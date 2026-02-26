@@ -30,5 +30,14 @@ PRESETS = [
             HAVING SUM(TOTAL_PAID) >= {threshold}
             ORDER BY total_paid DESC
         """
-    }
+    },
+    {
+        "id": "column_count",
+        "name": "Column Count",
+        "params": {},
+        "sql": """
+            SELECT COUNT(*) AS column_count
+            FROM parquet_schema(dataset)
+        """
+    },
 ]
