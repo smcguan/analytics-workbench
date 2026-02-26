@@ -1,0 +1,850 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Analytics Workbench</title>
+
+  <!-- Optional favicon (won't break if missing) -->
+  <link rel="icon" type="image/x-icon" href="logo.ico?v=3">
+  <link rel="shortcut icon" type="image/x-icon" href="logo.ico?v=3">
+  <style>
+    :root{
+      --bg0:#060a13;
+      --bg1:#09121f;
+      --card0:rgba(10,18,35,.72);
+      --card1:rgba(12,22,45,.72);
+      --stroke:rgba(255,255,255,.10);
+      --stroke2:rgba(255,255,255,.14);
+      --text:#e8eefc;
+      --muted:rgba(232,238,252,.75);
+      --muted2:rgba(232,238,252,.55);
+      --accent:#58a6ff;
+      --accent2:#7ee787;
+      --warn:#f2cc60;
+      --danger:#ff6b6b;
+      --shadow: 0 18px 60px rgba(0,0,0,.55);
+      --radius: 18px;
+      --radius2: 14px;
+      --pad: 18px;
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    html, body { height: 100%; }
+    body{
+      margin:0;
+      font-family: var(--font);
+      color: var(--text);
+      background:
+        radial-gradient(1200px 700px at 15% 15%, rgba(88,166,255,.20), transparent 55%),
+        radial-gradient(1000px 700px at 80% 30%, rgba(126,231,135,.13), transparent 60%),
+        radial-gradient(1200px 800px at 55% 85%, rgba(242,204,96,.09), transparent 60%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      overflow-x:hidden;
+    }
+
+    .topbar{
+      height: 76px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding: 0 22px;
+      border-bottom:1px solid rgba(255,255,255,.08);
+      background: linear-gradient(180deg, rgba(12,18,35,.55), rgba(12,18,35,.10));
+      backdrop-filter: blur(10px);
+    }
+
+    .brand{
+      display:flex; gap:14px; align-items:center;
+    }
+
+/* ---------- Logo Badge ---------- */
+.logo{
+  width:46px;
+  height:46px;
+  border-radius:50%;
+  overflow:hidden;
+  position:relative;
+  background:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  /* overall shadow */
+  box-shadow: 0 6px 16px rgba(0,0,0,.25);
+}
+
+/* Icon fill + slight nudge so the head isn't clipped */
+.logo img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transform: scale(1.30) translateY(1px); /* tweak these */
+  transform-origin:center;
+  display:block;
+}
+
+/* Shiny silver ring overlay (doesn't shrink the icon) */
+.logo::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  border-radius:50%;
+  pointer-events:none;
+
+  /* ring + highlight */
+  box-shadow:
+    inset 0 0 0 2px rgba(255,255,255,.92),     /* inner bright rim */
+    inset 0 0 0 4px rgba(180,190,205,.75),     /* silver body */
+    inset 0 2px 6px rgba(255,255,255,.55),     /* top highlight */
+    inset 0 -3px 8px rgba(0,0,0,.25);          /* bottom shade */
+}    .brand .sub{
+      font-size: 12px;
+      color: var(--muted2);
+      margin-top:2px;
+    }
+
+    .rightbar{
+      display:flex; gap:10px; align-items:center;
+    }
+
+    .pill{
+      display:flex; align-items:center; gap:10px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      border:1px solid var(--stroke);
+      background: rgba(0,0,0,.18);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.05);
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    .dot{
+      width:9px; height:9px; border-radius: 50%;
+      background: rgba(255,255,255,.25);
+      box-shadow: 0 0 0 3px rgba(255,255,255,.06);
+    }
+    .dot.ok{ background: var(--accent2); box-shadow: 0 0 0 3px rgba(126,231,135,.12); }
+    .dot.warn{ background: var(--warn); box-shadow: 0 0 0 3px rgba(242,204,96,.14); }
+    .dot.bad{ background: var(--danger); box-shadow: 0 0 0 3px rgba(255,107,107,.14); }
+
+    .btn{
+      border:1px solid var(--stroke2);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      padding: 9px 12px;
+      border-radius: 12px;
+      cursor:pointer;
+      font-weight: 600;
+      font-size: 13px;
+      transition: transform .06s ease, background .12s ease, border-color .12s ease;
+      user-select:none;
+    }
+    .btn:hover{ background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.20); }
+    .btn:active{ transform: translateY(1px); }
+
+    .btn.primary{
+      background: rgba(88,166,255,.18);
+      border-color: rgba(88,166,255,.35);
+    }
+    .btn.primary:hover{ background: rgba(88,166,255,.24); }
+    .btn.good{
+      background: rgba(126,231,135,.14);
+      border-color: rgba(126,231,135,.30);
+    }
+    .btn.good:hover{ background: rgba(126,231,135,.20); }
+
+    .btn.danger{
+      background: rgba(255,107,107,.14);
+      border-color: rgba(255,107,107,.30);
+    }
+    .btn.danger:hover{ background: rgba(255,107,107,.20); }
+
+    .wrap{
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 22px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.2fr .9fr;
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .card{
+      border-radius: var(--radius);
+      border:1px solid var(--stroke);
+      background: linear-gradient(180deg, var(--card0), var(--card1));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      padding: var(--pad);
+    }
+
+    .card h2{
+      margin:0 0 14px 0;
+      font-size: 12px;
+      letter-spacing: .9px;
+      text-transform: uppercase;
+      color: rgba(232,238,252,.78);
+    }
+
+    .row{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    .row.space{ justify-content:space-between; }
+    .field{
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+      min-width: 190px;
+    }
+    .field label{
+      font-size: 12px;
+      color: var(--muted2);
+    }
+    input[type="text"], select{
+      height: 38px;
+      border-radius: 12px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      color: var(--text);
+      padding: 0 12px;
+      outline:none;
+      font-size: 13px;
+    }
+    input[type="text"]::placeholder{ color: rgba(232,238,252,.35); }
+    select{ padding-right: 30px; }
+
+    .checkbox{
+      display:flex; gap:10px; align-items:center;
+      color: var(--muted);
+      font-size: 13px;
+      user-select:none;
+    }
+    .checkbox input{ transform: scale(1.05); }
+
+    .hint{
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border:1px solid rgba(242,204,96,.22);
+      background: rgba(242,204,96,.08);
+      color: rgba(242,204,96,.95);
+      font-size: 12px;
+    }
+
+    .status{
+      margin-top: 12px;
+      font-size: 12px;
+      color: var(--muted2);
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+
+    .results{
+      margin-top: 16px;
+      overflow:auto;
+      border-radius: 14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(0,0,0,.12);
+      max-height: 420px;
+    }
+    table{
+      border-collapse: separate;
+      border-spacing: 0;
+      width: 100%;
+      font-size: 12.5px;
+    }
+    thead th{
+      position: sticky;
+      top: 0;
+      background: rgba(10,18,35,.94);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid rgba(255,255,255,.10);
+      color: rgba(232,238,252,.92);
+      text-align:left;
+      padding: 10px 10px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    tbody td{
+      padding: 9px 10px;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      color: rgba(232,238,252,.90);
+      white-space: nowrap;
+    }
+    tbody tr:hover td{
+      background: rgba(255,255,255,.04);
+    }
+    .mono{ font-family: var(--mono); }
+
+    .toast{
+      position: fixed;
+      bottom: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,.55);
+      border:1px solid rgba(255,255,255,.14);
+      color: rgba(232,238,252,.92);
+      padding: 10px 12px;
+      border-radius: 12px;
+      box-shadow: 0 18px 40px rgba(0,0,0,.55);
+      backdrop-filter: blur(12px);
+      display:none;
+      font-size: 12.5px;
+      max-width: 860px;
+    }
+
+    @media (max-width: 980px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">
+        <img src="/ui/logo.png" alt="Analytics Workbench Logo"
+             style="width:100%; height:100%; object-fit:contain;" />
+      </div>
+      <div>
+        <h1>Analytics Workbench</h1>
+        <div class="sub">Local Parquet analytics • DuckDB • Excel export</div>
+      </div>
+    </div>
+
+    <div class="rightbar">
+      <div class="pill" id="versionPill">
+        <span class="dot" id="versionDot"></span>
+        <span id="versionText">Loading version…</span>
+      </div>
+      <button class="btn danger" id="quitBtn" title="Stop the server and close">Quit</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="grid">
+      <!-- QUERY -->
+      <div class="card">
+        <h2>Query</h2>
+
+        <div class="row">
+          <div class="field" style="min-width:240px;">
+            <label for="datasetSelect">Dataset</label>
+            <select id="datasetSelect"></select>
+          </div>
+
+          <div class="field" style="min-width:320px;">
+            <label for="presetSelect">Preset</label>
+            <select id="presetSelect"></select>
+          </div>
+
+          <div class="field" style="min-width:200px;">
+            <label for="thresholdInput">Threshold (optional)</label>
+            <input id="thresholdInput" type="text" placeholder="e.g. 100000000" />
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:12px;">
+          <button class="btn primary" id="runBtn">Run</button>
+          <button class="btn" id="copyBtn">Copy (TSV)</button>
+          <button class="btn good" id="exportBtn">Download Excel</button>
+        </div>
+
+        <div class="hint" id="queryHint">
+          Tip: Add a dataset on the right (Browse → Scan → Register). Then run a preset here.
+        </div>
+
+        <div class="status">
+          <span class="dot" id="runDot"></span>
+          <span id="runStatus">No results yet.</span>
+        </div>
+
+        <div class="results" id="resultsWrap" style="display:none;">
+          <table id="resultsTable">
+            <thead id="resultsHead"></thead>
+            <tbody id="resultsBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ADD DATASET -->
+      <div class="card">
+        <h2>Add dataset</h2>
+
+        <div class="field" style="min-width:100%;">
+          <label for="scanPath">Folder to scan</label>
+          <div class="row">
+            <input id="scanPath" type="text" placeholder="C:\path\to\folder" style="flex:1; min-width:260px;" />
+            <button class="btn" id="browseBtn">Browse</button>
+          </div>
+          <div class="sub" style="color:var(--muted2); font-size:12px; margin-top:8px;">
+            Paste a full Windows folder path (example: C:\Data\Parquet).
+          </div>
+        </div>
+
+        <div class="row" style="margin-top:12px;">
+          <label class="checkbox">
+            <input id="recursiveChk" type="checkbox" />
+            Recursive
+          </label>
+          <button class="btn primary" id="scanBtn">Scan</button>
+        </div>
+
+        <div class="field" style="min-width:100%; margin-top:14px;">
+          <label for="parquetSelect">Found parquet files</label>
+          <select id="parquetSelect">
+            <option value="">(scan a folder)</option>
+          </select>
+          <div class="sub" id="parquetMeta" style="color:var(--muted2); font-size:12px; margin-top:8px;"></div>
+        </div>
+
+        <div class="row" style="margin-top:14px;">
+          <div class="field" style="flex:1; min-width:190px;">
+            <label for="datasetName">Dataset name</label>
+            <input id="datasetName" type="text" placeholder="NewDataset" />
+          </div>
+
+          <div class="field" style="min-width:220px;">
+            <label for="storageMode">Storage mode</label>
+            <select id="storageMode">
+              <option value="reference">Reference (recommended)</option>
+              <option value="copy">Copy into app</option>
+            </select>
+          </div>
+
+          <div style="display:flex; align-items:flex-end;">
+            <button class="btn good" id="registerBtn">Register</button>
+          </div>
+        </div>
+
+        <div class="status">
+          <span class="dot" id="scanDot"></span>
+          <span id="scanStatus">Ready.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    // -----------------------------
+    // Small helpers
+    // -----------------------------
+    const $ = (id) => document.getElementById(id);
+
+    function toast(msg) {
+      const el = $("toast");
+      el.textContent = msg;
+      el.style.display = "block";
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => (el.style.display = "none"), 2600);
+    }
+
+    function setPill(dotEl, textEl, dotClass, text) {
+      dotEl.className = "dot " + (dotClass || "");
+      textEl.textContent = text;
+    }
+
+    function bytesToHuman(bytes) {
+      if (bytes === null || bytes === undefined) return "";
+      const units = ["B","KB","MB","GB","TB"];
+      let b = Number(bytes);
+      let i = 0;
+      while (b >= 1024 && i < units.length - 1) { b /= 1024; i++; }
+      return (i === 0 ? b.toFixed(0) : b.toFixed(1)) + " " + units[i];
+    }
+
+    function num(n) {
+      if (n === null || n === undefined) return "";
+      return Number(n).toLocaleString();
+    }
+
+    async function apiJson(url, opts) {
+      const res = await fetch(url, opts);
+      const contentType = res.headers.get("content-type") || "";
+      if (!res.ok) {
+        const text = contentType.includes("application/json") ? JSON.stringify(await res.json()) : await res.text();
+        throw new Error(text || ("HTTP " + res.status));
+      }
+      if (contentType.includes("application/json")) return res.json();
+      return res.text();
+    }
+
+    // -----------------------------
+    // State
+    // -----------------------------
+    let lastRun = { columns: [], rows: [], rowcount: 0, elapsed: 0 };
+
+    // -----------------------------
+    // Version + init
+    // -----------------------------
+    async function loadVersion() {
+      try {
+        const v = await apiJson("/api/version");
+        setPill($("versionDot"), $("versionText"), "ok",
+          `${v.name} • v${v.version} • exports: ${v.exports_dir}`
+        );
+      } catch (e) {
+        setPill($("versionDot"), $("versionText"), "bad", "Version unavailable");
+      }
+    }
+
+    async function loadDatasets() {
+      const sel = $("datasetSelect");
+      sel.innerHTML = "";
+      try {
+        const data = await apiJson("/api/datasets");
+        const arr = data.datasets || [];
+        if (arr.length === 0) {
+          const opt = document.createElement("option");
+          opt.value = "";
+          opt.textContent = "(no datasets yet)";
+          sel.appendChild(opt);
+          return;
+        }
+        for (const name of arr) {
+          const opt = document.createElement("option");
+          opt.value = name;
+          opt.textContent = name;
+          sel.appendChild(opt);
+        }
+      } catch (e) {
+        const opt = document.createElement("option");
+        opt.value = "";
+        opt.textContent = "(failed to load datasets)";
+        sel.appendChild(opt);
+      }
+    }
+
+    async function loadPresets() {
+      const sel = $("presetSelect");
+      sel.innerHTML = "";
+      try {
+        const data = await apiJson("/api/presets");
+        const arr = data.presets || [];
+        for (const p of arr) {
+          const opt = document.createElement("option");
+          opt.value = p.id;
+          opt.textContent = p.name || p.id;
+          sel.appendChild(opt);
+        }
+      } catch (e) {
+        const opt = document.createElement("option");
+        opt.value = "";
+        opt.textContent = "(failed to load presets)";
+        sel.appendChild(opt);
+      }
+    }
+
+    // -----------------------------
+    // Browse + Scan + Register
+    // -----------------------------
+    async function browseFolder() {
+      try {
+        setPill($("scanDot"), $("scanStatus"), "warn", "Opening folder picker…");
+        const data = await apiJson("/api/dialog/folder");
+        const path = (data.path || "").trim();
+        if (!path) {
+          setPill($("scanDot"), $("scanStatus"), "", "Browse cancelled.");
+          return;
+        }
+        $("scanPath").value = path;
+        setPill($("scanDot"), $("scanStatus"), "ok", "Folder selected.");
+      } catch (e) {
+        setPill($("scanDot"), $("scanStatus"), "bad", "Browse failed.");
+        toast("Browse failed: " + e.message);
+      }
+    }
+
+    async function scanFolder() {
+      const path = $("scanPath").value.trim();
+      const recursive = $("recursiveChk").checked;
+
+      if (!path) {
+        toast("Enter or Browse to a folder first.");
+        return;
+      }
+
+      try {
+        setPill($("scanDot"), $("scanStatus"), "warn", "Scanning…");
+        $("parquetSelect").innerHTML = `<option value="">(scanning…)</option>`;
+        $("parquetMeta").textContent = "";
+
+        const data = await apiJson("/api/datasets/scan", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ path, recursive })
+        });
+
+        if (data.error) {
+          setPill($("scanDot"), $("scanStatus"), "bad", data.error);
+          $("parquetSelect").innerHTML = `<option value="">(no files)</option>`;
+          return;
+        }
+
+        const files = data.files || [];
+        $("parquetSelect").innerHTML = "";
+        if (!files.length) {
+          $("parquetSelect").innerHTML = `<option value="">(no parquet files found)</option>`;
+          setPill($("scanDot"), $("scanStatus"), "", "No parquet files found.");
+          return;
+        }
+
+        for (const f of files) {
+          const opt = document.createElement("option");
+          opt.value = f.path;
+          const size = f.size_bytes != null ? bytesToHuman(f.size_bytes) : "";
+          const rows = f.row_count != null ? (num(f.row_count) + " rows") : "";
+          const meta = [size, rows].filter(Boolean).join(" • ");
+          opt.textContent = meta ? `${f.name} — ${meta}` : f.name;
+          opt.dataset.sizeBytes = f.size_bytes ?? "";
+          opt.dataset.rowCount = f.row_count ?? "";
+          opt.dataset.fullPath = f.path ?? "";
+          $("parquetSelect").appendChild(opt);
+        }
+
+        $("parquetSelect").selectedIndex = 0;
+        updateSelectedParquetMeta();
+
+        setPill($("scanDot"), $("scanStatus"), "ok", `Found ${files.length} parquet file(s).`);
+      } catch (e) {
+        setPill($("scanDot"), $("scanStatus"), "bad", "Scan failed.");
+        toast("Scan failed: " + e.message);
+      }
+    }
+
+    function updateSelectedParquetMeta() {
+      const sel = $("parquetSelect");
+      const opt = sel.options[sel.selectedIndex];
+      if (!opt || !opt.value) {
+        $("parquetMeta").textContent = "";
+        return;
+      }
+      const size = opt.dataset.sizeBytes ? bytesToHuman(opt.dataset.sizeBytes) : "";
+      const rows = opt.dataset.rowCount ? (num(opt.dataset.rowCount) + " rows") : "";
+      const full = opt.dataset.fullPath || opt.value;
+      const meta = [size, rows].filter(Boolean).join(" • ");
+      $("parquetMeta").innerHTML =
+        `<span class="mono">${full}</span>` + (meta ? ` <span style="color:var(--muted2)">(${meta})</span>` : "");
+    }
+
+    async function registerDataset() {
+      const dataset_name = $("datasetName").value.trim() || "NewDataset";
+      const parquet_path = $("parquetSelect").value;
+      const mode = $("storageMode").value;
+
+      if (!parquet_path) {
+        toast("Scan and select a parquet file first.");
+        return;
+      }
+
+      try {
+        setPill($("scanDot"), $("scanStatus"), "warn", "Registering…");
+        const data = await apiJson("/api/datasets/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ dataset_name, parquet_path, mode })
+        });
+
+        if (data.error) {
+          setPill($("scanDot"), $("scanStatus"), "bad", data.error);
+          return;
+        }
+
+        setPill($("scanDot"), $("scanStatus"), "ok", `Registered dataset: ${data.dataset} (${data.storage}).`);
+        toast(`Registered: ${data.dataset}`);
+        await loadDatasets();
+        // auto-select the new dataset
+        const dsSel = $("datasetSelect");
+        for (let i = 0; i < dsSel.options.length; i++) {
+          if (dsSel.options[i].value === data.dataset) {
+            dsSel.selectedIndex = i;
+            break;
+          }
+        }
+      } catch (e) {
+        setPill($("scanDot"), $("scanStatus"), "bad", "Register failed.");
+        toast("Register failed: " + e.message);
+      }
+    }
+
+    // -----------------------------
+    // Run + Results + Copy + Export
+    // -----------------------------
+    function setRunStatus(kind, msg) {
+      setPill($("runDot"), $("runStatus"), kind, msg);
+    }
+
+    function renderResults(columns, rows) {
+      const head = $("resultsHead");
+      const body = $("resultsBody");
+      head.innerHTML = "";
+      body.innerHTML = "";
+
+      if (!columns || !columns.length) {
+        $("resultsWrap").style.display = "none";
+        return;
+      }
+
+      const trh = document.createElement("tr");
+      for (const c of columns) {
+        const th = document.createElement("th");
+        th.textContent = c;
+        trh.appendChild(th);
+      }
+      const thead = document.createElement("thead");
+      thead.appendChild(trh);
+      head.replaceWith(thead);
+      thead.id = "resultsHead";
+
+      for (const r of rows) {
+        const tr = document.createElement("tr");
+        for (const c of columns) {
+          const td = document.createElement("td");
+          const val = r[c];
+          td.textContent = (val === null || val === undefined) ? "" : String(val);
+          tr.appendChild(td);
+        }
+        body.appendChild(tr);
+      }
+
+      $("resultsWrap").style.display = "block";
+    }
+
+    async function runQuery() {
+      const dataset = $("datasetSelect").value;
+      const preset = $("presetSelect").value;
+      const thresholdRaw = $("thresholdInput").value.trim();
+      const threshold = thresholdRaw ? Number(thresholdRaw) : null;
+
+      if (!dataset) {
+        toast("Select a dataset first.");
+        return;
+      }
+      if (!preset) {
+        toast("Select a preset first.");
+        return;
+      }
+      if (thresholdRaw && Number.isNaN(threshold)) {
+        toast("Threshold must be a number.");
+        return;
+      }
+
+      try {
+        setRunStatus("warn", "Running…");
+        $("resultsWrap").style.display = "none";
+
+        const params = new URLSearchParams({ dataset, preset });
+        if (threshold !== null) params.set("threshold", String(threshold));
+
+        const data = await apiJson("/api/run?" + params.toString());
+        lastRun = {
+          columns: data.columns || [],
+          rows: data.rows || [],
+          rowcount: data.rowcount || 0,
+          elapsed: data.elapsed_seconds || 0
+        };
+
+        renderResults(lastRun.columns, lastRun.rows);
+
+        setRunStatus("ok", `Rows: ${num(lastRun.rowcount)} • Preview: ${num(lastRun.rows.length)} • ${lastRun.elapsed}s`);
+      } catch (e) {
+        setRunStatus("bad", "Run failed.");
+        toast("Run failed: " + e.message);
+      }
+    }
+
+    function toTSV(columns, rows) {
+      const esc = (v) => {
+        const s = (v === null || v === undefined) ? "" : String(v);
+        return s.replace(/\t/g, " ").replace(/\r?\n/g, " ");
+      };
+      const header = columns.map(esc).join("\t");
+      const lines = rows.map(r => columns.map(c => esc(r[c])).join("\t"));
+      return [header, ...lines].join("\n");
+    }
+
+    async function copyTSV() {
+      if (!lastRun.columns.length) {
+        toast("No results to copy.");
+        return;
+      }
+      const tsv = toTSV(lastRun.columns, lastRun.rows);
+      try {
+        await navigator.clipboard.writeText(tsv);
+        toast(`Copied ${lastRun.rows.length} rows (preview) to clipboard as TSV.`);
+      } catch (e) {
+        // fallback
+        const ta = document.createElement("textarea");
+        ta.value = tsv;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        toast("Copied TSV (fallback).");
+      }
+    }
+
+    function exportExcel() {
+      const dataset = $("datasetSelect").value;
+      const preset = $("presetSelect").value;
+      const thresholdRaw = $("thresholdInput").value.trim();
+      const threshold = thresholdRaw ? Number(thresholdRaw) : null;
+
+      if (!dataset) { toast("Select a dataset first."); return; }
+      if (!preset) { toast("Select a preset first."); return; }
+      if (thresholdRaw && Number.isNaN(threshold)) { toast("Threshold must be a number."); return; }
+
+      const params = new URLSearchParams({ dataset, preset });
+      if (threshold !== null) params.set("threshold", String(threshold));
+
+      // download in browser
+      window.location.href = "/api/export?" + params.toString();
+      toast("Export started (check exports folder if needed).");
+    }
+
+    // -----------------------------
+    // Quit (shutdown server)
+    // -----------------------------
+    async function quitApp() {
+      try {
+        await fetch("/api/shutdown", { method: "POST" });
+      } catch (e) {
+        // ignore
+      }
+      toast("Shutting down…");
+      // window.close may be blocked; but server will exit so relaunch works.
+      setTimeout(() => { try { window.close(); } catch(e) {} }, 250);
+    }
+
+    // -----------------------------
+    // Wire events
+    // -----------------------------
+    $("browseBtn").addEventListener("click", browseFolder);
+    $("scanBtn").addEventListener("click", scanFolder);
+    $("parquetSelect").addEventListener("change", updateSelectedParquetMeta);
+    $("registerBtn").addEventListener("click", registerDataset);
+
+    $("runBtn").addEventListener("click", runQuery);
+    $("copyBtn").addEventListener("click", copyTSV);
+    $("exportBtn").addEventListener("click", exportExcel);
+
+    $("quitBtn").addEventListener("click", quitApp);
+
+    // -----------------------------
+    // Init
+    // -----------------------------
+    (async function init(){
+      await loadVersion();
+      await Promise.all([loadDatasets(), loadPresets()]);
+      setRunStatus("", "Ready.");
+      setPill($("scanDot"), $("scanStatus"), "", "Ready.");
+    })();
+  </script>
+</body>
+</html>

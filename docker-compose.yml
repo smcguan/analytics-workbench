@@ -1,0 +1,14 @@
+services:
+  app:
+    build:
+      context: ./backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./exports:/app/exports
+      - ./frontend:/app/frontend
+    environment:
+      APP_NAME: "Analytics Workbench"
+      APP_VERSION: ${APP_VERSION:-0.1.0}
+      BUILD_SHA: ${BUILD_SHA:-release}

@@ -1,0 +1,48 @@
+# -------------------------
+# Python
+# -------------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+
+# -------------------------
+# Build / Packaging
+# -------------------------
+build/
+dist/
+*.spec
+buildspec/
+release/
+Releases/*.zip
+
+# -------------------------
+# Runtime outputs
+# -------------------------
+exports/
+logs/
+*.log
+
+# -------------------------
+# OS / IDE
+# -------------------------
+Thumbs.db
+.DS_Store
+.vscode/
+.idea/
+
+# -------------------------
+# Datasets
+# -------------------------
+
+# Ignore all datasets by default
+data/datasets/**
+
+# But allow demo dataset folder
+!data/datasets/demo/
+!data/datasets/demo/**
+
+# Inside demo, only allow small parquet files
+!data/datasets/demo/*.parquet
