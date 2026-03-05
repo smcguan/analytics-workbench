@@ -1,0 +1,26 @@
+[
+  {
+    "id": "hcpcs_summary",
+    "name": "HCPCS Summary (Paid, Claims, Beneficiaries)",
+    "params": {},
+    "sql": "\n            SELECT\n                HCPCS_CODE,\n                SUM(TOTAL_PAID) AS total_paid,\n                SUM(TOTAL_CLAIMS) AS total_claims,\n                SUM(TOTAL_UNIQUE_BENEFICIARIES) AS total_unique_beneficiaries\n            FROM dataset\n            GROUP BY HCPCS_CODE\n            ORDER BY total_paid DESC\n            LIMIT 500\n        "
+  },
+  {
+    "id": "hcpcs_over_threshold",
+    "name": "HCPCS Over Threshold",
+    "params": {
+      "threshold": {
+        "type": "number",
+        "label": "Minimum Total Paid",
+        "default": 100000000
+      }
+    },
+    "sql": "\n            SELECT\n                HCPCS_CODE,\n                SUM(TOTAL_PAID) AS total_paid,\n                SUM(TOTAL_CLAIMS) AS total_claims,\n                SUM(TOTAL_UNIQUE_BENEFICIARIES) AS total_unique_beneficiaries\n            FROM dataset\n            GROUP BY HCPCS_CODE\n            HAVING SUM(TOTAL_PAID) >= {threshold}\n            ORDER BY total_paid DESC\n        "
+  },
+  {
+    "id": "column_count",
+    "name": "Column Count",
+    "params": {},
+    "sql": "\n            SELECT COUNT(*) AS column_count\n            FROM parquet_schema(dataset)\n        "
+  }
+]
