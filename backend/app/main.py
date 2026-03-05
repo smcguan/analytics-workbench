@@ -135,6 +135,34 @@ def _connect() -> duckdb.DuckDBPyConnection:
     return duckdb.connect()
 
 
+def _is_writable_dir(p: Path) -> tuple[bool, str | None]:
+    """
+    Returns (ok, error_message).
+    """
+    try:
+        p.mkdir(parents=True, exist_ok=True)
+        test = p / ".__aw_write_test__"
+        test.write_text("ok", encoding="utf-8")
+        test.unlink(missing_ok=True)
+        return True, None
+    except Exception as e:
+        return False, str(e)
+
+
+def _duckdb_ok() -> tuple[bool, str | None]:
+    try:
+        con = _connect()
+        try:
+            v = con.execute("SELECT 1").fetchone()
+            if not v or v[0] != 1:
+                return False, "DuckDB SELECT 1 returned unexpected result"
+            return True, None
+        finally:
+            con.close()
+    except Exception as e:
+        return False, str(e)
+
+
 def _audit_log(event: dict[str, Any]) -> None:
     """
     Append-only JSONL audit log.
@@ -224,6 +252,40 @@ def api_version():
         "datasets_dir": str(DATASETS_DIR),
         "exports_dir": str(EXPORTS_DIR),
         "frontend_dir": str(FRONTEND_DIR),
+        "python": sys.version.split()[0],
+        "platform": platform.platform(),
+        "duckdb_version": duckdb.__version__,
+        "frozen": bool(getattr(sys, "frozen", False)),
+        "pid": os.getpid(),
+    }
+
+
+@app.get("/api/health")
+def api_health():
+    duck_ok, duck_err = _duckdb_ok()
+
+    datasets_ok, datasets_err = _is_writable_dir(DATASETS_DIR)
+    exports_ok, exports_err = _is_writable_dir(EXPORTS_DIR)
+
+    frontend_ok = (FRONTEND_DIR / "index.html").exists()
+    frontend_err = None if frontend_ok else f"Missing {FRONTEND_DIR / 'index.html'}"
+
+    status = "ok"
+    if not (duck_ok and datasets_ok and exports_ok and frontend_ok):
+        status = "degraded"
+
+    return {
+        "status": status,
+        "checks": {
+            "duckdb": {"ok": duck_ok, "error": duck_err},
+            "datasets_dir": {"ok": datasets_ok, "path": str(DATASETS_DIR), "error": datasets_err},
+            "exports_dir": {"ok": exports_ok, "path": str(EXPORTS_DIR), "error": exports_err},
+            "frontend": {"ok": frontend_ok, "path": str(FRONTEND_DIR), "error": frontend_err},
+        },
+        "runtime": {
+            "pid": os.getpid(),
+            "frozen": bool(getattr(sys, "frozen", False)),
+        },
     }
 
 
