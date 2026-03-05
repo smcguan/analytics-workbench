@@ -1,6 +1,10 @@
 from __future__ import annotations
 
+import getpass
+import json
+import logging
 import os
+import platform
 import re
 import shutil
 import sys
@@ -10,16 +14,14 @@ from pathlib import Path
 from typing import Any
 
 import duckdb
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import BackgroundTasks, FastAPI, HTTPException, Query
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from starlette.responses import FileResponse, Response
 
 from app.presets.doge import PRESETS  # noqa: E402
-from app.presets.loader import load_presets  # noqa: E402
 
-import logging
 logger = logging.getLogger("app")
 
 app = FastAPI(title="Analytics Workbench")
@@ -31,7 +33,7 @@ app = FastAPI(title="Analytics Workbench")
 def app_base_dir() -> Path:
     """
     Packaged: folder containing the EXE
-    Dev: repo root (.../Analytics Workbench)
+    Dev: repo root (…/Analytics Workbench)
     """
     if getattr(sys, "frozen", False):
         return Path(sys.executable).resolve().parent
@@ -41,9 +43,6 @@ def app_base_dir() -> Path:
 
 BASE_DIR = app_base_dir()
 
-# Load presets from JSON if present; fall back to Python PRESETS if not.
-ACTIVE_PRESETS = load_presets(BASE_DIR)
-
 FRONTEND_DIR = Path(os.getenv("AW_FRONTEND_DIR", str(BASE_DIR / "frontend")))
 DATA_DIR = Path(os.getenv("AW_DATA_DIR", str(BASE_DIR / "data")))
 DATASETS_DIR = Path(os.getenv("AW_DATASETS_DIR", str(DATA_DIR / "datasets")))
@@ -52,7 +51,7 @@ EXPORTS_DIR = Path(os.getenv("AW_EXPORTS_DIR", str(BASE_DIR / "exports")))
 DATASETS_DIR.mkdir(parents=True, exist_ok=True)
 EXPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
-# Startup confirmation - logged once at import time
+# Startup confirmation — logged once at import time
 logger.info(
     "app started | mode=%s | exports_dir=%s",
     "packaged" if getattr(sys, "frozen", False) else "dev",
@@ -125,10 +124,45 @@ def dataset_source_path(dataset: str) -> tuple[str, bool]:
 
 
 def get_preset(preset_id: str) -> dict[str, Any] | None:
-    for p in ACTIVE_PRESETS:
+    for p in PRESETS:
         if p.get("id") == preset_id:
             return p
     return None
+
+
+def _connect() -> duckdb.DuckDBPyConnection:
+    # Fileless connection is fine for query/extract workloads
+    return duckdb.connect()
+
+
+def _audit_log(event: dict[str, Any]) -> None:
+    """
+    Append-only JSONL audit log.
+    Non-fatal: never raises.
+    """
+    try:
+        audit_path = DATASETS_DIR / "_audit.jsonl"
+
+        try:
+            user = getpass.getuser()
+        except Exception:
+            user = "unknown"
+
+        try:
+            machine = platform.node()
+        except Exception:
+            machine = "unknown"
+
+        payload = dict(event)
+        payload.setdefault("ts", datetime.now().isoformat(timespec="seconds"))
+        payload.setdefault("user", user)
+        payload.setdefault("machine", machine)
+
+        audit_path.parent.mkdir(parents=True, exist_ok=True)
+        with audit_path.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(payload, ensure_ascii=False) + "\n")
+    except Exception as e:
+        logger.warning("audit log write failed | reason=%s", e)
 
 
 def _sql_for(dataset: str, preset_id: str, threshold: int | None) -> tuple[str, str]:
@@ -144,19 +178,15 @@ def _sql_for(dataset: str, preset_id: str, threshold: int | None) -> tuple[str, 
 
     sql = preset_def["sql"].format(**final_params)
 
-    # IMPORTANT:
-    # parquet_schema(dataset) must receive a path/glob, NOT read_parquet(...)
+    # Some DuckDB introspection functions expect a path, not a relation.
+    # Preserve legacy presets that use parquet_schema(dataset) / parquet_metadata(dataset).
     sql = sql.replace("parquet_schema(dataset)", f"parquet_schema('{src}')")
+    sql = sql.replace("parquet_metadata(dataset)", f"parquet_metadata('{src}')")
 
-    # Replace placeholder token `dataset` with a parquet reader relation
+    # Replace placeholder token `dataset` with a parquet reader for normal queries
     sql = sql.replace("dataset", f"read_parquet('{src}')")
 
     return sql, src
-
-
-def _connect() -> duckdb.DuckDBPyConnection:
-    # Fileless connection is fine for query/extract workloads
-    return duckdb.connect()
 
 
 # ============================================================
@@ -207,9 +237,34 @@ def api_presets():
     return {
         "presets": [
             {"id": p["id"], "name": p["name"], "params": p.get("params", {})}
-            for p in ACTIVE_PRESETS
+            for p in PRESETS
         ]
     }
+
+
+@app.get("/api/audit")
+def api_audit(limit: int = Query(200, ge=1, le=5000)):
+    """
+    Returns last N audit events (newest first). Missing file -> empty list.
+    """
+    audit_path = DATASETS_DIR / "_audit.jsonl"
+    if not audit_path.exists():
+        return {"events": []}
+
+    lines = audit_path.read_text(encoding="utf-8", errors="replace").splitlines()
+    tail = lines[-limit:]
+
+    events: list[dict[str, Any]] = []
+    for line in reversed(tail):
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            events.append(json.loads(line))
+        except Exception:
+            continue
+
+    return {"events": events}
 
 
 @app.get("/api/dialog/folder")
@@ -237,8 +292,11 @@ def api_run(
     preset: str = Query(...),
     threshold: int | None = None,
 ):
+    params = {"threshold": threshold} if threshold is not None else {}
+
     logger.info("query requested | dataset=%s preset=%s threshold=%s", dataset, preset, threshold)
     t0 = time.perf_counter()
+
     try:
         sql, _src = _sql_for(dataset, preset, threshold)
 
@@ -256,6 +314,20 @@ def api_run(
                 "query success | dataset=%s preset=%s rowcount=%d preview=%d elapsed=%s",
                 dataset, preset, rowcount, len(preview), round(elapsed, 4),
             )
+
+            _audit_log(
+                {
+                    "event": "run",
+                    "status": "success",
+                    "dataset": dataset,
+                    "preset": preset,
+                    "params": params,
+                    "rowcount": rowcount,
+                    "preview_rows_returned": len(preview),
+                    "elapsed_seconds": round(elapsed, 4),
+                }
+            )
+
             return {
                 "columns": cols,
                 "rows": preview,
@@ -264,10 +336,32 @@ def api_run(
             }
         finally:
             con.close()
-    except HTTPException:
+
+    except HTTPException as e:
+        _audit_log(
+            {
+                "event": "run",
+                "status": "error",
+                "dataset": dataset,
+                "preset": preset,
+                "params": params,
+                "error": str(e.detail),
+            }
+        )
         raise
-    except Exception:
+
+    except Exception as e:
         logger.exception("query failed | dataset=%s preset=%s", dataset, preset)
+        _audit_log(
+            {
+                "event": "run",
+                "status": "error",
+                "dataset": dataset,
+                "preset": preset,
+                "params": params,
+                "error": str(e),
+            }
+        )
         raise
 
 
@@ -277,8 +371,11 @@ def api_export(
     preset: str = Query(...),
     threshold: int | None = None,
 ):
+    params = {"threshold": threshold} if threshold is not None else {}
+
     logger.info("export requested | dataset=%s preset=%s threshold=%s", dataset, preset, threshold)
     t0 = time.perf_counter()
+
     try:
         sql, _src = _sql_for(dataset, preset, threshold)
 
@@ -299,6 +396,19 @@ def api_export(
                 con.execute(f"COPY __export_view TO '{out_str}' (FORMAT XLSX, HEADER TRUE)")
                 elapsed = round(time.perf_counter() - t0, 4)
                 logger.info("export success | file=%s path=%s elapsed=%s", out_xlsx.name, out_xlsx, elapsed)
+
+                _audit_log(
+                    {
+                        "event": "export",
+                        "status": "success",
+                        "dataset": dataset,
+                        "preset": preset,
+                        "params": params,
+                        "exported_filename": out_xlsx.name,
+                        "elapsed_seconds": elapsed,
+                    }
+                )
+
                 return FileResponse(
                     path=str(out_xlsx),
                     filename=out_xlsx.name,
@@ -310,6 +420,19 @@ def api_export(
                 con.execute(f"COPY __export_view TO '{out_str}' (FORMAT CSV, HEADER TRUE)")
                 elapsed = round(time.perf_counter() - t0, 4)
                 logger.info("export success (csv fallback) | file=%s path=%s elapsed=%s", out_csv.name, out_csv, elapsed)
+
+                _audit_log(
+                    {
+                        "event": "export",
+                        "status": "success",
+                        "dataset": dataset,
+                        "preset": preset,
+                        "params": params,
+                        "exported_filename": out_csv.name,
+                        "elapsed_seconds": elapsed,
+                    }
+                )
+
                 return FileResponse(
                     path=str(out_csv),
                     filename=out_csv.name,
@@ -317,10 +440,32 @@ def api_export(
                 )
         finally:
             con.close()
-    except HTTPException:
+
+    except HTTPException as e:
+        _audit_log(
+            {
+                "event": "export",
+                "status": "error",
+                "dataset": dataset,
+                "preset": preset,
+                "params": params,
+                "error": str(e.detail),
+            }
+        )
         raise
-    except Exception:
+
+    except Exception as e:
         logger.exception("export failed | dataset=%s preset=%s", dataset, preset)
+        _audit_log(
+            {
+                "event": "export",
+                "status": "error",
+                "dataset": dataset,
+                "preset": preset,
+                "params": params,
+                "error": str(e),
+            }
+        )
         raise
 
 
@@ -328,9 +473,21 @@ def api_export(
 def scan_for_parquet(req: ScanRequest):
     t0 = time.perf_counter()
     logger.info("scan requested | path=%s recursive=%s", req.path, req.recursive)
+
     p = Path(req.path).expanduser()
     if not p.exists() or not p.is_dir():
         logger.warning("scan failed | path=%s | reason=not a directory", req.path)
+
+        _audit_log(
+            {
+                "event": "scan",
+                "status": "error",
+                "path": req.path,
+                "recursive": req.recursive,
+                "error": "Path must be an existing directory.",
+            }
+        )
+
         return {"error": "Path must be an existing directory."}
 
     pattern = "**/*.parquet" if req.recursive else "*.parquet"
@@ -367,6 +524,18 @@ def scan_for_parquet(req: ScanRequest):
 
     elapsed = round(time.perf_counter() - t0, 4)
     logger.info("scan complete | path=%s count=%d elapsed=%s", req.path, len(results), elapsed)
+
+    _audit_log(
+        {
+            "event": "scan",
+            "status": "success",
+            "path": req.path,
+            "recursive": req.recursive,
+            "file_count": len(results),
+            "elapsed_seconds": elapsed,
+        }
+    )
+
     return {"count": len(results), "files": results}
 
 
@@ -374,9 +543,22 @@ def scan_for_parquet(req: ScanRequest):
 def register_dataset(req: RegisterRequest):
     t0 = time.perf_counter()
     logger.info("register requested | dataset=%s parquet_path=%s mode=%s", req.dataset_name, req.parquet_path, req.mode)
+
     src = Path(req.parquet_path).expanduser()
     if not src.exists() or not src.is_file():
         logger.warning("register failed | dataset=%s | reason=parquet path not found", req.dataset_name)
+
+        _audit_log(
+            {
+                "event": "register",
+                "status": "error",
+                "dataset": req.dataset_name,
+                "parquet_path": req.parquet_path,
+                "mode": req.mode,
+                "error": "Parquet path must be an existing file.",
+            }
+        )
+
         return {"error": "Parquet path must be an existing file."}
 
     ds_name = _safe_name(req.dataset_name)
@@ -393,15 +575,37 @@ def register_dataset(req: RegisterRequest):
         storage = "referenced"
     else:
         logger.warning("register failed | dataset=%s | reason=invalid mode=%s", req.dataset_name, req.mode)
+
+        _audit_log(
+            {
+                "event": "register",
+                "status": "error",
+                "dataset": req.dataset_name,
+                "parquet_path": req.parquet_path,
+                "mode": req.mode,
+                "error": "mode must be 'copy' or 'reference'.",
+            }
+        )
+
         return {"error": "mode must be 'copy' or 'reference'."}
 
     elapsed = round(time.perf_counter() - t0, 4)
     logger.info("register success | dataset=%s storage=%s elapsed=%s", ds_name, storage, elapsed)
+
+    _audit_log(
+        {
+            "event": "register",
+            "status": "success",
+            "dataset": ds_name,
+            "parquet_path": req.parquet_path,
+            "mode": req.mode,
+            "storage": storage,
+            "elapsed_seconds": elapsed,
+        }
+    )
+
     return {"dataset": ds_name, "storage": storage}
 
-from fastapi import BackgroundTasks
-import os
-import time
 
 @app.post("/api/shutdown")
 def api_shutdown(bg: BackgroundTasks):
@@ -410,6 +614,7 @@ def api_shutdown(bg: BackgroundTasks):
     Windows + PyInstaller + --noconsole: SIGTERM is not reliable, so we force exit.
     """
     logger.info("shutdown requested")
+
     def _stop():
         time.sleep(0.25)  # let the HTTP response flush
         os._exit(0)       # guaranteed process termination
