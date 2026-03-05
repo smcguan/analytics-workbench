@@ -347,6 +347,58 @@ def api_schema(dataset: str = Query(...)):
         raise HTTPException(status_code=500, detail=f"Schema introspection failed: {e}")
 
 
+@app.get("/api/explain")
+def api_explain(
+    request: Request,
+    dataset: str = Query(...),
+    preset: str = Query(...),
+    threshold: int | None = None,
+):
+    provided_params = _extract_dynamic_params(
+        request,
+        reserved={"dataset", "preset"},
+        threshold_fallback=threshold,
+    )
+
+    logger.info(
+        "explain requested | dataset=%s preset=%s params=%s",
+        dataset, preset, provided_params,
+    )
+    t0 = time.perf_counter()
+
+    try:
+        sql, _src = _sql_for(dataset, preset, provided_params)
+
+        con = _connect()
+        try:
+            rows = con.execute(f"EXPLAIN {sql}").fetchall()
+            plan = "\n".join(str(r[1]) for r in rows if r[1] is not None)
+        finally:
+            con.close()
+
+        elapsed = round(time.perf_counter() - t0, 4)
+        logger.info(
+            "explain success | dataset=%s preset=%s params=%s elapsed=%s",
+            dataset, preset, provided_params, elapsed,
+        )
+        return {
+            "dataset": dataset,
+            "preset": preset,
+            "params": provided_params,
+            "sql": sql,
+            "explain": plan,
+        }
+
+    except HTTPException:
+        raise
+    except FileNotFoundError as e:
+        logger.warning("explain failed | dataset=%s | reason=%s", dataset, e)
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception:
+        logger.exception("explain failed | dataset=%s preset=%s params=%s", dataset, preset, provided_params)
+        raise
+
+
 @app.get("/api/dialog/folder")
 def api_dialog_folder():
     """
