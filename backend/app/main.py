@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+import logging
 import os
 import re
 import shutil
@@ -14,15 +16,44 @@ from fastapi import BackgroundTasks, FastAPI, HTTPException, Query, Request
 from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from starlette.responses import FileResponse, Response
+from starlette.responses import FileResponse, JSONResponse, Response
 
 from app.presets.doge import PRESETS  # noqa: E402
-
-import logging
 
 logger = logging.getLogger("app")
 
 app = FastAPI(title="Analytics Workbench")
+
+
+# ============================================================
+# Global exception handlers — structured error responses
+# ============================================================
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    # Preserve structured payloads (e.g. export abort dict from 5A).
+    if isinstance(exc.detail, dict):
+        content = {"error": exc.detail}
+    else:
+        content = {"error": {"type": "http_error", "message": str(exc.detail)}}
+    return JSONResponse(status_code=exc.status_code, content=content)
+
+
+@app.exception_handler(FileNotFoundError)
+async def file_not_found_handler(request: Request, exc: FileNotFoundError):
+    logger.warning("not found | path=%s", str(exc))
+    return JSONResponse(
+        status_code=404,
+        content={"error": {"type": "not_found", "message": str(exc)}},
+    )
+
+
+@app.exception_handler(Exception)
+async def unhandled_exception_handler(request: Request, exc: Exception):
+    logger.exception("unhandled exception | path=%s", request.url.path)
+    return JSONResponse(
+        status_code=500,
+        content={"error": {"type": "internal_error", "message": "Internal server error"}},
+    )
 
 
 # ============================================================
@@ -55,7 +86,7 @@ EXPORTS_DIR.mkdir(parents=True, exist_ok=True)
 MAX_PREVIEW_ROWS = 200
 MAX_EXPORT_ROWS = 2_000_000
 
-# Startup confirmation - logged once at import time
+# Startup confirmation — logged once at import time
 logger.info(
     "app started | mode=%s | exports_dir=%s",
     "packaged" if getattr(sys, "frozen", False) else "dev",
@@ -134,6 +165,48 @@ def get_preset(preset_id: str) -> dict[str, Any] | None:
     return None
 
 
+def _connect() -> duckdb.DuckDBPyConnection:
+    return duckdb.connect()
+
+
+def _build_dataset_metadata(ds_name: str, parquet_path: Path) -> dict[str, Any]:
+    """
+    Collect metadata for a single parquet file.
+    - Row count: parquet_metadata() (footer-only read)
+    - Column count: DESCRIBE SELECT * FROM read_parquet(?) (no row scan)
+    - Size: stat().st_size
+    """
+    p = parquet_path.resolve()
+    p_str = str(p).replace("\\", "/")
+
+    con = _connect()
+    try:
+        # Prefer bind parameters to avoid quoting issues
+        row_count = int(
+            con.execute(
+                "SELECT COALESCE(SUM(num_rows), 0) FROM parquet_metadata(?)",
+                [p_str],
+            ).fetchone()[0]
+        )
+
+        col_rows = con.execute(
+            "DESCRIBE SELECT * FROM read_parquet(?)",
+            [p_str],
+        ).fetchall()
+        column_count = len(col_rows)
+    finally:
+        con.close()
+
+    return {
+        "dataset": ds_name,
+        "source_path": str(p),
+        "row_count": row_count,
+        "column_count": column_count,
+        "file_size_bytes": p.stat().st_size,
+        "last_scanned": datetime.now().isoformat(timespec="seconds"),
+    }
+
+
 def _normalize_param_schema(raw_params: dict[str, Any] | None) -> dict[str, dict[str, Any]]:
     """
     Supports:
@@ -148,7 +221,6 @@ def _normalize_param_schema(raw_params: dict[str, Any] | None) -> dict[str, dict
         if isinstance(v, dict):
             schema[k] = v
         else:
-            # legacy scalar default
             schema[k] = {
                 "type": "number" if isinstance(v, (int, float)) else "string",
                 "label": k,
@@ -170,7 +242,6 @@ def _coerce_param(name: str, meta: dict[str, Any], value: Any) -> Any:
             return value
         s = str(value).strip()
         try:
-            # keep ints as int when possible
             if s.isdigit() or (s.startswith("-") and s[1:].isdigit()):
                 return int(s)
             return float(s)
@@ -187,7 +258,6 @@ def _coerce_param(name: str, meta: dict[str, Any], value: Any) -> Any:
             return False
         raise HTTPException(status_code=400, detail=f"Parameter '{name}' must be a boolean")
 
-    # string (and any unknown types) -> string
     return str(value)
 
 
@@ -236,22 +306,11 @@ def _sql_for(dataset: str, preset_id: str, provided_params: dict[str, Any] | Non
     except KeyError as e:
         raise HTTPException(status_code=400, detail=f"Preset SQL missing parameter: {e}") from e
 
-    # Replace placeholder token `dataset` with a parquet reader
     sql = sql.replace("dataset", f"read_parquet('{src}')")
     return sql, src
 
 
-def _connect() -> duckdb.DuckDBPyConnection:
-    # Fileless connection is fine for query/extract workloads
-    return duckdb.connect()
-
-
 def _extract_dynamic_params(request: Request, *, reserved: set[str], threshold_fallback: int | None) -> dict[str, Any]:
-    """
-    Pulls arbitrary query params (excluding reserved keys).
-    Keeps backward compatibility: if threshold_fallback is provided and not present in query params,
-    it is merged in as 'threshold'.
-    """
     provided: dict[str, Any] = dict(request.query_params)
     for k in reserved:
         provided.pop(k, None)
@@ -279,7 +338,6 @@ if not (FRONTEND_DIR / "index.html").exists():
 app.mount("/ui", StaticFiles(directory=str(FRONTEND_DIR), html=True), name="ui")
 
 
-# Optional: silence favicon.ico 404 noise
 @app.get("/ui/favicon.ico")
 def favicon():
     return Response(status_code=204)
@@ -317,39 +375,23 @@ def api_schema(dataset: str = Query(...)):
     logger.info("schema requested | dataset=%s", dataset)
     t0 = time.perf_counter()
 
+    src, _is_glob = dataset_source_path(dataset)
+
+    con = _connect()
     try:
-        src, _is_glob = dataset_source_path(dataset)
-    except FileNotFoundError as e:
-        logger.warning("schema failed | dataset=%s | reason=%s", dataset, e)
-        raise HTTPException(status_code=404, detail=str(e))
+        cur = con.execute("DESCRIBE SELECT * FROM read_parquet(?)", [src])
+        rows = cur.fetchall()
+        columns = [{"name": r[0], "type": str(r[1])} for r in rows]
+    finally:
+        con.close()
 
-    try:
-        con = _connect()
-        try:
-            # Use DESCRIBE to get schema rows directly (name/type as strings),
-            # and bind the parquet path to avoid quoting/path issues.
-            cur = con.execute("DESCRIBE SELECT * FROM read_parquet(?)", [src])
-            rows = cur.fetchall()
-            columns = [{"name": r[0], "type": str(r[1])} for r in rows]
-        finally:
-            con.close()
-
-        elapsed = round(time.perf_counter() - t0, 4)
-        logger.info("schema success | dataset=%s columns=%d elapsed=%s", dataset, len(columns), elapsed)
-        return {"dataset": dataset, "columns": columns}
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.exception("schema failed | dataset=%s src=%s", dataset, src)
-        raise HTTPException(status_code=500, detail=f"Schema introspection failed: {e}")
+    elapsed = round(time.perf_counter() - t0, 4)
+    logger.info("schema success | dataset=%s columns=%d elapsed=%s", dataset, len(columns), elapsed)
+    return {"dataset": dataset, "columns": columns}
 
 
 @app.get("/api/dialog/folder")
 def api_dialog_folder():
-    """
-    Native Windows folder picker (Tkinter). Returns {"path": "..."} or {"path": ""} if cancelled.
-    """
     try:
         import tkinter as tk  # noqa: WPS433
         from tkinter import filedialog  # noqa: WPS433
@@ -379,44 +421,38 @@ def api_run(
 
     logger.info("query requested | dataset=%s preset=%s params=%s", dataset, preset, provided_params)
     t0 = time.perf_counter()
+
+    sql, _src = _sql_for(dataset, preset, provided_params)
+    limited_sql = f"SELECT * FROM ({sql}) t LIMIT {MAX_PREVIEW_ROWS}"
+
+    con = _connect()
     try:
-        sql, _src = _sql_for(dataset, preset, provided_params)
+        cur = con.execute(limited_sql)
+        cols = [d[0] for d in cur.description]
+        rows = cur.fetchmany(MAX_PREVIEW_ROWS)
 
-        limited_sql = f"SELECT * FROM ({sql}) t LIMIT {MAX_PREVIEW_ROWS}"
+        rowcount = int(con.execute(f"SELECT COUNT(*) FROM ({sql}) t").fetchone()[0])
+        elapsed = time.perf_counter() - t0
 
-        con = _connect()
-        try:
-            cur = con.execute(limited_sql)
-            cols = [d[0] for d in cur.description]
-            rows = cur.fetchmany(MAX_PREVIEW_ROWS)
-
-            rowcount = int(con.execute(f"SELECT COUNT(*) FROM ({sql}) t").fetchone()[0])
-            elapsed = time.perf_counter() - t0
-
-            preview = [dict(zip(cols, r)) for r in rows]
-            logger.info(
-                "query success | dataset=%s preset=%s params=%s preview_limit=%d rows_returned=%d rowcount=%d elapsed=%s",
-                dataset,
-                preset,
-                provided_params,
-                MAX_PREVIEW_ROWS,
-                len(preview),
-                rowcount,
-                round(elapsed, 4),
-            )
-            return {
-                "columns": cols,
-                "rows": preview,
-                "rowcount": rowcount,
-                "elapsed_seconds": round(elapsed, 4),
-            }
-        finally:
-            con.close()
-    except HTTPException:
-        raise
-    except Exception:
-        logger.exception("query failed | dataset=%s preset=%s params=%s", dataset, preset, provided_params)
-        raise
+        preview = [dict(zip(cols, r)) for r in rows]
+        logger.info(
+            "query success | dataset=%s preset=%s params=%s preview_limit=%d rows_returned=%d rowcount=%d elapsed=%s",
+            dataset,
+            preset,
+            provided_params,
+            MAX_PREVIEW_ROWS,
+            len(preview),
+            rowcount,
+            round(elapsed, 4),
+        )
+        return {
+            "columns": cols,
+            "rows": preview,
+            "rowcount": rowcount,
+            "elapsed_seconds": round(elapsed, 4),
+        }
+    finally:
+        con.close()
 
 
 @app.get("/api/export")
@@ -434,88 +470,82 @@ def api_export(
 
     logger.info("export requested | dataset=%s preset=%s params=%s", dataset, preset, provided_params)
     t0 = time.perf_counter()
+
+    sql, _src = _sql_for(dataset, preset, provided_params)
+
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    safe_preset = preset.replace("/", "_").replace("\\", "_")
+    EXPORTS_DIR.mkdir(parents=True, exist_ok=True)
+
+    out_xlsx = EXPORTS_DIR / f"{dataset}_{safe_preset}_{ts}.xlsx"
+    out_csv = EXPORTS_DIR / f"{dataset}_{safe_preset}_{ts}.csv"
+
+    con = _connect()
     try:
-        sql, _src = _sql_for(dataset, preset, provided_params)
+        estimated_rows = int(con.execute(f"SELECT COUNT(*) FROM ({sql}) t").fetchone()[0])
+        if estimated_rows > MAX_EXPORT_ROWS:
+            elapsed = round(time.perf_counter() - t0, 4)
+            logger.warning(
+                "export aborted | dataset=%s preset=%s params=%s estimated_rows=%d max_export_rows=%d elapsed=%s",
+                dataset,
+                preset,
+                provided_params,
+                estimated_rows,
+                MAX_EXPORT_ROWS,
+                elapsed,
+            )
+            raise HTTPException(
+                status_code=400,
+                detail={
+                    "type": "export_limit_exceeded",
+                    "message": "Export exceeds maximum allowed rows",
+                    "max_export_rows": MAX_EXPORT_ROWS,
+                    "estimated_rows": estimated_rows,
+                },
+            )
 
-        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-        safe_preset = preset.replace("/", "_").replace("\\", "_")
-        EXPORTS_DIR.mkdir(parents=True, exist_ok=True)
+        con.execute("CREATE OR REPLACE TEMP VIEW __export_view AS " + sql)
 
-        # Prefer XLSX
-        out_xlsx = EXPORTS_DIR / f"{dataset}_{safe_preset}_{ts}.xlsx"
-        out_csv = EXPORTS_DIR / f"{dataset}_{safe_preset}_{ts}.csv"
-
-        con = _connect()
         try:
-            estimated_rows = int(con.execute(f"SELECT COUNT(*) FROM ({sql}) t").fetchone()[0])
-            if estimated_rows > MAX_EXPORT_ROWS:
-                elapsed = round(time.perf_counter() - t0, 4)
-                logger.warning(
-                    "export aborted | dataset=%s preset=%s params=%s estimated_rows=%d max_export_rows=%d elapsed=%s",
-                    dataset,
-                    preset,
-                    provided_params,
-                    estimated_rows,
-                    MAX_EXPORT_ROWS,
-                    elapsed,
-                )
-                raise HTTPException(
-                    status_code=400,
-                    detail={
-                        "error": "Export exceeds maximum allowed rows",
-                        "max_export_rows": MAX_EXPORT_ROWS,
-                        "estimated_rows": estimated_rows,
-                    },
-                )
-
-            con.execute("CREATE OR REPLACE TEMP VIEW __export_view AS " + sql)
-
-            try:
-                out_str = str(out_xlsx.resolve()).replace("\\", "/")
-                con.execute(f"COPY __export_view TO '{out_str}' (FORMAT XLSX, HEADER TRUE)")
-                elapsed = round(time.perf_counter() - t0, 4)
-                logger.info(
-                    "export success | dataset=%s preset=%s params=%s rows_exported=%d file=%s path=%s elapsed=%s",
-                    dataset,
-                    preset,
-                    provided_params,
-                    estimated_rows,
-                    out_xlsx.name,
-                    out_xlsx,
-                    elapsed,
-                )
-                return FileResponse(
-                    path=str(out_xlsx),
-                    filename=out_xlsx.name,
-                    media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                )
-            except Exception:
-                # Fallback: CSV always works
-                out_str = str(out_csv.resolve()).replace("\\", "/")
-                con.execute(f"COPY __export_view TO '{out_str}' (FORMAT CSV, HEADER TRUE)")
-                elapsed = round(time.perf_counter() - t0, 4)
-                logger.info(
-                    "export success (csv fallback) | dataset=%s preset=%s params=%s rows_exported=%d file=%s path=%s elapsed=%s",
-                    dataset,
-                    preset,
-                    provided_params,
-                    estimated_rows,
-                    out_csv.name,
-                    out_csv,
-                    elapsed,
-                )
-                return FileResponse(
-                    path=str(out_csv),
-                    filename=out_csv.name,
-                    media_type="text/csv",
-                )
-        finally:
-            con.close()
-    except HTTPException:
-        raise
-    except Exception:
-        logger.exception("export failed | dataset=%s preset=%s params=%s", dataset, preset, provided_params)
-        raise
+            out_str = str(out_xlsx.resolve()).replace("\\", "/")
+            con.execute(f"COPY __export_view TO '{out_str}' (FORMAT XLSX, HEADER TRUE)")
+            elapsed = round(time.perf_counter() - t0, 4)
+            logger.info(
+                "export success | dataset=%s preset=%s params=%s rows_exported=%d file=%s path=%s elapsed=%s",
+                dataset,
+                preset,
+                provided_params,
+                estimated_rows,
+                out_xlsx.name,
+                out_xlsx,
+                elapsed,
+            )
+            return FileResponse(
+                path=str(out_xlsx),
+                filename=out_xlsx.name,
+                media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            )
+        except Exception:
+            out_str = str(out_csv.resolve()).replace("\\", "/")
+            con.execute(f"COPY __export_view TO '{out_str}' (FORMAT CSV, HEADER TRUE)")
+            elapsed = round(time.perf_counter() - t0, 4)
+            logger.info(
+                "export success (csv fallback) | dataset=%s preset=%s params=%s rows_exported=%d file=%s path=%s elapsed=%s",
+                dataset,
+                preset,
+                provided_params,
+                estimated_rows,
+                out_csv.name,
+                out_csv,
+                elapsed,
+            )
+            return FileResponse(
+                path=str(out_csv),
+                filename=out_csv.name,
+                media_type="text/csv",
+            )
+    finally:
+        con.close()
 
 
 @app.post("/api/datasets/scan")
@@ -530,7 +560,6 @@ def scan_for_parquet(req: ScanRequest):
     pattern = "**/*.parquet" if req.recursive else "*.parquet"
     files = [f for f in p.glob(pattern) if f.is_file()]
 
-    # Fast row counts via parquet metadata (no full scan)
     con = _connect()
     results: list[dict[str, Any]] = []
     try:
@@ -539,9 +568,10 @@ def scan_for_parquet(req: ScanRequest):
             f_str = str(f.resolve()).replace("\\", "/")
             row_count: int | None = None
             try:
-                # parquet_metadata provides num_rows per row-group
                 row_count = int(
-                    con.execute(f"SELECT COALESCE(SUM(num_rows), 0) FROM parquet_metadata('{f_str}')").fetchone()[0]
+                    con.execute(
+                        f"SELECT COALESCE(SUM(num_rows), 0) FROM parquet_metadata('{f_str}')"
+                    ).fetchone()[0]
                 )
             except Exception:
                 row_count = None
@@ -551,7 +581,7 @@ def scan_for_parquet(req: ScanRequest):
                     "path": str(f),
                     "name": f.name,
                     "size_bytes": stat.st_size,
-                    "row_count": row_count,  # may be None if metadata failed
+                    "row_count": row_count,
                 }
             )
     finally:
@@ -565,12 +595,7 @@ def scan_for_parquet(req: ScanRequest):
 @app.post("/api/datasets/register")
 def register_dataset(req: RegisterRequest):
     t0 = time.perf_counter()
-    logger.info(
-        "register requested | dataset=%s parquet_path=%s mode=%s",
-        req.dataset_name,
-        req.parquet_path,
-        req.mode,
-    )
+    logger.info("register requested | dataset=%s parquet_path=%s mode=%s", req.dataset_name, req.parquet_path, req.mode)
     src = Path(req.parquet_path).expanduser()
     if not src.exists() or not src.is_file():
         logger.warning("register failed | dataset=%s | reason=parquet path not found", req.dataset_name)
@@ -580,35 +605,50 @@ def register_dataset(req: RegisterRequest):
     ds_dir = DATASETS_DIR / ds_name
     ds_dir.mkdir(parents=True, exist_ok=True)
 
+    stored_path = src
     if req.mode == "copy":
         dest = ds_dir / src.name
         shutil.copy2(src, dest)
         storage = "copied"
+        stored_path = dest
     elif req.mode == "reference":
         pointer = ds_dir / "_reference.txt"
         pointer.write_text(str(src), encoding="utf-8")
         storage = "referenced"
+        stored_path = src
     else:
         logger.warning("register failed | dataset=%s | reason=invalid mode=%s", req.dataset_name, req.mode)
         return {"error": "mode must be 'copy' or 'reference'."}
 
     elapsed = round(time.perf_counter() - t0, 4)
     logger.info("register success | dataset=%s storage=%s elapsed=%s", ds_name, storage, elapsed)
+
+    # Build and persist dataset metadata (non-fatal)
+    logger.info("metadata build start | dataset=%s", ds_name)
+    try:
+        meta = _build_dataset_metadata(ds_name, stored_path)
+        meta_path = ds_dir / "_meta.json"
+        meta_path.write_text(json.dumps(meta, indent=2, ensure_ascii=False), encoding="utf-8")
+        logger.info(
+            "metadata build success | dataset=%s rows=%d cols=%d size_bytes=%d",
+            ds_name,
+            int(meta.get("row_count", 0)),
+            int(meta.get("column_count", 0)),
+            int(meta.get("file_size_bytes", 0)),
+        )
+    except Exception:
+        logger.exception("metadata build failed | dataset=%s", ds_name)
+
     return {"dataset": ds_name, "storage": storage}
 
 
 @app.post("/api/shutdown")
 def api_shutdown(bg: BackgroundTasks):
-    """
-    Hard-stop the process so the app can be launched again immediately.
-    Windows + PyInstaller + --noconsole: SIGTERM is not reliable, so we force exit.
-    """
     logger.info("shutdown requested")
 
     def _stop():
-        time.sleep(0.25)  # let the HTTP response flush
-        os._exit(0)  # guaranteed process termination
+        time.sleep(0.25)
+        os._exit(0)
 
     bg.add_task(_stop)
     return {"ok": True}
-
