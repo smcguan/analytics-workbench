@@ -165,9 +165,14 @@
 
     .grid{
       display:grid;
-      grid-template-columns: 1.2fr .9fr;
+      grid-template-columns: 1fr 1.35fr;
       gap: 18px;
       margin-top: 18px;
+      align-items:start;
+    }
+
+    .span-2{
+      grid-column: 1 / -1;
     }
 
     .card{
@@ -323,90 +328,6 @@
 
   <div class="wrap">
     <div class="grid">
-      <!-- QUERY -->
-      <div class="card">
-        <h2>Query</h2>
-
-        <div class="row">
-          <div class="field" style="min-width:240px;">
-            <label for="datasetSelect">Dataset</label>
-            <select id="datasetSelect"></select>
-            <div id="datasetInfo" class="hint" style="display:none; margin-top:10px; border-color:rgba(88,166,255,.20); background:rgba(88,166,255,.08); color:rgba(232,238,252,.92);">
-              <div><strong id="datasetInfoName">Dataset</strong></div>
-              <div style="margin-top:6px; color:var(--muted); font-size:12px;">
-                Rows: <span id="datasetInfoRows">—</span> •
-                Columns: <span id="datasetInfoCols">—</span> •
-                Size: <span id="datasetInfoSize">—</span> •
-                Source: <span id="datasetInfoSource">—</span>
-              </div>
-              <div class="row" style="margin-top:10px;">
-                <button class="btn" id="viewSchemaBtn" type="button">View Schema</button>
-                <button class="btn" id="hideSchemaBtn" type="button" style="display:none;">Hide Schema</button>
-                <button class="btn" id="previewDataBtn" type="button">Preview Data</button>
-                <button class="btn" id="hidePreviewBtn" type="button" style="display:none;">Hide Preview</button>
-              </div>
-            </div>
-
-            <div id="schemaWrap" class="results" style="display:none; margin-top:10px;">
-              <div style="padding:7px 12px; font-size:11.5px; color:rgba(232,238,252,.50); border-bottom:1px solid rgba(255,255,255,.07); background:rgba(0,0,0,.10);">
-                Dataset schema
-              </div>
-              <table id="schemaTable">
-                <thead>
-                  <tr>
-                    <th>Column Name</th>
-                    <th>Type</th>
-                  </tr>
-                </thead>
-                <tbody id="schemaBody"></tbody>
-              </table>
-            </div>
-
-            <div id="datasetPreviewWrap" class="results" style="display:none; margin-top:10px;">
-              <div style="padding:7px 12px; font-size:11.5px; color:rgba(232,238,252,.50); border-bottom:1px solid rgba(255,255,255,.07); background:rgba(0,0,0,.10);">
-                Raw dataset preview
-              </div>
-              <table id="datasetPreviewTable">
-                <thead id="datasetPreviewHead"></thead>
-                <tbody id="datasetPreviewBody"></tbody>
-              </table>
-            </div>
-          </div>
-
-          <div class="field" style="min-width:320px;">
-            <label for="presetSelect">Preset</label>
-            <select id="presetSelect"></select>
-          </div>
-
-          <div id="dynamicParams" class="row"></div>
-        </div>
-
-        <div class="row" style="margin-top:12px;">
-          <button class="btn primary" id="runBtn">Run</button>
-          <button class="btn" id="copyBtn">Copy (TSV)</button>
-          <button class="btn good" id="exportBtn">Download Excel</button>
-        </div>
-
-        <div class="hint" id="queryHint">
-          Tip: Add a dataset on the right (Browse → Scan → Register). Then run a preset here.
-        </div>
-
-        <div class="status">
-          <span class="dot" id="runDot"></span>
-          <span id="runStatus">No results yet.</span>
-        </div>
-
-        <div class="results" id="resultsWrap" style="display:none;">
-          <div style="padding:7px 12px; font-size:11.5px; color:rgba(232,238,252,.50); border-bottom:1px solid rgba(255,255,255,.07); background:rgba(0,0,0,.10);">
-            Showing up to 200 rows (preview). Use <strong style="color:rgba(126,231,135,.75);">Download Excel</strong> for full results.
-          </div>
-          <table id="resultsTable">
-            <thead id="resultsHead"></thead>
-            <tbody id="resultsBody"></tbody>
-          </table>
-        </div>
-      </div>
-
       <!-- ADD DATASET -->
       <div class="card">
         <h2>Add dataset</h2>
@@ -462,7 +383,116 @@
           <span id="scanStatus">Ready.</span>
         </div>
       </div>
+
+      <!-- QUERY -->
+      <div class="card">
+        <h2>Query</h2>
+
+        <div class="row">
+          <div class="field" style="min-width:240px;">
+            <label for="datasetSelect">Dataset</label>
+            <select id="datasetSelect"></select>
+            <div id="datasetInfo" class="hint" style="display:none; margin-top:10px; border-color:rgba(88,166,255,.20); background:rgba(88,166,255,.08); color:rgba(232,238,252,.92);">
+              <div><strong id="datasetInfoName">Dataset</strong></div>
+              <div style="margin-top:6px; color:var(--muted); font-size:12px;">
+                Rows: <span id="datasetInfoRows">—</span> •
+                Columns: <span id="datasetInfoCols">—</span> •
+                Size: <span id="datasetInfoSize">—</span> •
+                Source: <span id="datasetInfoSource">—</span>
+              </div>
+              <div class="row" style="margin-top:10px;">
+                <button class="btn" id="viewSchemaBtn" type="button">View Schema</button>
+                <button class="btn" id="hideSchemaBtn" type="button" style="display:none;">Hide Schema</button>
+                <button class="btn" id="previewDataBtn" type="button">Preview Data</button>
+                <button class="btn" id="hidePreviewBtn" type="button" style="display:none;">Hide Preview</button>
+              </div>
+            </div>
+
+            <div id="schemaWrap" class="results" style="display:none; margin-top:10px;">
+              <div style="padding:7px 12px; font-size:11.5px; color:rgba(232,238,252,.50); border-bottom:1px solid rgba(255,255,255,.07); background:rgba(0,0,0,.10);">
+                Dataset schema
+              </div>
+              <table id="schemaTable">
+                <thead>
+                  <tr>
+                    <th>Column Name</th>
+                    <th>Type</th>
+                  </tr>
+                </thead>
+                <tbody id="schemaBody"></tbody>
+              </table>
+            </div>
+
+            <div id="datasetPreviewWrap" class="results" style="display:none; margin-top:10px;">
+              <div style="padding:7px 12px; font-size:11.5px; color:rgba(232,238,252,.50); border-bottom:1px solid rgba(255,255,255,.07); background:rgba(0,0,0,.10);">
+                Raw dataset preview
+              </div>
+              <table id="datasetPreviewTable">
+                <thead id="datasetPreviewHead"></thead>
+                <tbody id="datasetPreviewBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="field" style="min-width:320px; flex:1;">
+            <label for="presetSelect">Preset</label>
+            <select id="presetSelect"></select>
+          </div>
+
+          <div id="dynamicParams" class="row"></div>
+        </div>
+
+        <div class="row" style="margin-top:12px;">
+          <button class="btn primary" id="runBtn">Run</button>
+          <button class="btn" id="copyBtn">Copy (TSV)</button>
+          <button class="btn good" id="exportBtn">Download Excel</button>
+        </div>
+
+        <div class="hint" id="queryHint">
+          Tip: Add a dataset first, then inspect it, run a preset, and save useful queries below.
+        </div>
+
+        <div class="status">
+          <span class="dot" id="runDot"></span>
+          <span id="runStatus">No results yet.</span>
+        </div>
+
+        <div class="results" id="resultsWrap" style="display:none;">
+          <div style="padding:7px 12px; font-size:11.5px; color:rgba(232,238,252,.50); border-bottom:1px solid rgba(255,255,255,.07); background:rgba(0,0,0,.10);">
+            Showing up to 200 rows (preview). Use <strong style="color:rgba(126,231,135,.75);">Download Excel</strong> for full results.
+          </div>
+          <table id="resultsTable">
+            <thead id="resultsHead"></thead>
+            <tbody id="resultsBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SAVED QUERIES -->
+      <div class="card span-2">
+        <h2>Saved Queries</h2>
+        <div class="row" style="margin-bottom:12px;">
+          <button class="btn good" id="saveQueryBtn" type="button">Save Current Query</button>
+          <button class="btn" id="refreshQueriesBtn" type="button">Refresh</button>
+        </div>
+        <div class="results" style="display:block; max-height:220px;">
+          <table id="savedQueriesTable">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Dataset</th>
+                <th>Preset</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="savedQueriesBody"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
+  </div>
+
+  <div class="toast" id="toast"></div>    </div>
   </div>
 
   <div class="toast" id="toast"></div>
@@ -683,6 +713,161 @@
       $("hidePreviewBtn").style.display = "none";
       $("datasetPreviewHead").innerHTML = "";
       $("datasetPreviewBody").innerHTML = "";
+    }
+
+    function currentQueryPayload() {
+      const dataset = $("datasetSelect").value;
+      const preset = $("presetSelect").value;
+      const dyn = buildDynamicParamsForSelectedPreset();
+      const params = {};
+      for (const [k, v] of dyn.entries()) params[k] = v;
+      return { dataset, preset, params };
+    }
+
+    function applySavedQuery(q) {
+      if (!q) return;
+
+      const dsSel = $("datasetSelect");
+      for (let i = 0; i < dsSel.options.length; i++) {
+        if (dsSel.options[i].value === q.dataset) {
+          dsSel.selectedIndex = i;
+          break;
+        }
+      }
+
+      loadDatasetMeta(dsSel.value);
+
+      const presetSel = $("presetSelect");
+      for (let i = 0; i < presetSel.options.length; i++) {
+        if (presetSel.options[i].value === q.preset) {
+          presetSel.selectedIndex = i;
+          break;
+        }
+      }
+
+      renderPresetParams();
+
+      const params = q.params || {};
+      for (const [name, value] of Object.entries(params)) {
+        const input = $("param_" + name);
+        if (input) input.value = value === null || value === undefined ? "" : String(value);
+      }
+
+      toast(`Loaded saved query: ${q.name}`);
+    }
+
+    function renderSavedQueries(items) {
+      const body = $("savedQueriesBody");
+      body.innerHTML = "";
+
+      if (!items || !items.length) {
+        const tr = document.createElement("tr");
+        const td = document.createElement("td");
+        td.colSpan = 4;
+        td.textContent = "No saved queries yet.";
+        tr.appendChild(td);
+        body.appendChild(tr);
+        return;
+      }
+
+      for (const q of items) {
+        const tr = document.createElement("tr");
+
+        const nameTd = document.createElement("td");
+        nameTd.textContent = q.name || "";
+        tr.appendChild(nameTd);
+
+        const datasetTd = document.createElement("td");
+        datasetTd.textContent = q.dataset || "";
+        tr.appendChild(datasetTd);
+
+        const presetTd = document.createElement("td");
+        presetTd.textContent = q.preset || "";
+        tr.appendChild(presetTd);
+
+        const actionsTd = document.createElement("td");
+        const runBtn = document.createElement("button");
+        runBtn.className = "btn";
+        runBtn.type = "button";
+        runBtn.textContent = "Load";
+        runBtn.addEventListener("click", () => applySavedQuery(q));
+
+        const delBtn = document.createElement("button");
+        delBtn.className = "btn danger";
+        delBtn.type = "button";
+        delBtn.textContent = "Delete";
+        delBtn.style.marginLeft = "8px";
+        delBtn.addEventListener("click", async () => {
+          if (!confirm(`Delete saved query "${q.name}"?`)) return;
+          try {
+            await apiJson("/api/queries/delete", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ name: q.name })
+            });
+            toast(`Deleted saved query: ${q.name}`);
+            await loadSavedQueries();
+          } catch (e) {
+            toast("Delete failed: " + e.message);
+          }
+        });
+
+        actionsTd.appendChild(runBtn);
+        actionsTd.appendChild(delBtn);
+        tr.appendChild(actionsTd);
+
+        body.appendChild(tr);
+      }
+    }
+
+    async function loadSavedQueries() {
+      try {
+        const data = await apiJson("/api/queries");
+        renderSavedQueries(data.queries || []);
+      } catch (e) {
+        renderSavedQueries([]);
+        toast("Saved queries unavailable: " + e.message);
+      }
+    }
+
+    async function saveCurrentQuery() {
+      const { dataset, preset, params } = currentQueryPayload();
+
+      if (!dataset) {
+        toast("Select a dataset first.");
+        return;
+      }
+      if (!preset) {
+        toast("Select a preset first.");
+        return;
+      }
+
+      const suggested = `${preset} - ${dataset}`;
+      const name = window.prompt("Save query as:", suggested);
+      if (name === null) return;
+
+      const trimmed = String(name).trim();
+      if (!trimmed) {
+        toast("Query name is required.");
+        return;
+      }
+
+      try {
+        await apiJson("/api/queries/save", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: trimmed,
+            dataset,
+            preset,
+            params
+          })
+        });
+        toast(`Saved query: ${trimmed}`);
+        await loadSavedQueries();
+      } catch (e) {
+        toast("Save failed: " + e.message);
+      }
     }
 
     // -----------------------------
@@ -1131,6 +1316,8 @@
     $("exportBtn").addEventListener("click", exportExcel);
 
     $("quitBtn").addEventListener("click", quitApp);
+    $("saveQueryBtn").addEventListener("click", saveCurrentQuery);
+    $("refreshQueriesBtn").addEventListener("click", loadSavedQueries);
     $("viewSchemaBtn").addEventListener("click", viewSchema);
     $("hideSchemaBtn").addEventListener("click", hideSchema);
     $("previewDataBtn").addEventListener("click", previewDataset);
@@ -1145,7 +1332,7 @@
     // -----------------------------
     (async function init(){
       await loadVersion();
-      await Promise.all([loadDatasets(), loadPresets()]);
+      await Promise.all([loadDatasets(), loadPresets(), loadSavedQueries()]);
       setRunStatus("", "Ready.");
       setPill($("scanDot"), $("scanStatus"), "", "Ready.");
     })();
