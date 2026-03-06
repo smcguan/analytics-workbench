@@ -238,6 +238,70 @@ def _duckdb_ok() -> tuple[bool, str | None]:
         return False, str(e)
 
 
+def _dataset_meta_summary(dataset: str) -> dict[str, Any]:
+    """
+    Returns a lightweight metadata summary for a dataset.
+
+    Prefers cached _meta.json.
+    Falls back to live computation if metadata is missing.
+    """
+    ds_dir = _dataset_dir(dataset)
+    meta_path = ds_dir / "_meta.json"
+
+    if meta_path.exists():
+        try:
+            meta = json.loads(meta_path.read_text(encoding="utf-8"))
+            return {
+                "name": dataset,
+                "row_count": meta.get("row_count"),
+                "column_count": meta.get("column_count"),
+                "file_size_bytes": meta.get("file_size_bytes"),
+                "meta_source": "cached",
+            }
+        except Exception:
+            pass
+
+    src, is_glob = dataset_source_path(dataset)
+    esc = _sql_escape_path(src)
+
+    con = _connect()
+    try:
+
+
+        row_count = int(
+            con.execute(
+                f"SELECT COUNT(*) FROM read_parquet('{esc}')"
+            ).fetchone()[0]
+        )
+
+
+        # parquet_schema() returns one row per column
+        column_count = int(
+            con.execute(
+                f"SELECT COUNT(*) FROM parquet_schema('{esc}')"
+            ).fetchone()[0]
+        )
+    finally:
+        con.close()
+
+    if is_glob:
+        file_size_bytes = sum(
+            f.stat().st_size for f in ds_dir.glob("*.parquet") if f.is_file()
+        )
+    else:
+        ref = ds_dir / "_reference.txt"
+        ref_path = Path(ref.read_text(encoding="utf-8").strip())
+        file_size_bytes = ref_path.stat().st_size if ref_path.exists() else None
+
+    return {
+        "name": dataset,
+        "row_count": row_count,
+        "column_count": column_count,
+        "file_size_bytes": file_size_bytes,
+        "meta_source": "live",
+    }
+
+
 def _audit_log(event: dict[str, Any]) -> None:
     """
     Append-only JSONL audit log.
@@ -400,7 +464,35 @@ def api_health():
 
 @app.get("/api/datasets")
 def api_datasets():
-    return {"datasets": list_datasets()}
+    items: list[dict[str, Any]] = []
+
+    for dataset in list_datasets():
+        try:
+            items.append(_dataset_meta_summary(dataset))
+        except FileNotFoundError:
+            items.append(
+                {
+                    "name": dataset,
+                    "row_count": None,
+                    "column_count": None,
+                    "file_size_bytes": None,
+                    "meta_source": "unavailable",
+                    "error": "dataset source not found",
+                }
+            )
+        except Exception as e:
+            items.append(
+                {
+                    "name": dataset,
+                    "row_count": None,
+                    "column_count": None,
+                    "file_size_bytes": None,
+                    "meta_source": "error",
+                    "error": str(e),
+                }
+            )
+
+    return {"datasets": items}
 
 
 @app.get("/api/datasets/{name}/meta")

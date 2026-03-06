@@ -331,6 +331,46 @@
           <div class="field" style="min-width:240px;">
             <label for="datasetSelect">Dataset</label>
             <select id="datasetSelect"></select>
+            <div id="datasetInfo" class="hint" style="display:none; margin-top:10px; border-color:rgba(88,166,255,.20); background:rgba(88,166,255,.08); color:rgba(232,238,252,.92);">
+              <div><strong id="datasetInfoName">Dataset</strong></div>
+              <div style="margin-top:6px; color:var(--muted); font-size:12px;">
+                Rows: <span id="datasetInfoRows">—</span> •
+                Columns: <span id="datasetInfoCols">—</span> •
+                Size: <span id="datasetInfoSize">—</span> •
+                Source: <span id="datasetInfoSource">—</span>
+              </div>
+              <div class="row" style="margin-top:10px;">
+                <button class="btn" id="viewSchemaBtn" type="button">View Schema</button>
+                <button class="btn" id="hideSchemaBtn" type="button" style="display:none;">Hide Schema</button>
+                <button class="btn" id="previewDataBtn" type="button">Preview Data</button>
+                <button class="btn" id="hidePreviewBtn" type="button" style="display:none;">Hide Preview</button>
+              </div>
+            </div>
+
+            <div id="schemaWrap" class="results" style="display:none; margin-top:10px;">
+              <div style="padding:7px 12px; font-size:11.5px; color:rgba(232,238,252,.50); border-bottom:1px solid rgba(255,255,255,.07); background:rgba(0,0,0,.10);">
+                Dataset schema
+              </div>
+              <table id="schemaTable">
+                <thead>
+                  <tr>
+                    <th>Column Name</th>
+                    <th>Type</th>
+                  </tr>
+                </thead>
+                <tbody id="schemaBody"></tbody>
+              </table>
+            </div>
+
+            <div id="datasetPreviewWrap" class="results" style="display:none; margin-top:10px;">
+              <div style="padding:7px 12px; font-size:11.5px; color:rgba(232,238,252,.50); border-bottom:1px solid rgba(255,255,255,.07); background:rgba(0,0,0,.10);">
+                Raw dataset preview
+              </div>
+              <table id="datasetPreviewTable">
+                <thead id="datasetPreviewHead"></thead>
+                <tbody id="datasetPreviewBody"></tbody>
+              </table>
+            </div>
           </div>
 
           <div class="field" style="min-width:320px;">
@@ -476,6 +516,174 @@
     // -----------------------------
     let lastRun = { columns: [], rows: [], rowcount: 0, elapsed: 0 };
     let presets = []; // <-- 4B: store preset definitions including param schema
+    let datasetMap = new Map();
+
+    function renderDatasetInfo(dataset) {
+      const panel = $("datasetInfo");
+      if (!dataset) {
+        panel.style.display = "none";
+        return;
+      }
+
+      $("datasetInfoName").textContent = dataset.name || "Dataset";
+      $("datasetInfoRows").textContent =
+        (dataset.row_count !== null && dataset.row_count !== undefined)
+          ? num(dataset.row_count)
+          : "—";
+      $("datasetInfoCols").textContent =
+        (dataset.column_count !== null && dataset.column_count !== undefined)
+          ? num(dataset.column_count)
+          : "—";
+      $("datasetInfoSize").textContent =
+        (dataset.file_size_bytes !== null && dataset.file_size_bytes !== undefined)
+          ? bytesToHuman(dataset.file_size_bytes)
+          : "—";
+      $("datasetInfoSource").textContent = dataset.meta_source || "—";
+
+      panel.style.display = "block";
+    }
+
+    async function loadDatasetMeta(datasetName) {
+      if (!datasetName) {
+        renderDatasetInfo(null);
+        return;
+      }
+
+      try {
+        const data = await apiJson("/api/datasets/" + encodeURIComponent(datasetName) + "/meta");
+        const merged = {
+          name: data.dataset || datasetName,
+          row_count: data.row_count,
+          column_count: data.column_count,
+          file_size_bytes: data.file_size_bytes,
+          meta_source: data.meta_source
+        };
+        datasetMap.set(datasetName, merged);
+        renderDatasetInfo(merged);
+      } catch (e) {
+        const fallback = datasetMap.get(datasetName);
+        if (fallback) {
+          renderDatasetInfo(fallback);
+        } else {
+          renderDatasetInfo({
+            name: datasetName,
+            row_count: null,
+            column_count: null,
+            file_size_bytes: null,
+            meta_source: "unavailable"
+          });
+        }
+      }
+    }
+
+    function renderSchema(columns) {
+      const body = $("schemaBody");
+      body.innerHTML = "";
+
+      if (!columns || !columns.length) {
+        const tr = document.createElement("tr");
+        const td = document.createElement("td");
+        td.colSpan = 2;
+        td.textContent = "No schema available.";
+        tr.appendChild(td);
+        body.appendChild(tr);
+      } else {
+        for (const col of columns) {
+          const tr = document.createElement("tr");
+
+          const nameTd = document.createElement("td");
+          nameTd.textContent = col.name || "";
+          tr.appendChild(nameTd);
+
+          const typeTd = document.createElement("td");
+          typeTd.textContent = col.type || "";
+          typeTd.className = "mono";
+          tr.appendChild(typeTd);
+
+          body.appendChild(tr);
+        }
+      }
+
+      $("schemaWrap").style.display = "block";
+      $("hideSchemaBtn").style.display = "inline-block";
+    }
+
+    async function viewSchema() {
+      const dataset = $("datasetSelect").value;
+      if (!dataset) {
+        toast("Select a dataset first.");
+        return;
+      }
+
+      try {
+        const data = await apiJson("/api/schema?dataset=" + encodeURIComponent(dataset));
+        renderSchema(data.columns || []);
+      } catch (e) {
+        toast("Schema load failed: " + e.message);
+      }
+    }
+
+    function hideSchema() {
+      $("schemaWrap").style.display = "none";
+      $("hideSchemaBtn").style.display = "none";
+    }
+
+    function renderDatasetPreview(columns, rows) {
+      const head = $("datasetPreviewHead");
+      const body = $("datasetPreviewBody");
+      head.innerHTML = "";
+      body.innerHTML = "";
+
+      if (!columns || !columns.length) {
+        $("datasetPreviewWrap").style.display = "none";
+        $("hidePreviewBtn").style.display = "none";
+        return;
+      }
+
+      const trh = document.createElement("tr");
+      for (const c of columns) {
+        const th = document.createElement("th");
+        th.textContent = c;
+        trh.appendChild(th);
+      }
+      head.appendChild(trh);
+
+      for (const r of rows || []) {
+        const tr = document.createElement("tr");
+        for (const c of columns) {
+          const td = document.createElement("td");
+          const val = r[c];
+          td.textContent = (val === null || val === undefined) ? "" : String(val);
+          tr.appendChild(td);
+        }
+        body.appendChild(tr);
+      }
+
+      $("datasetPreviewWrap").style.display = "block";
+      $("hidePreviewBtn").style.display = "inline-block";
+    }
+
+    async function previewDataset() {
+      const dataset = $("datasetSelect").value;
+      if (!dataset) {
+        toast("Select a dataset first.");
+        return;
+      }
+
+      try {
+        const data = await apiJson("/api/preview?dataset=" + encodeURIComponent(dataset));
+        renderDatasetPreview(data.columns || [], data.rows || []);
+      } catch (e) {
+        toast("Preview failed: " + e.message);
+      }
+    }
+
+    function hideDatasetPreview() {
+      $("datasetPreviewWrap").style.display = "none";
+      $("hidePreviewBtn").style.display = "none";
+      $("datasetPreviewHead").innerHTML = "";
+      $("datasetPreviewBody").innerHTML = "";
+    }
 
     // -----------------------------
     // Version + init
@@ -494,27 +702,51 @@
     async function loadDatasets() {
       const sel = $("datasetSelect");
       sel.innerHTML = "";
+      datasetMap = new Map();
+
       try {
         const data = await apiJson("/api/datasets");
         const arr = data.datasets || [];
+
         if (arr.length === 0) {
           const opt = document.createElement("option");
           opt.value = "";
           opt.textContent = "(no datasets yet)";
           sel.appendChild(opt);
+          renderDatasetInfo(null);
           return;
         }
-        for (const name of arr) {
+
+        for (const d of arr) {
           const opt = document.createElement("option");
-          opt.value = name;
-          opt.textContent = name;
+          opt.value = d.name || "";
+
+          const rows = (d.row_count !== null && d.row_count !== undefined)
+            ? num(d.row_count) + " rows"
+            : "";
+
+          const size = (d.file_size_bytes !== null && d.file_size_bytes !== undefined)
+            ? bytesToHuman(d.file_size_bytes)
+            : "";
+
+          const meta = [rows, size].filter(Boolean).join(" • ");
+          opt.textContent = meta ? `${d.name} — ${meta}` : (d.name || "(unnamed dataset)");
+
           sel.appendChild(opt);
+          if (d.name) datasetMap.set(d.name, d);
+        }
+
+        if (sel.value) {
+          await loadDatasetMeta(sel.value);
+        } else {
+          renderDatasetInfo(null);
         }
       } catch (e) {
         const opt = document.createElement("option");
         opt.value = "";
         opt.textContent = "(failed to load datasets)";
         sel.appendChild(opt);
+        renderDatasetInfo(null);
       }
     }
 
@@ -727,6 +959,7 @@
             break;
           }
         }
+        await loadDatasetMeta(dsSel.value);
       } catch (e) {
         setPill($("scanDot"), $("scanStatus"), "bad", "Register failed.");
         toast("Register failed: " + e.message);
@@ -898,9 +1131,14 @@
     $("exportBtn").addEventListener("click", exportExcel);
 
     $("quitBtn").addEventListener("click", quitApp);
+    $("viewSchemaBtn").addEventListener("click", viewSchema);
+    $("hideSchemaBtn").addEventListener("click", hideSchema);
+    $("previewDataBtn").addEventListener("click", previewDataset);
+    $("hidePreviewBtn").addEventListener("click", hideDatasetPreview);
 
     // 4B: rerender params whenever preset changes
     $("presetSelect").addEventListener("change", renderPresetParams);
+    $("datasetSelect").addEventListener("change", () => { hideSchema(); hideDatasetPreview(); loadDatasetMeta($("datasetSelect").value); });
 
     // -----------------------------
     // Init
