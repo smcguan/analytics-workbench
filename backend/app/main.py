@@ -1487,6 +1487,73 @@ def register_dataset(req: RegisterRequest):
     return {"dataset": ds_name, "storage": storage, "context_built": context_built}
 
 
+
+class AiSqlRequest(BaseModel):
+    dataset: str
+    question: str
+
+
+@app.post("/api/ai/generate_sql")
+def api_ai_generate_sql(req: AiSqlRequest):
+    """Generate SQL from a natural language question (Assignment 13B).
+    For now this is deterministic and uses dataset context only.
+    """
+    if req.dataset not in list_datasets():
+        raise HTTPException(status_code=404, detail=f"Dataset not found: {req.dataset}")
+
+    question = (req.question or "").strip().lower()
+    if not question:
+        raise HTTPException(status_code=400, detail="Question is required.")
+
+    # Load dataset context (schema + stats)
+    context = _load_dataset_context(req.dataset, refresh=False)
+    cols = [c["name"] for c in context.get("columns", [])]
+
+    # Simple rule‑based SQL generation (placeholder for LLM)
+    sql = None
+
+    if "count" in question or "how many" in question:
+        sql = "SELECT COUNT(*) AS row_count FROM dataset"
+
+    elif "group" in question or "per" in question:
+        for c in cols:
+            if c.lower() in question:
+                sql = f"""
+SELECT {c}, COUNT(*) AS count_rows
+FROM dataset
+GROUP BY {c}
+ORDER BY count_rows DESC
+""".strip()
+                break
+
+    elif "top" in question or "highest" in question:
+        for c in cols:
+            if c.lower() in question:
+                sql = f"""
+SELECT *
+FROM dataset
+ORDER BY {c} DESC
+LIMIT 20
+""".strip()
+                break
+
+    if not sql:
+        sql = "SELECT * FROM dataset LIMIT 100"
+
+    _audit_log({
+        "event": "ai_generate_sql",
+        "status": "success",
+        "dataset": req.dataset,
+        "question": req.question,
+    })
+
+    return {
+        "dataset": req.dataset,
+        "question": req.question,
+        "sql": sql
+    }
+
+
 @app.post("/api/shutdown")
 def api_shutdown(bg: BackgroundTasks):
     """
