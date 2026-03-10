@@ -5,7 +5,7 @@ from .prompt_builder import build_generate_sql_prompt
 from .provider_openai import generate_sql_response
 from .response_parser import parse_generate_sql_response
 from .schemas import GenerateSQLRequest, GenerateSQLResponse
-from .sql_validator import validate_generated_sql
+from .sql_validator import validate_generated_sql, validate_sql_with_duckdb
 
 router = APIRouter(prefix="/api/ai", tags=["AI"])
 
@@ -46,6 +46,22 @@ def generate_sql(payload: GenerateSQLRequest) -> GenerateSQLResponse:
                     message=validation_message,
                     warnings=parsed["warnings"],
                 )
+
+            duck_ok, duck_message = validate_sql_with_duckdb(
+                sql=parsed["sql"],
+                dataset_name=payload.dataset,
+                dataset_source_path_fn=_get_dataset_source_path,
+            )
+            if not duck_ok:
+                return GenerateSQLResponse(
+                    status="error",
+                    dataset=payload.dataset,
+                    question=payload.question,
+                    sql="",
+                    message=duck_message,
+                    warnings=parsed["warnings"],
+                )
+
 
         return GenerateSQLResponse(
             status=parsed["status"],

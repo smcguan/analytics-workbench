@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from typing import Callable
 
 
 _BLOCKED_KEYWORDS = [
@@ -15,6 +16,10 @@ _BLOCKED_KEYWORDS = [
     "detach",
     "call",
 ]
+
+
+def _sql_escape_path(p: str) -> str:
+    return p.replace("'", "''")
 
 
 def validate_generated_sql(sql: str) -> tuple[bool, str]:
@@ -35,3 +40,27 @@ def validate_generated_sql(sql: str) -> tuple[bool, str]:
             return False, f"Blocked SQL keyword detected: {token}"
 
     return True, ""
+
+
+def validate_sql_with_duckdb(
+    sql: str,
+    dataset_name: str,
+    dataset_source_path_fn: Callable[[str], tuple[str, bool]],
+) -> tuple[bool, str]:
+    try:
+        import duckdb
+
+        src, _is_glob = dataset_source_path_fn(dataset_name)
+        esc = _sql_escape_path(src)
+
+        con = duckdb.connect()
+        try:
+            con.execute(f"CREATE OR REPLACE TEMP VIEW dataset AS SELECT * FROM read_parquet('{esc}')")
+            con.execute(f"EXPLAIN {sql}")
+        finally:
+            con.close()
+
+        return True, ""
+
+    except Exception as e:
+        return False, f"Generated SQL failed DuckDB validation: {e}"
