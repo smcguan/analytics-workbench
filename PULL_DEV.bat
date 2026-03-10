@@ -6,11 +6,8 @@ echo Running in directory:
 echo %cd%
 echo.
 
-
-REM Go to repo root (folder this script lives in)
 cd /d "%~dp0"
 
-REM Sanity: must be inside a git repo
 git rev-parse --is-inside-work-tree >nul 2>&1
 if errorlevel 1 (
   echo ERROR: Not inside a git repository.
@@ -18,7 +15,6 @@ if errorlevel 1 (
   exit /b 1
 )
 
-REM Ensure we are on dev
 for /f "delims=" %%b in ('git branch --show-current') do set "BRANCH=%%b"
 if /i not "%BRANCH%"=="dev" (
   echo Switching to dev branch...
@@ -30,34 +26,45 @@ if /i not "%BRANCH%"=="dev" (
   )
 )
 
-REM Capture current HEAD to detect changes
-for /f "delims=" %%h in ('git rev-parse HEAD') do set "OLDHEAD=%%h"
+echo.
+echo WARNING: This will make your local dev branch exactly match origin/dev.
+echo All uncommitted local changes will be lost.
+set /p confirm=Proceed with force sync? [Y/N]:
 
-echo Pulling latest from origin/dev...
-git pull
+if /i not "%confirm%"=="Y" (
+  echo Aborted.
+  pause
+  exit /b
+)
+
+echo.
+echo Fetching latest from origin...
+git fetch origin
 if errorlevel 1 (
-  echo ERROR: Pull failed. Resolve issues, then retry.
+  echo ERROR: Fetch failed.
   pause
   exit /b 1
 )
 
-for /f "delims=" %%h in ('git rev-parse HEAD') do set "NEWHEAD=%%h"
-
 echo.
-echo Status:
-git status
-
-REM If HEAD changed, remind about deps
-if /i not "%OLDHEAD%"=="%NEWHEAD%" (
-  echo.
-  echo Repo updated.
-  if exist "backend\requirements.txt" (
-    echo If dependencies changed, run:
-    echo   .\.venv\Scripts\python.exe -m pip install -r backend\requirements.txt
-  )
-) else (
-  echo.
-  echo Already up to date.
+echo Resetting local dev to origin/dev...
+git reset --hard origin/dev
+if errorlevel 1 (
+  echo ERROR: Reset failed.
+  pause
+  exit /b 1
 )
 
+echo.
+echo Removing untracked files and folders...
+git clean -fd
+if errorlevel 1 (
+  echo ERROR: Clean failed.
+  pause
+  exit /b 1
+)
+
+echo.
+echo Sync complete.
+git status
 pause

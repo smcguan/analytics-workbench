@@ -1,9 +1,8 @@
 @echo off
 setlocal EnableExtensions
 
-REM OpenAI configuration
-set AW_OPENAI_API_KEY=YOUR_OPENAI_KEY
-set AW_OPENAI_MODEL=gpt-4.1-mini
+REM Load environment variables from .env
+for /f "delims=" %%x in (.env) do set %%x
 
 REM Always run from the folder this BAT lives in
 set "ROOT=%~dp0"
