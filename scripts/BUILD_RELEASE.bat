@@ -57,6 +57,12 @@ if errorlevel 1 (
     exit /b 1
 )
 
+REM Move START_HERE.bat to the executable directory
+if exist START_HERE.bat (
+    echo Moving START_HERE.bat to dist\AnalyticsWorkbench...
+    copy /Y START_HERE.bat dist\AnalyticsWorkbench\
+)
+
 echo.
 echo Build successful.
 echo.
