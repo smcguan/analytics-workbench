@@ -11,6 +11,22 @@ cd /d "%~dp0\.."
 echo Repo: %cd%
 echo.
 
+echo.
+echo Checking for running AnalyticsWorkbench...
+
+tasklist /FI "IMAGENAME eq AnalyticsWorkbench.exe" 2>NUL | find /I /N "AnalyticsWorkbench.exe" >NUL
+
+if "%ERRORLEVEL%"=="0" (
+    echo AnalyticsWorkbench is running. Stopping it...
+    taskkill /F /IM AnalyticsWorkbench.exe >NUL 2>&1
+    timeout /t 2 >NUL
+    echo Process stopped.
+) else (
+    echo AnalyticsWorkbench is not running.
+)
+
+echo.
+
 REM ==========================================================
 REM Install backend requirements
 REM ==========================================================
