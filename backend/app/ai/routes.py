@@ -1,8 +1,6 @@
 from fastapi import APIRouter
 
-from .context_builder import build_context
-from .prompt_builder import build_generate_sql_prompt
-from .provider_openai import generate_sql_response
+from .provider_openai import generate_sql_for_dataset
 from .response_parser import parse_generate_sql_response
 from .schemas import GenerateSQLRequest, GenerateSQLResponse
 from .sql_validator import validate_generated_sql, validate_sql_with_duckdb
@@ -21,18 +19,12 @@ def _get_dataset_source_path(dataset: str):
 @router.post("/generate_sql", response_model=GenerateSQLResponse)
 def generate_sql(payload: GenerateSQLRequest) -> GenerateSQLResponse:
     try:
-        context = build_context(
+        model_output = generate_sql_for_dataset(
             dataset_name=payload.dataset,
-            dataset_source_path_fn=_get_dataset_source_path,
-            max_sample_rows=5,
-        )
-
-        prompt = build_generate_sql_prompt(
-            context=context,
             question=payload.question,
+            dataset_source_path_fn=_get_dataset_source_path,
         )
 
-        model_output = generate_sql_response(prompt)
         parsed = parse_generate_sql_response(model_output)
 
         if parsed["status"] == "ok":
@@ -61,7 +53,6 @@ def generate_sql(payload: GenerateSQLRequest) -> GenerateSQLResponse:
                     message=duck_message,
                     warnings=parsed["warnings"],
                 )
-
 
         return GenerateSQLResponse(
             status=parsed["status"],
