@@ -52,6 +52,6 @@ if errorlevel 1 (
 )
 
 echo.
-echo Push to main complete.
+echo == Push to main complete. ==
 pause
 endlocal

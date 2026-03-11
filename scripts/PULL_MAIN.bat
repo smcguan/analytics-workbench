@@ -41,6 +41,6 @@ if errorlevel 1 (
 )
 
 echo.
-echo Pull from main complete.
+echo == Pull from main complete. ==
 pause
 endlocal
