@@ -127,7 +127,7 @@ if (Test-Path "requirements.txt") {
 
     if (Ask-YesNo "Install dependencies?") {
 
-        pip install -r requirements.txt
+        pip install -r backend\requirements.txt
 
         if ($LASTEXITCODE -ne 0) {
             Write-Host "Dependency install failed."
