@@ -1,19 +1,129 @@
 ﻿from __future__ import annotations
 
-from dotenv import load_dotenv
+"""
+============================================================
+FILE: main.py
+LOCATION: backend/app/main.py
+============================================================
+
+PURPOSE
+-------
+This is the main FastAPI application entrypoint for
+Analytics Workbench.
+
+This file is responsible for:
+
+1. Loading environment configuration
+2. Defining runtime paths
+3. Creating the FastAPI app
+4. Mounting the frontend UI
+5. Registering API endpoints
+6. Managing datasets and metadata
+7. Running SQL safely against local Parquet data
+8. Supporting AI-assisted SQL features through the
+   separate AI router
+9. Building dataset context used by both:
+   - dataset inspection
+   - schema-aware AI prompting
+   - AI-suggested question chips
+
+HIGH-LEVEL ARCHITECTURE
+-----------------------
+
+Frontend UI
+    ↓
+FastAPI routes in this file
+    ↓
+DuckDB query execution / dataset inspection
+    ↓
+Local Parquet files
+
+SEPARATE AI FLOW
+----------------
+The AI-specific routes are defined separately in:
+
+    app.ai.routes
+
+That AI layer handles:
+
+    selected dataset
+        ↓
+    dataset context
+        ↓
+    schema-aware prompt building
+        ↓
+    OpenAI SQL generation
+        ↓
+    OpenAI suggested question generation
+        ↓
+    SQL validation
+
+CURRENT PRODUCT WORKFLOW
+------------------------
+The intended user workflow is:
+
+    select dataset
+        ↓
+    review AI-suggested question chips
+        ↓
+    ask question or click a suggestion
+        ↓
+    generate SQL with AI
+        ↓
+    review/edit SQL in SQL workspace
+        ↓
+    run SQL manually
+
+This keeps the human in the loop and makes the system
+more transparent and trustworthy.
+
+IMPORTANT DESIGN PRINCIPLE
+--------------------------
+This application is intentionally built as an
+AI-assisted analytics workbench, not a fully autonomous
+AI agent.
+
+AI can:
+- suggest useful questions
+- generate SQL drafts
+
+But the user remains in control of execution.
+
+============================================================
+"""
+
+# ============================================================
+# EARLY ENVIRONMENT LOADING
+# ------------------------------------------------------------
+# We load .env as early as possible because later imports and
+# path calculations may depend on environment variables.
+#
+# Supported lookup locations:
+# - current working directory
+# - packaged EXE directory
+# - known local dev path fallback
+# ============================================================
+
 from pathlib import Path
 import sys
 
-env_candidates = [
-    Path.cwd() / ".env",                              # current working directory
-    Path(sys.executable).parent / ".env",              # beside packaged EXE
-    Path("C:/dev/AnalyticsWorkbench-Claude/.env"),     # project root
+from dotenv import load_dotenv
+
+early_env_candidates = [
+    Path.cwd() / ".env",
+    Path(sys.executable).parent / ".env",
+    Path("C:/dev/AnalyticsWorkbench-Claude/.env"),
 ]
 
-for env_path in env_candidates:
+for env_path in early_env_candidates:
     if env_path.exists():
         load_dotenv(env_path)
         break
+
+
+# ============================================================
+# STANDARD IMPORTS
+# ============================================================
 
 import getpass
 import json
@@ -24,81 +134,81 @@ import re
 import shutil
 import time
 from datetime import datetime
-from pathlib import Path
 from typing import Any
 
 import duckdb
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Query, Request
-from fastapi.responses import RedirectResponse
+from fastapi.responses import FileResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from starlette.responses import FileResponse, Response
+from starlette.responses import Response
+
 try:
     from dotenv import load_dotenv
 except Exception:  # pragma: no cover
     load_dotenv = None
 
 from app.presets.doge import PRESETS  # noqa: E402
+from app.ai.routes import router as ai_router  # noqa: E402
+
+
+# ============================================================
+# LOGGING / APP INSTANCE
+# ============================================================
 
 logger = logging.getLogger("app")
-
 app = FastAPI(title="Analytics Workbench")
 
 APP_VERSION = "1.1.0"
 
+
+# ============================================================
+# BASE DIRECTORY RESOLUTION
+# ------------------------------------------------------------
+# Packaged mode:
+#   use the folder containing the EXE
+#
+# Development mode:
+#   backend/app/main.py -> repo root
+# ============================================================
+
 def app_base_dir() -> Path:
     """
-    Packaged: folder containing the EXE
-    Dev: repo root (â€¦/Analytics Workbench)
+    Return the application base directory.
+
+    Packaged:
+        folder containing the EXE
+
+    Development:
+        repo root directory
     """
     if getattr(sys, "frozen", False):
         return Path(sys.executable).resolve().parent
-    # backend/app/main.py -> repo root
+
     return Path(__file__).resolve().parents[2]
 
 
 BASE_DIR = app_base_dir()
+
+
+# ============================================================
+# LOCAL .ENV LOADING
+# ------------------------------------------------------------
+# This supports both:
+# - local development
+# - packaged desktop execution
+#
+# We intentionally do not hardcode secrets here.
+# ============================================================
+
 def _load_local_env() -> None:
-    "Load a local .env without hardcoding secrets."
+    """Load a local .env file if one exists."""
     if load_dotenv is None:
         logger.info("python-dotenv not installed; skipping .env load")
         return
 
     candidates: list[Path] = []
-    if getattr(sys, "frozen", False):
-        candidates.append(BASE_DIR / ".env")
-    else:
-        current = Path(__file__).resolve()
-        candidates.extend(
-            [
-                current.parents[2] / ".env",
-                current.parents[1] / ".env",
-                current.parent / ".env",
-            ]
-        )
 
-    seen: set[str] = set()
-    for env_path in candidates:
-        env_str = str(env_path.resolve())
-        if env_str in seen:
-            continue
-        seen.add(env_str)
-
-        try:
-            if env_path.exists():
-                load_dotenv(env_path, override=True)
-                logger.info("loaded .env | path=%s", env_path)
-                return
-        except Exception as e:
-            logger.warning("failed loading .env | path=%s | reason=%s", env_path, e)
-
-def _load_local_env() -> None:
-    """Load a local .env without hardcoding secrets."""
-    if load_dotenv is None:
-        logger.info("python-dotenv not installed; skipping .env load")
-        return
-
-    candidates: list[Path] = []
     if getattr(sys, "frozen", False):
         candidates.append(Path(sys.executable).resolve().parent / ".env")
         candidates.append(Path.cwd() / ".env")
@@ -114,6 +224,7 @@ def _load_local_env() -> None:
         )
 
     seen: set[str] = set()
+
     for env_path in candidates:
         try:
             env_resolved = str(env_path.resolve())
@@ -141,6 +252,25 @@ def _load_local_env() -> None:
     logger.warning("no .env file loaded from any candidate path")
 
 
+_load_local_env()
+
+
+# ============================================================
+# RUNTIME PATHS
+# ------------------------------------------------------------
+# These define where the app expects:
+# - frontend files
+# - datasets
+# - exports
+# - saved query metadata
+# - cached dataset context
+#
+# Dataset context is now an important part of the product
+# because it supports:
+# - the Inspect Dataset panel
+# - schema-aware AI prompting
+# - suggested question chips in the frontend
+# ============================================================
 
 FRONTEND_DIR = Path(os.getenv("AW_FRONTEND_DIR", str(BASE_DIR / "frontend")))
 DATA_DIR = Path(os.getenv("AW_DATA_DIR", str(BASE_DIR / "data")))
@@ -152,28 +282,60 @@ DATASET_CONTEXT_FILENAME = "dataset_context.json"
 DATASETS_DIR.mkdir(parents=True, exist_ok=True)
 EXPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
-# Preview/export safety
+
+# ============================================================
+# PREVIEW / EXPORT SAFETY LIMITS
+# ------------------------------------------------------------
+# These caps protect the UI and local machine from returning
+# excessively large result sets.
+# ============================================================
+
 DEFAULT_PREVIEW_ROWS = int(os.getenv("AW_DEFAULT_PREVIEW_ROWS", "50"))
 MAX_PREVIEW_ROWS = int(os.getenv("AW_MAX_PREVIEW_ROWS", "200"))
 MAX_EXPORT_ROWS = int(os.getenv("AW_MAX_EXPORT_ROWS", "200000"))
 
-# Startup confirmation â€” logged once at import time
+
+# ============================================================
+# STARTUP LOGGING
+# ============================================================
+
 logger.info(
     "app started | mode=%s | exports_dir=%s",
     "packaged" if getattr(sys, "frozen", False) else "dev",
     EXPORTS_DIR,
 )
-from app.ai.routes import router as ai_router
+
+
+# ============================================================
+# REGISTER AI ROUTER
+# ------------------------------------------------------------
+# This attaches the separate AI module endpoints, such as:
+#
+#   /api/ai/generate_sql
+#   /api/ai/suggest_questions
+#
+# Those routes handle:
+# - schema-aware AI SQL generation
+# - AI-suggested question generation for the frontend chips
+# ============================================================
 
 app.include_router(ai_router)
 
+
 # ============================================================
-# Presets loading (6B)
+# PRESET LOADING
+# ------------------------------------------------------------
+# Presets are reusable query templates.
+#
+# The app tries to load presets.json first, and if that
+# fails, falls back to the Python PRESETS constant.
 # ============================================================
+
 _REQUIRED_PRESET_FIELDS = {"id", "name", "sql"}
 
 
 def _validate_presets(raw: list[Any]) -> list[dict[str, Any]]:
+    """Keep only valid preset dicts."""
     out: list[dict[str, Any]] = []
     for item in raw:
         if not isinstance(item, dict):
@@ -185,18 +347,26 @@ def _validate_presets(raw: list[Any]) -> list[dict[str, Any]]:
 
 
 def _load_presets() -> list[dict[str, Any]]:
-    """Load presets.json from app data/base dir; fallback to python PRESETS."""
-    # Prefer an explicit path if provided
+    """
+    Load presets from JSON if available.
+
+    Fallback:
+        use Python PRESETS constant
+    """
     explicit = os.getenv("AW_PRESETS_PATH")
     candidates: list[Path] = []
+
     if explicit:
         candidates.append(Path(explicit))
-    # Common locations
-    candidates.extend([
-        BASE_DIR / "presets.json",
-        DATA_DIR / "presets.json",
-        DATASETS_DIR / "presets.json",
-    ])
+
+    candidates.extend(
+        [
+            BASE_DIR / "presets.json",
+            DATA_DIR / "presets.json",
+            DATASETS_DIR / "presets.json",
+        ]
+    )
+
     for fp in candidates:
         try:
             if fp.exists() and fp.is_file():
@@ -204,28 +374,26 @@ def _load_presets() -> list[dict[str, Any]]:
                 if isinstance(raw, list):
                     validated = _validate_presets(raw)
                     if validated:
-                        logger.info("loaded presets.json | path=%s count=%d", fp, len(validated))
+                        logger.info(
+                            "loaded presets.json | path=%s count=%d",
+                            fp,
+                            len(validated),
+                        )
                         return validated
         except Exception as e:
             logger.warning("failed to load presets.json | path=%s | reason=%s", fp, e)
+
     return PRESETS
 
 
 ACTIVE_PRESETS = _load_presets()
 
-# Preview + safety caps
-MAX_PREVIEW_ROWS = int(os.getenv("AW_MAX_PREVIEW_ROWS", "200"))
-DEFAULT_PREVIEW_ROWS = int(os.getenv("AW_DEFAULT_PREVIEW_ROWS", "50"))
-
 
 # ============================================================
-# Runtime paths (single source of truth)
+# REQUEST MODELS
+# ------------------------------------------------------------
+# These define the input structure for FastAPI endpoints.
 # ============================================================
-
-# ============================================================
-# Models
-# ============================================================
-
 
 class ScanRequest(BaseModel):
     path: str
@@ -257,50 +425,72 @@ class SqlRequest(BaseModel):
 
 
 # ============================================================
-# Helpers
+# HELPER FUNCTIONS
 # ============================================================
 
 def _safe_name(name: str) -> str:
+    """Convert a dataset name into a safe filesystem name."""
     name = (name or "").strip()
     name = re.sub(r"[^A-Za-z0-9._-]+", "_", name)
     return name[:64] if name else "Dataset"
 
 
 def list_datasets() -> list[str]:
+    """
+    Return all valid registered datasets.
+
+    A dataset is considered valid if:
+    - its folder contains parquet files, or
+    - it contains a valid _reference.txt pointer
+    """
     if not DATASETS_DIR.exists():
         return []
+
     out: list[str] = []
+
     for ds in DATASETS_DIR.iterdir():
         if not ds.is_dir():
             continue
-        # local parquet mode
+
         if any(ds.glob("*.parquet")):
             out.append(ds.name)
             continue
-        # reference mode
+
         ref = ds / "_reference.txt"
         if ref.exists():
             ref_path = ref.read_text(encoding="utf-8").strip()
             if ref_path and Path(ref_path).exists():
                 out.append(ds.name)
+
     return sorted(out)
 
 
 def dataset_source_path(dataset: str) -> tuple[str, bool]:
     """
-    Returns (path_or_glob, is_glob)
-    - reference mode: absolute parquet path
-    - copy mode: datasets/<dataset>/*.parquet
+    Return (path_or_glob, is_glob) for a dataset.
+
+    Reference mode:
+        returns absolute parquet file path
+
+    Copy mode:
+        returns datasets/<dataset>/*.parquet glob
     """
     ds_dir = (DATASETS_DIR / dataset).resolve()
     ref = ds_dir / "_reference.txt"
+
     if ref.exists():
         target = ref.read_text(encoding="utf-8").strip()
         if not target:
-            raise FileNotFoundError(f"Reference dataset '{dataset}' has empty _reference.txt")
+            raise FileNotFoundError(
+                f"Reference dataset '{dataset}' has empty _reference.txt"
+            )
+
         p = Path(target)
         if not p.exists():
-            raise FileNotFoundError(f"Reference dataset '{dataset}' points to missing file: {target}")
+            raise FileNotFoundError(
+                f"Reference dataset '{dataset}' points to missing file: {target}"
+            )
+
         return (str(p.resolve()).replace("\\", "/"), False)
 
     glob_path = str((ds_dir / "*.parquet").resolve()).replace("\\", "/")
@@ -326,17 +516,22 @@ def get_preset(preset_id: str) -> dict[str, Any] | None:
 
 
 def _connect() -> duckdb.DuckDBPyConnection:
-    # Fileless connection is fine for query/extract workloads
+    """
+    Create a DuckDB connection.
+
+    This app uses fileless embedded connections, which is
+    fine for local query/extract workloads.
+    """
     return duckdb.connect()
 
 
 def _sql_escape_path(p: str) -> str:
-    # Defensive: single-quote escape for embedding into SQL string
+    """Escape single quotes before embedding a path into SQL."""
     return p.replace("'", "''")
 
 
 def _is_writable_dir(p: Path) -> tuple[bool, str | None]:
-    """Returns (ok, error_message)."""
+    """Return whether a directory is writable."""
     try:
         p.mkdir(parents=True, exist_ok=True)
         test = p / ".__aw_write_test__"
@@ -348,6 +543,7 @@ def _is_writable_dir(p: Path) -> tuple[bool, str | None]:
 
 
 def _duckdb_ok() -> tuple[bool, str | None]:
+    """Basic DuckDB health check."""
     try:
         con = _connect()
         try:
@@ -361,12 +557,21 @@ def _duckdb_ok() -> tuple[bool, str | None]:
         return False, str(e)
 
 
+# ============================================================
+# DATASET METADATA SUMMARY
+# ------------------------------------------------------------
+# This is used to populate dataset lists and summary panels.
+#
+# We prefer cached _meta.json when available because that is
+# faster than recomputing live counts every time.
+# ============================================================
+
 def _dataset_meta_summary(dataset: str) -> dict[str, Any]:
     """
-    Returns a lightweight metadata summary for a dataset.
+    Return a lightweight metadata summary for a dataset.
 
     Prefers cached _meta.json.
-    Falls back to live computation if metadata is missing.
+    Falls back to live computation.
     """
     ds_dir = _dataset_dir(dataset)
     meta_path = ds_dir / "_meta.json"
@@ -392,7 +597,6 @@ def _dataset_meta_summary(dataset: str) -> dict[str, Any]:
         row_count = int(
             con.execute(f"SELECT COUNT(*) FROM read_parquet('{esc}')").fetchone()[0]
         )
-        # parquet_schema() returns one row per column
         col_count = int(
             con.execute(f"SELECT COUNT(*) FROM parquet_schema('{esc}')").fetchone()[0]
         )
@@ -417,11 +621,16 @@ def _dataset_meta_summary(dataset: str) -> dict[str, Any]:
     }
 
 
+# ============================================================
+# AUDIT LOGGING
+# ------------------------------------------------------------
+# The audit log is append-only JSONL and is intentionally
+# non-fatal: failure to write the audit log must never crash
+# the user workflow.
+# ============================================================
+
 def _audit_log(event: dict[str, Any]) -> None:
-    """
-    Append-only JSONL audit log.
-    Non-fatal: never raises.
-    """
+    """Append an event to the JSONL audit log."""
     try:
         audit_path = DATASETS_DIR / "_audit.jsonl"
 
@@ -448,56 +657,78 @@ def _audit_log(event: dict[str, Any]) -> None:
 
 
 # ============================================================
-# Dynamic preset params (4B)
+# DYNAMIC PRESET PARAM HELPERS
 # ============================================================
 
-def _extract_dynamic_params(request: Request, reserved: set[str], threshold_fallback: int | None) -> dict[str, Any]:
+def _extract_dynamic_params(
+    request: Request,
+    reserved: set[str],
+    threshold_fallback: int | None,
+) -> dict[str, Any]:
     """
-    Pull query params from the request excluding reserved keys.
-    Values remain strings (DuckDB SQL templates are string formatted).
+    Pull non-reserved query params from the request.
+
+    These remain strings because SQL template formatting later
+    uses them directly.
     """
     provided: dict[str, Any] = {}
+
     for k, v in request.query_params.items():
         if k in reserved:
             continue
         provided[k] = v
+
     if threshold_fallback is not None and "threshold" not in provided:
         provided["threshold"] = threshold_fallback
+
     return provided
 
 
-def _build_final_params(preset_def: dict[str, Any], provided_params: dict[str, Any]) -> dict[str, Any]:
-    """Merge preset default params with provided params; validate required placeholders."""
+def _build_final_params(
+    preset_def: dict[str, Any],
+    provided_params: dict[str, Any],
+) -> dict[str, Any]:
+    """
+    Merge preset defaults with provided params and validate
+    that required placeholders exist.
+    """
     final_params = dict(preset_def.get("params", {}) or {})
     final_params.update({k: v for k, v in provided_params.items() if v is not None})
 
-    # Try formatting early to surface missing params nicely
     try:
         preset_def["sql"].format(**final_params)
     except KeyError as e:
         missing = str(e).strip("'")
-        raise HTTPException(status_code=400, detail=f"Missing required preset param: {missing}")
+        raise HTTPException(
+            status_code=400,
+            detail=f"Missing required preset param: {missing}",
+        )
+
     return final_params
 
 
-def _sql_for(dataset: str, preset_id: str, provided_params: dict[str, Any]) -> tuple[str, str]:
+def _sql_for(
+    dataset: str,
+    preset_id: str,
+    provided_params: dict[str, Any],
+) -> tuple[str, str]:
+    """
+    Build final SQL for a preset and dataset.
+
+    This replaces the logical token 'dataset' with a real
+    read_parquet(...) expression.
+    """
     preset_def = get_preset(preset_id)
     if not preset_def:
         raise HTTPException(status_code=400, detail=f"Unknown preset: {preset_id}")
 
     src, _is_glob = dataset_source_path(dataset)
-
     final_params = _build_final_params(preset_def, provided_params)
-
     sql = preset_def["sql"].format(**final_params)
 
-    # Some DuckDB introspection functions expect a path, not a relation.
-    # Preserve legacy presets that use parquet_schema(dataset) / parquet_metadata(dataset).
     esc = _sql_escape_path(src)
     sql = sql.replace("parquet_schema(dataset)", f"parquet_schema('{esc}')")
     sql = sql.replace("parquet_metadata(dataset)", f"parquet_metadata('{esc}')")
-
-    # Replace placeholder token `dataset` with a parquet reader for normal queries
     sql = sql.replace("dataset", f"read_parquet('{esc}')")
 
     return sql, src
@@ -508,6 +739,7 @@ def _normalize_saved_query_name(name: str) -> str:
 
 
 def _load_saved_queries() -> list[dict[str, Any]]:
+    """Load saved queries from queries.json."""
     if not QUERIES_PATH.exists():
         return []
 
@@ -546,6 +778,7 @@ def _load_saved_queries() -> list[dict[str, Any]]:
             "dataset": dataset,
             "params": params,
         }
+
         if qtype == "preset":
             record["preset"] = preset
         else:
@@ -557,39 +790,107 @@ def _load_saved_queries() -> list[dict[str, Any]]:
 
 
 def _save_saved_queries(items: list[dict[str, Any]]) -> None:
+    """Write saved queries to disk."""
     QUERIES_PATH.parent.mkdir(parents=True, exist_ok=True)
     payload = {"queries": items}
-    QUERIES_PATH.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+    QUERIES_PATH.write_text(
+        json.dumps(payload, indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
 
 
 def _validate_readonly_sql(sql: str) -> str:
+    """
+    Allow only read-only SQL.
+
+    Allowed:
+        SELECT
+        WITH ... SELECT
+
+    Blocked:
+        INSERT / UPDATE / DELETE / DROP / etc.
+    """
     s = (sql or "").strip()
     if not s:
         raise HTTPException(status_code=400, detail="SQL is required.")
 
     lowered = s.lower()
-    if not (lowered.startswith("select") or lowered.startswith("with")):
-        raise HTTPException(status_code=400, detail="Only SELECT and WITH queries are allowed.")
 
-    blocked = ["insert", "update", "delete", "drop", "alter", "create", "copy", "attach", "detach"]
+    if not (lowered.startswith("select") or lowered.startswith("with")):
+        raise HTTPException(
+            status_code=400,
+            detail="Only SELECT and WITH queries are allowed.",
+        )
+
+    blocked = [
+        "insert",
+        "update",
+        "delete",
+        "drop",
+        "alter",
+        "create",
+        "copy",
+        "attach",
+        "detach",
+    ]
     for token in blocked:
         if re.search(rf"\b{token}\b", lowered):
-            raise HTTPException(status_code=400, detail=f"Blocked SQL keyword: {token}")
+            raise HTTPException(
+                status_code=400,
+                detail=f"Blocked SQL keyword: {token}",
+            )
 
     return s
 
 
-
+# ============================================================
+# DATASET CONTEXT BUILDING
+# ------------------------------------------------------------
+# This is one of the most important parts of the app for the
+# AI workflow.
+#
+# The AI layer can use this context to become schema-aware.
+#
+# We build a structured description of the dataset including:
+# - row count
+# - column count
+# - column names/types
+# - semantic kind guesses
+# - numeric stats
+# - categorical top values
+# - sample rows
+#
+# This context is useful in two major places:
+#
+# 1. Frontend dataset inspection
+# 2. AI layer support:
+#    - SQL generation
+#    - suggested question chips
+# ============================================================
 
 def _dataset_context_path(dataset: str) -> Path:
     return (DATASETS_DIR / dataset / DATASET_CONTEXT_FILENAME).resolve()
 
 
 def _classify_column_kind(col_type: str) -> str:
+    """Classify a DuckDB column type into a coarse semantic kind."""
     t = (col_type or "").upper()
+
     if any(x in t for x in ["TIMESTAMP", "DATE", "TIME"]):
         return "datetime"
-    if any(x in t for x in ["INT", "DECIMAL", "DOUBLE", "FLOAT", "REAL", "BIGINT", "SMALLINT", "HUGEINT"]):
+    if any(
+        x in t
+        for x in [
+            "INT",
+            "DECIMAL",
+            "DOUBLE",
+            "FLOAT",
+            "REAL",
+            "BIGINT",
+            "SMALLINT",
+            "HUGEINT",
+        ]
+    ):
         return "numeric"
     if "BOOL" in t:
         return "boolean"
@@ -597,12 +898,21 @@ def _classify_column_kind(col_type: str) -> str:
 
 
 def _preview_value(v: Any) -> Any:
+    """Make preview values more compact for stored context."""
     if isinstance(v, float):
         return round(v, 4)
     return v
 
 
 def _build_dataset_context(dataset: str) -> dict[str, Any]:
+    """
+    Build and save a rich dataset context JSON file.
+
+    This supports:
+    - schema-aware AI prompting
+    - AI-suggested question generation
+    - richer dataset inspection in the UI
+    """
     src, _is_glob = dataset_source_path(dataset)
     esc = _sql_escape_path(src)
     ds_summary = _dataset_meta_summary(dataset)
@@ -613,10 +923,12 @@ def _build_dataset_context(dataset: str) -> dict[str, Any]:
         schema_rows = schema_cur.fetchall()
 
         columns: list[dict[str, Any]] = []
+
         for row in schema_rows:
             col_name = row[0]
             col_type = row[1]
             kind = _classify_column_kind(col_type)
+
             entry: dict[str, Any] = {
                 "name": col_name,
                 "type": col_type,
@@ -624,6 +936,7 @@ def _build_dataset_context(dataset: str) -> dict[str, Any]:
             }
 
             quoted = '"' + str(col_name).replace('"', '""') + '"'
+
             if kind == "numeric":
                 try:
                     stats = con.execute(
@@ -636,6 +949,7 @@ def _build_dataset_context(dataset: str) -> dict[str, Any]:
                         FROM read_parquet('{esc}')
                         """
                     ).fetchone()
+
                     entry["stats"] = {
                         "min": _preview_value(stats[0]),
                         "max": _preview_value(stats[1]),
@@ -644,6 +958,7 @@ def _build_dataset_context(dataset: str) -> dict[str, Any]:
                     }
                 except Exception:
                     entry["stats"] = {}
+
             elif kind in {"categorical", "boolean"}:
                 try:
                     top_vals = con.execute(
@@ -655,13 +970,22 @@ def _build_dataset_context(dataset: str) -> dict[str, Any]:
                         LIMIT 5
                         """
                     ).fetchall()
+
                     null_count = con.execute(
-                        f"SELECT SUM(CASE WHEN {quoted} IS NULL THEN 1 ELSE 0 END) FROM read_parquet('{esc}')"
+                        f"""
+                        SELECT SUM(CASE WHEN {quoted} IS NULL THEN 1 ELSE 0 END)
+                        FROM read_parquet('{esc}')
+                        """
                     ).fetchone()[0]
-                    entry["top_values"] = [{"value": _preview_value(v), "count": int(c)} for v, c in top_vals]
+
+                    entry["top_values"] = [
+                        {"value": _preview_value(v), "count": int(c)}
+                        for v, c in top_vals
+                    ]
                     entry["null_count"] = int(null_count or 0)
                 except Exception:
                     entry["top_values"] = []
+
             elif kind == "datetime":
                 try:
                     stats = con.execute(
@@ -673,6 +997,7 @@ def _build_dataset_context(dataset: str) -> dict[str, Any]:
                         FROM read_parquet('{esc}')
                         """
                     ).fetchone()
+
                     entry["stats"] = {
                         "min": _preview_value(stats[0]),
                         "max": _preview_value(stats[1]),
@@ -686,7 +1011,11 @@ def _build_dataset_context(dataset: str) -> dict[str, Any]:
         sample_cur = con.execute(f"SELECT * FROM read_parquet('{esc}') LIMIT 5")
         sample_cols = [d[0] for d in sample_cur.description]
         sample_rows_raw = sample_cur.fetchall()
-        sample_rows = [{k: _preview_value(v) for k, v in zip(sample_cols, row)} for row in sample_rows_raw]
+        sample_rows = [
+            {k: _preview_value(v) for k, v in zip(sample_cols, row)}
+            for row in sample_rows_raw
+        ]
+
     finally:
         con.close()
 
@@ -702,24 +1031,31 @@ def _build_dataset_context(dataset: str) -> dict[str, Any]:
 
     ctx_path = _dataset_context_path(dataset)
     ctx_path.parent.mkdir(parents=True, exist_ok=True)
-    ctx_path.write_text(json.dumps(context, indent=2, ensure_ascii=False, default=str), encoding="utf-8")
+    ctx_path.write_text(
+        json.dumps(context, indent=2, ensure_ascii=False, default=str),
+        encoding="utf-8",
+    )
     return context
 
 
 def _load_dataset_context(dataset: str, refresh: bool = False) -> dict[str, Any]:
+    """
+    Load cached dataset context, rebuilding it when needed.
+    """
     ctx_path = _dataset_context_path(dataset)
+
     if not refresh and ctx_path.exists():
         try:
             return json.loads(ctx_path.read_text(encoding="utf-8"))
         except Exception:
             logger.warning("dataset context load failed | dataset=%s", dataset)
+
     return _build_dataset_context(dataset)
 
 
 # ============================================================
-# UI mount
+# UI MOUNT
 # ============================================================
-
 
 @app.get("/")
 def root():
@@ -735,16 +1071,15 @@ if not (FRONTEND_DIR / "index.html").exists():
 app.mount("/ui", StaticFiles(directory=str(FRONTEND_DIR), html=True), name="ui")
 
 
-# Optional: silence favicon.ico 404 noise
 @app.get("/ui/favicon.ico")
 def favicon():
+    """Silence favicon 404 noise."""
     return Response(status_code=204)
 
 
 # ============================================================
-# API
+# API ENDPOINTS
 # ============================================================
-
 
 @app.get("/api/version")
 def api_version():
@@ -766,22 +1101,35 @@ def api_version():
 @app.get("/api/health")
 def api_health():
     duck_ok, duck_err = _duckdb_ok()
-
     datasets_ok, datasets_err = _is_writable_dir(DATASETS_DIR)
     exports_ok, exports_err = _is_writable_dir(EXPORTS_DIR)
 
     frontend_ok = (FRONTEND_DIR / "index.html").exists()
     frontend_err = None if frontend_ok else f"Missing {FRONTEND_DIR / 'index.html'}"
 
-    status = "ok" if (duck_ok and datasets_ok and exports_ok and frontend_ok) else "degraded"
+    status = (
+        "ok" if (duck_ok and datasets_ok and exports_ok and frontend_ok) else "degraded"
+    )
 
     return {
         "status": status,
         "checks": {
             "duckdb": {"ok": duck_ok, "error": duck_err},
-            "datasets_dir": {"ok": datasets_ok, "path": str(DATASETS_DIR), "error": datasets_err},
-            "exports_dir": {"ok": exports_ok, "path": str(EXPORTS_DIR), "error": exports_err},
-            "frontend": {"ok": frontend_ok, "path": str(FRONTEND_DIR), "error": frontend_err},
+            "datasets_dir": {
+                "ok": datasets_ok,
+                "path": str(DATASETS_DIR),
+                "error": datasets_err,
+            },
+            "exports_dir": {
+                "ok": exports_ok,
+                "path": str(EXPORTS_DIR),
+                "error": exports_err,
+            },
+            "frontend": {
+                "ok": frontend_ok,
+                "path": str(FRONTEND_DIR),
+                "error": frontend_err,
+            },
         },
         "runtime": {
             "pid": os.getpid(),
@@ -825,14 +1173,13 @@ def api_datasets():
 
 @app.get("/api/datasets/{name}/meta")
 def api_dataset_meta(name: str):
-    """Return cached dataset metadata from _meta.json, with a live fallback."""
+    """Return dataset metadata, preferring cached values."""
     ds_dir = _dataset_dir(name)
     if not ds_dir.exists() or not ds_dir.is_dir():
         raise HTTPException(status_code=404, detail=f"Dataset not found: {name}")
 
     mode = _dataset_mode(name)
 
-    # Source path (what read_parquet will use)
     try:
         src, is_glob = dataset_source_path(name)
     except FileNotFoundError as e:
@@ -844,6 +1191,7 @@ def api_dataset_meta(name: str):
             meta = json.loads(meta_path.read_text(encoding="utf-8"))
         except Exception:
             meta = {}
+
         out = {
             "dataset": name,
             "mode": mode,
@@ -855,39 +1203,49 @@ def api_dataset_meta(name: str):
             "last_scanned": meta.get("last_scanned"),
             "meta_source": "cached",
         }
-        _audit_log({"event": "meta", "status": "success", "dataset": name, "meta_source": "cached"})
+        _audit_log(
+            {
+                "event": "meta",
+                "status": "success",
+                "dataset": name,
+                "meta_source": "cached",
+            }
+        )
         return out
 
-    # Live fallback
     t0 = time.perf_counter()
     con = _connect()
     try:
         esc = _sql_escape_path(src)
 
-        # Column count via parquet_schema (one row per column)
         try:
-            col_count = int(con.execute(f"SELECT COUNT(*) FROM parquet_schema('{esc}')").fetchone()[0])
+            col_count = int(
+                con.execute(
+                    f"SELECT COUNT(*) FROM parquet_schema('{esc}')"
+                ).fetchone()[0]
+            )
         except Exception:
             col_count = None
 
-        # Row count via direct parquet scan for DuckDB compatibility
         try:
-            row_count = int(con.execute(f"SELECT COUNT(*) FROM read_parquet('{esc}')").fetchone()[0])
+            row_count = int(
+                con.execute(
+                    f"SELECT COUNT(*) FROM read_parquet('{esc}')"
+                ).fetchone()[0]
+            )
         except Exception:
             row_count = None
 
-        # File size
-        file_size_bytes: int | None
         try:
             if mode == "reference":
                 file_size_bytes = Path(src).stat().st_size
             else:
-                # copy/glob: sum all parquet files in dataset folder
                 file_size_bytes = sum(p.stat().st_size for p in ds_dir.glob("*.parquet"))
         except Exception:
             file_size_bytes = None
 
         elapsed = round(time.perf_counter() - t0, 4)
+
         out = {
             "dataset": name,
             "mode": mode,
@@ -900,7 +1258,16 @@ def api_dataset_meta(name: str):
             "meta_source": "live",
             "elapsed_seconds": elapsed,
         }
-        _audit_log({"event": "meta", "status": "success", "dataset": name, "meta_source": "live", "elapsed_seconds": elapsed})
+
+        _audit_log(
+            {
+                "event": "meta",
+                "status": "success",
+                "dataset": name,
+                "meta_source": "live",
+                "elapsed_seconds": elapsed,
+            }
+        )
         return out
     finally:
         con.close()
@@ -918,8 +1285,7 @@ def api_presets():
 
 @app.get("/api/queries")
 def api_queries():
-    queries = _load_saved_queries()
-    return {"queries": queries}
+    return {"queries": _load_saved_queries()}
 
 
 @app.post("/api/queries/save")
@@ -947,6 +1313,7 @@ def api_queries_save(req: SaveQueryRequest):
             "preset": preset,
             "params": params,
         }
+
     elif qtype == "sql":
         sql = _validate_readonly_sql(req.sql or "")
         record = {
@@ -956,8 +1323,12 @@ def api_queries_save(req: SaveQueryRequest):
             "sql": sql,
             "params": {},
         }
+
     else:
-        raise HTTPException(status_code=400, detail="Query type must be 'preset' or 'sql'.")
+        raise HTTPException(
+            status_code=400,
+            detail="Query type must be 'preset' or 'sql'.",
+        )
 
     replaced = False
     for i, item in enumerate(items):
@@ -997,19 +1368,18 @@ def api_queries_delete(req: DeleteQueryRequest):
 
     _save_saved_queries(kept)
 
-    _audit_log(
-        {
-            "event": "query_deleted",
-            "status": "success",
-            "name": name,
-        }
-    )
+    _audit_log({"event": "query_deleted", "status": "success", "name": name})
 
     return {"ok": True, "deleted": name}
 
 
 @app.get("/api/profile")
 def api_profile(dataset: str = Query(...), refresh: bool = False):
+    """
+    Return dataset context for the Inspect Dataset workflow.
+
+    This same underlying context can also support the AI layer.
+    """
     if dataset not in list_datasets():
         raise HTTPException(status_code=404, detail=f"Dataset not found: {dataset}")
 
@@ -1041,11 +1411,35 @@ def api_profile(dataset: str = Query(...), refresh: bool = False):
 
 @app.post("/api/sql")
 def api_sql(req: SqlRequest):
+    """
+    Execute the SQL currently in the SQL workspace.
+
+    IMPORTANT
+    ---------
+    This endpoint does not ask AI anything.
+    It simply runs the SQL that the user has chosen to execute.
+
+    That means the SQL may have come from:
+    - manual typing
+    - editing
+    - AI generation
+    - a saved query
+
+    This design intentionally supports the current frontend:
+        Generate SQL with AI
+            ↓
+        user review/edit
+            ↓
+        Run SQL
+    """
     t0 = time.perf_counter()
 
     try:
         if req.dataset not in list_datasets():
-            raise HTTPException(status_code=404, detail=f"Dataset not found: {req.dataset}")
+            raise HTTPException(
+                status_code=404,
+                detail=f"Dataset not found: {req.dataset}",
+            )
 
         validated_sql = _validate_readonly_sql(req.sql)
         src, _is_glob = dataset_source_path(req.dataset)
@@ -1059,7 +1453,9 @@ def api_sql(req: SqlRequest):
             cur = con.execute(limited_sql)
             cols = [d[0] for d in cur.description]
             rows = cur.fetchall()
-            rowcount = int(con.execute(f"SELECT COUNT(*) FROM ({sql}) t").fetchone()[0])
+            rowcount = int(
+                con.execute(f"SELECT COUNT(*) FROM ({sql}) t").fetchone()[0]
+            )
         finally:
             con.close()
 
@@ -1110,9 +1506,7 @@ def api_sql(req: SqlRequest):
 
 @app.get("/api/audit")
 def api_audit(limit: int = Query(200, ge=1, le=5000)):
-    """
-    Returns last N audit events (newest first). Missing file -> empty list.
-    """
+    """Return last N audit events (newest first)."""
     audit_path = DATASETS_DIR / "_audit.jsonl"
     if not audit_path.exists():
         return {"events": []}
@@ -1135,7 +1529,7 @@ def api_audit(limit: int = Query(200, ge=1, le=5000)):
 
 @app.get("/api/schema")
 def api_schema(dataset: str = Query(...)):
-    """Return column names and DuckDB types for the dataset."""
+    """Return column names and DuckDB types for a dataset."""
     try:
         src, _is_glob = dataset_source_path(dataset)
     except FileNotFoundError as e:
@@ -1147,10 +1541,24 @@ def api_schema(dataset: str = Query(...)):
         cur = con.execute(f"DESCRIBE SELECT * FROM read_parquet('{esc}')")
         cols = cur.fetchall()
         columns = [{"name": r[0], "type": r[1]} for r in cols]
-        _audit_log({"event": "schema", "status": "success", "dataset": dataset, "column_count": len(columns)})
+        _audit_log(
+            {
+                "event": "schema",
+                "status": "success",
+                "dataset": dataset,
+                "column_count": len(columns),
+            }
+        )
         return {"dataset": dataset, "columns": columns}
     except Exception as e:
-        _audit_log({"event": "schema", "status": "error", "dataset": dataset, "error": str(e)})
+        _audit_log(
+            {
+                "event": "schema",
+                "status": "error",
+                "dataset": dataset,
+                "error": str(e),
+            }
+        )
         raise
     finally:
         con.close()
@@ -1158,7 +1566,7 @@ def api_schema(dataset: str = Query(...)):
 
 @app.get("/api/preview")
 def api_preview(dataset: str = Query(...), limit: int = Query(DEFAULT_PREVIEW_ROWS, ge=1)):
-    """Return first N rows of a dataset (no preset involved)."""
+    """Return first N rows of a dataset."""
     used_limit = min(limit, MAX_PREVIEW_ROWS)
 
     try:
@@ -1200,13 +1608,25 @@ def api_preview(dataset: str = Query(...), limit: int = Query(DEFAULT_PREVIEW_RO
 
     except Exception as e:
         msg = str(e)
-        # Friendlier error when copy-mode dataset folder is empty
         if "No files found" in msg or "no files" in msg.lower():
-            raise HTTPException(status_code=404, detail=f"No parquet files found for dataset: {dataset}") from e
+            raise HTTPException(
+                status_code=404,
+                detail=f"No parquet files found for dataset: {dataset}",
+            ) from e
         if "incompatible" in msg.lower() or "schema" in msg.lower():
-            raise HTTPException(status_code=400, detail="Inconsistent schemas across parquet files in dataset") from e
+            raise HTTPException(
+                status_code=400,
+                detail="Inconsistent schemas across parquet files in dataset",
+            ) from e
 
-        _audit_log({"event": "preview", "status": "error", "dataset": dataset, "error": msg})
+        _audit_log(
+            {
+                "event": "preview",
+                "status": "error",
+                "dataset": dataset,
+                "error": msg,
+            }
+        )
         raise
     finally:
         con.close()
@@ -1214,12 +1634,10 @@ def api_preview(dataset: str = Query(...), limit: int = Query(DEFAULT_PREVIEW_RO
 
 @app.get("/api/dialog/folder")
 def api_dialog_folder():
-    """
-    Native Windows folder picker (Tkinter). Returns {"path": "..."} or {"path": ""} if cancelled.
-    """
+    """Open a native Windows folder picker."""
     try:
-        import tkinter as tk  # noqa: WPS433
-        from tkinter import filedialog  # noqa: WPS433
+        import tkinter as tk
+        from tkinter import filedialog
 
         root = tk.Tk()
         root.withdraw()
@@ -1238,8 +1656,17 @@ def api_run(
     preset: str = Query(...),
     threshold: int | None = None,
 ):
-    params = _extract_dynamic_params(request, reserved={"dataset", "preset"}, threshold_fallback=threshold)
+    """
+    Run a preset query.
 
+    This is separate from the SQL workspace flow because
+    presets are reusable pre-authored templates.
+    """
+    params = _extract_dynamic_params(
+        request,
+        reserved={"dataset", "preset"},
+        threshold_fallback=threshold,
+    )
     logger.info("query requested | dataset=%s preset=%s params=%s", dataset, preset, params)
     t0 = time.perf_counter()
 
@@ -1323,8 +1750,20 @@ def api_export(
     preset: str = Query(...),
     threshold: int | None = None,
 ):
-    params = _extract_dynamic_params(request, reserved={"dataset", "preset"}, threshold_fallback=threshold)
+    """
+    Export a preset query result.
 
+    Preferred format:
+        XLSX
+
+    Fallback:
+        CSV
+    """
+    params = _extract_dynamic_params(
+        request,
+        reserved={"dataset", "preset"},
+        threshold_fallback=threshold,
+    )
     logger.info("export requested | dataset=%s preset=%s params=%s", dataset, preset, params)
     t0 = time.perf_counter()
 
@@ -1335,27 +1774,31 @@ def api_export(
         safe_preset = preset.replace("/", "_").replace("\\", "_")
         EXPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
-        # Prefer XLSX
         out_xlsx = EXPORTS_DIR / f"{dataset}_{safe_preset}_{ts}.xlsx"
         out_csv = EXPORTS_DIR / f"{dataset}_{safe_preset}_{ts}.csv"
 
         con = _connect()
         try:
-            # Export row limit protection (5A)
             try:
                 rowcount = int(con.execute(f"SELECT COUNT(*) FROM ({sql}) t").fetchone()[0])
             except Exception:
                 rowcount = None
+
             if rowcount is not None and rowcount > MAX_EXPORT_ROWS:
-                raise HTTPException(status_code=400, detail=f"Export too large: {rowcount} rows (limit {MAX_EXPORT_ROWS})")
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Export too large: {rowcount} rows (limit {MAX_EXPORT_ROWS})",
+                )
 
             con.execute("CREATE OR REPLACE TEMP VIEW __export_view AS " + sql)
 
             try:
                 out_str = str(out_xlsx.resolve()).replace("\\", "/")
-                con.execute(f"COPY __export_view TO '{_sql_escape_path(out_str)}' (FORMAT XLSX, HEADER TRUE)")
+                con.execute(
+                    f"COPY __export_view TO '{_sql_escape_path(out_str)}' "
+                    f"(FORMAT XLSX, HEADER TRUE)"
+                )
                 elapsed = round(time.perf_counter() - t0, 4)
-                logger.info("export success | file=%s path=%s elapsed=%s", out_xlsx.name, out_xlsx, elapsed)
 
                 _audit_log(
                     {
@@ -1372,19 +1815,18 @@ def api_export(
                 return FileResponse(
                     path=str(out_xlsx),
                     filename=out_xlsx.name,
-                    media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    media_type=(
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    ),
                 )
+
             except Exception:
-                # Fallback: CSV always works
                 out_str = str(out_csv.resolve()).replace("\\", "/")
-                con.execute(f"COPY __export_view TO '{_sql_escape_path(out_str)}' (FORMAT CSV, HEADER TRUE)")
-                elapsed = round(time.perf_counter() - t0, 4)
-                logger.info(
-                    "export success (csv fallback) | file=%s path=%s elapsed=%s",
-                    out_csv.name,
-                    out_csv,
-                    elapsed,
+                con.execute(
+                    f"COPY __export_view TO '{_sql_escape_path(out_str)}' "
+                    f"(FORMAT CSV, HEADER TRUE)"
                 )
+                elapsed = round(time.perf_counter() - t0, 4)
 
                 _audit_log(
                     {
@@ -1403,6 +1845,7 @@ def api_export(
                     filename=out_csv.name,
                     media_type="text/csv",
                 )
+
         finally:
             con.close()
 
@@ -1436,6 +1879,7 @@ def api_export(
 
 @app.post("/api/datasets/scan")
 def scan_for_parquet(req: ScanRequest):
+    """Scan a folder for parquet files and return basic file metadata."""
     t0 = time.perf_counter()
     logger.info("scan requested | path=%s recursive=%s", req.path, req.recursive)
 
@@ -1458,16 +1902,16 @@ def scan_for_parquet(req: ScanRequest):
     pattern = "**/*.parquet" if req.recursive else "*.parquet"
     files = [f for f in p.glob(pattern) if f.is_file()]
 
-    # Fast row counts via parquet metadata (no full scan)
     con = _connect()
     results: list[dict[str, Any]] = []
+
     try:
         for f in files:
             stat = f.stat()
             f_str = str(f.resolve()).replace("\\", "/")
             row_count: int | None = None
+
             try:
-                # Direct count is slower than pure metadata but compatible across DuckDB versions
                 row_count = int(
                     con.execute(
                         f"SELECT COUNT(*) FROM read_parquet('{_sql_escape_path(f_str)}')"
@@ -1481,7 +1925,7 @@ def scan_for_parquet(req: ScanRequest):
                     "path": str(f),
                     "name": f.name,
                     "size_bytes": stat.st_size,
-                    "row_count": row_count,  # may be None if metadata failed
+                    "row_count": row_count,
                 }
             )
     finally:
@@ -1506,6 +1950,18 @@ def scan_for_parquet(req: ScanRequest):
 
 @app.post("/api/datasets/register")
 def register_dataset(req: RegisterRequest):
+    """
+    Register a dataset in either:
+    - copy mode
+    - reference mode
+
+    After registration we also try to build dataset context
+    immediately so that the app is ready for:
+
+    - profile/inspection views
+    - schema-aware AI prompting
+    - suggested question chips in the frontend
+    """
     t0 = time.perf_counter()
     logger.info(
         "register requested | dataset=%s parquet_path=%s mode=%s",
@@ -1516,7 +1972,10 @@ def register_dataset(req: RegisterRequest):
 
     src = Path(req.parquet_path).expanduser()
     if not src.exists() or not src.is_file():
-        logger.warning("register failed | dataset=%s | reason=parquet path not found", req.dataset_name)
+        logger.warning(
+            "register failed | dataset=%s | reason=parquet path not found",
+            req.dataset_name,
+        )
 
         _audit_log(
             {
@@ -1543,12 +2002,18 @@ def register_dataset(req: RegisterRequest):
         dest = ds_dir / src.name
         shutil.copy2(src, dest)
         storage = "copied"
+
     elif req.mode == "reference":
         pointer = ds_dir / "_reference.txt"
         pointer.write_text(str(src), encoding="utf-8")
         storage = "referenced"
+
     else:
-        logger.warning("register failed | dataset=%s | reason=invalid mode=%s", req.dataset_name, req.mode)
+        logger.warning(
+            "register failed | dataset=%s | reason=invalid mode=%s",
+            req.dataset_name,
+            req.mode,
+        )
 
         _audit_log(
             {
@@ -1591,22 +2056,28 @@ def register_dataset(req: RegisterRequest):
 @app.post("/api/shutdown")
 def api_shutdown(bg: BackgroundTasks):
     """
-    Hard-stop the process so the app can be launched again immediately.
-    Windows + PyInstaller + --noconsole: SIGTERM is not reliable, so we force exit.
+    Hard-stop the process so the desktop app can be launched
+    again immediately.
+
+    This uses os._exit(0) because Windows + PyInstaller +
+    no-console packaging can be unreliable with soft exits.
     """
     logger.info("shutdown requested")
 
     def _stop():
-        time.sleep(0.25)  # let the HTTP response flush
-        os._exit(0)  # guaranteed process termination
+        time.sleep(0.25)
+        os._exit(0)
 
     bg.add_task(_stop)
     return {"ok": True}
 
+
 @app.get("/api/debug/env")
 def api_debug_env():
+    """Debug endpoint for confirming .env loading behavior."""
     exe_dir = Path(sys.executable).resolve().parent if getattr(sys, "frozen", False) else None
     raw_key = os.environ.get("OPENAI_API_KEY")
+
     return {
         "frozen": bool(getattr(sys, "frozen", False)),
         "cwd": str(Path.cwd()),

@@ -7,8 +7,8 @@ echo        PUSH ANALYTICS WORKBENCH
 echo =====================================
 echo.
 
-REM Repo is the parent of this scripts folder
-cd /d "%~dp0.."
+for %%I in ("%~dp0..") do set "REPO=%%~fI"
+cd /d "%REPO%"
 
 if errorlevel 1 (
     echo ERROR: Could not access repo directory.
@@ -23,7 +23,7 @@ if errorlevel 1 (
     exit /b 1
 )
 
-for /f "delims=" %%i in ('git branch --show-current') do set CURRENT_BRANCH=%%i
+for /f "delims=" %%i in ('git branch --show-current') do set "CURRENT_BRANCH=%%i"
 
 if /I not "%CURRENT_BRANCH%"=="main" (
     echo ERROR: You are on branch "%CURRENT_BRANCH%".
@@ -32,22 +32,27 @@ if /I not "%CURRENT_BRANCH%"=="main" (
     exit /b 1
 )
 
-echo Repo:
+echo Repo root:
 git rev-parse --show-toplevel
 echo Branch: %CURRENT_BRANCH%
 echo.
 
+echo Current HEAD before commit:
+git log --oneline -1
+echo.
+
 echo Pulling latest origin/main first...
-git pull origin main
+git pull --ff-only origin main
 if errorlevel 1 (
     echo.
-    echo ERROR: Pull failed. Resolve that first.
+    echo ERROR: Pull failed.
     pause
     exit /b 1
 )
 
 echo.
-git status
+echo Current status:
+git status --short
 echo.
 
 set /p MSG=Enter commit message: 
@@ -63,16 +68,32 @@ echo Staging changes...
 git add .
 
 echo.
+echo Status after staging:
+git status --short
+echo.
+
+git diff --cached --quiet
+if not errorlevel 1 goto HAS_CHANGES
+
+echo No staged changes to commit.
+pause
+exit /b 0
+
+:HAS_CHANGES
 echo Creating commit...
 git commit -m "%MSG%"
 if errorlevel 1 (
     echo.
-    echo No changes to commit, or commit failed.
+    echo ERROR: Commit failed.
     pause
     exit /b 1
 )
 
 echo.
+echo New HEAD after commit:
+git log --oneline -1
+echo.
+
 echo Pushing to origin/main...
 git push origin main
 if errorlevel 1 (
@@ -83,8 +104,15 @@ if errorlevel 1 (
 )
 
 echo.
-echo Push successful.
-git log --oneline -1
+echo Verifying remote tracking state...
+git fetch origin main >nul 2>&1
+
+echo Local HEAD:
+git rev-parse HEAD
+echo Remote origin/main:
+git rev-parse origin/main
 echo.
+
+echo Push successful.
 pause
 endlocal

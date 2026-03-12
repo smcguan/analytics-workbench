@@ -7,8 +7,8 @@ echo        PULL ANALYTICS WORKBENCH
 echo =====================================
 echo.
 
-REM Repo is the parent of this scripts folder
-cd /d "%~dp0.."
+for %%I in ("%~dp0..") do set "REPO=%%~fI"
+cd /d "%REPO%"
 
 if errorlevel 1 (
     echo ERROR: Could not access repo directory.
@@ -23,7 +23,7 @@ if errorlevel 1 (
     exit /b 1
 )
 
-for /f "delims=" %%i in ('git branch --show-current') do set CURRENT_BRANCH=%%i
+for /f "delims=" %%i in ('git branch --show-current') do set "CURRENT_BRANCH=%%i"
 
 if /I not "%CURRENT_BRANCH%"=="main" (
     echo ERROR: You are on branch "%CURRENT_BRANCH%".
@@ -32,13 +32,17 @@ if /I not "%CURRENT_BRANCH%"=="main" (
     exit /b 1
 )
 
-echo Repo:
+echo Repo root:
 git rev-parse --show-toplevel
 echo Branch: %CURRENT_BRANCH%
 echo.
 
-echo Fetching origin...
-git fetch origin
+echo Local HEAD before fetch:
+git rev-parse HEAD
+echo.
+
+echo Fetching origin/main...
+git fetch origin main
 if errorlevel 1 (
     echo ERROR: Fetch failed.
     pause
@@ -46,8 +50,12 @@ if errorlevel 1 (
 )
 
 echo.
+echo Remote origin/main after fetch:
+git rev-parse origin/main
+echo.
+
 echo Pulling origin/main...
-git pull origin main
+git pull --ff-only origin main
 if errorlevel 1 (
     echo ERROR: Pull failed.
     pause
@@ -55,7 +63,11 @@ if errorlevel 1 (
 )
 
 echo.
-echo Pull successful.
+echo Local HEAD after pull:
+git rev-parse HEAD
+echo.
+
+echo Recent commits:
 git log --oneline -3
 echo.
 pause
