@@ -31,11 +31,11 @@ HIGH-LEVEL ARCHITECTURE
 -----------------------
 
 Frontend UI
-    ↓
+    ->
 FastAPI routes in this file
-    ↓
+    ->
 DuckDB query execution / dataset inspection
-    ↓
+    ->
 Local Parquet files
 
 SEPARATE AI FLOW
@@ -47,15 +47,15 @@ The AI-specific routes are defined separately in:
 That AI layer handles:
 
     selected dataset
-        ↓
+        ->
     dataset context
-        ↓
+        ->
     schema-aware prompt building
-        ↓
+        ->
     OpenAI SQL generation
-        ↓
+        ->
     OpenAI suggested question generation
-        ↓
+        ->
     SQL validation
 
 CURRENT PRODUCT WORKFLOW
@@ -63,15 +63,15 @@ CURRENT PRODUCT WORKFLOW
 The intended user workflow is:
 
     select dataset
-        ↓
+        ->
     review AI-suggested question chips
-        ↓
+        ->
     ask question or click a suggestion
-        ↓
+        ->
     generate SQL with AI
-        ↓
+        ->
     review/edit SQL in SQL workspace
-        ↓
+        ->
     run SQL manually
 
 This keeps the human in the loop and makes the system
@@ -449,6 +449,11 @@ class DeleteQueryRequest(BaseModel):
 class SqlRequest(BaseModel):
     dataset: str
     sql: str
+
+class SqlExportRequest(BaseModel):
+    dataset: str
+    sql: str
+    format: str = "xlsx"
 
 
 # ============================================================
@@ -1548,9 +1553,9 @@ def api_sql(req: SqlRequest):
 
     This design intentionally supports the current frontend:
         Generate SQL with AI
-            ↓
+            ->
         user review/edit
-            ↓
+            ->
         Run SQL
 
     EXECUTION RULE
@@ -1698,6 +1703,180 @@ def api_sql(req: SqlRequest):
         )
         raise
 
+@app.post("/api/sql/export")
+def api_sql_export(req: SqlExportRequest):
+    """
+    Export the FULL result of the SQL workspace query.
+
+    IMPORTANT
+    ---------
+    This endpoint is intentionally different from /api/sql.
+
+    /api/sql
+        returns only a preview limited by MAX_PREVIEW_ROWS
+
+    /api/sql/export
+        exports the full validated query result, subject only
+        to MAX_EXPORT_ROWS safety protection
+
+    SUPPORTED FORMATS
+    -----------------
+    - xlsx
+    - tsv
+
+    IMPLEMENTATION NOTE
+    -------------------
+    We intentionally export through Python/pandas instead of
+    DuckDB COPY FORMAT XLSX because XLSX support is not always
+    available in every local DuckDB runtime.
+    """
+    t0 = time.perf_counter()
+
+    try:
+        import pandas as pd
+
+        # ----------------------------------------------------
+        # STEP 1
+        # Confirm the selected dataset exists.
+        # ----------------------------------------------------
+        if req.dataset not in list_datasets():
+            raise HTTPException(
+                status_code=404,
+                detail=f"Dataset not found: {req.dataset}",
+            )
+
+        # ----------------------------------------------------
+        # STEP 2
+        # Validate and normalize SQL.
+        # ----------------------------------------------------
+        validated_sql = _validate_readonly_sql(req.sql)
+        cleaned_sql = _strip_trailing_semicolon(validated_sql)
+
+        # ----------------------------------------------------
+        # STEP 3
+        # Resolve the dataset source and rewrite logical
+        # dataset references to read_parquet(...).
+        # ----------------------------------------------------
+        src, _is_glob = dataset_source_path(req.dataset)
+        esc = _sql_escape_path(src)
+        parquet_sql = f"read_parquet('{esc}')"
+
+        sql = _rewrite_sql_dataset_reference(
+            sql=cleaned_sql,
+            dataset_name=req.dataset,
+            parquet_sql=parquet_sql,
+        )
+
+        # ----------------------------------------------------
+        # STEP 4
+        # Validate export format.
+        # ----------------------------------------------------
+        export_format = (req.format or "").strip().lower()
+        if export_format not in {"xlsx", "tsv"}:
+            raise HTTPException(
+                status_code=400,
+                detail="Export format must be 'xlsx' or 'tsv'.",
+            )
+
+        # ----------------------------------------------------
+        # STEP 5
+        # Run the FULL SQL and enforce export safety limits.
+        # ----------------------------------------------------
+        con = _connect()
+        try:
+            rowcount = int(
+                con.execute(f"SELECT COUNT(*) FROM ({sql}) t").fetchone()[0]
+            )
+
+            if rowcount > MAX_EXPORT_ROWS:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Export too large: {rowcount} rows (limit {MAX_EXPORT_ROWS})",
+                )
+
+            cur = con.execute(sql)
+            cols = [d[0] for d in cur.description]
+            rows = cur.fetchall()
+
+        finally:
+            con.close()
+
+        # ----------------------------------------------------
+        # STEP 6
+        # Build DataFrame and write output file.
+        # ----------------------------------------------------
+        df = pd.DataFrame(rows, columns=cols)
+
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+        safe_dataset = _safe_name(req.dataset)
+        EXPORTS_DIR.mkdir(parents=True, exist_ok=True)
+
+        if export_format == "xlsx":
+            out_path = EXPORTS_DIR / f"{safe_dataset}_sql_export_{ts}.xlsx"
+            df.to_excel(out_path, index=False)
+            media_type = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        else:
+            out_path = EXPORTS_DIR / f"{safe_dataset}_sql_export_{ts}.tsv"
+            df.to_csv(out_path, sep="\t", index=False)
+            media_type = "text/tab-separated-values"
+
+        elapsed = round(time.perf_counter() - t0, 4)
+
+        _audit_log(
+            {
+                "event": "sql_export",
+                "status": "success",
+                "dataset": req.dataset,
+                "format": export_format,
+                "rowcount": rowcount,
+                "exported_filename": out_path.name,
+                "elapsed_seconds": elapsed,
+            }
+        )
+
+        return FileResponse(
+            path=str(out_path),
+            filename=out_path.name,
+            media_type=media_type,
+        )
+
+    except HTTPException as e:
+        _audit_log(
+            {
+                "event": "sql_export",
+                "status": "error",
+                "dataset": req.dataset,
+                "format": getattr(req, "format", None),
+                "error": str(e.detail),
+            }
+        )
+        raise
+
+    except duckdb.Error as e:
+        logger.exception("sql export failed | dataset=%s", req.dataset)
+        _audit_log(
+            {
+                "event": "sql_export",
+                "status": "error",
+                "dataset": req.dataset,
+                "format": getattr(req, "format", None),
+                "error": str(e),
+            }
+        )
+        raise HTTPException(status_code=400, detail=str(e)) from e
+
+    except Exception as e:
+        logger.exception("sql export failed | dataset=%s", req.dataset)
+        _audit_log(
+            {
+                "event": "sql_export",
+                "status": "error",
+                "dataset": req.dataset,
+                "format": getattr(req, "format", None),
+                "error": str(e),
+            }
+        )
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 @app.get("/api/audit")
 def api_audit(limit: int = Query(200, ge=1, le=5000)):
@@ -1985,7 +2164,6 @@ def api_export(
                     detail=f"Export too large: {rowcount} rows (limit {MAX_EXPORT_ROWS})",
                 )
 
-            con.execute("CREATE OR REPLACE TEMP VIEW __export_view AS " + sql)
 
             try:
                 out_str = str(out_xlsx.resolve()).replace("\\", "/")

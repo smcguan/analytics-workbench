@@ -667,42 +667,38 @@
            CARD 1 — ADD DATASET
            Ingestion / dataset registration workflow
            ================================================== -->
-      <div class="card">
+      <div class="card span-2">
         <h2>Add dataset</h2>
         <div class="subtle-note">Register a parquet dataset first. This is the ingestion step.</div>
 
         <div class="field" style="min-width:100%;">
           <label for="scanPath">Folder to scan</label>
-          <div class="row">
+          <div class="row" style="margin-top:6px; align-items:flex-end; gap:10px;">
             <input id="scanPath" type="text" placeholder="C:\Data\Parquet" style="flex:1; min-width:260px;" />
             <button class="btn" id="browseBtn">Browse</button>
+            <button class="btn primary" id="scanBtn">Scan</button>
+            <label class="checkbox" style="margin-left:4px;">
+              <input id="recursiveChk" type="checkbox" />
+              Recursive
+            </label>
           </div>
           <div class="subtle-note" style="margin-top:8px;">Paste a full Windows folder path or use Browse.</div>
         </div>
 
-        <div class="row" style="margin-top:12px;">
-          <label class="checkbox">
-            <input id="recursiveChk" type="checkbox" />
-            Recursive
-          </label>
-          <button class="btn primary" id="scanBtn">Scan</button>
-        </div>
+        <div class="row" style="margin-top:14px; align-items:flex-end; gap:10px;">
+          <div class="field" style="flex:1.25; min-width:320px; margin-top:0;">
+            <label for="parquetSelect">Found parquet files</label>
+            <select id="parquetSelect">
+              <option value="">(scan a folder)</option>
+            </select>
+          </div>
 
-        <div class="field" style="min-width:100%; margin-top:14px;">
-          <label for="parquetSelect">Found parquet files</label>
-          <select id="parquetSelect">
-            <option value="">(scan a folder)</option>
-          </select>
-          <div class="subtle-note" id="parquetMeta" style="margin-top:8px;"></div>
-        </div>
-
-        <div class="row" style="margin-top:14px;">
-          <div class="field" style="flex:1; min-width:220px;">
+          <div class="field" style="flex:.8; min-width:220px; margin-top:0;">
             <label for="datasetName">Dataset name</label>
             <input id="datasetName" type="text" value="NewDataset" placeholder="NewDataset" />
           </div>
 
-          <div class="field" style="min-width:220px;">
+          <div class="field" style="min-width:220px; margin-top:0;">
             <label for="storageMode">Storage mode</label>
             <select id="storageMode">
               <option value="reference">Reference (recommended)</option>
@@ -715,6 +711,8 @@
           </div>
         </div>
 
+        <div class="subtle-note" id="parquetMeta" style="margin-top:8px;"></div>
+
         <div class="status">
           <span class="dot" id="scanDot"></span>
           <span id="scanStatus">Ready.</span>
@@ -726,7 +724,7 @@
            Lets the user inspect profile, schema, and preview
            before querying the dataset
            ================================================== -->
-      <div class="card">
+      <div class="card span-2">
         <h2>Inspect dataset</h2>
         <div class="subtle-note">Select a dataset, review the summary, and inspect Profile, Schema, or Preview before you query it.</div>
 
@@ -848,8 +846,8 @@
                It simply fills the text box with a suggestion,
                which the user can still edit.
                ================================================== -->
-          <div class="row" style="margin-top:10px; align-items:flex-end;">
-            <div class="field" style="flex:1; min-width:420px;">
+          <div class="row" style="margin-top:10px; align-items:flex-end; gap:12px;">
+            <div class="field" style="flex:1.7; min-width:420px;">
               <label for="aiPrompt">Question</label>
               <input
                 id="aiPrompt"
@@ -859,16 +857,16 @@
               />
             </div>
 
-            <div class="field" style="min-width:280px;">
+            <div class="field" style="flex:.9; min-width:260px;">
               <label for="suggestedQuestionSelect">Suggested questions</label>
               <select id="suggestedQuestionSelect">
                 <option value="">(select a suggested question)</option>
               </select>
             </div>
-          </div>
 
-          <div class="row" style="margin-top:12px;">
-            <button class="btn primary" id="aiGenerateBtn" type="button">Generate SQL with AI</button>
+            <div style="display:flex; align-items:flex-end; margin-left:auto;">
+              <button class="btn primary" id="aiGenerateBtn" type="button">Generate SQL with AI</button>
+            </div>
           </div>
 
           <div class="field" style="min-width:100%; margin-top:12px;">
@@ -1731,12 +1729,18 @@ LIMIT 100</textarea>
 
         renderResults(lastRun.columns, lastRun.rows);
 
-        await explainQuery(data.sql || sql);
-
+        // IMPORTANT:
+        // Keep the existing query explanation visible when the
+        // user runs SQL. The explanation belongs to the current
+        // SQL draft and should not disappear on execution.
         setRunStatus("ok", `SQL rows: ${num(lastRun.rowcount)} • Preview: ${num(lastRun.rows.length)} • ${lastRun.elapsed}s`);
       } catch (e) {
-        hideQueryExplanation();
         hideResultsPreview();
+
+        // IMPORTANT:
+        // Do not hide the existing explanation on execution
+        // failure. Users may still want to read it while they
+        // troubleshoot the SQL.
         setRunStatus("bad", "SQL failed.");
         toast("SQL failed: " + e.message);
       }
@@ -1776,40 +1780,64 @@ LIMIT 100</textarea>
       }
     }
 
+    async function exportSqlWorkspaceResult(format) {
+      const dataset = $("datasetSelect").value;
+      const sql = currentSql();
+
+      if (!dataset) { toast("Select a dataset first."); return; }
+      if (!sql) { toast("Run or edit a SQL query first."); return; }
+
+      try {
+        setRunStatus("warn", `Exporting ${format.toUpperCase()}...`);
+
+        const response = await fetch("/api/sql/export", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ dataset, sql, format })
+        });
+
+        if (!response.ok) {
+          let message = `Export failed (${response.status})`;
+
+          try {
+            const err = await response.json();
+            if (err && err.detail) message = err.detail;
+          } catch (_) {
+            try {
+              const txt = await response.text();
+              if (txt) message = txt;
+            } catch (_) {}
+          }
+
+          throw new Error(message);
+        }
+
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = format === "xlsx" ? "query_results.xlsx" : "query_results.tsv";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        URL.revokeObjectURL(url);
+
+        setRunStatus("ok", `Exported full query result as ${format.toUpperCase()}.`);
+        toast(`${format.toUpperCase()} export started.`);
+      } catch (e) {
+        setRunStatus("bad", "Export failed.");
+        toast("Export failed: " + e.message);
+      }
+    }
+
     function exportCurrentTsv() {
-      if (!lastRun.columns.length) { toast("Run a query first."); return; }
-
-      const tsv = toTSV(lastRun.columns, lastRun.rows);
-      const blob = new Blob([tsv], { type: "text/tab-separated-values;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "query_results.tsv";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-
-      URL.revokeObjectURL(url);
-      toast("TSV export started.");
+      return exportSqlWorkspaceResult("tsv");
     }
 
     function exportCurrentExcel() {
-      if (!lastRun.columns.length) { toast("Run a query first."); return; }
-
-      const tsv = toTSV(lastRun.columns, lastRun.rows);
-      const blob = new Blob([tsv], { type: "application/vnd.ms-excel;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "query_results.xls";
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-
-      URL.revokeObjectURL(url);
-      toast("Excel export started.");
+      return exportSqlWorkspaceResult("xlsx");
     }
 
     /* ======================================================
