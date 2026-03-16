@@ -78,13 +78,7 @@
     - /api/queries
     - /api/queries/save
     - /api/queries/delete
-    - /api/datasets/<dataset>/delete  (deregister on Refresh Datasets; falls back gracefully if absent)
     - /api/shutdown
-
-    Results Block Export Note
-    -------------------------
-    Export Excel and Export TSV are direct toolbar buttons in results row 2.
-    The Export tab has been removed. No intermediate tab click required.
     ============================================================
     -->
 
@@ -367,31 +361,6 @@
             margin-top:4px;
         }
 
-        /* Import in-progress state:
-           Applied to both the Import label-button and the Refresh button
-           while an upload is active. Prevents double-import and signals
-           to the user that the system is working. */
-        .import-btn.busy{
-            opacity:.55;
-            cursor:not-allowed;
-            pointer-events:none;
-        }
-
-        /* Persistent import status bar shown below the buttons during upload.
-           Hidden by default; shown only while an import is in flight. */
-        #importStatus{
-            display:none;
-            margin-top:8px;
-            padding:9px 12px;
-            border-radius:12px;
-            border:1px solid rgba(79,140,255,.28);
-            background:rgba(79,140,255,.08);
-            color:#bfd6ff;
-            font-size:12px;
-            line-height:1.4;
-            word-break:break-word;
-        }
-
         .content{
             display:grid;
             grid-template-rows:auto auto;
@@ -480,51 +449,6 @@
         .popover strong{
             display:block;
             margin-bottom:6px;
-            font-size:12px;
-        }
-
-        /* Suggestions popover — chip buttons for each AI-generated question */
-        #suggestionsPopover{
-            display:none;
-            margin-top:10px;
-            padding:12px 13px;
-            border-radius:12px;
-            border:1px solid rgba(79,140,255,.22);
-            background:rgba(79,140,255,.08);
-        }
-
-        .suggestions-header{
-            color:#bfd6ff;
-            font-size:11px;
-            text-transform:uppercase;
-            letter-spacing:.8px;
-            margin-bottom:10px;
-        }
-
-        .suggestions-chips{
-            display:flex;
-            flex-wrap:wrap;
-            gap:8px;
-        }
-
-        .suggestion-chip{
-            padding:8px 13px;
-            border-radius:999px;
-            border:1px solid rgba(79,140,255,.30);
-            background:rgba(79,140,255,.12);
-            color:#d6e6ff;
-            font-size:12px;
-            cursor:pointer;
-            text-align:left;
-            transition:background .12s ease;
-        }
-
-        .suggestion-chip:hover{
-            background:rgba(79,140,255,.24);
-        }
-
-        .suggestions-empty{
-            color:var(--muted);
             font-size:12px;
         }
 
@@ -845,13 +769,10 @@
             <aside class="panel sidebar">
                 <section>
                     <h3 class="section-title">Workspace</h3>
-                    <!-- Nav order: Insights → Query → Saved Queries
-                         Insights is first so users can explore AI-generated
-                         observations before diving into manual querying. -->
                     <div class="nav-list">
-                        <button class="nav-item" id="navInsights">Insights <span class="placeholder-tag">placeholder</span></button>
-                        <button class="nav-item" id="navQuery">Query</button>
+                        <button class="nav-item active" id="navQuery">Query</button>
                         <button class="nav-item" id="navSavedQueries">Saved Queries</button>
+                        <button class="nav-item" id="navInsights">Insights <span class="placeholder-tag">placeholder</span></button>
                     </div>
                 </section>
 
@@ -863,32 +784,11 @@
                         + Import Dataset
                     </label>
 
-                    <!--
-                        Refresh Datasets button:
-                        Clears the current session dataset list from the UI and
-                        resets selection. Does NOT fetch from the backend —
-                        this intentionally returns the sidebar to the empty
-                        startup state so the user controls what is visible.
-                        Per Milestone 3 spec: dataset list starts empty and
-                        is populated only by explicit imports this session.
-                    -->
-                    <button class="btn import-btn" id="refreshDatasetsBtn" style="margin-top:8px;">
-                        ↺ Refresh Datasets
-                    </button>
-
-                    <!--
-                        Import status bar:
-                        Visible only while an import is in flight.
-                        Does not auto-dismiss — stays until import completes
-                        or fails, so large-file uploads are never silent.
-                    -->
-                    <div id="importStatus"></div>
-
                     <input
                         id="importDatasetFile"
                         type="file"
                         class="visually-hidden-file"
-                        accept=".csv,.tsv,.xlsx,.xls,.parquet"
+                        accept=".csv,.xlsx,.parquet"
                     />
                 </section>
             </aside>
@@ -991,19 +891,6 @@ e.g. "Show revenue by region for 2024"'
                                 The system will generate SQL you can review and edit.
                             </div>
 
-                            <!--
-                                Suggestions popover:
-                                Populated by /api/ai/suggest_questions.
-                                Chips are clickable — they fill the prompt box
-                                and close the popover ready to Generate SQL.
-                            -->
-                            <div id="suggestionsPopover">
-                                <div class="suggestions-header">Suggested Questions</div>
-                                <div class="suggestions-chips" id="suggestionsChips">
-                                    <span class="suggestions-empty">Select a dataset to load suggestions.</span>
-                                </div>
-                            </div>
-
                             <div class="editor-shell">
                                 <div class="editor-label">SQL Editor</div>
                                 <textarea id="sqlEditor" class="editor">SELECT *
@@ -1023,12 +910,6 @@ LIMIT 100</textarea>
                             <div class="results-meta" id="resultsMeta">No query executed yet.</div>
                         </div>
 
-                        <!--
-                            Results Row 2 (frozen Milestone 3 layout):
-                            RESULTS label | row-count bubble | Table tab | Chart tab | [separator] | Export Excel | Export TSV
-                            Export tab has been replaced with direct Export Excel and Export TSV buttons
-                            so users reach export in one click without an intermediate tab state.
-                        -->
                         <div class="results-tabs">
                             <div class="results-label">Results</div>
                             <div class="results-count-bubble" id="resultsCount">0 rows</div>
@@ -1036,18 +917,23 @@ LIMIT 100</textarea>
                             <div class="tab-group">
                                 <button class="tab active" id="tableTab">Table</button>
                                 <button class="tab" id="chartTab">Chart</button>
-                            </div>
-
-                            <!-- Export buttons promoted directly into row 2 — no tab required -->
-                            <div class="tab-group" style="margin-left:auto;">
-                                <button class="btn small" id="exportExcelBtn">Export Excel</button>
-                                <button class="btn small" id="exportTsvBtn">Export TSV</button>
+                                <button class="tab" id="exportTab">Export</button>
                             </div>
                         </div>
 
                         <div class="results-card">
                             <div class="results-placeholder" id="chartPlaceholder">
                                 Chart view is a Milestone 3 placeholder until visualization wiring is connected.
+                            </div>
+
+                            <div class="results-placeholder" id="exportPlaceholder">
+                                <div>
+                                    <div style="margin-bottom:12px;">Export the full result set for the current SQL.</div>
+                                    <div class="saved-actions" style="justify-content:center;">
+                                        <button class="btn primary" id="exportExcelBtn">Export Excel</button>
+                                        <button class="btn" id="exportTsvBtn">Export TSV</button>
+                                    </div>
+                                </div>
                             </div>
 
                             <div class="table-wrap" id="tableWrap">
@@ -1166,7 +1052,7 @@ LIMIT 100</textarea>
         let inspectMode = "";
 
         function setActiveNav(buttonId) {
-            ["navInsights","navQuery","navSavedQueries"].forEach((id) => {
+            ["navQuery","navSavedQueries","navInsights"].forEach((id) => {
                 $(id).classList.toggle("active", id === buttonId);
             });
         }
@@ -1234,15 +1120,6 @@ LIMIT 100</textarea>
                     updateSelectedDatasetSummary();
                     await loadDatasetMeta(selectedDataset);
                     resetInspectState();
-                    // Clear the prompt and SQL editor so the user starts
-                    // fresh with the new dataset — old questions and queries
-                    // from a previous dataset are misleading in this context.
-                    $("askPrompt").value = "";
-                    $("sqlEditor").value = "SELECT *\nFROM dataset\nLIMIT 100";
-                    $("resultsMeta").textContent = "No query executed yet.";
-                    $("resultsCount").textContent = "0 rows";
-                    $("resultsHead").innerHTML = "";
-                    $("resultsBody").innerHTML = "";
                 });
 
                 list.appendChild(btn);
@@ -1318,23 +1195,6 @@ LIMIT 100</textarea>
             } catch (_) {}
         }
 
-        // ---------------------------------------------------------------------------
-        // importDatasetFile
-        // ---------------------------------------------------------------------------
-        // Handles the full import lifecycle for a single file:
-        //   1. Prompts user for optional dataset name
-        //   2. Locks the import/refresh buttons and shows a persistent status bar
-        //      so large uploads are never silent
-        //   3. POSTs to /api/datasets/import with file + optional dataset_name
-        //      and a file_type hint (helps backend locate large Parquet/Excel loaders)
-        //   4. On "already exists" conflict: informs user to pick a different name.
-        //      Overwrite is not attempted because the backend does not yet support
-        //      deregistration — sending ?overwrite=true silently fails.
-        //   5. Polls for the new dataset using a TARGETED meta check on just the
-        //      new dataset name — NOT a full /api/datasets reload, which would
-        //      restore all previously cleared datasets from the backend.
-        //   6. Always unlocks the UI in the finally block, even on failure
-        // ---------------------------------------------------------------------------
         async function importDatasetFile(file) {
             if (!file) return;
 
@@ -1343,100 +1203,32 @@ LIMIT 100</textarea>
                 ""
             );
 
-            // User cancelled the prompt — abort silently
-            if (maybeName === null) return;
-
-            const inferredName = String(maybeName).trim()
+            const inferredName = (maybeName && String(maybeName).trim())
                 ? String(maybeName).trim()
                 : file.name.replace(/\.[^.]+$/, "").replace(/[^A-Za-z0-9_\- ]+/g, "").trim();
 
-            // Derive a file type hint from the extension.
-            // Sent to the backend as both file_type and dataset_type with multiple
-            // spellings so Excel/Parquet loaders can be selected correctly.
-            const ext = (file.name.split(".").pop() || "").toLowerCase();
-            const fileTypeHint = { csv: "csv", tsv: "tsv", txt: "csv", xlsx: "excel", xls: "excel", parquet: "parquet" }[ext] || ext;
+            const form = new FormData();
+            form.append("file", file);
 
-            await _doImport(file, inferredName, fileTypeHint);
-        }
-
-        async function _doImport(file, datasetName, fileTypeHint, overwrite = false) {
-            const importLabel = $("importDatasetBtn");
-            const refreshBtn  = $("refreshDatasetsBtn");
-            const statusBar   = $("importStatus");
-
-            // --- Lock UI and show persistent status ---
-            importLabel.classList.add("busy");
-            refreshBtn.classList.add("busy");
-
-            function setStatus(msg) {
-                statusBar.textContent = msg;
-                statusBar.style.display = "block";
+            if (maybeName !== null && String(maybeName).trim()) {
+                form.append("dataset_name", String(maybeName).trim());
             }
-
-            function clearStatus() {
-                statusBar.style.display = "none";
-                statusBar.textContent = "";
-            }
-
-            function unlockUi() {
-                importLabel.classList.remove("busy");
-                refreshBtn.classList.remove("busy");
-            }
-
-            const sizeLabel = file.size > 0
-                ? (file.size >= 1048576
-                    ? (file.size / 1048576).toFixed(1) + " MB"
-                    : (file.size / 1024).toFixed(0) + " KB")
-                : "";
-
-            setStatus(`Uploading ${file.name}${sizeLabel ? " (" + sizeLabel + ")" : ""}… this may take a moment for large files.`);
 
             try {
-                const form = new FormData();
-                form.append("file", file);
-                form.append("dataset_name", datasetName);
-                // Send type hint under multiple keys — backend implementations vary
-                form.append("file_type", fileTypeHint);
-                form.append("dataset_type", fileTypeHint);
+                toast("Importing dataset...");
 
-                // overwrite=true tells the backend to replace an existing dataset
-                // of the same name rather than rejecting with a conflict error.
-                const importUrl = overwrite
-                    ? "/api/datasets/import?overwrite=true"
-                    : "/api/datasets/import";
-                const response = await fetch(importUrl, { method: "POST", body: form });
+                const response = await fetch("/api/datasets/import", {
+                    method: "POST",
+                    body: form
+                });
 
                 if (!response.ok) {
                     let msg = `Import failed (${response.status})`;
+
                     try {
                         const err = await response.json();
                         msg = err.detail || JSON.stringify(err);
                     } catch (_) {}
-
-                    // Conflict: backend still has this name registered.
-                    // The backend does not support deregister or overwrite yet,
-                    // so the only working path is for the user to choose a new name.
-                    if (response.status === 409 || msg.toLowerCase().includes("already exists")) {
-                        clearStatus();
-                        unlockUi();
-                        const newName = window.prompt(
-                            `"${datasetName}" already exists.\n\n` +
-                            `• Press OK to overwrite it with this file\n` +
-                            `• Or type a new name to import separately\n` +
-                            `• Or press Cancel to abort`,
-                            datasetName
-                        );
-                        if (newName === null) {
-                            toast("Import cancelled.");
-                        } else if (String(newName).trim() === "" || String(newName).trim() === datasetName) {
-                            // User kept the same name — try overwrite
-                            await _doImport(file, datasetName, fileTypeHint, true);
-                        } else {
-                            // User chose a new name — import fresh
-                            await _doImport(file, String(newName).trim(), fileTypeHint, false);
-                        }
-                        return;
-                    }
 
                     throw new Error(msg);
                 }
@@ -1447,85 +1239,42 @@ LIMIT 100</textarea>
                     data.dataset ||
                     data.registered_name ||
                     data.dataset_name ||
-                    datasetName;
+                    inferredName;
 
-                setStatus(`Processing "${returnedName}"… waiting for backend registration.`);
-
-                // Poll using a TARGETED meta check on just this one dataset.
-                // Do NOT call loadDatasets() here — that hits /api/datasets and
-                // restores the full backend list, which brings back every dataset
-                // the user just cleared with Refresh. Instead, probe the meta
-                // endpoint directly until it responds, then push locally.
-                let registrationConfirmed = false;
-                for (let i = 0; i < 10; i++) {
-                    try {
-                        const meta = await apiJson(
-                            "/api/datasets/" + encodeURIComponent(returnedName) + "/meta"
-                        );
-                        // Meta responded — backend has registered this dataset
-                        if (meta) {
-                            // Merge into local datasets array without replacing everything
-                            const existing = datasets.findIndex(d => (d.name || "") === returnedName);
-                            const entry = {
-                                name: returnedName,
-                                row_count: meta.row_count ?? data.row_count ?? null,
-                                column_count: meta.column_count ?? data.column_count ?? null,
-                                file_size_bytes: meta.file_size_bytes ?? null,
-                                meta_source: meta.meta_source || data.original_type || fileTypeHint
-                            };
-                            if (existing >= 0) {
-                                datasets[existing] = entry;
-                            } else {
-                                datasets.push(entry);
-                            }
-                            registrationConfirmed = true;
-                            break;
-                        }
-                    } catch (_) {
-                        // Meta not ready yet — keep polling
+                let found = false;
+                for (let i = 0; i < 5; i++) {
+                    await loadDatasets();
+                    if (datasets.some(d => (d.name || "") === returnedName)) {
+                        found = true;
+                        break;
                     }
-                    setStatus(`Processing "${returnedName}"… (attempt ${i + 2} of 10)`);
-                    await new Promise(resolve => setTimeout(resolve, 600));
+                    await new Promise(resolve => setTimeout(resolve, 400));
                 }
 
-                if (!registrationConfirmed) {
-                    // Meta never responded — push a minimal local placeholder
-                    // so the user can proceed. They may need to re-select later.
-                    const existing = datasets.findIndex(d => (d.name || "") === returnedName);
-                    const placeholder = {
+                if (!found) {
+                    datasets.push({
                         name: returnedName,
                         row_count: data.row_count ?? null,
                         column_count: data.column_count ?? null,
                         file_size_bytes: null,
-                        meta_source: data.original_type || fileTypeHint
-                    };
-                    if (existing >= 0) {
-                        datasets[existing] = placeholder;
-                    } else {
-                        datasets.push(placeholder);
-                    }
+                        meta_source: data.original_type || file.name.split(".").pop() || "import"
+                    });
                 }
 
                 selectedDataset = returnedName;
                 renderDatasets();
                 updateSelectedDatasetSummary();
+                await loadDatasetMeta(selectedDataset);
                 resetInspectState();
-                // Clear prompt and SQL for the freshly imported dataset
-                $("askPrompt").value = "";
-                $("sqlEditor").value = "SELECT *\nFROM dataset\nLIMIT 100";
-                $("resultsMeta").textContent = "No query executed yet.";
-                $("resultsCount").textContent = "0 rows";
-                $("resultsHead").innerHTML = "";
-                $("resultsBody").innerHTML = "";
 
-                clearStatus();
-                toast(`Imported: ${returnedName}`);
-
+                toast(`Imported dataset: ${selectedDataset || file.name}`);
             } catch (e) {
-                clearStatus();
-                toast("Import failed: " + e.message);
-            } finally {
-                unlockUi();
+                const msg = String(e.message || "");
+                if (msg.toLowerCase().includes("already exists")) {
+                    toast("That dataset already exists. Choose a different dataset name or replace the existing dataset.");
+                } else {
+                    toast("Import failed: " + e.message);
+                }
             }
         }
 
@@ -1534,81 +1283,8 @@ LIMIT 100</textarea>
                 $("infoPopover").style.display === "block" ? "none" : "block";
         }
 
-        // ---------------------------------------------------------------
-        // fetchSuggestions
-        // ---------------------------------------------------------------
-        // Calls GET /api/ai/suggest_questions for the selected dataset.
-        // Renders clickable chip buttons in the suggestions popover.
-        // Each chip fills the prompt box and closes the popover so the
-        // user can immediately hit Generate SQL.
-        // ---------------------------------------------------------------
-        let suggestionsVisible = false;
-
-        async function fetchSuggestions() {
-            const dataset = selectedDataset;
-
-            // Toggle off if already visible
-            if (suggestionsVisible) {
-                $("suggestionsPopover").style.display = "none";
-                suggestionsVisible = false;
-                return;
-            }
-
-            if (!dataset) {
-                toast("Select a dataset first to get suggestions.");
-                return;
-            }
-
-            // Show popover immediately with loading state
-            $("suggestionsChips").innerHTML =
-                '<span class="suggestions-empty">Loading suggestions…</span>';
-            $("suggestionsPopover").style.display = "block";
-            suggestionsVisible = true;
-
-            $("suggestionsBtn").disabled = true;
-            $("suggestionsBtn").textContent = "Loading…";
-
-            try {
-                const data = await apiJson(
-                    "/api/ai/suggest_questions?dataset=" + encodeURIComponent(dataset)
-                );
-
-                const questions = (data.questions || []).filter(q => String(q).trim());
-
-                if (!questions.length) {
-                    $("suggestionsChips").innerHTML =
-                        '<span class="suggestions-empty">No suggestions available for this dataset.</span>';
-                    return;
-                }
-
-                $("suggestionsChips").innerHTML = "";
-
-                for (const q of questions) {
-                    const chip = document.createElement("button");
-                    chip.className = "suggestion-chip";
-                    chip.type = "button";
-                    chip.textContent = q;
-                    chip.addEventListener("click", () => {
-                        $("askPrompt").value = q;
-                        // Clear the SQL editor so the user doesn't see stale SQL
-                        // from a previous question and mistake it for output
-                        // generated for this new suggestion.
-                        $("sqlEditor").value = "SELECT *\nFROM dataset\nLIMIT 100";
-                        $("suggestionsPopover").style.display = "none";
-                        suggestionsVisible = false;
-                        // Move focus to Generate SQL so user can hit it immediately
-                        $("generateSqlBtn").focus();
-                    });
-                    $("suggestionsChips").appendChild(chip);
-                }
-
-            } catch (e) {
-                $("suggestionsChips").innerHTML =
-                    '<span class="suggestions-empty">Could not load suggestions: ' + e.message + '</span>';
-            } finally {
-                $("suggestionsBtn").disabled = false;
-                $("suggestionsBtn").textContent = "Suggestions";
-            }
+        function suggestionsPlaceholder() {
+            toast("Suggestions is a Milestone 3 placeholder.");
         }
 
         function explainPlaceholder() {
@@ -1629,36 +1305,11 @@ LIMIT 100</textarea>
                 return;
             }
 
-            // Look up the file type hint from the known dataset metadata.
-            // Sent under multiple keys because backend implementations vary.
-            // Both Excel and Parquet have historically caused "file not found"
-            // errors when the backend picks the wrong loader — we send every
-            // spelling the backend might recognise so it can't miss.
-            const knownDataset = datasets.find(d => (d.name || "") === dataset);
-            const rawSource = (knownDataset && knownDataset.meta_source)
-                ? String(knownDataset.meta_source).toLowerCase()
-                : "";
-
-            // Normalise known aliases to the canonical form each loader expects.
-            // xlsx/xls → excel   (Excel loader)
-            // parquet  → parquet (Parquet loader — also send application/parquet)
-            const fileType = { xlsx: "excel", xls: "excel" }[rawSource] || rawSource;
-
-            // Build the shared extra fields sent with every attempt.
-            // source_type carries the raw value in case the backend uses that key.
-            // parquet_hint is a dedicated flag some backends check separately.
-            const typeHints = {
-                file_type:     fileType,
-                dataset_type:  fileType,
-                source_type:   rawSource,
-                parquet_hint:  rawSource === "parquet" ? true : undefined
-            };
-
             const attempts = [
-                { url: "/api/ai/generate_sql", body: { dataset, question: prompt, ...typeHints } },
-                { url: "/api/ai/generate_sql", body: { dataset, prompt: prompt,   ...typeHints } },
-                { url: "/api/sql/generate",    body: { dataset, prompt: prompt,   ...typeHints } },
-                { url: "/api/sql/generate",    body: { dataset, question: prompt, ...typeHints } }
+                { url: "/api/ai/generate_sql", body: { dataset, question: prompt } },
+                { url: "/api/ai/generate_sql", body: { dataset, prompt: prompt } },
+                { url: "/api/sql/generate", body: { dataset, prompt: prompt } },
+                { url: "/api/sql/generate", body: { dataset, question: prompt } }
             ];
 
             let lastError = null;
@@ -1702,12 +1353,14 @@ LIMIT 100</textarea>
                     }
                 }
 
-                $("sqlEditor").value = "SELECT *\nFROM dataset\nLIMIT 100";
-                // Surface the actual backend error so it's diagnosable, not just a generic message.
-                const errMsg = lastError ? lastError.message : "All routes returned no SQL.";
-                toast("Generate SQL failed — " + errMsg + ". Loaded starter SQL.");
+                $("sqlEditor").value = "SELECT *
+FROM dataset
+LIMIT 100";
+                toast("AI SQL generation endpoint unavailable. Loaded starter SQL instead.");
             } catch (e) {
-                $("sqlEditor").value = "SELECT *\nFROM dataset\nLIMIT 100";
+                $("sqlEditor").value = "SELECT *
+FROM dataset
+LIMIT 100";
                 toast("Generate SQL failed. Loaded starter SQL instead.");
                 console.error("Generate SQL failed:", e);
             } finally {
@@ -1717,14 +1370,13 @@ LIMIT 100</textarea>
         }
 
         function setActiveTab(tabName) {
-            // Only two content tabs remain: Table and Chart.
-            // Export Excel / Export TSV are now direct buttons in the row 2 toolbar.
-            ["tableTab","chartTab"].forEach((id) => {
+            ["tableTab","chartTab","exportTab"].forEach((id) => {
                 $(id).classList.remove("active");
             });
 
             $("tableWrap").style.display = "none";
             $("chartPlaceholder").style.display = "none";
+            $("exportPlaceholder").style.display = "none";
 
             if (tabName === "table") {
                 $("tableTab").classList.add("active");
@@ -1732,6 +1384,9 @@ LIMIT 100</textarea>
             } else if (tabName === "chart") {
                 $("chartTab").classList.add("active");
                 $("chartPlaceholder").style.display = "flex";
+            } else if (tabName === "export") {
+                $("exportTab").classList.add("active");
+                $("exportPlaceholder").style.display = "flex";
             }
         }
 
@@ -1867,10 +1522,6 @@ LIMIT 100</textarea>
             $("inspectTableWrap").classList.add("hidden");
             $("inspectHead").innerHTML = "";
             $("inspectBody").innerHTML = "";
-            // Close suggestions and info popovers when dataset changes
-            $("suggestionsPopover").style.display = "none";
-            suggestionsVisible = false;
-            $("infoPopover").style.display = "none";
         }
 
         function renderInspectTable(columns, rows) {
@@ -2091,9 +1742,9 @@ LIMIT 100</textarea>
             setTimeout(() => { try { window.close(); } catch(e) {} }, 250);
         }
 
-        $("navInsights").addEventListener("click", () => switchView("insights"));
         $("navQuery").addEventListener("click", () => switchView("query"));
         $("navSavedQueries").addEventListener("click", () => switchView("saved"));
+        $("navInsights").addEventListener("click", () => switchView("insights"));
 
         $("importDatasetFile").addEventListener("click", () => {
             $("importDatasetFile").value = "";
@@ -2105,14 +1756,14 @@ LIMIT 100</textarea>
         });
 
         $("infoBtn").addEventListener("click", toggleInfoPopover);
-        $("suggestionsBtn").addEventListener("click", fetchSuggestions);
+        $("suggestionsBtn").addEventListener("click", suggestionsPlaceholder);
         $("generateSqlBtn").addEventListener("click", generateAiSql);
         $("runSqlBtn").addEventListener("click", runSqlQuery);
         $("explainBtn").addEventListener("click", explainPlaceholder);
 
         $("tableTab").addEventListener("click", () => setActiveTab("table"));
         $("chartTab").addEventListener("click", () => setActiveTab("chart"));
-        // exportTab removed — Export Excel and Export TSV are now direct toolbar buttons
+        $("exportTab").addEventListener("click", () => setActiveTab("export"));
 
         $("exportExcelBtn").addEventListener("click", () => exportSqlWorkspaceResult("xlsx"));
         $("exportTsvBtn").addEventListener("click", () => exportSqlWorkspaceResult("tsv"));
@@ -2124,59 +1775,6 @@ LIMIT 100</textarea>
         $("saveQueryBtn").addEventListener("click", saveCurrentQuery);
         $("refreshQueriesBtn").addEventListener("click", loadSavedQueries);
         $("quitBtn").addEventListener("click", quitApp);
-
-        // Refresh Datasets button.
-        // Calls DELETE on /api/datasets/<name>/delete for every known dataset
-        // to fully deregister them from the backend, then clears the UI.
-        // Now that the backend has this endpoint, Refresh is a true reset:
-        // the user can re-import any dataset with the same name afterwards.
-        $("refreshDatasetsBtn").addEventListener("click", async () => {
-            const toDelete = [...datasets];
-
-            // Clear UI immediately
-            datasets = [];
-            selectedDataset = "";
-            renderDatasets();
-            updateSelectedDatasetSummary();
-            resetInspectState();
-
-            if (!toDelete.length) {
-                toast("Dataset list cleared.");
-                return;
-            }
-
-            let deleted = 0;
-            let failed = 0;
-
-            for (const d of toDelete) {
-                try {
-                    const res = await fetch(
-                        "/api/datasets/" + encodeURIComponent(d.name || "") + "/delete",
-                        { method: "POST" }
-                    );
-                    if (res.ok) {
-                        deleted++;
-                    } else {
-                        // Dataset may already be gone — treat 404 as success
-                        if (res.status === 404) {
-                            deleted++;
-                        } else {
-                            failed++;
-                            console.warn("Delete failed for", d.name, "HTTP", res.status);
-                        }
-                    }
-                } catch (e) {
-                    failed++;
-                    console.warn("Delete error for", d.name, e.message);
-                }
-            }
-
-            if (failed > 0) {
-                toast(`Cleared. ${deleted} dataset(s) removed; ${failed} could not be deleted from backend.`);
-            } else {
-                toast(`Cleared. ${deleted} dataset(s) removed. You can re-import any dataset now.`);
-            }
-        });
 
         $("askPrompt").addEventListener("keydown", (e) => {
             if (e.key === "Enter" && !e.shiftKey) {
@@ -2197,7 +1795,7 @@ LIMIT 100</textarea>
             updateSelectedDatasetSummary();
 
             setActiveTab("table");
-            switchView("insights");  // Insights is the default landing view
+            switchView("query");
             resetInspectState();
         })();
     </script>

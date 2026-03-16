@@ -122,14 +122,9 @@ def import_dataset(
     original_filename: str,
     display_name: str | None = None,
     registered_root: str | Path = "data/datasets",
-    overwrite: bool = False,
 ) -> DatasetImportResult:
     """
     Import a user-uploaded dataset into normalized Parquet storage.
-
-    overwrite=True: if the dataset directory already exists, remove it and
-    replace it. Used by the frontend Refresh → re-import workflow so users
-    can bring in the same file again without renaming.
     """
 
     # Step 1: Validate the most basic upload assumptions before touching disk.
@@ -154,16 +149,12 @@ def import_dataset(
     # Step 3: Create the normalized storage directory for this dataset.
     # Imported datasets should live under a human-readable dataset folder name,
     # not an opaque generated ID.
-    dataset_dir = Path(registered_root).resolve() / registered_name
+    dataset_dir = Path(registered_root) / registered_name
 
     if dataset_dir.exists():
-        if overwrite:
-            # Remove the existing dataset directory so we can replace it cleanly.
-            shutil.rmtree(dataset_dir)
-        else:
-            raise DatasetValidationError(
-                f"Dataset '{registered_name}' already exists. Choose a different dataset name."
-            )
+        raise DatasetValidationError(
+            f"Dataset '{registered_name}' already exists. Choose a different dataset name."
+        )
 
     dataset_dir.mkdir(parents=True, exist_ok=False)
 
@@ -328,35 +319,13 @@ def write_uploaded_file(uploaded_file: BinaryIO, destination: Path) -> None:
 
 
 def write_metadata(metadata: DatasetImportMetadata, destination: Path) -> None:
-    """
-    Write dataset metadata in a human-readable JSON format.
-
-    Writes two files:
-    1. metadata.json  — full import pipeline metadata (primary)
-    2. _meta.json     — lightweight summary in the format _dataset_meta_summary()
-                        reads, so profile/schema/preview work immediately after
-                        import without requiring a live DuckDB computation.
-    """
+    """Write dataset metadata in a human-readable JSON format."""
 
     payload = asdict(metadata)
     payload["columns"] = [asdict(column) for column in metadata.columns]
 
     with destination.open("w", encoding="utf-8") as output_file:
         json.dump(payload, output_file, indent=2)
-
-    # Write _meta.json alongside so the main app's caching layer picks it up.
-    meta_path = destination.parent / "_meta.json"
-    meta_summary = {
-        "row_count": metadata.row_count,
-        "column_count": metadata.column_count,
-        "file_size_bytes": None,  # filled in at read time from actual parquet size
-        "last_scanned": metadata.created_at,
-    }
-    try:
-        with meta_path.open("w", encoding="utf-8") as f:
-            json.dump(meta_summary, f, indent=2)
-    except Exception:
-        pass  # non-fatal — live computation will still work as fallback
 
 
 # -----------------------------------------------------------------------------
@@ -366,44 +335,19 @@ def write_metadata(metadata: DatasetImportMetadata, destination: Path) -> None:
 
 def normalize_parquet(source_path: Path, parquet_path: Path) -> None:
     """
-    Validate an uploaded Parquet file and copy it into canonical storage.
-
-    PERFORMANCE NOTE
-    ----------------
-    We intentionally do NOT read the entire file into memory.
-    For large Parquet files (100M+ rows) a full pq.read_table() + pq.write_table()
-    cycle can take several minutes and use many GB of RAM.
-
-    Instead we:
-    1. Read only the schema (file footer only — instant for any file size)
-    2. Validate it has columns
-    3. Copy the raw bytes with shutil.copy2 (OS-level copy, no decompression)
-
-    This reduces a 5-minute import to a few seconds for large files.
-    The file is already valid Parquet — no conversion or normalization needed.
+    Validate an uploaded Parquet file and rewrite it into canonical storage.
     """
 
     try:
-        # Read only the schema — reads the Parquet file footer, not the data.
-        # This is near-instant even for 220M row files.
-        schema = pq.read_schema(source_path)
-        if len(schema) == 0:
+        table = pq.read_table(source_path)
+        if table.num_columns == 0:
             raise DatasetValidationError("Parquet file contains no columns.")
 
+        pq.write_table(table, parquet_path)
     except DatasetValidationError:
         raise
     except Exception as exc:
-        raise DatasetConversionError(
-            f"Failed to read Parquet file schema: {exc}"
-        ) from exc
-
-    # Copy raw bytes — no decompression, no row iteration, no memory allocation.
-    try:
-        shutil.copy2(source_path, parquet_path)
-    except Exception as exc:
-        raise DatasetConversionError(
-            f"Failed to copy Parquet file to storage: {exc}"
-        ) from exc
+        raise DatasetConversionError(f"Failed to normalize Parquet file: {exc}") from exc
 
 
 def convert_csv_to_parquet(source_path: Path, parquet_path: Path) -> None:
@@ -420,27 +364,8 @@ def convert_csv_to_parquet(source_path: Path, parquet_path: Path) -> None:
 def convert_tsv_to_parquet(source_path: Path, parquet_path: Path) -> None:
     """Read TSV data (tab-separated values) and write into canonical Parquet storage."""
 
-    # on_bad_lines="warn" requires pandas >= 1.3.
-    # Fall back to the older error_bad_lines=False for compatibility.
     try:
-        dataframe = pd.read_csv(
-            source_path,
-            sep="\t",
-            encoding="utf-8",
-            on_bad_lines="warn",
-        )
-    except TypeError:
-        # Older pandas — use legacy parameter names
-        try:
-            dataframe = pd.read_csv(
-                source_path,
-                sep="\t",
-                encoding="utf-8",
-                error_bad_lines=False,
-                warn_bad_lines=True,
-            )
-        except Exception as exc:
-            raise DatasetValidationError(f"Failed to read TSV file: {exc}") from exc
+        dataframe = pd.read_csv(source_path, sep="\t", encoding="utf-8", on_bad_lines="warn")
     except Exception as exc:
         raise DatasetValidationError(f"Failed to read TSV file: {exc}") from exc
 
@@ -485,33 +410,17 @@ def dataframe_to_parquet(dataframe: pd.DataFrame, parquet_path: Path, source_lab
 
 def inspect_parquet(parquet_path: Path) -> tuple[int, list[DatasetColumn]]:
     """
-    Read row count and schema from the Parquet file footer.
-
-    PERFORMANCE NOTE
-    ----------------
-    pq.read_metadata() reads only the Parquet file footer — a few KB regardless
-    of how many rows the file contains. This is instant for any file size.
-
-    pq.read_table() would load the entire file into memory — avoid for large files.
+    Read row count and schema details from the normalized Parquet file.
     """
 
     try:
-        # Read file-level metadata from footer only (no row data loaded)
-        meta = pq.read_metadata(parquet_path)
-        schema = pq.read_schema(parquet_path)
+        table = pq.read_table(parquet_path)
     except Exception as exc:
-        raise DatasetValidationError(
-            f"Failed to inspect Parquet file: {exc}"
-        ) from exc
-
-    # Row count is stored in the footer per row group — sum them.
-    row_count = sum(
-        meta.row_group(i).num_rows for i in range(meta.num_row_groups)
-    )
+        raise DatasetValidationError(f"Failed to inspect normalized Parquet file: {exc}") from exc
 
     columns = [
-        DatasetColumn(name=schema.field(i).name, type=str(schema.field(i).type))
-        for i in range(len(schema))
+        DatasetColumn(name=field.name, type=str(field.type))
+        for field in table.schema
     ]
 
-    return row_count, columns
+    return table.num_rows, columns

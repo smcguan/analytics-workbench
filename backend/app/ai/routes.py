@@ -232,11 +232,40 @@ def generate_sql(payload: GenerateSQLRequest) -> GenerateSQLResponse:
     try:
 
         # ----------------------------------------------------
-        # STEP 1 — Generate SQL using the AI provider
+        # STEP 1 — Resolve the question from either the
+        # "question" or "prompt" field.
+        #
+        # The frontend sends four attempts using both keys:
+        #   { dataset, question: prompt }
+        #   { dataset, prompt: prompt }
+        #
+        # If GenerateSQLRequest only declares "question",
+        # the prompt-keyed attempts arrive with question=None.
+        # We fall back to payload.prompt if it exists so both
+        # frontend key variants reach the AI provider.
+        # ----------------------------------------------------
+        question = (
+            getattr(payload, "question", None)
+            or getattr(payload, "prompt", None)
+            or ""
+        ).strip()
+
+        if not question:
+            return GenerateSQLResponse(
+                status="error",
+                dataset=payload.dataset,
+                question="",
+                sql="",
+                message="No question or prompt provided.",
+                warnings=[],
+            )
+
+        # ----------------------------------------------------
+        # STEP 2 — Generate SQL using the AI provider
         # ----------------------------------------------------
         model_output = generate_sql_for_dataset(
             dataset_name=payload.dataset,
-            question=payload.question,
+            question=question,
             dataset_source_path_fn=_get_dataset_source_path,
         )
 
@@ -314,12 +343,21 @@ def generate_sql(payload: GenerateSQLRequest) -> GenerateSQLResponse:
         #
         # If anything unexpected happens we return a clean
         # structured error instead of crashing the API.
+        #
+        # The full error text is returned in "message" so
+        # the frontend toast can surface it for diagnosis.
         # ----------------------------------------------------
+        import logging as _logging
+        _logging.getLogger("app").exception(
+            "generate_sql failed | dataset=%s | error=%s",
+            getattr(payload, "dataset", "unknown"),
+            e,
+        )
         return GenerateSQLResponse(
             status="error",
             dataset=payload.dataset,
-            question=payload.question,
+            question=getattr(payload, "question", "") or "",
             sql="",
-            message=f"DEBUG ERROR: {type(e).__name__}: {e}",
+            message=f"{type(e).__name__}: {e}",
             warnings=[],
         )

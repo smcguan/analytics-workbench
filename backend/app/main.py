@@ -304,9 +304,9 @@ _load_local_env()
 
 FRONTEND_DIR = Path(os.getenv("AW_FRONTEND_DIR", str(BASE_DIR / "frontend")))
 DATA_DIR = Path(os.getenv("AW_DATA_DIR", str(BASE_DIR / "data")))
-DATASETS_DIR = Path(os.getenv("AW_DATASETS_DIR", str(DATA_DIR / "datasets")))
-EXPORTS_DIR = Path(os.getenv("AW_EXPORTS_DIR", str(BASE_DIR / "exports")))
-QUERIES_PATH = Path(os.getenv("AW_QUERIES_PATH", str(DATA_DIR / "queries.json")))
+DATASETS_DIR = Path(os.getenv("AW_DATASETS_DIR", str(DATA_DIR / "datasets"))).resolve()
+EXPORTS_DIR = Path(os.getenv("AW_EXPORTS_DIR", str(BASE_DIR / "exports"))).resolve()
+QUERIES_PATH = Path(os.getenv("AW_QUERIES_PATH", str(DATA_DIR / "queries.json"))).resolve()
 DATASET_CONTEXT_FILENAME = "dataset_context.json"
 
 DATASETS_DIR.mkdir(parents=True, exist_ok=True)
@@ -505,10 +505,16 @@ def dataset_source_path(dataset: str) -> tuple[str, bool]:
     Return (path_or_glob, is_glob) for a dataset.
 
     Reference mode:
-        returns absolute parquet file path
+        returns absolute parquet file path (resolved to system absolute)
 
     Copy mode:
-        returns datasets/<dataset>/*.parquet glob
+        returns datasets/<dataset>/*.parquet glob (resolved to system absolute)
+
+    IMPORTANT: both branches always return absolute paths with forward slashes.
+    This is required because the AI validation layer (validate_sql_with_duckdb)
+    creates its own DuckDB connection in a potentially different working directory.
+    A relative path would cause "file not found" errors in that context even
+    though the same path works fine from the main process working directory.
     """
     ds_dir = (DATASETS_DIR / dataset).resolve()
     ref = ds_dir / "_reference.txt"
@@ -521,12 +527,24 @@ def dataset_source_path(dataset: str) -> tuple[str, bool]:
             )
 
         p = Path(target)
+        # Resolve relative stored paths against ds_dir so they work regardless
+        # of which directory the process is currently running from.
+        if not p.is_absolute():
+            p = (ds_dir / p).resolve()
+
         if not p.exists():
             raise FileNotFoundError(
                 f"Reference dataset '{dataset}' points to missing file: {target}"
             )
 
         return (str(p.resolve()).replace("\\", "/"), False)
+
+    # Copy mode: dataset lives as source.parquet (written by import pipeline)
+    # or as *.parquet files. Check for source.parquet first (import pipeline
+    # canonical name), fall back to glob for legacy/registered datasets.
+    source_parquet = ds_dir / "source.parquet"
+    if source_parquet.exists():
+        return (str(source_parquet.resolve()).replace("\\", "/"), False)
 
     glob_path = str((ds_dir / "*.parquet").resolve()).replace("\\", "/")
     return (glob_path, True)
@@ -609,20 +627,29 @@ def _dataset_meta_summary(dataset: str) -> dict[str, Any]:
     Falls back to live computation.
     """
     ds_dir = _dataset_dir(dataset)
-    meta_path = ds_dir / "_meta.json"
 
-    if meta_path.exists():
-        try:
-            meta = json.loads(meta_path.read_text(encoding="utf-8"))
-            return {
-                "name": dataset,
-                "row_count": meta.get("row_count"),
-                "column_count": meta.get("column_count"),
-                "file_size_bytes": meta.get("file_size_bytes"),
-                "meta_source": "cached",
-            }
-        except Exception:
-            pass
+    # Check both _meta.json (legacy registered datasets) and metadata.json
+    # (written by the import pipeline). Try both so imported datasets also
+    # benefit from the fast cached path.
+    for meta_filename in ("_meta.json", "metadata.json"):
+        meta_path = ds_dir / meta_filename
+        if meta_path.exists():
+            try:
+                meta = json.loads(meta_path.read_text(encoding="utf-8"))
+                row_count = meta.get("row_count")
+                col_count = meta.get("column_count")
+                # metadata.json uses "columns" list — derive count from it
+                if col_count is None and isinstance(meta.get("columns"), list):
+                    col_count = len(meta["columns"])
+                return {
+                    "name": dataset,
+                    "row_count": row_count,
+                    "column_count": col_count,
+                    "file_size_bytes": meta.get("file_size_bytes"),
+                    "meta_source": "cached",
+                }
+            except Exception:
+                pass
 
     src, is_glob = dataset_source_path(dataset)
     esc = _sql_escape_path(src)
@@ -632,20 +659,29 @@ def _dataset_meta_summary(dataset: str) -> dict[str, Any]:
         row_count = int(
             con.execute(f"SELECT COUNT(*) FROM read_parquet('{esc}')").fetchone()[0]
         )
-        col_count = int(
-            con.execute(f"SELECT COUNT(*) FROM parquet_schema('{esc}')").fetchone()[0]
-        )
+        # parquet_schema() works on globs and single files, but the column count
+        # query using it counts schema *rows* not columns — use DESCRIBE instead
+        # which works reliably on both single-file and glob paths.
+        try:
+            col_count = len(
+                con.execute(f"DESCRIBE SELECT * FROM read_parquet('{esc}')").fetchall()
+            )
+        except Exception:
+            col_count = None
     finally:
         con.close()
 
-    if is_glob:
+    # File size: sum all parquet files in the dataset directory regardless of
+    # whether this is a glob or single-file dataset. This handles imported
+    # copy-mode datasets (source.parquet) without requiring _reference.txt.
+    try:
         file_size_bytes = sum(
             f.stat().st_size for f in ds_dir.glob("*.parquet") if f.is_file()
         )
-    else:
-        ref = ds_dir / "_reference.txt"
-        ref_path = Path(ref.read_text(encoding="utf-8").strip())
-        file_size_bytes = ref_path.stat().st_size if ref_path.exists() else None
+        if file_size_bytes == 0:
+            file_size_bytes = None
+    except Exception:
+        file_size_bytes = None
 
     return {
         "name": dataset,
@@ -1075,7 +1111,7 @@ def _build_dataset_context(dataset: str) -> dict[str, Any]:
                             MAX({quoted}) AS max_value,
                             AVG({quoted}) AS avg_value,
                             SUM(CASE WHEN {quoted} IS NULL THEN 1 ELSE 0 END) AS null_count
-                        FROM read_parquet('{esc}')
+                        FROM (SELECT * FROM read_parquet('{esc}') USING SAMPLE {_CONTEXT_SAMPLE_ROWS} ROWS)
                         """
                     ).fetchone()
 
@@ -1093,7 +1129,7 @@ def _build_dataset_context(dataset: str) -> dict[str, Any]:
                     top_vals = con.execute(
                         f"""
                         SELECT {quoted} AS value, COUNT(*) AS cnt
-                        FROM read_parquet('{esc}')
+                        FROM (SELECT * FROM read_parquet('{esc}') USING SAMPLE {_CONTEXT_SAMPLE_ROWS} ROWS)
                         GROUP BY {quoted}
                         ORDER BY cnt DESC
                         LIMIT 5
@@ -1103,7 +1139,7 @@ def _build_dataset_context(dataset: str) -> dict[str, Any]:
                     null_count = con.execute(
                         f"""
                         SELECT SUM(CASE WHEN {quoted} IS NULL THEN 1 ELSE 0 END)
-                        FROM read_parquet('{esc}')
+                        FROM (SELECT * FROM read_parquet('{esc}') USING SAMPLE {_CONTEXT_SAMPLE_ROWS} ROWS)
                         """
                     ).fetchone()[0]
 
@@ -1123,7 +1159,7 @@ def _build_dataset_context(dataset: str) -> dict[str, Any]:
                             MIN({quoted}) AS min_value,
                             MAX({quoted}) AS max_value,
                             SUM(CASE WHEN {quoted} IS NULL THEN 1 ELSE 0 END) AS null_count
-                        FROM read_parquet('{esc}')
+                        FROM (SELECT * FROM read_parquet('{esc}') USING SAMPLE {_CONTEXT_SAMPLE_ROWS} ROWS)
                         """
                     ).fetchone()
 
@@ -1314,12 +1350,32 @@ def api_dataset_meta(name: str):
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e)) from e
 
-    meta_path = ds_dir / "_meta.json"
-    if meta_path.exists():
+    # Check both _meta.json (legacy registered) and metadata.json (import pipeline).
+    # _meta.json is written by import pipeline now too — prefer it as it's lighter.
+    meta = None
+    for meta_filename in ("_meta.json", "metadata.json"):
+        candidate = ds_dir / meta_filename
+        if candidate.exists():
+            try:
+                meta = json.loads(candidate.read_text(encoding="utf-8"))
+                break
+            except Exception:
+                continue
+
+    if meta is not None:
+        col_count = meta.get("column_count")
+        # metadata.json stores columns as a list — derive count from it
+        if col_count is None and isinstance(meta.get("columns"), list):
+            col_count = len(meta["columns"])
+
+        # file_size_bytes: recompute from actual parquet file rather than relying
+        # on stored value (which may be None from _meta.json written at import time)
         try:
-            meta = json.loads(meta_path.read_text(encoding="utf-8"))
+            file_size_bytes = sum(
+                p.stat().st_size for p in ds_dir.glob("*.parquet") if p.is_file()
+            ) or None
         except Exception:
-            meta = {}
+            file_size_bytes = meta.get("file_size_bytes")
 
         out = {
             "dataset": name,
@@ -1327,8 +1383,8 @@ def api_dataset_meta(name: str):
             "source_path": src,
             "is_glob": is_glob,
             "row_count": meta.get("row_count"),
-            "column_count": meta.get("column_count"),
-            "file_size_bytes": meta.get("file_size_bytes"),
+            "column_count": col_count,
+            "file_size_bytes": file_size_bytes,
             "last_scanned": meta.get("last_scanned"),
             "meta_source": "cached",
         }
@@ -1347,11 +1403,12 @@ def api_dataset_meta(name: str):
     try:
         esc = _sql_escape_path(src)
 
+        # Use DESCRIBE instead of parquet_schema() for column count —
+        # parquet_schema() returns schema *rows* not columns and behaves
+        # differently on single files vs globs.
         try:
-            col_count = int(
-                con.execute(
-                    f"SELECT COUNT(*) FROM parquet_schema('{esc}')"
-                ).fetchone()[0]
+            col_count = len(
+                con.execute(f"DESCRIBE SELECT * FROM read_parquet('{esc}')").fetchall()
             )
         except Exception:
             col_count = None
@@ -1366,10 +1423,9 @@ def api_dataset_meta(name: str):
             row_count = None
 
         try:
-            if mode == "reference":
-                file_size_bytes = Path(src).stat().st_size
-            else:
-                file_size_bytes = sum(p.stat().st_size for p in ds_dir.glob("*.parquet"))
+            file_size_bytes = sum(
+                p.stat().st_size for p in ds_dir.glob("*.parquet") if p.is_file()
+            ) or None
         except Exception:
             file_size_bytes = None
 
@@ -1402,6 +1458,37 @@ def api_dataset_meta(name: str):
         con.close()
 
 
+
+
+@app.post("/api/datasets/{name}/delete")
+def api_dataset_delete(name: str):
+    """
+    Deregister and remove a dataset from the application.
+
+    This deletes the dataset directory and all its contents
+    (the canonical Parquet file, metadata, and context cache).
+
+    The frontend Refresh Datasets button calls this endpoint for
+    each visible dataset so that re-importing the same name does
+    not conflict with a stale backend registration.
+
+    Returns 404 if the dataset does not exist.
+    Returns 200 with ok=True on success.
+    """
+    ds_dir = _dataset_dir(name)
+
+    if not ds_dir.exists() or not ds_dir.is_dir():
+        raise HTTPException(status_code=404, detail=f"Dataset not found: {name}")
+
+    try:
+        shutil.rmtree(ds_dir)
+        logger.info("dataset deleted | dataset=%s | path=%s", name, ds_dir)
+        _audit_log({"event": "dataset_delete", "status": "success", "dataset": name})
+        return {"ok": True, "deleted": name}
+    except Exception as e:
+        logger.exception("dataset delete failed | dataset=%s", name)
+        _audit_log({"event": "dataset_delete", "status": "error", "dataset": name, "error": str(e)})
+        raise HTTPException(status_code=500, detail=f"Failed to delete dataset: {e}") from e
 @app.get("/api/presets")
 def api_presets():
     return {
@@ -1535,7 +1622,12 @@ def api_profile(dataset: str = Query(...), refresh: bool = False):
                 "error": str(e),
             }
         )
-        raise
+        # Raise as 400 with the actual error text so the frontend can
+        # display it in the toast instead of a generic "Internal Server Error".
+        raise HTTPException(
+            status_code=400,
+            detail=f"Profile failed for dataset '{dataset}': {e}",
+        ) from e
 
 
 @app.post("/api/sql")
@@ -2262,10 +2354,15 @@ def api_export(
 async def import_uploaded_dataset(
     file: UploadFile = File(...),
     dataset_name: str | None = Form(None),
+    overwrite: bool = Query(False),
 ):
     """
     Import an uploaded dataset and normalize it into the app's canonical
     dataset storage structure.
+
+    overwrite=true: if the dataset directory already exists, remove it first
+    before importing. This supports the Refresh → re-import workflow where
+    the backend delete may have raced or the user explicitly wants to replace.
     """
 
     clean_dataset_name = dataset_name
@@ -2280,6 +2377,7 @@ async def import_uploaded_dataset(
             original_filename=file.filename,
             display_name=clean_dataset_name,
             registered_root=DATASETS_DIR,
+            overwrite=overwrite,
         )
     except DatasetImportError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
@@ -2303,6 +2401,91 @@ async def import_uploaded_dataset(
         "columns": [asdict(col) for col in metadata.columns],
         "created_at": metadata.created_at,
     }
+
+
+class SqlGenerateRequest(BaseModel):
+    """Request body for /api/sql/generate (schema-aware SQL starter)."""
+    dataset: str
+    question: str | None = None
+    prompt: str | None = None
+    file_type: str | None = None
+    dataset_type: str | None = None
+
+
+@app.post("/api/sql/generate")
+def api_sql_generate(req: SqlGenerateRequest):
+    """
+    Schema-aware SQL starter endpoint.
+
+    This is the fallback for the frontend's Generate SQL chain when the
+    AI routes (/api/ai/generate_sql) are unavailable or fail.
+
+    Unlike a hard-coded SELECT * FROM dataset LIMIT 100, this endpoint
+    reads the actual dataset schema and returns SQL that references real
+    column names, giving the user a more useful starting point.
+
+    It does NOT call the AI — it generates deterministic starter SQL.
+    The AI layer is in /api/ai/generate_sql (routes.py).
+    """
+    dataset = (req.dataset or "").strip()
+
+    if not dataset:
+        raise HTTPException(status_code=400, detail="dataset is required.")
+
+    if dataset not in list_datasets():
+        raise HTTPException(status_code=404, detail=f"Dataset not found: {dataset}")
+
+    try:
+        src, _is_glob = dataset_source_path(dataset)
+        esc = _sql_escape_path(src)
+
+        con = _connect()
+        try:
+            cur = con.execute(f"DESCRIBE SELECT * FROM read_parquet(\'{esc}\')")
+            cols = [row[0] for row in cur.fetchall()]
+        finally:
+            con.close()
+
+        # This endpoint is a non-AI fallback — it cannot interpret the question.
+        # Return SELECT * with the dataset's actual column count noted in the
+        # message so the user knows what they're working with and why.
+        # The message makes clear the AI route was unavailable so they understand
+        # the SQL is a starter template, not an answer to their question.
+
+        import re as _re
+        question_text = (req.question or req.prompt or "").lower()
+        limit = 100
+        m = _re.search(r'\b(\d+)\s*(rows?|records?|results?|entries|lines)?\b', question_text)
+        if m:
+            candidate = int(m.group(1))
+            if 1 <= candidate <= 100000:
+                limit = candidate
+
+        col_summary = f"{len(cols)} columns" if cols else "unknown columns"
+        sql = f"SELECT *\nFROM dataset\nLIMIT {limit}"
+
+        return {
+            "sql": sql,
+            "dataset": dataset,
+            "source": "schema_starter",
+            "message": (
+                f"AI SQL generation was unavailable — loaded a starter query instead "
+                f"(dataset has {col_summary}: {', '.join(cols[:8])}{'...' if len(cols) > 8 else ''}). "
+                f"Edit the SQL above to answer your question."
+            ),
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.warning("sql/generate fallback failed | dataset=%s | reason=%s", dataset, e)
+        # Still return something usable rather than 500
+        return {
+            "sql": "SELECT *\nFROM dataset\nLIMIT 100",
+            "dataset": dataset,
+            "source": "generic_starter",
+            "message": f"Could not read schema ({e}). Generic starter SQL loaded.",
+        }
 @app.post("/api/datasets/scan")
 def scan_for_parquet(req: ScanRequest):
     """Scan a folder for parquet files and return basic file metadata."""
