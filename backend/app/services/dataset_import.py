@@ -159,6 +159,7 @@ def import_dataset(
     display_name: str | None = None,
     registered_root: str | Path = "data/datasets",
     overwrite: bool = False,
+    strip_trailing_special_chars: bool = False,
 ) -> DatasetImportResult:
     """
     Import a user-uploaded dataset into normalized Parquet storage.
@@ -166,6 +167,16 @@ def import_dataset(
     overwrite=True: if the dataset directory already exists, remove it and
     replace it. Used by the frontend Refresh → re-import workflow so users
     can bring in the same file again without renaming.
+
+    strip_trailing_special_chars=True: after conversion, strip trailing
+    non-alphanumeric characters (e.g. asterisks, daggers) from every string
+    column in the dataset.  CMS and other government datasets routinely append
+    footnote markers to values such as "Stelara*" or "12345†".  These markers
+    cause exact-match SQL filters to miss rows silently.
+
+    This option is opt-in and defaults to False.  It is not applied to
+    Parquet source files that are copied verbatim (only CSV / TSV / Excel
+    imports go through a DataFrame conversion step where stripping is safe).
     """
 
     # Step 1: Validate the most basic upload assumptions before touching disk.
@@ -217,12 +228,15 @@ def import_dataset(
     if original_type == "parquet":
         normalize_parquet(source_upload_path, parquet_path)
     elif original_type == "csv":
-        convert_csv_to_parquet(source_upload_path, parquet_path)
+        convert_csv_to_parquet(source_upload_path, parquet_path,
+                               strip_trailing_special_chars=strip_trailing_special_chars)
     elif original_type == "tsv":
         # TSV uses the same path as CSV but with tab delimiter
-        convert_tsv_to_parquet(source_upload_path, parquet_path)
+        convert_tsv_to_parquet(source_upload_path, parquet_path,
+                               strip_trailing_special_chars=strip_trailing_special_chars)
     elif original_type == "xlsx":
-        convert_xlsx_to_parquet(source_upload_path, parquet_path)
+        convert_xlsx_to_parquet(source_upload_path, parquet_path,
+                                strip_trailing_special_chars=strip_trailing_special_chars)
     else:
         raise UnsupportedDatasetTypeError(f"Unsupported dataset type: {original_type}")
 
@@ -443,7 +457,32 @@ def normalize_parquet(source_path: Path, parquet_path: Path) -> None:
         ) from exc
 
 
-def convert_csv_to_parquet(source_path: Path, parquet_path: Path) -> None:
+def _strip_trailing_special_chars_from_df(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Strip trailing non-alphanumeric characters from every string column.
+
+    CMS and other government datasets often append footnote markers to values
+    (e.g. "Stelara*", "12,345†", "Denosumab**").  These trailing characters
+    cause exact-match SQL filters to miss rows silently because the stored
+    value does not equal the user's search term.
+
+    Only object-dtype columns are modified.  Numeric columns are unaffected.
+    NaN / None values pass through unchanged.
+    """
+    _trailing_special = re.compile(r"[^A-Za-z0-9]+$")
+    for col in df.columns:
+        if df[col].dtype == object:
+            df[col] = df[col].apply(
+                lambda v: _trailing_special.sub("", v) if isinstance(v, str) else v
+            )
+    return df
+
+
+def convert_csv_to_parquet(
+    source_path: Path,
+    parquet_path: Path,
+    strip_trailing_special_chars: bool = False,
+) -> None:
     """Read CSV data and write it into canonical Parquet storage."""
 
     try:
@@ -451,10 +490,17 @@ def convert_csv_to_parquet(source_path: Path, parquet_path: Path) -> None:
     except Exception as exc:
         raise DatasetValidationError(f"Failed to read CSV file: {exc}") from exc
 
+    if strip_trailing_special_chars:
+        dataframe = _strip_trailing_special_chars_from_df(dataframe)
+
     dataframe_to_parquet(dataframe, parquet_path, source_label="CSV")
 
 
-def convert_tsv_to_parquet(source_path: Path, parquet_path: Path) -> None:
+def convert_tsv_to_parquet(
+    source_path: Path,
+    parquet_path: Path,
+    strip_trailing_special_chars: bool = False,
+) -> None:
     """Read TSV data (tab-separated values) and write into canonical Parquet storage."""
 
     # on_bad_lines="warn" requires pandas >= 1.3.
@@ -481,10 +527,17 @@ def convert_tsv_to_parquet(source_path: Path, parquet_path: Path) -> None:
     except Exception as exc:
         raise DatasetValidationError(f"Failed to read TSV file: {exc}") from exc
 
+    if strip_trailing_special_chars:
+        dataframe = _strip_trailing_special_chars_from_df(dataframe)
+
     dataframe_to_parquet(dataframe, parquet_path, source_label="TSV")
 
 
-def convert_xlsx_to_parquet(source_path: Path, parquet_path: Path) -> None:
+def convert_xlsx_to_parquet(
+    source_path: Path,
+    parquet_path: Path,
+    strip_trailing_special_chars: bool = False,
+) -> None:
     """
     Read the first worksheet from an Excel file and write canonical Parquet.
     """
@@ -493,6 +546,9 @@ def convert_xlsx_to_parquet(source_path: Path, parquet_path: Path) -> None:
         dataframe = pd.read_excel(source_path, sheet_name=0, engine="openpyxl")
     except Exception as exc:
         raise DatasetValidationError(f"Failed to read Excel file: {exc}") from exc
+
+    if strip_trailing_special_chars:
+        dataframe = _strip_trailing_special_chars_from_df(dataframe)
 
     dataframe_to_parquet(dataframe, parquet_path, source_label="Excel")
 

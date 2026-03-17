@@ -1,165 +1,386 @@
 # Analytics Workbench — Claude Code Context
 
-## What This Project Is
+## PROJECT NAME
+Analytics Workbench
 
-Analytics Workbench is an AI-assisted analytics desktop application.
-It is a FastAPI backend + static HTML/JS frontend packaged as a local desktop app.
-The AI layer uses OpenAI (GPT-4.1-mini by default) for SQL generation and question suggestions.
-DuckDB is the query engine — all SQL runs against local Parquet files.
+## PROJECT PURPOSE
+Analytics Workbench is an AI-assisted analytics desktop application that allows a user to:
 
-The product goal is an AI-assisted insight workflow:
-Open file → inspect dataset → ask question → generate SQL → review/edit → run SQL → see table + chart
+1. Import a dataset (CSV, Excel, TSV, Parquet)
+2. Inspect the dataset (Profile, Schema, Preview)
+3. Ask a natural-language question about the dataset
+4. Get AI-suggested questions via the Suggestions button
+5. Generate SQL with AI
+6. Manually review/edit the SQL
+7. Run SQL against the dataset
+8. View results in a table
+9. View automatic chart (bar or line) when result shape supports it
+10. Export results (Excel or TSV)
 
-## Current Milestone
+The product direction is an AI-assisted insight workflow, not just a SQL textbox.
 
-Milestone 3 — complete as of March 2026.
-All acceptance criteria met. Next work is Milestone 4 (Insights view).
+## PRIMARY PRODUCT GOAL
+Move from:
+- AI-assisted query tool
 
-## Repository Structure
+To:
+- AI-assisted insight tool
 
+## TARGET USER FLOW
+Open file → dataset loads → **insights appear automatically** → inspect dataset → ask question →
+generate SQL → review/edit SQL → run SQL → table + chart appear → export results
+
+## CURRENT DEVELOPMENT STAGE
+Milestone 3 is COMPLETE as of March 2026.
+Milestone 4 is the active target — the Insights view + Reference Table JOIN.
+
+---
+
+## TECH STACK
+- Backend: FastAPI (Python)
+- Query engine: DuckDB (all SQL runs against local Parquet files)
+- AI: OpenAI GPT-4.1-mini (SQL generation + question suggestions + insights)
+- Frontend: Single static HTML/JS/CSS file (no framework)
+- Packaging: Local desktop app (PyInstaller)
+- Chart rendering: Chart.js 4.4.1
+
+---
+
+## REPOSITORY STRUCTURE
 ```
 /
 ├── frontend/
-│   └── index.html              # Entire frontend — single HTML/JS/CSS file
+│   └── index.html              # Entire frontend — single file
 ├── backend/
 │   └── app/
 │       ├── main.py             # FastAPI app, all core endpoints
 │       ├── ai/
-│       │   ├── routes.py       # /api/ai/* endpoints (generate_sql, suggest_questions)
+│       │   ├── routes.py       # /api/ai/* endpoints
 │       │   ├── provider_openai.py  # OpenAI prompts and API calls
-│       │   ├── context_builder.py  # Builds dataset context for AI prompts
+│       │   ├── context_builder.py  # Builds dataset context for AI
 │       │   ├── response_parser.py  # Parses AI JSON responses
-│       │   ├── schemas.py      # Pydantic request/response models for AI routes
+│       │   ├── schemas.py      # Pydantic models for AI routes
 │       │   └── sql_validator.py    # Validates AI SQL with DuckDB EXPLAIN
 │       └── services/
-│           ├── dataset_import.py   # Import pipeline: CSV/TSV/Excel/Parquet → Parquet
-│           └── chart_recommender.py # Deterministic chart type recommendation
+│           ├── dataset_import.py   # Import pipeline
+│           └── chart_recommender.py # Chart type recommendation
 ├── data/
-│   └── datasets/               # Imported datasets live here
+│   └── datasets/
 │       └── <dataset_name>/
-│           ├── source.parquet  # Canonical internal Parquet file
-│           ├── metadata.json   # Full import metadata (written by dataset_import.py)
-│           └── _meta.json      # Lightweight summary (for fast cache reads)
-├── exports/                    # SQL export outputs (xlsx, tsv)
-├── .env                        # OPENAI_API_KEY and other config (not committed)
-└── CLAUDE.md                   # This file
+│           ├── source.parquet
+│           ├── metadata.json
+│           ├── _meta.json
+│           └── dataset_context.json  # AI context + cached suggestions + cached insights
+├── exports/
+├── .env                        # OPENAI_API_KEY (not committed)
+├── CLAUDE.md                   # This file
+└── start-dev.bat               # Double-click launcher for dev session
 ```
 
-## Key Commands
+---
 
-```bash
-# Start the backend (from repo root)
-uvicorn backend.app.main:app --reload --port 8000
+## MILESTONE 3 — WHAT WAS BUILT (COMPLETE)
 
-# The frontend is served at:
-http://localhost:8000/ui/
-
-# Run a quick health check
-curl http://localhost:8000/api/health
-```
-
-## Environment Variables
-
-```
-OPENAI_API_KEY=sk-...           # Required for AI features
-OPENAI_MODEL=gpt-4.1-mini      # Default model (can override)
-AW_DATASETS_DIR=...            # Override datasets directory (absolute path)
-AW_EXPORTS_DIR=...             # Override exports directory
-AW_CONTEXT_SAMPLE_ROWS=100000  # Rows sampled for AI context on large datasets
-AW_DEFAULT_PREVIEW_ROWS=50
-AW_MAX_PREVIEW_ROWS=200
-AW_MAX_EXPORT_ROWS=200000
-```
-
-## Backend Architecture
-
-### main.py responsibilities
-- All non-AI API endpoints
-- Dataset discovery (list_datasets, dataset_source_path)
-- SQL execution and rewriting (FROM dataset → FROM read_parquet('...'))
-- Profile / schema / preview endpoints
-- Import endpoint (delegates to dataset_import.py)
-- Chart recommendation (delegates to chart_recommender.py)
-- Dataset delete endpoint
-
-### Critical design decisions in main.py
-- DATASETS_DIR is always resolved as absolute at startup — never use relative paths
-- dataset_source_path() checks for source.parquet first, then glob *.parquet
-- _build_dataset_context() uses USING SAMPLE {_CONTEXT_SAMPLE_ROWS} ROWS on all stat queries
-- Use DESCRIBE SELECT * instead of parquet_schema() for column counts everywhere
-- Both _meta.json and metadata.json are checked in all metadata read paths
-
-### AI routes (routes.py)
-- POST /api/ai/generate_sql — main AI SQL generation
-- GET /api/ai/suggest_questions — AI-generated question chips
-- The generate_sql endpoint accepts both "question" and "prompt" fields
-- Falls back gracefully on all exceptions — never crashes the API
-- DuckDB semantic validation runs via EXPLAIN before returning SQL
-
-### dataset_import.py
-- Supported types: .parquet, .csv, .tsv, .xlsx, .xls
-- Parquet import: schema-only validation + shutil.copy2 (no full read/write — critical for large files)
-- inspect_parquet uses pq.read_metadata() footer only — not pq.read_table()
-- write_metadata() writes both metadata.json and _meta.json
+### Dataset Import Pipeline
+- CSV, Excel (.xlsx/.xls), TSV, Parquet all supported
+- All formats converted to internal Parquet on import
+- Parquet import: schema-only validation + raw file copy (fast for 220M row files)
+- TSV: pandas read_csv with sep="\t" and version compatibility fallback
 - import_dataset() accepts overwrite=True to replace existing datasets
+- Writes both metadata.json and _meta.json on every import
+- _meta.json enables fast cached metadata reads by all endpoints
 
-### chart_recommender.py
-- Pure Python, no FastAPI or DuckDB dependencies
-- Input: columns (list), rows (list of dicts)
-- Returns: recommendation dict with recommended, chart_type, x_column, y_column, title, reason
-- Bar chart: 2 cols, categorical x, numeric y, 2-50 rows
-- Line chart: 2 cols, datetime x, numeric y, 2+ rows
-- Everything else: recommended=False with plain-English reason
+### Dataset Management
+- POST /api/datasets/{name}/delete endpoint — removes dataset directory
+- Refresh Datasets calls delete endpoint for each dataset before clearing UI
+- DATASETS_DIR always resolved as absolute path at startup
+- Import supports ?overwrite=true query param
 
-## Frontend Architecture
+### AI SQL Generation
+- 4-route fallback chain in frontend:
+  1. POST /api/ai/generate_sql with {dataset, question, file_type}
+  2. POST /api/ai/generate_sql with {dataset, prompt, file_type}
+  3. POST /api/sql/generate with {dataset, prompt, file_type}
+  4. POST /api/sql/generate with {dataset, question, file_type}
+- /api/sql/generate in main.py: schema-aware fallback, no AI, returns real column names
+- AI system prompt tuned for DuckDB syntax (strftime argument order, DATE_TRUNC, casting)
+- generate_sql endpoint accepts both "question" and "prompt" fields
+- Actual last error message surfaced in toast for diagnosis
 
-Single file: frontend/index.html
+### Suggestions Button
+- Calls GET /api/ai/suggest_questions
+- Results CACHED in dataset_context.json under "suggested_questions" key
+- First click: calls OpenAI, caches result
+- Subsequent clicks: returns from cache instantly (no OpenAI call)
+- Popover shows "Cached suggestions — Refresh" link for force regeneration
+- Refresh link calls endpoint with ?refresh=true to bypass cache
+- If OpenAI fails on refresh, cached suggestions returned as fallback
+- Suggestions popover closes when dataset changes
 
-### Key JS globals
-- selectedDataset — currently active dataset name
-- datasets — array of dataset objects loaded this session
-- lastRun — last SQL execution result including visualization block
-- _chartInstance — active Chart.js instance (must call clearChart() before new render)
-- suggestionsVisible — tracks suggestions popover open/closed state
+### Inspect Dataset
+- Profile, Schema, Preview all working
+- Fixed header (7-slot CSS grid) — does NOT scroll with data
+- Only the data window below scrolls horizontally
+- Profile/Schema/Preview are true toggles (click again to hide)
+- Uses DESCRIBE SELECT * instead of parquet_schema() for column counts
+- Reads both _meta.json and metadata.json in all metadata paths
 
-### Critical frontend behaviors (frozen — do not change without reason)
-- Import uses <label for="file-input"> pattern, NOT programmatic .click()
-- Inspect Dataset header is a fixed 7-slot CSS grid — does NOT scroll with data
-- Only the inspect data window below scrolls horizontally
-- Profile/Schema/Preview are true toggles — click again to hide
-- Results block row layout is frozen:
-  - Row 1: Run SQL | Explain | execution metadata
-  - Row 2: RESULTS label | row count | Table tab | Chart tab | Export Excel | Export TSV
-  - Row 3: table or chart content
-- Export Excel and Export TSV are direct buttons — no Export tab
+### Performance for Large Datasets
+- Context builder uses USING SAMPLE 100000 ROWS on all stat queries
+- Row counts from Parquet footer metadata (pq.read_metadata()), not COUNT(*)
+- Parquet import copies raw bytes — no decompression for large files
+- AW_CONTEXT_SAMPLE_ROWS env var to tune sample size
+
+### Automatic Charting
+- chart_recommender.py: deterministic rules, no AI
+- Bar chart: exactly 2 cols, categorical x, numeric y, 2-50 rows
+- Line chart: exactly 2 cols, datetime x, numeric y, 2+ rows
+- /api/sql response includes "visualization" block
+- Chart.js 4.4.1 renders in Chart tab
+- Chart tab renders on user click — no auto-switch
+- clearChart() called before every new SQL run
+
+---
+
+## MILESTONE 4 — ACTIVE TARGET
+
+### Product Goal
+The user opens a dataset and within 30 seconds sees something they didn't know
+to ask for. No query required. No SQL. Just open a file and get value immediately.
+
+### The Core Experience
+```
+User imports dataset
+        ↓
+Insights tab activates automatically
+        ↓
+AI analyzes the dataset structure and content
+        ↓
+3–5 insight cards appear
+        ↓
+Each card shows a finding + supporting chart or table
+        ↓
+User clicks any card → opens as full query in Query tab
+        ↓
+User asks follow-up questions from the card
+```
+
+### Insight Card Structure
+Each card contains:
+1. A plain-English headline ("Keytruda accounts for 18% of all Part B spending")
+2. A one-sentence explanation of why it's notable
+3. A supporting chart or summary table rendered inline
+4. An "Explore in Query" button that loads the underlying SQL into the Query tab
+
+### Six Insight Types (in priority order)
+1. **Concentration** — small number of items drives disproportionate share of total (Pareto)
+2. **Outliers** — values far outside the norm for their group
+3. **Trend** — fastest-growing and fastest-declining items (requires time column)
+4. **Distribution skew** — heavily skewed numeric columns
+5. **Missing/anomalous data** — high null rates, zero values, formatting inconsistencies
+6. **Correlation** — two numeric columns that move together in an interesting way
+
+### What NOT to do in Insights
+- Do not generate insights that restate the obvious ("This dataset has 734 rows")
+- Do not generate more than 5 cards
+- Do not make the user wait more than 10 seconds for the first card
+- Do not require configuration before insights appear
+- Do not make every card a chart — numbers and small tables are fine
+- Do not use jargon in headlines — write for business users
+
+### Insight Object Schema
+```json
+{
+  "type": "concentration",
+  "headline": "Top 5 drugs account for 42% of total spending",
+  "explanation": "Medicare Part B spending is highly concentrated...",
+  "sql": "SELECT Brnd_Name, Tot_Spndng_2023 FROM dataset ORDER BY...",
+  "chart_type": "bar",
+  "priority": 1
+}
+```
+
+### New Backend Endpoints Required
+```
+GET /api/ai/insights?dataset=<name>
+GET /api/ai/insights?dataset=<name>&refresh=true
+```
+
+Behavior:
+- First call: runs AI analysis, caches result in dataset_context.json under "insights" key
+- Subsequent calls: returns from cache instantly
+- ?refresh=true bypasses cache and regenerates
+- Pattern is identical to suggest_questions caching — follow the same implementation
+
+### Technical Approach
+1. Use existing /api/profile data as input to insight engine (no new data collection)
+2. Pass profile + data sample to GPT-4.1-mini with structured prompt
+3. AI returns JSON array of insight objects (same parse pattern as suggestions)
+4. For each insight, generate supporting SQL query
+5. Render cards using existing Chart.js + results table infrastructure
+
+### UI Changes Required
+- On dataset load, auto-trigger insights fetch
+- Show skeleton loading cards while AI runs (3 placeholder cards)
+- Render insight cards in a 2-column grid in the Insights view
+- Each card: headline, explanation, mini chart or table, Explore button
+- Add "Refresh Insights" button in toolbar
+- Empty state if no insights can be generated — not a blank screen
+
+---
+
+## MILESTONE 4 — REFERENCE TABLE JOIN (COMPANION FEATURE)
+
+### Purpose
+Allow the user to upload a small reference CSV and JOIN it against the primary
+dataset inside AW. This enables enrichment workflows (IRA exclusion lists,
+category mappings, manufacturer lists) without leaving AW.
+
+### How It Works
+- In the Import area, add a "Reference Table" option alongside primary dataset import
+- Reference tables are lightweight — no profiling, no schema inspection, no insights
+- Available in SQL as a second table name (user-defined or default "reference")
+- AI context builder includes reference table column names when generating SQL
+- One reference table per session (not a full multi-dataset engine)
+
+### What This Unlocks
+- JOIN an IRA drug exclusion list → automatic IRA filtering in any query
+- JOIN a USP category mapping → automatic therapeutic classification
+- JOIN a manufacturer MFN list → automatic MFN flagging
+- Any lookup table enrichment the user needs
+
+### Backend Changes Required
+- dataset_import.py: add lightweight reference table import (CSV → Parquet, no profiling)
+- context_builder.py: include reference table schema in AI context when present
+- main.py: rewrite FROM dataset logic to handle FROM dataset JOIN reference
+- No new endpoints required — extends existing import and SQL execution paths
+
+### Scope Boundary
+This is enrichment, not multi-dataset analysis. One primary dataset + one reference
+table. Keep it simple. Do not build a general multi-dataset join engine.
+
+---
+
+## MILESTONE 4 — SUCCESS CRITERIA
+
+Milestone 4 is complete when:
+1. User imports any structured dataset and sees 3–5 insight cards within 10 seconds
+2. Every insight card has a working "Explore in Query" drill-down
+3. Insights are cached — reloading the dataset is instant
+4. Reference table JOIN works end-to-end for at least one enrichment use case
+5. The Compass/Farragut analytical workflow (see below) can be completed entirely
+   inside AW without exporting to an external tool
+
+---
+
+## COMPASS/FARRAGUT WORKFLOW — REFERENCE USE CASE
+
+This real-world workflow was used as a stress test in March 2026 and defines
+the target capability for Milestone 4. When Milestone 4 is complete, this
+entire workflow should run inside AW.
+
+**The task:** Identify drugs likely included in the CMS GLOBE and GUARD payment
+models, applying spending thresholds, IRA exclusions, single-source filtering,
+and therapeutic category classification.
+
+**Steps that required leaving AW in the stress test (Milestone 4 should fix these):**
+1. IRA exclusion list — 40+ drugs across 3 rounds, too many NOT LIKE conditions
+   for AW query engine → Fix: Reference table JOIN
+2. Therapeutic category classification — CASE statement too complex for AW query
+   length limit → Fix: Reference table JOIN with pre-built category mapping CSV
+3. Post-processing / enrichment — Python classification after export
+   → Fix: Reference table JOIN eliminates this step entirely
+4. Silent SQL failures — wrong results returned without error
+   → Fix: Bug fixes (see Known Bugs section below)
+
+---
+
+## KNOWN BUGS — ACTIVE (Fix before or during Milestone 4)
+
+### Bug 1: Silent SQL failure on invalid DuckDB syntax
+**Symptom:** When a query contains invalid DuckDB syntax (e.g. regexp_replace
+with a PostgreSQL-style 'g' flag), /api/sql returns the unfiltered dataset
+instead of an error. User sees results as if the WHERE clause was ignored.
+**Root cause:** Error is being swallowed somewhere in the SQL execution path.
+sql_validator.py EXPLAIN step may not be firing correctly.
+**Fix:** Diagnose error handling in /api/sql. Ensure actual DuckDB error message
+reaches frontend toast. Confirm sql_validator.py EXPLAIN runs before execution.
+**Priority:** Critical — silent wrong results are worse than visible errors.
+
+### Bug 2: Long NOT LIKE / NOT IN chains fail silently around 26 conditions
+**Symptom:** Queries with many NOT LIKE or NOT IN conditions in a WHERE clause
+fail without a clear error message around line 26. DuckDB itself has no such
+limit — this is a frontend or backend issue.
+**Investigation needed:** Check for content-length limits, newline/character
+parsing issues, or textarea size limits in the frontend SQL editor.
+**Fix:** Diagnose the limit. Add a clear error message when a query exceeds any
+limit. Do not fail silently.
+**Priority:** High.
+
+### Bug 3: Refresh Datasets — Windows file lock issue
+**Symptom:** shutil.rmtree() in /api/datasets/{name}/delete may fail silently
+when DuckDB has the Parquet file open.
+**Fix:** Add robust rmtree helper with retry logic and better error surfacing.
+**Priority:** Medium.
+
+### Bug 4: Suggestions button caching
+**Status:** Just implemented — needs testing.
+
+---
+
+## DATA QUALITY NOTES (Learned from Compass stress test)
+
+### CMS Dataset Asterisk Contamination
+CMS Medicare spending datasets append asterisks to some brand and generic names
+(e.g. "Stelara*", "Denosumab*", "Orencia*"). These bypass exact-match SQL
+filters (= and IN operators) and cause incorrect exclusion logic.
+
+**Workaround in SQL:** Always use LIKE 'DRUGNAME%' instead of = 'DRUGNAME'
+or IN ('DRUGNAME') when filtering CMS brand name columns.
+
+**Recommended fix:** Add optional trailing special-character stripping on import
+in dataset_import.py. Should be opt-in (default off) with a checkbox in the
+import UI. Strip trailing non-alphanumeric characters from string columns.
+
+### CMS Part D Tot_Mftr Proxy Limitation
+The Tot_Mftr column in CMS Part D data counts manufacturers per brand name row,
+not per molecule. A drug with biosimilars (e.g. Humira/adalimumab) still shows
+Tot_Mftr=1 for its branded row even though biosimilars exist on the market.
+Using Tot_Mftr=1 as a single-source proxy will over-include drugs with
+biosimilar competition.
+
+**Note for AI SQL generation:** When generating queries that filter on Tot_Mftr,
+add a comment in the SQL noting this limitation.
+
+### CMS Part B — No Manufacturer Column
+The CMS Part B Spending by Drug dataset does not include a manufacturer name
+column. Drug identification is by HCPCS code + brand name + generic name.
+Manufacturer data for Part B drugs requires a supplemental source.
+
+---
+
+## UI DECISIONS (FROZEN — do not change without explicit instruction)
 - Nav order: Insights → Query → Saved Queries
 - App starts on Insights view
+- Export Excel and Export TSV are direct toolbar buttons (no Export tab)
+- Import uses <label for="file-input"> pattern, NOT programmatic .click()
 - Prompt and SQL editor clear when switching datasets
-- SQL editor clears when suggestion chip is clicked
+- SQL editor clears when suggestion chip clicked
+- Results block row layout:
+  Row 1: Run SQL | Explain | execution metadata
+  Row 2: RESULTS label | row count | Table | Chart | Export Excel | Export TSV
+  Row 3: table or chart content
 
-### Chart rendering
-- Chart.js 4.4.1 loaded from cdnjs CDN
-- renderChart(visualization, columns, rows) — renders from lastRun.visualization
-- clearChart() — destroys Chart.js instance, must call before new render
-- Chart tab renders on click, not automatically after SQL run
-- No auto-switch to Chart tab — user clicks it explicitly
+---
 
-### SQL generation fallback chain (frontend)
-1. POST /api/ai/generate_sql with {dataset, question, file_type, ...}
-2. POST /api/ai/generate_sql with {dataset, prompt, file_type, ...}
-3. POST /api/sql/generate with {dataset, prompt, file_type, ...}
-4. POST /api/sql/generate with {dataset, question, file_type, ...}
-If all fail: populate editor with SELECT * FROM dataset LIMIT 100
-
-## API Endpoints
-
+## API ENDPOINTS
 ```
 GET  /api/version
 GET  /api/health
 GET  /api/datasets
 GET  /api/datasets/{name}/meta
 POST /api/datasets/{name}/delete
-POST /api/datasets/import          ?overwrite=true supported
+POST /api/datasets/import          (?overwrite=true supported)
 GET  /api/schema?dataset=
 GET  /api/preview?dataset=
 GET  /api/profile?dataset=
@@ -170,12 +391,25 @@ GET  /api/queries
 POST /api/queries/save
 POST /api/queries/delete
 POST /api/ai/generate_sql
-GET  /api/ai/suggest_questions?dataset=
+GET  /api/ai/suggest_questions?dataset=  (?refresh=true to bypass cache)
+GET  /api/ai/insights?dataset=           (?refresh=true to bypass cache) [MILESTONE 4]
 POST /api/shutdown
 ```
 
-## /api/sql Response Shape
+---
 
+## SQL EXECUTION CONVENTION
+All SQL runs against Parquet via DuckDB.
+Frontend writes SQL using logical table name "dataset".
+main.py rewrites FROM dataset → FROM read_parquet('/absolute/path/source.parquet')
+AI instructed to always use "dataset" as table name, no semicolon at end.
+
+When a reference table is loaded, main.py also rewrites "reference" to its
+absolute Parquet path. Both rewrites must happen before execution.
+
+---
+
+## /api/sql RESPONSE SHAPE
 ```json
 {
   "columns": ["region", "revenue"],
@@ -193,59 +427,112 @@ POST /api/shutdown
 }
 ```
 
-## SQL Execution Convention
+---
 
-All SQL runs against Parquet files via DuckDB.
-The frontend writes SQL referencing the logical table name `dataset`.
-main.py rewrites `FROM dataset` → `FROM read_parquet('/absolute/path/source.parquet')`
-before execution. The AI is instructed to use `dataset` as the table name.
+## AI PROMPT NOTES (provider_openai.py)
 
-## AI Prompt Notes
-
-provider_openai.py contains two prompts:
-
-**SQL generation prompt** — key instructions:
-- DuckDB syntax only (not MySQL/SQLite)
-- strftime('%Y-%m', col) — format string FIRST (opposite of SQLite)
+### SQL Generation
+- DuckDB syntax only
+- strftime('%Y-%m', col) — format string FIRST
 - DATE_TRUNC('month', col) for date bucketing
 - col::INTEGER for type casting
-- Never invent column names — only use columns listed in context
-- Table name is always `dataset`
+- Never invent column names
+- Table name is always "dataset" (reference table is "reference" if present)
 - No semicolon at end of query
+- Returns JSON: {status, sql, message, warnings}
+- LIKE patterns preferred over = or IN for string matching (handles data quality issues)
 
-**Suggest questions prompt** — generates schema-grounded analytical questions.
-No changes needed here — working well.
+### Insights Generation (NEW — Milestone 4)
+- Input: dataset profile (column stats, sample rows, top values)
+- Output: JSON array of insight objects (see Insight Object Schema above)
+- Max 5 insights
+- Each insight must include executable SQL
+- Headlines must be plain English, no jargon
+- Prioritize: concentration > outliers > trend > skew > missing data > correlation
 
-## Known Gaps / Placeholder Features
+### Suggestions
+- Generates schema-grounded analytical questions
+- Results cached in dataset_context.json under "suggested_questions" key
 
-- Insights view — nav item exists, no backend implementation yet (Milestone 4)
-- Explain button — placeholder toast only
-- Suggestions button — working but relies on AI; fails gracefully if AI unavailable
-- Chart view — limited to exactly 2-column results by design (Milestone 3 scope)
-- sql_validator.py (DuckDB EXPLAIN step) — not reviewed; may over-reject valid SQL
+---
 
-## Coding Conventions
+## DATASET STORAGE STRUCTURE
+```
+data/datasets/<registered_name>/
+  source.parquet       — canonical internal file
+  metadata.json        — full import metadata
+  _meta.json           — lightweight summary for fast cache reads
+  dataset_context.json — AI context (columns, stats, sample rows,
+                         suggested_questions, insights)
 
+data/references/<registered_name>/   [MILESTONE 4 — NEW]
+  source.parquet       — reference table file
+  _meta.json           — column names and types only (no profiling)
+```
+
+---
+
+## ENVIRONMENT VARIABLES
+```
+OPENAI_API_KEY=sk-...
+OPENAI_MODEL=gpt-4.1-mini
+AW_DATASETS_DIR=...        (absolute path override)
+AW_EXPORTS_DIR=...
+AW_CONTEXT_SAMPLE_ROWS=100000
+AW_DEFAULT_PREVIEW_ROWS=50
+AW_MAX_PREVIEW_ROWS=200
+AW_MAX_EXPORT_ROWS=200000
+```
+
+---
+
+## CODING CONVENTIONS
 - Python: type hints throughout, dataclasses for data models
-- Error handling: always catch and return HTTP 400/404 with detail text — never bare 500s
-- Logging: use logger.info/warning/exception — never print()
-- All file paths: resolve() to absolute before use
-- Frontend JS: vanilla JS only — no framework
-- Frontend CSS: CSS custom properties (--bg0, --accent, etc.) — match existing palette
-- Comments: explain WHY not just what, especially for non-obvious DuckDB behavior
+- Error handling: always HTTP 400/404 with detail text — never bare 500s
+- Logging: logger.info/warning/exception — never print()
+- All file paths: .resolve() to absolute before use
+- Frontend: vanilla JS only, no framework
+- CSS: use existing custom properties (--bg0, --accent, etc.)
+- Comments: explain WHY, especially for non-obvious DuckDB behavior
+- Use DESCRIBE SELECT * not parquet_schema() for column counts
+- Never call loadDatasets() inside import polling loop
 
-## Performance Notes
+---
 
-- Large Parquet files (100M+ rows): import is fast because we copy bytes, not data
-- Context building for Suggestions/Profile samples 100K rows — accurate enough for AI
-- SQL execution on 220M rows is inherently slow — DuckDB is fast but physics applies
-- Row counts always come from Parquet footer metadata, not COUNT(*) queries on import
+## WHAT NOT TO DO
+- Do not use parquet_schema() for column counts
+- Do not call loadDatasets() in the import polling loop
+- Do not use relative paths for DATASETS_DIR
+- Do not add frontend frameworks
+- Do not auto-switch to Chart tab after SQL run
+- Do not expose internal Parquet conversion to users
+- Do not change frozen UI decisions without explicit instruction
+- Do not use = or IN for string matching on CMS datasets — use LIKE patterns
+- Do not swallow DuckDB errors — always surface the actual error message
+- Do not build a general multi-dataset engine for Milestone 4 — keep it to
+  one primary dataset + one reference table
 
-## What NOT To Do
+---
 
-- Do not use parquet_schema() for column counts — use DESCRIBE SELECT * instead
-- Do not call loadDatasets() inside the import polling loop — it restores all backend datasets
-- Do not use relative paths for DATASETS_DIR — always .resolve() to absolute
-- Do not add framework dependencies (React, Vue, etc.) to the frontend
-- Do not auto-switch to Chart tab after SQL run — user clicks it explicitly
-- Do not expose the internal Parquet conversion to users — import is a single step
+## DEVELOPMENT ENVIRONMENT
+- Windows 11
+- Project root: C:\dev\analytics-workbench
+- Virtual environment: .venv
+- Launch command: uvicorn backend.app.main:app --reload --port 8000
+- App URL: http://127.0.0.1:8000/ui/
+- Claude Code: installed, CLAUDE.md in project root
+- Batch file: start-dev.bat in project root
+
+---
+
+## WHEN CONTRIBUTING
+1. Always read the actual file before editing — never assume current state
+2. Preserve frozen UI decisions unless explicitly told to change them
+3. Distinguish frontend vs backend problems clearly
+4. Prefer targeted fixes over rewrites
+5. Use /plan in Claude Code for any change touching multiple files
+6. Always .resolve() file paths to absolute
+7. Test that imports still work after any main.py change
+8. Never leave bare except: pass blocks — always log the error
+9. For any new AI endpoint, follow the suggest_questions caching pattern exactly
+10. When in doubt about DuckDB syntax, test with EXPLAIN before executing

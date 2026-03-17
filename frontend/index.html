@@ -293,6 +293,105 @@
             margin-left:6px;
         }
 
+        /* ---- Insights view ---- */
+        .insights-toolbar{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            margin-bottom:12px;
+        }
+        .insights-grid{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:16px;
+            margin-top:4px;
+        }
+        @media(max-width:900px){
+            .insights-grid{grid-template-columns:1fr;}
+        }
+        .insight-card{
+            background:linear-gradient(180deg,rgba(30,44,66,.92),rgba(25,37,56,.92));
+            border:1px solid rgba(79,140,255,.16);
+            border-radius:16px;
+            padding:18px;
+            display:flex;
+            flex-direction:column;
+            gap:10px;
+        }
+        .insight-headline{
+            font-size:14px;
+            font-weight:700;
+            color:var(--text);
+            line-height:1.35;
+        }
+        .insight-explanation{
+            font-size:12px;
+            color:var(--muted);
+            line-height:1.5;
+        }
+        .insight-mini-table{
+            width:100%;
+            font-size:11px;
+            border-collapse:collapse;
+            margin-top:4px;
+        }
+        .insight-mini-table th,
+        .insight-mini-table td{
+            padding:4px 6px;
+            border-bottom:1px solid var(--stroke);
+            text-align:left;
+            white-space:nowrap;
+            overflow:hidden;
+            max-width:200px;
+            text-overflow:ellipsis;
+        }
+        .insight-mini-table th{
+            color:var(--muted2);
+            font-weight:600;
+        }
+        .insight-mini-result{
+            overflow:auto;
+            max-height:160px;
+        }
+        .insight-mini-chart-wrap{
+            position:relative;
+            height:130px;
+        }
+        .insight-explore-btn{
+            align-self:flex-start;
+            margin-top:auto;
+            padding:6px 12px;
+            font-size:12px;
+        }
+        .insight-skeleton{
+            background:linear-gradient(90deg,rgba(255,255,255,.04) 25%,rgba(255,255,255,.09) 50%,rgba(255,255,255,.04) 75%);
+            background-size:200% 100%;
+            animation:shimmer 1.4s infinite linear;
+            border-radius:16px;
+            height:180px;
+            border:1px solid var(--stroke);
+        }
+        @keyframes shimmer{
+            0%{background-position:200% 0;}
+            100%{background-position:-200% 0;}
+        }
+        .insights-empty{
+            color:var(--muted);
+            font-size:13px;
+            text-align:center;
+            padding:32px 0;
+            grid-column:1/-1;
+        }
+        .insight-result-loading{
+            font-size:11px;
+            color:var(--muted2);
+        }
+        .insight-result-error{
+            font-size:11px;
+            color:var(--muted2);
+            font-style:italic;
+        }
+
         .dataset-name{
             overflow:hidden;
             text-overflow:ellipsis;
@@ -901,7 +1000,7 @@
                          Insights is first so users can explore AI-generated
                          observations before diving into manual querying. -->
                     <div class="nav-list">
-                        <button class="nav-item" id="navInsights">Insights <span class="placeholder-tag">placeholder</span></button>
+                        <button class="nav-item" id="navInsights">Insights</button>
                         <button class="nav-item" id="navQuery">Query</button>
                         <button class="nav-item" id="navSavedQueries">Saved Queries</button>
                     </div>
@@ -1168,11 +1267,14 @@ LIMIT 100</textarea>
 
                 <section id="insightsView" class="hidden">
                     <section class="panel insights-shell">
-                        <div class="saved-title" style="margin-bottom:12px;">Insights</div>
-                        <div class="help-text">
-                            Insights is intentionally a Milestone 3 placeholder. The UI is reserved here so
-                            the frozen layout remains stable while backend functionality is added later.
+                        <div class="insights-toolbar">
+                            <div class="saved-title">Insights</div>
+                            <button class="btn small" id="refreshInsightsBtn">↺ Refresh Insights</button>
                         </div>
+                        <div class="help-text" id="insightsHelpText">
+                            Select a dataset to generate AI-powered insights.
+                        </div>
+                        <div id="insightsGrid" class="insights-grid"></div>
                     </section>
                 </section>
             </section>
@@ -1231,10 +1333,12 @@ LIMIT 100</textarea>
 
         let lastRun = { columns: [], rows: [], rowcount: 0, elapsed: 0, sql: "", visualization: null };
         let _chartInstance = null; // holds the active Chart.js instance
+        let _insightChartInstances = []; // one Chart.js instance per insight card
         let datasets = [];
         let selectedDataset = "";
         let currentView = "query";
         let inspectMode = "";
+        const insightsCache = {}; // dataset → insights[] (JS-level, survives card re-renders)
 
         function setActiveNav(buttonId) {
             ["navInsights","navQuery","navSavedQueries"].forEach((id) => {
@@ -1251,7 +1355,13 @@ LIMIT 100</textarea>
 
             if (viewName === "query") setActiveNav("navQuery");
             if (viewName === "saved") setActiveNav("navSavedQueries");
-            if (viewName === "insights") setActiveNav("navInsights");
+            if (viewName === "insights") {
+                setActiveNav("navInsights");
+                // Auto-fetch insights when navigating here with a dataset loaded
+                if (selectedDataset && !insightsCache[selectedDataset]) {
+                    fetchInsights(false);
+                }
+            }
         }
 
         function setVersionState(kind, text) {
@@ -1314,6 +1424,10 @@ LIMIT 100</textarea>
                     $("resultsCount").textContent = "0 rows";
                     $("resultsHead").innerHTML = "";
                     $("resultsBody").innerHTML = "";
+                    // Auto-fetch insights if the Insights view is active
+                    if (currentView === "insights") {
+                        fetchInsights(false);
+                    }
                 });
 
                 list.appendChild(btn);
@@ -1427,10 +1541,22 @@ LIMIT 100</textarea>
             const ext = (file.name.split(".").pop() || "").toLowerCase();
             const fileTypeHint = { csv: "csv", tsv: "tsv", txt: "csv", xlsx: "excel", xls: "excel", parquet: "parquet" }[ext] || ext;
 
-            await _doImport(file, inferredName, fileTypeHint);
+            // CMS and government datasets often append asterisks or other footnote
+            // markers to values (e.g. "Stelara*", "12,345†").  These trailing
+            // characters cause exact-match SQL filters to miss rows silently.
+            // Only applies to CSV / TSV / Excel — Parquet files are copied as-is.
+            const stripChars = window.confirm(
+                "Strip trailing special characters from string values?\n\n" +
+                "Example: \"Stelara*\" → \"Stelara\", \"Denosumab†\" → \"Denosumab\"\n\n" +
+                "Enable this for CMS or government datasets that append asterisks or\n" +
+                "footnote symbols to values. Leave disabled for most other datasets.\n\n" +
+                "Note: applies to CSV / TSV / Excel only. Parquet files are unchanged."
+            );
+
+            await _doImport(file, inferredName, fileTypeHint, false, stripChars);
         }
 
-        async function _doImport(file, datasetName, fileTypeHint, overwrite = false) {
+        async function _doImport(file, datasetName, fileTypeHint, overwrite = false, stripChars = false) {
             const importLabel = $("importDatasetBtn");
             const refreshBtn  = $("refreshDatasetsBtn");
             const statusBar   = $("importStatus");
@@ -1469,6 +1595,8 @@ LIMIT 100</textarea>
                 // Send type hint under multiple keys — backend implementations vary
                 form.append("file_type", fileTypeHint);
                 form.append("dataset_type", fileTypeHint);
+                // Strip trailing special characters (e.g. asterisks) from string values
+                form.append("strip_trailing_chars", stripChars ? "true" : "false");
 
                 // overwrite=true tells the backend to replace an existing dataset
                 // of the same name rather than rejecting with a conflict error.
@@ -1500,11 +1628,11 @@ LIMIT 100</textarea>
                         if (newName === null) {
                             toast("Import cancelled.");
                         } else if (String(newName).trim() === "" || String(newName).trim() === datasetName) {
-                            // User kept the same name — try overwrite
-                            await _doImport(file, datasetName, fileTypeHint, true);
+                            // User kept the same name — try overwrite, preserve stripChars choice
+                            await _doImport(file, datasetName, fileTypeHint, true, stripChars);
                         } else {
-                            // User chose a new name — import fresh
-                            await _doImport(file, String(newName).trim(), fileTypeHint, false);
+                            // User chose a new name — import fresh, preserve stripChars choice
+                            await _doImport(file, String(newName).trim(), fileTypeHint, false, stripChars);
                         }
                         return;
                     }
@@ -1706,6 +1834,258 @@ LIMIT 100</textarea>
             } finally {
                 $("suggestionsBtn").disabled = false;
                 $("suggestionsBtn").textContent = "Suggestions";
+            }
+        }
+
+        // ---------------------------------------------------------------
+        // INSIGHTS
+        // ---------------------------------------------------------------
+
+        function clearInsights() {
+            // Destroy any Chart.js instances created for insight cards
+            _insightChartInstances.forEach(c => { try { c.destroy(); } catch(_) {} });
+            _insightChartInstances = [];
+            $("insightsGrid").innerHTML = "";
+        }
+
+        function _renderInsightsSkeleton() {
+            const grid = $("insightsGrid");
+            grid.innerHTML = "";
+            for (let i = 0; i < 3; i++) {
+                const sk = document.createElement("div");
+                sk.className = "insight-skeleton";
+                grid.appendChild(sk);
+            }
+        }
+
+        // Render a mini Chart.js bar or line chart inside an insight card.
+        // Uses a separate instance (not _chartInstance) to avoid clobbering
+        // the main Query chart.
+        function _renderInsightMiniChart(canvas, chartType, columns, rows) {
+            if (!rows.length || columns.length < 2) return;
+
+            // Infer x (first non-numeric) and y (first numeric) columns
+            const sample = rows[0];
+            let xCol = columns[0];
+            let yCol = columns[1];
+            for (const c of columns) {
+                if (typeof sample[c] === "number") { yCol = c; break; }
+            }
+            for (const c of columns) {
+                if (typeof sample[c] !== "number") { xCol = c; break; }
+            }
+
+            const labels = rows.map(r => {
+                const v = r[xCol];
+                return (v === null || v === undefined) ? "" : String(v);
+            });
+            const values = rows.map(r => {
+                const v = r[yCol];
+                return (v === null || v === undefined) ? 0 : Number(v);
+            });
+
+            const accentColor = "rgba(79,140,255,0.75)";
+            const accentBorder = "rgba(79,140,255,1)";
+            const gridColor = "rgba(255,255,255,0.08)";
+            const labelColor = "rgba(166,181,203,0.9)";
+            const isLine = chartType === "line";
+
+            const instance = new Chart(canvas, {
+                type: isLine ? "line" : "bar",
+                data: {
+                    labels,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: isLine ? "rgba(79,140,255,0.15)" : accentColor,
+                        borderColor: accentBorder,
+                        borderWidth: isLine ? 2 : 1,
+                        tension: isLine ? 0.35 : 0,
+                        fill: isLine,
+                        pointRadius: isLine ? 2 : 0,
+                    }],
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: true },
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: labelColor, font: { size: 10 }, maxRotation: 30 },
+                            grid: { color: gridColor },
+                        },
+                        y: {
+                            ticks: { color: labelColor, font: { size: 10 } },
+                            grid: { color: gridColor },
+                        },
+                    },
+                },
+            });
+
+            _insightChartInstances.push(instance);
+        }
+
+        // Build one insight card DOM node.
+        // Mini SQL execution is fire-and-forget — the card renders immediately
+        // and the result area fills in asynchronously.
+        function _renderInsightCard(insight, index) {
+            const card = document.createElement("div");
+            card.className = "insight-card";
+
+            const headline = document.createElement("div");
+            headline.className = "insight-headline";
+            headline.textContent = insight.headline;
+            card.appendChild(headline);
+
+            const explanation = document.createElement("div");
+            explanation.className = "insight-explanation";
+            explanation.textContent = insight.explanation;
+            card.appendChild(explanation);
+
+            // Result area — filled async after card is in the DOM
+            const resultArea = document.createElement("div");
+            resultArea.className = "insight-mini-result";
+            resultArea.innerHTML = '<span class="insight-result-loading">Loading data…</span>';
+            card.appendChild(resultArea);
+
+            // "Explore in Query" button
+            const exploreBtn = document.createElement("button");
+            exploreBtn.className = "btn small insight-explore-btn";
+            exploreBtn.textContent = "Explore in Query →";
+            exploreBtn.addEventListener("click", () => {
+                $("sqlEditor").value = insight.sql;
+                $("askPrompt").value = insight.headline;
+                switchView("query");
+            });
+            card.appendChild(exploreBtn);
+
+            // Async: run the SQL and populate the result area
+            const dataset = selectedDataset;
+            (async () => {
+                try {
+                    const result = await apiJson("/api/sql", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ dataset, sql: insight.sql }),
+                    });
+
+                    const cols = result.columns || [];
+                    const rows = (result.rows || []).slice(0, 6); // max 6 rows in mini view
+                    const chartType = insight.chart_type || "";
+                    const canChart = chartType && cols.length === 2 && rows.length >= 2;
+
+                    resultArea.innerHTML = "";
+
+                    if (canChart) {
+                        const wrap = document.createElement("div");
+                        wrap.className = "insight-mini-chart-wrap";
+                        const canvas = document.createElement("canvas");
+                        canvas.id = "insightChart_" + index;
+                        wrap.appendChild(canvas);
+                        resultArea.appendChild(wrap);
+                        // Defer chart creation so the canvas is in the DOM
+                        setTimeout(() => {
+                            _renderInsightMiniChart(canvas, chartType, cols, rows);
+                        }, 0);
+                    } else if (cols.length && rows.length) {
+                        const tbl = document.createElement("table");
+                        tbl.className = "insight-mini-table";
+                        const thead = document.createElement("thead");
+                        const trh = document.createElement("tr");
+                        for (const c of cols) {
+                            const th = document.createElement("th");
+                            th.textContent = c;
+                            trh.appendChild(th);
+                        }
+                        thead.appendChild(trh);
+                        tbl.appendChild(thead);
+                        const tbody = document.createElement("tbody");
+                        for (const row of rows) {
+                            const tr = document.createElement("tr");
+                            for (const c of cols) {
+                                const td = document.createElement("td");
+                                const v = row[c];
+                                td.textContent = (v === null || v === undefined) ? "" : String(v);
+                                tr.appendChild(td);
+                            }
+                            tbody.appendChild(tr);
+                        }
+                        tbl.appendChild(tbody);
+                        resultArea.appendChild(tbl);
+                    } else {
+                        resultArea.innerHTML = '<span class="insight-result-error">No data returned.</span>';
+                    }
+                } catch (e) {
+                    resultArea.innerHTML = '<span class="insight-result-error">Query failed: ' + e.message + '</span>';
+                }
+            })();
+
+            return card;
+        }
+
+        function _renderInsightsFromData(insights) {
+            const grid = $("insightsGrid");
+            grid.innerHTML = "";
+            for (let i = 0; i < insights.length; i++) {
+                grid.appendChild(_renderInsightCard(insights[i], i));
+            }
+        }
+
+        async function fetchInsights(force = false) {
+            const dataset = selectedDataset;
+
+            if (!dataset) {
+                $("insightsHelpText").style.display = "block";
+                $("insightsHelpText").textContent = "Select a dataset to generate AI-powered insights.";
+                clearInsights();
+                return;
+            }
+
+            $("insightsHelpText").style.display = "none";
+
+            // JS cache hit — render instantly without any network call
+            if (!force && insightsCache[dataset]) {
+                clearInsights();
+                _renderInsightsFromData(insightsCache[dataset]);
+                return;
+            }
+
+            // Show skeleton loading state
+            clearInsights();
+            _renderInsightsSkeleton();
+            $("refreshInsightsBtn").disabled = true;
+            $("refreshInsightsBtn").textContent = "Loading…";
+
+            try {
+                const url = "/api/ai/insights?dataset=" +
+                    encodeURIComponent(dataset) +
+                    (force ? "&refresh=true" : "");
+
+                const data = await apiJson(url);
+                const insights = data.insights || [];
+
+                // Store in JS cache
+                insightsCache[dataset] = insights;
+
+                clearInsights();
+
+                if (!insights.length) {
+                    $("insightsGrid").innerHTML =
+                        '<div class="insights-empty">No insights could be generated for this dataset.</div>';
+                } else {
+                    _renderInsightsFromData(insights);
+                }
+
+            } catch (e) {
+                clearInsights();
+                $("insightsGrid").innerHTML =
+                    '<div class="insights-empty">Could not load insights: ' + e.message + '</div>';
+            } finally {
+                $("refreshInsightsBtn").disabled = false;
+                $("refreshInsightsBtn").textContent = "↺ Refresh Insights";
             }
         }
 
@@ -2108,12 +2488,14 @@ LIMIT 100</textarea>
             $("inspectHead").innerHTML = "";
             $("inspectBody").innerHTML = "";
             // Close suggestions and info popovers when dataset changes.
-            // Also clear the JS-level suggestions cache for this dataset so
-            // switching back later re-fetches (server cache still applies).
+            // Also clear the JS-level caches for this dataset so switching
+            // back later re-fetches (server-side cache in JSON still applies).
             $("suggestionsPopover").style.display = "none";
             suggestionsVisible = false;
             if (selectedDataset) delete suggestionsCache[selectedDataset];
+            if (selectedDataset) delete insightsCache[selectedDataset];
             $("infoPopover").style.display = "none";
+            clearInsights();
         }
 
         function renderInspectTable(columns, rows) {
@@ -2337,6 +2719,11 @@ LIMIT 100</textarea>
         $("navInsights").addEventListener("click", () => switchView("insights"));
         $("navQuery").addEventListener("click", () => switchView("query"));
         $("navSavedQueries").addEventListener("click", () => switchView("saved"));
+
+        $("refreshInsightsBtn").addEventListener("click", () => {
+            if (selectedDataset) delete insightsCache[selectedDataset];
+            fetchInsights(true);
+        });
 
         $("importDatasetFile").addEventListener("click", () => {
             $("importDatasetFile").value = "";

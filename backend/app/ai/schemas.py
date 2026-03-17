@@ -163,3 +163,25 @@ class RunQueryResponse(GenerateSQLResponse):
     # Total number of rows in the full result set
     # (not just the preview rows)
     rowcount: int | None = None
+
+
+# ============================================================
+# INSIGHT MODELS — MILESTONE 4
+# ============================================================
+# Used by GET /api/ai/insights
+# ============================================================
+
+class InsightItem(BaseModel):
+    type: str          # concentration, outliers, trend, skew, missing, correlation
+    headline: str      # Plain-English one-liner with specific numbers
+    explanation: str   # 2–3 sentence context for why this is notable
+    sql: str           # Executable DuckDB SQL using table name "dataset"
+    chart_type: str = ""  # "bar", "line", or "" (table only)
+    priority: int = 1  # 1 = highest priority insight
+
+
+class InsightsResponse(BaseModel):
+    dataset: str
+    insights: List[InsightItem] = []
+    cached: bool = False
+    error: str = ""

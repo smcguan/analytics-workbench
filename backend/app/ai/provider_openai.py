@@ -416,3 +416,192 @@ def suggest_questions_for_dataset(
 
     raw_text = generate_sql_response(prompt)
     return parse_suggested_questions(raw_text)
+
+
+# ============================================================
+# INSIGHTS PROMPT BUILDER
+# ------------------------------------------------------------
+# Asks the model to surface 3–5 non-obvious findings based on
+# the dataset's actual structure, stats, and sample values.
+#
+# Priority order mirrors CLAUDE.md:
+#   concentration > outliers > trend > skew > missing > correlation
+# ============================================================
+def build_insights_prompt(
+    *,
+    dataset_name: str,
+    dataset_source_path_fn,
+    max_insights: int = 5,
+) -> str:
+    """
+    Build the prompt used to generate AI insights for a dataset.
+    """
+    context = build_context(
+        dataset_name=dataset_name,
+        dataset_source_path_fn=dataset_source_path_fn,
+    )
+
+    columns_text = _format_columns(context.get("columns", []))
+    sample_rows_text = _format_sample_rows(context.get("sample_rows", []))
+    numeric_stats_text = _format_numeric_stats(context.get("numeric_stats", []))
+    categorical_values_text = _format_categorical_values(
+        context.get("categorical_values", [])
+    )
+
+    prompt = f"""
+You are a data analyst identifying non-obvious insights in a dataset.
+
+Your task is to produce up to {max_insights} high-value analytical insights that a
+business user would find genuinely interesting — things they would NOT have thought
+to ask about on their own.
+
+CRITICAL RULES — FOLLOW EXACTLY:
+- Return ONLY valid JSON. No markdown. No code fences. No explanation outside the JSON.
+- Each insight must include a working DuckDB SQL query using the table name "dataset".
+- Use ONLY the column names listed under "Available columns". Never invent column names.
+- SQL must use DuckDB syntax. No semicolons at end of SQL.
+- Do not qualify column names with a table prefix.
+- Headlines must be plain English with specific numbers when possible (e.g. "Top 5 drugs account for 42% of spending").
+- Do NOT restate the obvious (e.g. "This dataset has 734 rows").
+- Do NOT generate more than {max_insights} insights.
+- Write for business users — no technical jargon in headlines or explanations.
+
+INSIGHT TYPES (use in this priority order — pick whichever apply):
+1. concentration — a small number of items drives a disproportionate share of the total (Pareto)
+2. outliers — values far outside the norm for their group
+3. trend — fastest-growing or fastest-declining items (only if a date/time column exists)
+4. skew — a numeric column is heavily skewed (mean >> median or vice versa)
+5. missing — columns with high null rates, zero-heavy distributions, or formatting anomalies
+6. correlation — two numeric columns that move together in an interesting way
+
+DUCKDB SYNTAX REMINDERS:
+- strftime('%Y-%m', col) — format string FIRST
+- DATE_TRUNC('month', col) for date bucketing
+- col::INTEGER for type casting
+- ILIKE for case-insensitive string matching
+- No semicolons at end of SQL
+
+For chart_type: use "bar" when the SQL returns exactly 2 columns where one is
+categorical and one is numeric (2–50 rows). Use "line" when one column is a
+date/time and one is numeric. Use "" (empty string) otherwise.
+
+Return JSON with exactly this structure:
+{{
+  "insights": [
+    {{
+      "type": "concentration",
+      "headline": "Top 5 drugs account for 42% of total spending",
+      "explanation": "Medicare Part B spending is highly concentrated in a small number of drugs. The top 5 account for 42% of total spending despite representing less than 1% of all drugs billed.",
+      "sql": "SELECT Brnd_Name, SUM(Tot_Spndng) AS total FROM dataset GROUP BY Brnd_Name ORDER BY total DESC LIMIT 10",
+      "chart_type": "bar",
+      "priority": 1
+    }}
+  ]
+}}
+
+Dataset name: {dataset_name}
+
+Available columns (USE ONLY THESE):
+{columns_text}
+
+Sample rows (shows real data values and formats):
+{sample_rows_text}
+
+Numeric column stats (min/max/avg):
+{numeric_stats_text}
+
+Categorical column values:
+{categorical_values_text}
+""".strip()
+
+    return prompt
+
+
+# ============================================================
+# INSIGHTS RESPONSE PARSER
+# ------------------------------------------------------------
+# Turns the model's JSON output into a safe list[dict].
+# Skips malformed items so one bad insight doesn't crash the
+# endpoint. Returns [] on any parse failure.
+# ============================================================
+def parse_insights_response(raw_text: str) -> list[dict]:
+    """
+    Parse the model output for insights.
+
+    Expected JSON:
+    {
+      "insights": [ { type, headline, explanation, sql, chart_type, priority }, ... ]
+    }
+    """
+    required_keys = {"type", "headline", "explanation", "sql"}
+
+    try:
+        cleaned = raw_text.strip()
+
+        # Strip markdown code fences if present
+        if cleaned.startswith("```"):
+            lines = cleaned.splitlines()
+            if lines and lines[0].startswith("```"):
+                lines = lines[1:]
+            if lines and lines[-1].strip() == "```":
+                lines = lines[:-1]
+            cleaned = "\n".join(lines).strip()
+
+        start = cleaned.find("{")
+        end = cleaned.rfind("}")
+        if start == -1 or end == -1 or end < start:
+            return []
+
+        data = json.loads(cleaned[start:end + 1])
+        raw_insights = data.get("insights", [])
+
+        if not isinstance(raw_insights, list):
+            return []
+
+        result = []
+        for item in raw_insights:
+            if not isinstance(item, dict):
+                continue
+            # Skip items missing required fields
+            if not required_keys.issubset(item.keys()):
+                continue
+            # Clamp priority to 1–5
+            try:
+                item["priority"] = max(1, min(5, int(item.get("priority", 1))))
+            except (TypeError, ValueError):
+                item["priority"] = 1
+            # Ensure chart_type is a string
+            if not isinstance(item.get("chart_type"), str):
+                item["chart_type"] = ""
+            result.append(item)
+
+        return result
+
+    except Exception:
+        return []
+
+
+# ============================================================
+# INSIGHTS WRAPPER
+# ------------------------------------------------------------
+# High-level helper used by the route:
+#
+#   dataset -> prompt -> OpenAI -> parsed insights
+# ============================================================
+def generate_insights_for_dataset(
+    *,
+    dataset_name: str,
+    dataset_source_path_fn,
+    max_insights: int = 5,
+) -> list[dict]:
+    """
+    Generate AI-powered insights for a dataset.
+    """
+    prompt = build_insights_prompt(
+        dataset_name=dataset_name,
+        dataset_source_path_fn=dataset_source_path_fn,
+        max_insights=max_insights,
+    )
+
+    raw_text = generate_sql_response(prompt)
+    return parse_insights_response(raw_text)

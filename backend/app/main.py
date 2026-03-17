@@ -919,6 +919,14 @@ def _validate_readonly_sql(sql: str) -> str:
 
     Blocked:
         INSERT / UPDATE / DELETE / DROP / etc.
+
+    IMPORTANT: blocked-keyword scanning runs on a version of the SQL that has
+    had single-quoted string literals replaced with empty strings first.  This
+    prevents false positives when LIKE / IN values happen to contain a blocked
+    word (e.g. WHERE col NOT LIKE '%update%' or NOT IN ('drop', 'Alteplase')).
+    Without this step, queries with ~26 conditions in pharmaceutical datasets
+    fail silently because one of the drug names or CMS values matches a keyword
+    pattern inside the quoted string.
     """
     s = (sql or "").strip()
     if not s:
@@ -943,8 +951,14 @@ def _validate_readonly_sql(sql: str) -> str:
         "attach",
         "detach",
     ]
+
+    # Strip single-quoted literals before keyword scanning so that values like
+    # '%update%' or 'Alteplase' don't trigger a false positive.  The regex
+    # replaces 'anything' (including SQL-escaped '' pairs) with ''.
+    lowered_no_literals = re.sub(r"'[^']*'", "''", lowered)
+
     for token in blocked:
-        if re.search(rf"\b{token}\b", lowered):
+        if re.search(rf"\b{token}\b", lowered_no_literals):
             raise HTTPException(
                 status_code=400,
                 detail=f"Blocked SQL keyword: {token}",
@@ -1852,7 +1866,12 @@ def api_sql(req: SqlRequest):
                 "error": str(e),
             }
         )
-        raise
+        # Surface the real error message instead of letting FastAPI return the
+        # generic "Internal Server Error" 500 body.  duckdb.Error is caught
+        # above; this catches any remaining Python-level exception (e.g. a
+        # DuckDB wrapper inconsistency) and still delivers it as a 400 so
+        # the frontend toast shows the actual problem.
+        raise HTTPException(status_code=400, detail=str(e)) from e
 
 @app.post("/api/sql/export")
 def api_sql_export(req: SqlExportRequest):
@@ -2416,6 +2435,7 @@ async def import_uploaded_dataset(
     file: UploadFile = File(...),
     dataset_name: str | None = Form(None),
     overwrite: bool = Query(False),
+    strip_trailing_chars: bool = Form(False),
 ):
     """
     Import an uploaded dataset and normalize it into the app's canonical
@@ -2439,6 +2459,7 @@ async def import_uploaded_dataset(
             display_name=clean_dataset_name,
             registered_root=DATASETS_DIR,
             overwrite=overwrite,
+            strip_trailing_special_chars=strip_trailing_chars,
         )
     except DatasetImportError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc

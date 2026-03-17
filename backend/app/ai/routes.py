@@ -80,6 +80,7 @@ logger = logging.getLogger("app")
 from .provider_openai import (
     generate_sql_for_dataset,
     suggest_questions_for_dataset,
+    generate_insights_for_dataset,
 )
 
 from .response_parser import parse_generate_sql_response
@@ -87,6 +88,8 @@ from .response_parser import parse_generate_sql_response
 from .schemas import (
     GenerateSQLRequest,
     GenerateSQLResponse,
+    InsightItem,
+    InsightsResponse,
 )
 
 from .sql_validator import (
@@ -159,16 +162,53 @@ def _read_suggestions_cache(dataset: str) -> list[str] | None:
 
 
 def _write_suggestions_cache(dataset: str, questions: list[str]) -> None:
-    """Persist questions to dataset_context.json inside the dataset directory."""
+    """Persist questions to dataset_context.json inside the dataset directory.
+
+    Reads then merges so an existing 'insights' key is preserved.
+    """
     try:
         cache_path = _suggestions_cache_path(dataset)
-        payload = {
-            "questions": questions,
-            "generated_at": datetime.now(timezone.utc).isoformat(),
-        }
-        cache_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+        existing: dict = {}
+        try:
+            existing = json.loads(cache_path.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+        existing["questions"] = questions
+        existing["generated_at"] = datetime.now(timezone.utc).isoformat()
+        cache_path.write_text(json.dumps(existing, indent=2), encoding="utf-8")
     except Exception as exc:
         logger.warning("Could not write suggestions cache for %s: %s", dataset, exc)
+
+
+def _read_insights_cache(dataset: str) -> list[dict] | None:
+    """Return cached insights list, or None if no valid cache exists."""
+    try:
+        cache = json.loads(_suggestions_cache_path(dataset).read_text(encoding="utf-8"))
+        insights = cache.get("insights")
+        if isinstance(insights, list) and insights:
+            return insights
+    except Exception:
+        pass
+    return None
+
+
+def _write_insights_cache(dataset: str, insights: list[dict]) -> None:
+    """Persist insights to dataset_context.json under 'insights' key.
+
+    Reads then merges so the 'questions' key is preserved.
+    """
+    try:
+        cache_path = _suggestions_cache_path(dataset)
+        existing: dict = {}
+        try:
+            existing = json.loads(cache_path.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+        existing["insights"] = insights
+        existing["insights_generated_at"] = datetime.now(timezone.utc).isoformat()
+        cache_path.write_text(json.dumps(existing, indent=2), encoding="utf-8")
+    except Exception as exc:
+        logger.warning("Could not write insights cache for %s: %s", dataset, exc)
 
 
 # ============================================================
@@ -273,6 +313,119 @@ def suggest_questions(
             "questions": [],
             "error": f"{type(e).__name__}: {e}",
         }
+
+
+# ============================================================
+# AI FEATURE: DATASET INSIGHTS
+# ------------------------------------------------------------
+# Endpoint:
+#     GET /api/ai/insights
+#
+# PURPOSE
+# -------
+# Surface 3–5 non-obvious findings about the dataset so the
+# user sees value immediately after loading a file — no query
+# required.
+#
+# Follows the same caching pattern as suggest_questions:
+# - First call: run AI analysis, cache in dataset_context.json
+# - Subsequent calls: return from cache instantly
+# - ?refresh=true: bypass cache, regenerate, fallback to stale
+# ============================================================
+
+@router.get("/insights", response_model=InsightsResponse)
+def get_insights(
+    dataset: str,
+    max_insights: int = 5,
+    refresh: bool = Query(False, description="Force regeneration, ignoring cache"),
+):
+    """
+    Return AI-generated insights for the dataset.
+
+    Parameters
+    ----------
+    dataset : str
+        Dataset name
+    max_insights : int
+        Maximum number of insights to generate
+    refresh : bool
+        When True, bypass the cache and call OpenAI even if cached
+        insights exist. Overwrites the cache with fresh results.
+        If OpenAI fails during refresh, returns stale cache as fallback.
+    """
+
+    try:
+
+        # ----------------------------------------------------
+        # STEP 1 — Return cached insights if available
+        # ----------------------------------------------------
+        if not refresh:
+            cached = _read_insights_cache(dataset)
+            if cached is not None:
+                logger.info("insights cache hit | dataset=%s", dataset)
+                return InsightsResponse(
+                    dataset=dataset,
+                    insights=[InsightItem(**i) for i in cached],
+                    cached=True,
+                )
+
+        # ----------------------------------------------------
+        # STEP 2 — Ask the provider layer for insights
+        # ----------------------------------------------------
+        logger.info(
+            "insights calling OpenAI | dataset=%s | refresh=%s",
+            dataset,
+            refresh,
+        )
+
+        raw_insights = generate_insights_for_dataset(
+            dataset_name=dataset,
+            dataset_source_path_fn=_get_dataset_source_path,
+            max_insights=max_insights,
+        )
+
+        # ----------------------------------------------------
+        # STEP 3 — Persist to cache so next load is instant
+        # ----------------------------------------------------
+        if raw_insights:
+            _write_insights_cache(dataset, raw_insights)
+
+        # ----------------------------------------------------
+        # STEP 4 — Return structured response
+        # ----------------------------------------------------
+        return InsightsResponse(
+            dataset=dataset,
+            insights=[InsightItem(**i) for i in raw_insights],
+            cached=False,
+        )
+
+    except Exception as e:
+
+        # ----------------------------------------------------
+        # On refresh failure — try to return stale cache
+        # ----------------------------------------------------
+        if refresh:
+            stale = _read_insights_cache(dataset)
+            if stale:
+                logger.warning(
+                    "insights refresh failed, returning stale cache | dataset=%s | error=%s",
+                    dataset, e,
+                )
+                return InsightsResponse(
+                    dataset=dataset,
+                    insights=[InsightItem(**i) for i in stale],
+                    cached=True,
+                )
+
+        # ----------------------------------------------------
+        # Fail safely — never crash the API
+        # ----------------------------------------------------
+        logger.exception("insights failed | dataset=%s | error=%s", dataset, e)
+        return InsightsResponse(
+            dataset=dataset,
+            insights=[],
+            error=f"{type(e).__name__}: {e}",
+        )
 
 
 # ============================================================
