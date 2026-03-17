@@ -160,6 +160,7 @@ import os
 import platform
 import re
 import shutil
+import stat
 import time
 from datetime import datetime
 from typing import Any
@@ -552,6 +553,44 @@ def dataset_source_path(dataset: str) -> tuple[str, bool]:
 
 def _dataset_dir(dataset: str) -> Path:
     return (DATASETS_DIR / dataset).resolve()
+
+
+def _rmtree_robust(path: Path) -> None:
+    """
+    Remove a directory tree, handling Windows-specific failure modes.
+
+    Windows can set read-only flags on files (common with files extracted
+    from archives) and briefly holds file locks after DuckDB closes a
+    Parquet connection. A bare shutil.rmtree raises PermissionError in
+    both cases, leaving the directory behind and causing subsequent imports
+    to hit an "already exists" conflict.
+
+    Strategy:
+    1. onerror callback clears read-only flags and retries the failed op.
+    2. Retry the entire rmtree up to 3 times with a short delay for
+       PermissionError — covers the brief lock-release window after DuckDB
+       closes a connection on Windows.
+    """
+    def _on_error(func, failed_path, exc_info):
+        # Clear read-only flag (common on Windows for extracted files) and retry.
+        try:
+            os.chmod(failed_path, stat.S_IWRITE)
+            func(failed_path)
+        except Exception:
+            pass  # let the outer retry loop handle persistent failures
+
+    last_err: Exception | None = None
+    for attempt in range(3):
+        try:
+            shutil.rmtree(path, onerror=_on_error)
+            return
+        except PermissionError as exc:
+            last_err = exc
+            if attempt < 2:
+                time.sleep(0.5)  # brief wait for Windows to release file locks
+
+    if last_err:
+        raise last_err
 
 
 def _dataset_mode(dataset: str) -> str:
@@ -1481,7 +1520,7 @@ def api_dataset_delete(name: str):
         raise HTTPException(status_code=404, detail=f"Dataset not found: {name}")
 
     try:
-        shutil.rmtree(ds_dir)
+        _rmtree_robust(ds_dir)
         logger.info("dataset deleted | dataset=%s | path=%s", name, ds_dir)
         _audit_log({"event": "dataset_delete", "status": "success", "dataset": name})
         return {"ok": True, "deleted": name}
@@ -1489,6 +1528,8 @@ def api_dataset_delete(name: str):
         logger.exception("dataset delete failed | dataset=%s", name)
         _audit_log({"event": "dataset_delete", "status": "error", "dataset": name, "error": str(e)})
         raise HTTPException(status_code=500, detail=f"Failed to delete dataset: {e}") from e
+
+
 @app.get("/api/presets")
 def api_presets():
     return {

@@ -1398,9 +1398,9 @@ LIMIT 100</textarea>
         //      so large uploads are never silent
         //   3. POSTs to /api/datasets/import with file + optional dataset_name
         //      and a file_type hint (helps backend locate large Parquet/Excel loaders)
-        //   4. On "already exists" conflict: informs user to pick a different name.
-        //      Overwrite is not attempted because the backend does not yet support
-        //      deregistration — sending ?overwrite=true silently fails.
+        //   4. On "already exists" conflict: prompts user to overwrite or rename.
+        //      Overwrite re-calls _doImport with overwrite=true which passes
+        //      ?overwrite=true to the backend, removing the stale directory first.
         //   5. Polls for the new dataset using a TARGETED meta check on just the
         //      new dataset name — NOT a full /api/datasets reload, which would
         //      restore all previously cleared datasets from the backend.

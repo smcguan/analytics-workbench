@@ -39,8 +39,11 @@ Important Notes
 from __future__ import annotations
 
 import json
+import os
 import re
 import shutil
+import stat
+import time
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
@@ -113,6 +116,39 @@ class DatasetConversionError(DatasetImportError):
 
 
 # -----------------------------------------------------------------------------
+# Internal helpers
+# -----------------------------------------------------------------------------
+
+
+def _rmtree_robust(path: Path) -> None:
+    """
+    Remove a directory tree, handling Windows-specific failure modes.
+
+    See the same helper in main.py for full rationale. Duplicated here
+    so dataset_import.py stays self-contained with no circular imports.
+    """
+    def _on_error(func, failed_path, exc_info):
+        try:
+            os.chmod(failed_path, stat.S_IWRITE)
+            func(failed_path)
+        except Exception:
+            pass
+
+    last_err: Exception | None = None
+    for attempt in range(3):
+        try:
+            shutil.rmtree(path, onerror=_on_error)
+            return
+        except PermissionError as exc:
+            last_err = exc
+            if attempt < 2:
+                time.sleep(0.5)
+
+    if last_err:
+        raise last_err
+
+
+# -----------------------------------------------------------------------------
 # Public service entrypoint
 # -----------------------------------------------------------------------------
 
@@ -159,7 +195,8 @@ def import_dataset(
     if dataset_dir.exists():
         if overwrite:
             # Remove the existing dataset directory so we can replace it cleanly.
-            shutil.rmtree(dataset_dir)
+            # _rmtree_robust handles Windows read-only flags and brief file locks.
+            _rmtree_robust(dataset_dir)
         else:
             raise DatasetValidationError(
                 f"Dataset '{registered_name}' already exists. Choose a different dataset name."
