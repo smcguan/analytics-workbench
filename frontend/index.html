@@ -95,6 +95,7 @@
     <link rel="icon" type="image/x-icon" href="logo.ico?v=3">
     <link rel="shortcut icon" type="image/x-icon" href="logo.ico?v=3">
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
     <style>
         :root{
             --bg0:#0d1522;
@@ -499,6 +500,26 @@
             text-transform:uppercase;
             letter-spacing:.8px;
             margin-bottom:10px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+        }
+
+        .suggestions-refresh{
+            font-size:11px;
+            text-transform:none;
+            letter-spacing:0;
+            color:var(--muted);
+            background:none;
+            border:none;
+            cursor:pointer;
+            padding:0;
+            text-decoration:underline;
+            text-underline-offset:2px;
+        }
+
+        .suggestions-refresh:hover{
+            color:#bfd6ff;
         }
 
         .suggestions-chips{
@@ -781,6 +802,37 @@
             table-layout:auto;
         }
 
+        /* Chart container — shown inside results-card when Chart tab is active */
+        .chart-container{
+            padding:18px;
+            display:none;
+        }
+
+        .chart-title{
+            color:var(--muted);
+            font-size:11px;
+            text-transform:uppercase;
+            letter-spacing:.8px;
+            margin-bottom:12px;
+        }
+
+        .chart-canvas-wrap{
+            position:relative;
+            width:100%;
+            max-height:380px;
+        }
+
+        .chart-no-data{
+            display:none;
+            min-height:180px;
+            align-items:center;
+            justify-content:center;
+            color:var(--muted);
+            font-size:13px;
+            text-align:center;
+            padding:24px;
+        }
+
         .toast{
             position:fixed;
             bottom:18px;
@@ -998,7 +1050,10 @@ e.g. "Show revenue by region for 2024"'
                                 and close the popover ready to Generate SQL.
                             -->
                             <div id="suggestionsPopover">
-                                <div class="suggestions-header">Suggested Questions</div>
+                                <div class="suggestions-header">
+                                    <span>Suggested Questions</span>
+                                    <button class="suggestions-refresh" id="suggestionsRefreshBtn" title="Regenerate suggestions">Refresh</button>
+                                </div>
                                 <div class="suggestions-chips" id="suggestionsChips">
                                     <span class="suggestions-empty">Select a dataset to load suggestions.</span>
                                 </div>
@@ -1046,8 +1101,23 @@ LIMIT 100</textarea>
                         </div>
 
                         <div class="results-card">
-                            <div class="results-placeholder" id="chartPlaceholder">
-                                Chart view is a Milestone 3 placeholder until visualization wiring is connected.
+                            <!--
+                                Chart container:
+                                Shown when user clicks the Chart tab.
+                                Rendered by renderChart() using Chart.js.
+                                Hidden when table tab is active or no chart is recommended.
+                            -->
+                            <div class="chart-container" id="chartContainer">
+                                <div class="chart-title" id="chartTitle"></div>
+                                <div class="chart-canvas-wrap">
+                                    <canvas id="chartCanvas"></canvas>
+                                </div>
+                                <div class="chart-no-data" id="chartNoData">
+                                    No chart available for this result.<br>
+                                    <span style="font-size:12px;margin-top:6px;display:block;">
+                                        Charts appear automatically for results with one category column and one numeric column.
+                                    </span>
+                                </div>
                             </div>
 
                             <div class="table-wrap" id="tableWrap">
@@ -1159,7 +1229,8 @@ LIMIT 100</textarea>
             return res.text();
         }
 
-        let lastRun = { columns: [], rows: [], rowcount: 0, elapsed: 0, sql: "" };
+        let lastRun = { columns: [], rows: [], rowcount: 0, elapsed: 0, sql: "", visualization: null };
+        let _chartInstance = null; // holds the active Chart.js instance
         let datasets = [];
         let selectedDataset = "";
         let currentView = "query";
@@ -1541,14 +1612,53 @@ LIMIT 100</textarea>
         // Renders clickable chip buttons in the suggestions popover.
         // Each chip fills the prompt box and closes the popover so the
         // user can immediately hit Generate SQL.
+        //
+        // Caching strategy (two layers):
+        //   1. JS-level: suggestionsCache[dataset] — survives popover
+        //      close/reopen within the same session with zero network cost.
+        //   2. Server-level: dataset_context.json — persists across
+        //      sessions so the first click after restart is also instant.
+        //
+        // force=true bypasses both caches, passes ?refresh=true to the
+        // backend, and overwrites the server cache with fresh results.
         // ---------------------------------------------------------------
         let suggestionsVisible = false;
+        const suggestionsCache = {};   // dataset → questions[]
 
-        async function fetchSuggestions() {
+        function _renderSuggestionChips(questions) {
+            if (!questions.length) {
+                $("suggestionsChips").innerHTML =
+                    '<span class="suggestions-empty">No suggestions available for this dataset.</span>';
+                return;
+            }
+
+            $("suggestionsChips").innerHTML = "";
+
+            for (const q of questions) {
+                const chip = document.createElement("button");
+                chip.className = "suggestion-chip";
+                chip.type = "button";
+                chip.textContent = q;
+                chip.addEventListener("click", () => {
+                    $("askPrompt").value = q;
+                    // Clear the SQL editor so the user doesn't see stale SQL
+                    // from a previous question and mistake it for output
+                    // generated for this new suggestion.
+                    $("sqlEditor").value = "SELECT *\nFROM dataset\nLIMIT 100";
+                    $("suggestionsPopover").style.display = "none";
+                    suggestionsVisible = false;
+                    // Move focus to Generate SQL so user can hit it immediately
+                    $("generateSqlBtn").focus();
+                });
+                $("suggestionsChips").appendChild(chip);
+            }
+        }
+
+        async function fetchSuggestions(force = false) {
             const dataset = selectedDataset;
 
-            // Toggle off if already visible
-            if (suggestionsVisible) {
+            // Toggle off if already visible (only for normal open, not refresh)
+            if (!force && suggestionsVisible) {
                 $("suggestionsPopover").style.display = "none";
                 suggestionsVisible = false;
                 return;
@@ -1556,6 +1666,14 @@ LIMIT 100</textarea>
 
             if (!dataset) {
                 toast("Select a dataset first to get suggestions.");
+                return;
+            }
+
+            // JS cache hit — render instantly without any network call
+            if (!force && suggestionsCache[dataset]) {
+                _renderSuggestionChips(suggestionsCache[dataset]);
+                $("suggestionsPopover").style.display = "block";
+                suggestionsVisible = true;
                 return;
             }
 
@@ -1569,38 +1687,18 @@ LIMIT 100</textarea>
             $("suggestionsBtn").textContent = "Loading…";
 
             try {
-                const data = await apiJson(
-                    "/api/ai/suggest_questions?dataset=" + encodeURIComponent(dataset)
-                );
+                const url = "/api/ai/suggest_questions?dataset=" +
+                    encodeURIComponent(dataset) +
+                    (force ? "&refresh=true" : "");
+
+                const data = await apiJson(url);
 
                 const questions = (data.questions || []).filter(q => String(q).trim());
 
-                if (!questions.length) {
-                    $("suggestionsChips").innerHTML =
-                        '<span class="suggestions-empty">No suggestions available for this dataset.</span>';
-                    return;
-                }
+                // Store in JS cache for instant re-opens this session
+                suggestionsCache[dataset] = questions;
 
-                $("suggestionsChips").innerHTML = "";
-
-                for (const q of questions) {
-                    const chip = document.createElement("button");
-                    chip.className = "suggestion-chip";
-                    chip.type = "button";
-                    chip.textContent = q;
-                    chip.addEventListener("click", () => {
-                        $("askPrompt").value = q;
-                        // Clear the SQL editor so the user doesn't see stale SQL
-                        // from a previous question and mistake it for output
-                        // generated for this new suggestion.
-                        $("sqlEditor").value = "SELECT *\nFROM dataset\nLIMIT 100";
-                        $("suggestionsPopover").style.display = "none";
-                        suggestionsVisible = false;
-                        // Move focus to Generate SQL so user can hit it immediately
-                        $("generateSqlBtn").focus();
-                    });
-                    $("suggestionsChips").appendChild(chip);
-                }
+                _renderSuggestionChips(questions);
 
             } catch (e) {
                 $("suggestionsChips").innerHTML =
@@ -1717,22 +1815,161 @@ LIMIT 100</textarea>
         }
 
         function setActiveTab(tabName) {
-            // Only two content tabs remain: Table and Chart.
-            // Export Excel / Export TSV are now direct buttons in the row 2 toolbar.
+            // Only two content tabs: Table and Chart.
+            // Export Excel / Export TSV are direct toolbar buttons.
             ["tableTab","chartTab"].forEach((id) => {
                 $(id).classList.remove("active");
             });
 
             $("tableWrap").style.display = "none";
-            $("chartPlaceholder").style.display = "none";
+            $("chartContainer").style.display = "none";
 
             if (tabName === "table") {
                 $("tableTab").classList.add("active");
                 $("tableWrap").style.display = "block";
             } else if (tabName === "chart") {
                 $("chartTab").classList.add("active");
-                $("chartPlaceholder").style.display = "flex";
+                $("chartContainer").style.display = "block";
+                // Render chart from lastRun visualization on tab click
+                renderChart(lastRun.visualization, lastRun.columns, lastRun.rows);
             }
+        }
+
+        // ---------------------------------------------------------------
+        // clearChart
+        // ---------------------------------------------------------------
+        // Destroy the active Chart.js instance and reset the container
+        // to its empty state. Called before every new SQL execution so
+        // stale charts never persist across queries.
+        // ---------------------------------------------------------------
+        function clearChart() {
+            if (_chartInstance) {
+                _chartInstance.destroy();
+                _chartInstance = null;
+            }
+            $("chartTitle").textContent = "";
+            $("chartNoData").style.display = "none";
+            const canvas = $("chartCanvas");
+            canvas.style.display = "block";
+        }
+
+        // ---------------------------------------------------------------
+        // renderChart
+        // ---------------------------------------------------------------
+        // Renders a Chart.js bar or line chart from the visualization
+        // recommendation returned by /api/sql.
+        //
+        // If visualization.recommended is false, shows the no-data message.
+        // If visualization is null (error or old result), shows no-data.
+        //
+        // Chart type mapping:
+        //   "bar"  → Chart.js "bar"
+        //   "line" → Chart.js "line" with tension for smooth curves
+        // ---------------------------------------------------------------
+        function renderChart(visualization, columns, rows) {
+            clearChart();
+
+            if (!visualization || !visualization.recommended) {
+                $("chartNoData").style.display = "flex";
+                $("chartCanvas").style.display = "none";
+                const reason = visualization && visualization.reason
+                    ? visualization.reason
+                    : "Run a SQL query first.";
+                $("chartNoData").innerHTML =
+                    `No chart available for this result.<br>
+                    <span style="font-size:12px;margin-top:6px;display:block;">${reason}</span>`;
+                return;
+            }
+
+            const { chart_type, x_column, y_column, title } = visualization;
+
+            // Extract labels and values from rows
+            const labels = rows.map(r => {
+                const v = r[x_column];
+                return (v === null || v === undefined) ? "" : String(v);
+            });
+            const values = rows.map(r => {
+                const v = r[y_column];
+                return (v === null || v === undefined) ? 0 : Number(v);
+            });
+
+            if (title) $("chartTitle").textContent = title;
+
+            // Chart.js theme colors matching the app's dark palette
+            const accentColor = "rgba(79,140,255,0.75)";
+            const accentBorder = "rgba(79,140,255,1)";
+            const gridColor = "rgba(255,255,255,0.08)";
+            const labelColor = "rgba(166,181,203,0.9)";
+
+            const isLine = chart_type === "line";
+
+            const config = {
+                type: isLine ? "line" : "bar",
+                data: {
+                    labels,
+                    datasets: [{
+                        label: _titleCase(y_column),
+                        data: values,
+                        backgroundColor: isLine ? "rgba(79,140,255,0.12)" : accentColor,
+                        borderColor: accentBorder,
+                        borderWidth: isLine ? 2 : 1,
+                        borderRadius: isLine ? 0 : 6,
+                        tension: isLine ? 0.35 : 0,
+                        fill: isLine,
+                        pointRadius: isLine ? (labels.length > 30 ? 0 : 3) : 0,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    animation: { duration: 280 },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: "rgba(10,15,24,0.92)",
+                            titleColor: "#eef4ff",
+                            bodyColor: "#a6b5cb",
+                            borderColor: "rgba(79,140,255,0.28)",
+                            borderWidth: 1,
+                            padding: 10,
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: labelColor,
+                                font: { size: 11 },
+                                maxRotation: labels.length > 12 ? 45 : 0,
+                                autoSkip: true,
+                                maxTicksLimit: 20,
+                            },
+                            grid: { color: gridColor },
+                        },
+                        y: {
+                            ticks: { color: labelColor, font: { size: 11 } },
+                            grid: { color: gridColor },
+                            beginAtZero: false,
+                        }
+                    }
+                }
+            };
+
+            try {
+                _chartInstance = new Chart($("chartCanvas"), config);
+            } catch (e) {
+                $("chartNoData").style.display = "flex";
+                $("chartCanvas").style.display = "none";
+                $("chartNoData").textContent = "Chart render failed: " + e.message;
+            }
+        }
+
+        // Simple title-case helper for chart labels (mirrors backend _title_case)
+        function _titleCase(str) {
+            return (str || "")
+                .replace(/([a-z])([A-Z])/g, "$1 $2")
+                .replace(/[_\-]+/g, " ")
+                .trim()
+                .replace(/\b\w/g, c => c.toUpperCase());
         }
 
         function renderResults(columns, rows) {
@@ -1791,8 +2028,11 @@ LIMIT 100</textarea>
                     rows: data.rows || [],
                     rowcount: data.rowcount || 0,
                     elapsed: data.elapsed_seconds || 0,
-                    sql
+                    sql,
+                    visualization: data.visualization || null
                 };
+                // Clear any stale chart when new results arrive
+                clearChart();
 
                 renderResults(lastRun.columns, lastRun.rows);
                 $("resultsCount").textContent = `${num(lastRun.rowcount)} rows`;
@@ -1867,9 +2107,12 @@ LIMIT 100</textarea>
             $("inspectTableWrap").classList.add("hidden");
             $("inspectHead").innerHTML = "";
             $("inspectBody").innerHTML = "";
-            // Close suggestions and info popovers when dataset changes
+            // Close suggestions and info popovers when dataset changes.
+            // Also clear the JS-level suggestions cache for this dataset so
+            // switching back later re-fetches (server cache still applies).
             $("suggestionsPopover").style.display = "none";
             suggestionsVisible = false;
+            if (selectedDataset) delete suggestionsCache[selectedDataset];
             $("infoPopover").style.display = "none";
         }
 
@@ -2105,7 +2348,11 @@ LIMIT 100</textarea>
         });
 
         $("infoBtn").addEventListener("click", toggleInfoPopover);
-        $("suggestionsBtn").addEventListener("click", fetchSuggestions);
+        $("suggestionsBtn").addEventListener("click", () => fetchSuggestions());
+        $("suggestionsRefreshBtn").addEventListener("click", (e) => {
+            e.stopPropagation();  // don't trigger any parent handlers
+            fetchSuggestions(true);
+        });
         $("generateSqlBtn").addEventListener("click", generateAiSql);
         $("runSqlBtn").addEventListener("click", runSqlQuery);
         $("explainBtn").addEventListener("click", explainPlaceholder);

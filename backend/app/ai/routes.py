@@ -68,7 +68,14 @@ This separation improves:
 ============================================================
 """
 
-from fastapi import APIRouter
+import json
+import logging
+from datetime import datetime, timezone
+from pathlib import Path
+
+from fastapi import APIRouter, Query
+
+logger = logging.getLogger("app")
 
 from .provider_openai import (
     generate_sql_for_dataset,
@@ -128,6 +135,42 @@ def _get_dataset_source_path(dataset: str):
     return dataset_source_path(dataset)
 
 
+def _suggestions_cache_path(dataset: str) -> Path:
+    """
+    Return the path to the suggestions cache file for a dataset.
+
+    We derive the dataset directory from the source path so we
+    don't need to re-import DATASETS_DIR separately.
+    """
+    src, _ = _get_dataset_source_path(dataset)
+    return Path(src).parent / "dataset_context.json"
+
+
+def _read_suggestions_cache(dataset: str) -> list[str] | None:
+    """Return cached questions list, or None if no valid cache exists."""
+    try:
+        cache = json.loads(_suggestions_cache_path(dataset).read_text(encoding="utf-8"))
+        questions = cache.get("questions")
+        if isinstance(questions, list) and questions:
+            return questions
+    except Exception:
+        pass
+    return None
+
+
+def _write_suggestions_cache(dataset: str, questions: list[str]) -> None:
+    """Persist questions to dataset_context.json inside the dataset directory."""
+    try:
+        cache_path = _suggestions_cache_path(dataset)
+        payload = {
+            "questions": questions,
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+        }
+        cache_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    except Exception as exc:
+        logger.warning("Could not write suggestions cache for %s: %s", dataset, exc)
+
+
 # ============================================================
 # AI FEATURE: SUGGESTED QUESTIONS
 # ------------------------------------------------------------
@@ -157,7 +200,11 @@ def _get_dataset_source_path(dataset: str):
 # ============================================================
 
 @router.get("/suggest_questions")
-def suggest_questions(dataset: str, max_questions: int = 8):
+def suggest_questions(
+    dataset: str,
+    max_questions: int = 8,
+    refresh: bool = Query(False, description="Force regeneration, ignoring cache"),
+):
     """
     Return AI-generated suggested questions for the dataset.
 
@@ -165,16 +212,36 @@ def suggest_questions(dataset: str, max_questions: int = 8):
     ----------
     dataset : str
         Dataset name
-
     max_questions : int
         Maximum number of suggested questions
+    refresh : bool
+        When True, bypass the cache and call OpenAI even if cached
+        questions exist. Overwrites the cache with fresh results.
     """
 
     try:
 
         # ----------------------------------------------------
-        # STEP 1 — Ask the provider layer for suggestions
+        # STEP 1 — Return cached questions if available
+        #
+        # dataset_context.json in the dataset directory holds
+        # the last set of AI-generated questions. This avoids
+        # an OpenAI round-trip on every Suggestions click.
         # ----------------------------------------------------
+        if not refresh:
+            cached = _read_suggestions_cache(dataset)
+            if cached is not None:
+                logger.info("suggest_questions cache hit | dataset=%s", dataset)
+                return {"dataset": dataset, "questions": cached, "cached": True}
+
+        # ----------------------------------------------------
+        # STEP 2 — Ask the provider layer for suggestions
+        # ----------------------------------------------------
+        logger.info(
+            "suggest_questions calling OpenAI | dataset=%s | refresh=%s",
+            dataset,
+            refresh,
+        )
         questions = suggest_questions_for_dataset(
             dataset_name=dataset,
             dataset_source_path_fn=_get_dataset_source_path,
@@ -182,11 +249,18 @@ def suggest_questions(dataset: str, max_questions: int = 8):
         )
 
         # ----------------------------------------------------
-        # STEP 2 — Return structured response
+        # STEP 3 — Persist to cache so next click is instant
+        # ----------------------------------------------------
+        if questions:
+            _write_suggestions_cache(dataset, questions)
+
+        # ----------------------------------------------------
+        # STEP 4 — Return structured response
         # ----------------------------------------------------
         return {
             "dataset": dataset,
             "questions": questions,
+            "cached": False,
         }
 
     except Exception as e:

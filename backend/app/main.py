@@ -1739,6 +1739,19 @@ def api_sql(req: SqlRequest):
         preview = [dict(zip(cols, r)) for r in rows]
         elapsed = round(time.perf_counter() - t0, 4)
 
+        # ----------------------------------------------------
+        # STEP 6
+        # Recommend a chart based on result shape.
+        # Deterministic rules — no AI involved.
+        # Returns {"recommended": False} if no chart suits the
+        # result, so the frontend can always read this field.
+        # ----------------------------------------------------
+        try:
+            visualization = recommend_chart(cols, preview)
+        except Exception as _chart_err:
+            logger.warning("chart recommendation failed | reason=%s", _chart_err)
+            visualization = {"recommended": False, "reason": str(_chart_err)}
+
         _audit_log(
             {
                 "event": "sql",
@@ -1747,6 +1760,7 @@ def api_sql(req: SqlRequest):
                 "rowcount": rowcount,
                 "preview_rows_returned": len(preview),
                 "elapsed_seconds": elapsed,
+                "chart_recommended": visualization.get("recommended", False),
             }
         )
 
@@ -1755,6 +1769,7 @@ def api_sql(req: SqlRequest):
             "rows": preview,
             "rowcount": rowcount,
             "elapsed_seconds": elapsed,
+            "visualization": visualization,
         }
 
     except HTTPException as e:
@@ -1977,6 +1992,11 @@ from app.services.dataset_import import (
     import_dataset,
     DatasetImportError,
 )
+
+try:
+    from app.services.chart_recommender import recommend_chart
+except Exception:
+    from services.chart_recommender import recommend_chart
 
 
 @app.get("/api/audit")
