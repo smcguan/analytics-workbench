@@ -185,3 +185,20 @@ class InsightsResponse(BaseModel):
     insights: List[InsightItem] = []
     cached: bool = False
     error: str = ""
+
+
+# ============================================================
+# EXPLAIN MODELS — MILESTONE 4
+# ============================================================
+# Used by POST /api/ai/explain
+# ============================================================
+
+class ExplainRequest(BaseModel):
+    dataset: str
+    sql: str
+    columns: List[str] = []
+    rows: List[dict] = []
+
+
+class ExplainResponse(BaseModel):
+    explanation: str

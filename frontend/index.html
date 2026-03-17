@@ -392,6 +392,17 @@
             font-style:italic;
         }
 
+        .explain-panel{
+            margin:8px 0 0 0;
+            padding:12px 14px;
+            border-radius:12px;
+            border:1px solid rgba(79,140,255,.22);
+            background:rgba(79,140,255,.08);
+            color:#d6e6ff;
+            font-size:13px;
+            line-height:1.6;
+        }
+
         .dataset-name{
             overflow:hidden;
             text-overflow:ellipsis;
@@ -1083,7 +1094,6 @@
                             </div>
 
                             <div class="inspect-actions">
-                                <button class="btn small" id="inspectProfileBtn">Profile</button>
                                 <button class="btn small" id="inspectSchemaBtn">Schema</button>
                                 <button class="btn small" id="inspectPreviewBtn">Preview</button>
                             </div>
@@ -1091,7 +1101,7 @@
 
                         <div class="inspect-card">
                             <div class="inspect-empty" id="inspectEmpty">
-                                Select a dataset, then choose Profile, Schema, or Preview.
+                                Select a dataset, then choose Schema or Preview.
                             </div>
 
                             <!--
@@ -1175,6 +1185,11 @@ LIMIT 100</textarea>
                             </div>
 
                             <div class="results-meta" id="resultsMeta">No query executed yet.</div>
+                        </div>
+
+                        <!-- Explain panel: appears below Run SQL/Explain row when Explain is clicked -->
+                        <div id="explainPanel" class="explain-panel" style="display:none;">
+                            <div id="explainText"></div>
                         </div>
 
                         <!--
@@ -2089,8 +2104,36 @@ LIMIT 100</textarea>
             }
         }
 
-        function explainPlaceholder() {
-            toast("Explain is a Milestone 3 placeholder.");
+        async function explainSql() {
+            const panel = $("explainPanel");
+
+            // Toggle: clicking Explain again closes the panel
+            if (panel.style.display !== "none") {
+                panel.style.display = "none";
+                return;
+            }
+
+            if (!selectedDataset) { toast("Select a dataset first."); return; }
+            if (!lastRun.sql) { toast("Run a query first."); return; }
+
+            $("explainText").textContent = "Explaining…";
+            panel.style.display = "block";
+
+            try {
+                const data = await apiJson("/api/ai/explain", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        dataset: selectedDataset,
+                        sql: lastRun.sql,
+                        columns: lastRun.columns,
+                        rows: lastRun.rows.slice(0, 10),
+                    })
+                });
+                $("explainText").textContent = data.explanation || "(No explanation returned.)";
+            } catch (e) {
+                $("explainText").textContent = "Could not generate explanation: " + e.message;
+            }
         }
 
         async function generateAiSql() {
@@ -2411,8 +2454,10 @@ LIMIT 100</textarea>
                     sql,
                     visualization: data.visualization || null
                 };
-                // Clear any stale chart when new results arrive
+                // Clear any stale chart and explanation when new results arrive
                 clearChart();
+                $("explainPanel").style.display = "none";
+                $("explainText").textContent = "";
 
                 renderResults(lastRun.columns, lastRun.rows);
                 $("resultsCount").textContent = `${num(lastRun.rowcount)} rows`;
@@ -2470,7 +2515,6 @@ LIMIT 100</textarea>
 
         function setInspectButtons() {
             const map = {
-                profile: "inspectProfileBtn",
                 schema: "inspectSchemaBtn",
                 preview: "inspectPreviewBtn"
             };
@@ -2566,30 +2610,6 @@ LIMIT 100</textarea>
             }
         }
 
-        async function inspectProfile() {
-            if (inspectMode === "profile") {
-                resetInspectState();
-                return;
-            }
-
-            if (!selectedDataset) { toast("Select a dataset first."); return; }
-
-            try {
-                const data = await apiJson("/api/profile?dataset=" + encodeURIComponent(selectedDataset));
-                const rows = [
-                    { "Metric": "Rows", "Value": data.row_count ?? "—" },
-                    { "Metric": "Columns", "Value": data.column_count ?? "—" },
-                    { "Metric": "File Size", "Value": data.file_size_bytes != null ? bytesToHuman(data.file_size_bytes) : "—" },
-                    { "Metric": "Source", "Value": data.meta_source || "—" }
-                ];
-                inspectMode = "profile";
-                setInspectButtons();
-                renderInspectTable(["Metric", "Value"], rows);
-            } catch (e) {
-                toast("Profile load failed: " + e.message);
-            }
-        }
-
         function renderSavedQueries(items) {
             const body = $("savedQueriesBody");
             const empty = $("savedQueriesEmpty");
@@ -2657,15 +2677,32 @@ LIMIT 100</textarea>
             }
         }
 
-        function applySavedQuery(q) {
+        async function applySavedQuery(q) {
             if (!q) return;
 
-            selectedDataset = q.dataset || selectedDataset;
-            renderDatasets();
-            updateSelectedDatasetSummary();
+            const datasetName = q.dataset || selectedDataset;
+            selectedDataset = datasetName;
+
+            // If this dataset isn't in the current session list (e.g. loading a
+            // query saved in a prior session), add a stub so the sidebar shows
+            // it as selected and loadDatasetMeta has somewhere to write into.
+            if (datasetName && !datasets.some(d => (d.name || "") === datasetName)) {
+                datasets.push({ name: datasetName, row_count: null, column_count: null, file_size_bytes: null, meta_source: null });
+            }
+
+            // loadDatasetMeta calls renderDatasets() + updateSelectedDatasetSummary()
+            // internally after the fetch resolves, so no need to call them here.
+            // Fall back to direct calls only when there is no dataset to load.
+            if (datasetName) {
+                await loadDatasetMeta(datasetName);
+            } else {
+                renderDatasets();
+                updateSelectedDatasetSummary();
+            }
 
             if (q.type === "sql" && q.sql) {
                 $("sqlEditor").value = q.sql;
+                $("askPrompt").value = "";
                 switchView("query");
                 toast(`Loaded saved query: ${q.name}`);
             } else {
@@ -2742,7 +2779,7 @@ LIMIT 100</textarea>
         });
         $("generateSqlBtn").addEventListener("click", generateAiSql);
         $("runSqlBtn").addEventListener("click", runSqlQuery);
-        $("explainBtn").addEventListener("click", explainPlaceholder);
+        $("explainBtn").addEventListener("click", explainSql);
 
         $("tableTab").addEventListener("click", () => setActiveTab("table"));
         $("chartTab").addEventListener("click", () => setActiveTab("chart"));
@@ -2751,7 +2788,6 @@ LIMIT 100</textarea>
         $("exportExcelBtn").addEventListener("click", () => exportSqlWorkspaceResult("xlsx"));
         $("exportTsvBtn").addEventListener("click", () => exportSqlWorkspaceResult("tsv"));
 
-        $("inspectProfileBtn").addEventListener("click", inspectProfile);
         $("inspectSchemaBtn").addEventListener("click", inspectSchema);
         $("inspectPreviewBtn").addEventListener("click", inspectPreview);
 

@@ -419,6 +419,85 @@ def suggest_questions_for_dataset(
 
 
 # ============================================================
+# EXPLAIN PROMPT BUILDER
+# ------------------------------------------------------------
+# Given a SQL query and its result rows, asks the model to
+# explain in plain English what the query does and what the
+# results mean in business terms.
+#
+# Returns plain text (not JSON) — 2–4 sentences.
+# ============================================================
+def build_explain_prompt(
+    *,
+    sql: str,
+    columns: list[str],
+    rows: list[dict],
+    dataset_name: str,
+) -> str:
+    """
+    Build the prompt used to explain a SQL query and its results
+    in plain-English business terms.
+    """
+    sample = rows[:10]
+
+    # Format rows as a simple readable table
+    rows_text = "(no results)"
+    if sample and columns:
+        header = " | ".join(columns)
+        separator = "-" * len(header)
+        data_lines = []
+        for row in sample:
+            data_lines.append(" | ".join(str(row.get(c, "")) for c in columns))
+        rows_text = header + "\n" + separator + "\n" + "\n".join(data_lines)
+
+    prompt = f"""
+You are a data analyst explaining a query result to a business user who is not technical.
+
+Write 2 to 4 sentences. The first sentence should describe what the query does in plain English.
+The remaining sentences should explain what the results mean in business terms — highlight
+anything notable, such as which items are largest, smallest, or most significant.
+
+Rules:
+- Write for a business audience. No SQL syntax, no technical jargon.
+- Be specific — reference actual values from the results when they are meaningful.
+- Do NOT restate the column names or row count mechanically.
+- Do NOT use bullet points or headers — plain flowing text only.
+- Keep it concise: 2 to 4 sentences maximum.
+
+Dataset: {dataset_name}
+
+SQL query:
+{sql}
+
+Result columns: {", ".join(columns) if columns else "(none)"}
+
+Result rows (up to 10):
+{rows_text}
+""".strip()
+
+    return prompt
+
+
+def generate_explanation(
+    *,
+    sql: str,
+    columns: list[str],
+    rows: list[dict],
+    dataset_name: str,
+) -> str:
+    """
+    Generate a plain-English explanation of a SQL query and its results.
+    """
+    prompt = build_explain_prompt(
+        sql=sql,
+        columns=columns,
+        rows=rows,
+        dataset_name=dataset_name,
+    )
+    return generate_sql_response(prompt)
+
+
+# ============================================================
 # INSIGHTS PROMPT BUILDER
 # ------------------------------------------------------------
 # Asks the model to surface 3–5 non-obvious findings based on

@@ -81,6 +81,7 @@ from .provider_openai import (
     generate_sql_for_dataset,
     suggest_questions_for_dataset,
     generate_insights_for_dataset,
+    generate_explanation,
 )
 
 from .response_parser import parse_generate_sql_response
@@ -90,6 +91,8 @@ from .schemas import (
     GenerateSQLResponse,
     InsightItem,
     InsightsResponse,
+    ExplainRequest,
+    ExplainResponse,
 )
 
 from .sql_validator import (
@@ -588,3 +591,35 @@ def generate_sql(payload: GenerateSQLRequest) -> GenerateSQLResponse:
             message=f"{type(e).__name__}: {e}",
             warnings=[],
         )
+
+
+# ============================================================
+# AI FEATURE: EXPLAIN SQL RESULTS
+# ------------------------------------------------------------
+# Endpoint:
+#     POST /api/ai/explain
+#
+# PURPOSE
+# -------
+# Explain what a SQL query does and what its results mean
+# in plain-English business terms.
+#
+# The frontend sends the SQL from the editor plus the column
+# names and result rows from the most recent /api/sql run.
+# The AI returns 2–4 sentences of plain text (not JSON).
+# ============================================================
+
+@router.post("/explain", response_model=ExplainResponse)
+def explain_sql(payload: ExplainRequest) -> ExplainResponse:
+    try:
+        explanation = generate_explanation(
+            sql=payload.sql,
+            columns=payload.columns,
+            rows=payload.rows,
+            dataset_name=payload.dataset,
+        )
+        return ExplainResponse(explanation=explanation)
+    except Exception as e:
+        logger.exception("explain failed | dataset=%s | error=%s", payload.dataset, e)
+        from fastapi import HTTPException
+        raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}")
