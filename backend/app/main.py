@@ -190,7 +190,7 @@ from app.ai.routes import router as ai_router  # noqa: E402
 logger = logging.getLogger("app")
 app = FastAPI(title="Analytics Workbench")
 
-APP_VERSION = "1.1.0"
+APP_VERSION = "1.2.0"
 
 
 # ============================================================

@@ -1389,6 +1389,7 @@ LIMIT 100</textarea>
             try {
                 const v = await apiJson("/api/version");
                 setVersionState("ok", `${v.name} • v${v.version} • exports: ${v.exports_dir}`);
+                document.title = `Analytics Workbench v${v.version}`;
             } catch (e) {
                 setVersionState("bad", "Version unavailable");
             }
@@ -2187,6 +2188,8 @@ LIMIT 100</textarea>
             try {
                 $("generateSqlBtn").disabled = true;
                 $("generateSqlBtn").textContent = "Generating...";
+                $("explainPanel").style.display = "none";
+                $("explainText").textContent = "";
 
                 for (const attempt of attempts) {
                     try {
