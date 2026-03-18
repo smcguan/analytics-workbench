@@ -1319,12 +1319,14 @@ LIMIT 100</textarea>
     <script>
         const $ = (id) => document.getElementById(id);
 
-        function toast(msg) {
+        function toast(msg, durationMs) {
             const el = $("toast");
             el.textContent = msg;
             el.style.display = "block";
             clearTimeout(window.__toastTimer);
-            window.__toastTimer = setTimeout(() => (el.style.display = "none"), 2600);
+            // Default 2.6s for success, caller can pass longer for errors
+            const ms = durationMs || 2600;
+            window.__toastTimer = setTimeout(() => (el.style.display = "none"), ms);
         }
 
         function bytesToHuman(bytes) {
@@ -1756,7 +1758,7 @@ LIMIT 100</textarea>
 
             } catch (e) {
                 clearStatus();
-                toast("Import failed: " + e.message);
+                toast("Import failed: " + e.message, 8000);
             } finally {
                 unlockUi();
             }
@@ -2260,10 +2262,10 @@ LIMIT 100</textarea>
                 $("sqlEditor").value = "SELECT *\nFROM dataset\nLIMIT 100";
                 // Surface the actual backend error so it's diagnosable, not just a generic message.
                 const errMsg = lastError ? lastError.message : "All routes returned no SQL.";
-                toast("Generate SQL failed — " + errMsg + ". Loaded starter SQL.");
+                toast("Generate SQL failed — " + errMsg + ". Loaded starter SQL.", 8000);
             } catch (e) {
                 $("sqlEditor").value = "SELECT *\nFROM dataset\nLIMIT 100";
-                toast("Generate SQL failed. Loaded starter SQL instead.");
+                toast("Generate SQL failed. Loaded starter SQL instead.", 8000);
                 console.error("Generate SQL failed:", e);
             } finally {
                 $("generateSqlBtn").disabled = false;
@@ -2498,8 +2500,10 @@ LIMIT 100</textarea>
                 $("resultsMeta").textContent = `executed in ${lastRun.elapsed}s • DuckDB local`;
                 toast("SQL executed.");
             } catch (e) {
-                $("resultsMeta").textContent = "SQL failed.";
-                toast("SQL failed: " + e.message);
+                const errMsg = e.message || "Unknown error";
+                $("resultsMeta").textContent = "ERROR: " + errMsg;
+                toast("SQL failed: " + errMsg, 8000);
+                console.error("SQL execution error:", errMsg);
             }
         }
 

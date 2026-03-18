@@ -1,5 +1,10 @@
 # Analytics Workbench — Claude Code Context
 
+> **See CONTEXT.md for current product and business state.**
+> CONTEXT.md is the single source of truth for milestone status, open decisions,
+> session log, and next actions. Read it at the start of every Claude Code session.
+
+
 ## PROJECT NAME
 Analytics Workbench
 
@@ -460,14 +465,7 @@ and therapeutic category classification.
 ## KNOWN BUGS — ACTIVE (Fix before or during Milestone 4)
 
 ### Bug 1: Silent SQL failure on invalid DuckDB syntax
-**Symptom:** When a query contains invalid DuckDB syntax (e.g. regexp_replace
-with a PostgreSQL-style 'g' flag), /api/sql returns the unfiltered dataset
-instead of an error. User sees results as if the WHERE clause was ignored.
-**Root cause:** Error is being swallowed somewhere in the SQL execution path.
-sql_validator.py EXPLAIN step may not be firing correctly.
-**Fix:** Diagnose error handling in /api/sql. Ensure actual DuckDB error message
-reaches frontend toast. Confirm sql_validator.py EXPLAIN runs before execution.
-**Priority:** Critical — silent wrong results are worse than visible errors.
+**Status:** FIXED. DuckDB errors now surface as HTTP 400 with readable messages.
 
 ### Bug 2: Long NOT LIKE / NOT IN chains fail silently around 26 conditions
 **Symptom:** Queries with many NOT LIKE or NOT IN conditions in a WHERE clause
@@ -479,14 +477,22 @@ parsing issues, or textarea size limits in the frontend SQL editor.
 limit. Do not fail silently.
 **Priority:** High.
 
-### Bug 3: Refresh Datasets — Windows file lock issue
-**Symptom:** shutil.rmtree() in /api/datasets/{name}/delete may fail silently
-when DuckDB has the Parquet file open.
-**Fix:** Add robust rmtree helper with retry logic and better error surfacing.
-**Priority:** Medium.
+### Bug 3: ORDER BY DESC parser error when AW wraps query
+**Symptom:** When a user query contains ORDER BY ... DESC, the SQL rewriting
+logic in main.py (_rewrite_sql_dataset_reference or wrapping into a subquery)
+may produce invalid SQL, causing a parser error.
+**Investigation needed:** Check how main.py wraps user SQL and whether ORDER BY
+clauses survive the rewrite correctly.
+**Priority:** High.
 
 ### Bug 4: Suggestions button caching
-**Status:** Just implemented — needs testing.
+**Status:** FIXED. Two-layer caching (JS + server) working with refresh mechanism.
+
+### Bug 5: Refresh Datasets — Windows file lock issue
+**Symptom:** shutil.rmtree() in /api/datasets/{name}/delete may fail silently
+when DuckDB has the Parquet file open.
+**Status:** Partially addressed — retry logic added, needs further testing on Windows.
+**Priority:** Medium.
 
 ---
 
