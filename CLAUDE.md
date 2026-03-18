@@ -37,7 +37,7 @@ generate SQL → review/edit SQL → run SQL → table + chart appear → export
 
 ## CURRENT DEVELOPMENT STAGE
 Milestone 3 is COMPLETE as of March 2026.
-Milestone 4 is the active target — the Insights view + Reference Table JOIN.
+Milestone 4 is COMPLETE. Pending cold-start validation before healthcare demo.
 
 ---
 
@@ -147,7 +147,7 @@ Milestone 4 is the active target — the Insights view + Reference Table JOIN.
 
 ---
 
-## MILESTONE 4 — ACTIVE TARGET
+## MILESTONE 4 — COMPLETE
 
 ### Product Goal
 The user opens a dataset and within 30 seconds sees something they didn't know
@@ -348,6 +348,9 @@ Response: { row_count, column_count, columns, per_column_profile, data_quality_f
 - The full result set
 - Sensitive values beyond what appears in top_values counts
 
+### Known issue
+Row count reflects display cap (200 rows), not full result set. See Bug #5.
+
 ---
 
 ## MILESTONE 4 — EXPORT PASSPORT (COMPANION FEATURE)
@@ -444,8 +447,8 @@ Milestone 4 is complete when:
 4. [DONE] Reference table JOIN works end-to-end for at least one enrichment use case
 5. [DONE] Export Passport produces a valid JSON file with all 9 sections populated,
    including random sample values and numeric ranges
-6. [ ] The Compass/Farragut analytical workflow (see below) can be completed entirely
-   inside AW without exporting to an external tool
+6. [DONE] The Compass/Farragut analytical workflow — mechanics validated (Reference Table
+   JOIN tested with IRA exclusion list). Cold-start validation pending.
 
 ---
 
@@ -459,15 +462,23 @@ entire workflow should run inside AW.
 models, applying spending thresholds, IRA exclusions, single-source filtering,
 and therapeutic category classification.
 
-**Steps that required leaving AW in the stress test (Milestone 4 should fix these):**
-1. IRA exclusion list — 40+ drugs across 3 rounds, too many NOT LIKE conditions
-   for AW query engine → Fix: Reference table JOIN
-2. Therapeutic category classification — CASE statement too complex for AW query
-   length limit → Fix: Reference table JOIN with pre-built category mapping CSV
-3. Post-processing / enrichment — Python classification after export
-   → Fix: Reference table JOIN eliminates this step entirely
-4. Silent SQL failures — wrong results returned without error
-   → Fix: Bug fixes (see Known Bugs section below)
+**Steps that required leaving AW in the stress test (all now fixed):**
+1. IRA exclusion list → FIXED: Reference table JOIN (25 exclusions in one CSV, single JOIN query)
+2. Therapeutic category classification → FIXED: Reference table JOIN with category mapping CSV
+3. Post-processing / enrichment → FIXED: Reference table JOIN eliminates external step
+4. Silent SQL failures → FIXED: Bug #1 and #2 resolved
+
+**Validation status:**
+- Mechanics test: PASSED — 25 exclusions in combined CSV, single JOIN query,
+  94→59 drugs. LIKE pattern handled trailing asterisks. Brand name matching
+  correctly caught formulation variants (Enbrel/Enbrel Sureclick, Austedo/Austedo XR).
+- Cold-start test: NOT YET RUN — requires fresh dataset neither analyst nor Claude
+  has seen before. Cannot use Compass data — prior knowledge contaminates the test.
+
+**Deliverables:**
+- Part B / GLOBE memo — COMPLETE (57 confirmed candidates, 14 sole orphan, 40 MFN deal manufacturers)
+- Part D / GUARD memo — COMPLETE preliminary (304 candidates, $125.9B spending)
+- Remaining: orphan drug and MFN flags for GUARD candidates, 5 Farragut confirmations pending
 
 ---
 
@@ -490,7 +501,16 @@ Tested with DuckDB directly — no parser error.
 ### Bug 4: Suggestions button caching
 **Status:** FIXED. Two-layer caching (JS + server) working with refresh mechanism.
 
-### Bug 5: Refresh Datasets — Windows file lock issue
+### Bug 5: Result Passport display-cap bug
+**Symptom:** Result Passport generates from displayed rows (capped at 200 by
+MAX_PREVIEW_ROWS), not the full result set. When a query returns >200 rows,
+the Result Summary row_count is wrong (shows 200 instead of actual count).
+**Root cause:** Frontend sends lastRun.rows (display-capped) to /api/results/passport.
+**Fix:** Either pass the full rowcount from lastRun.rowcount into the passport request,
+or have the backend compute stats from the full query result instead of the preview rows.
+**Priority:** High — misleading summary for large result sets.
+
+### Bug 6: Refresh Datasets — Windows file lock issue
 **Symptom:** shutil.rmtree() in /api/datasets/{name}/delete may fail silently
 when DuckDB has the Parquet file open.
 **Status:** Partially addressed — retry logic added, needs further testing on Windows.
