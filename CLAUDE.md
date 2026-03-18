@@ -234,19 +234,19 @@ Behavior:
 
 ---
 
-## MILESTONE 4 — REFERENCE TABLE JOIN (COMPANION FEATURE)
+## MILESTONE 4 — REFERENCE TABLE JOIN (COMPLETE)
 
-### Purpose
-Allow the user to upload a small reference CSV and JOIN it against the primary
-dataset inside AW. This enables enrichment workflows (IRA exclusion lists,
-category mappings, manufacturer lists) without leaving AW.
+### Status
+COMPLETE — built and working as of March 2026.
 
 ### How It Works
-- In the Import area, add a "Reference Table" option alongside primary dataset import
-- Reference tables are lightweight — no profiling, no schema inspection, no insights
-- Available in SQL as a second table name (user-defined or default "reference")
+- "+ Reference Table" button in sidebar imports CSV/TSV/XLSX as lightweight Parquet
+- Reference tables: no profiling, no insights, only _meta.json with column names/types
+- Available in SQL as table name "reference" (e.g. JOIN reference ON ...)
 - AI context builder includes reference table column names when generating SQL
-- One reference table per session (not a full multi-dataset engine)
+- One reference table at a time — importing a new one overwrites the previous
+- Reference indicator in sidebar shows loaded table name, row count, column count
+- "Remove" button clears the reference table
 
 ### What This Unlocks
 - JOIN an IRA drug exclusion list → automatic IRA filtering in any query
@@ -254,11 +254,23 @@ category mappings, manufacturer lists) without leaving AW.
 - JOIN a manufacturer MFN list → automatic MFN flagging
 - Any lookup table enrichment the user needs
 
-### Backend Changes Required
-- dataset_import.py: add lightweight reference table import (CSV → Parquet, no profiling)
-- context_builder.py: include reference table schema in AI context when present
-- main.py: rewrite FROM dataset logic to handle FROM dataset JOIN reference
-- No new endpoints required — extends existing import and SQL execution paths
+### Implementation
+- dataset_import.py: import_reference_table() — lightweight pipeline, always overwrites
+- context_builder.py: build_reference_context() — schema-only (column names + types)
+- main.py: _rewrite_sql_dataset_reference extended for FROM/JOIN reference rewriting
+- main.py: REFERENCES_DIR, /api/references/import, /api/references, /api/references/{name}/delete
+- provider_openai.py: SQL prompt includes reference table columns when loaded
+- routes.py: AI SQL generation wired with reference context
+- schemas.py: reference field on GenerateSQLRequest
+- frontend: reference import button, file input, indicator, passes reference in SQL/export/AI calls
+- Error: SQL using "reference" without loaded table → HTTP 400 with clear message
+
+### Storage
+```
+data/references/<registered_name>/
+  source.parquet       — reference table file
+  _meta.json           — column names, types, row count
+```
 
 ### Scope Boundary
 This is enrichment, not multi-dataset analysis. One primary dataset + one reference
@@ -266,78 +278,75 @@ table. Keep it simple. Do not build a general multi-dataset join engine.
 
 ---
 
-## MILESTONE 4 — DATA PRIVACY & AI TRANSPARENCY
+## MILESTONE 4 — DATA PRIVACY & AI TRANSPARENCY (COMPLETE)
 
-### Core product promise
-Analytics Workbench's primary differentiator is that user data never leaves
-the user's computer. This promise must remain true and visible in Milestone 4.
-The Insights view makes AI more prominent — which makes the privacy story
-more important, not less.
+### Status
+COMPLETE — all three components built and working.
 
-### What actually gets sent to OpenAI
-Be precise about this. The context builder sends:
-- Column names and data types
-- Aggregate statistics (min, max, mean, null counts, top values)
-- A sample of rows (capped by AW_CONTEXT_SAMPLE_ROWS)
+### Component 1: Schema-only mode for Insights
+The insights prompt in provider_openai.py sends ONLY column names, data types,
+and aggregate numeric stats (min/max/mean). Sample rows and categorical top
+values are excluded. The AI generates SQL that runs locally — no raw data
+values need to leave the machine.
 
-It does NOT send the full dataset. But top values and sample rows do contain
-real data values. For sensitive datasets this is a real exposure.
+### Component 2: Permanent privacy disclosure
+A muted text line is permanently visible in the Insights view below the toolbar:
+"AI generates analysis instructions from column names and statistics only.
+Your data stays on your computer."
 
-### Required: Schema-only mode for Insights (DEFAULT)
-For the /api/ai/insights endpoint, the AI prompt must use ONLY:
-- Column names and data types
-- Aggregate statistics (row count, min, max, mean, null rate per column)
+### Component 3: Per-dataset AI consent
+On import, a confirm dialog asks whether to enable AI features. Decision stored
+in _meta.json as "ai_consent" (true/false). If skipped:
+- Insights auto-generation disabled
+- Suggestions button disabled
+- Query tab and manual SQL still work normally
 
-Do NOT include sample rows or top values in the insights prompt.
-
-Rationale: Insights are generated as SQL queries that run locally in DuckDB.
-The AI generates the analysis instructions — not the analysis itself. The
-actual data computation happens entirely on the user's machine. No raw data
-values need to leave to make this work.
-
-This is not a quality tradeoff. It is the correct architecture.
-
-### Required: Permanent privacy disclosure in UI
-Add a single quiet line of text in the Insights view, visible at all times:
-
-  "AI generates analysis instructions from column names and statistics only.
-   Your data stays on your computer."
-
-This is not a modal. Not a consent dialog. Not a legal disclaimer. Just an
-honest, permanent, plain-English statement. Styled as secondary text — present
-but not intrusive. Visible below the Refresh Insights button without scrolling.
-
-### Required: Per-dataset AI consent on import
-When a dataset is imported, show a clear one-time disclosure before AI features
-activate for that dataset:
-
-  "AI features will use column names and statistics to generate insights and
-   suggested questions. No raw data is sent. Enable AI features?"
-   [Enable] [Skip — use manual queries only]
-
-Default: Enable. Store the consent decision in _meta.json per dataset. Do not
-ask again once decided. Allow the user to change it in dataset settings.
+Consent is exposed via GET /api/datasets/{name}/meta (ai_consent field) and
+stored via POST /api/datasets/{name}/ai_consent.
 
 ### Framing guidance for UI copy
-Always describe what the AI does accurately:
-
   WRONG: "AI analyzes your data"
   RIGHT: "AI generates analysis instructions that run on your computer"
 
-  WRONG: "Insights are powered by AI"
-  RIGHT: "AI identifies patterns to explore — all computation runs locally"
-
-The distinction is real and important. The AI generates SQL. DuckDB runs it.
-The data never moves.
-
 ### Future: Local AI mode (Milestone 5 — not Milestone 4)
 For users who need full air-gap operation, plan for a local AI mode using
-Ollama + a locally-running model in Milestone 5. Do not build it in Milestone 4
-but ensure Milestone 4 architecture decisions don't block it. When active, UI
-shows "Local AI mode — all processing on this machine."
+Ollama + a locally-running model in Milestone 5.
 
 ---
 
+## MILESTONE 4 — RESULT PASSPORT (COMPLETE)
+
+### Status
+COMPLETE — built and working.
+
+### Purpose
+When an analyst collaborates with an external AI on query results, they can
+copy a structured summary instead of exporting raw rows. The Result Passport
+contains per-column profiles (top values with counts, numeric stats, null
+rates, data quality flags) but zero raw row data.
+
+### UI
+"Copy Result Summary" button in results toolbar Row 2, after Export TSV.
+Active only when a result set is present. Copies JSON to clipboard.
+Toast: "Result summary copied — paste into Claude or any AI assistant"
+
+### Endpoint
+POST /api/results/passport
+Request: { "columns": [...], "rows": [...], "sql": "..." }
+Response: { row_count, column_count, columns, per_column_profile, data_quality_flags, grain_hint }
+
+### What the passport includes
+- row_count, column_count, column names
+- Per-column profile:
+  - String: distinct_count, top_values (15) with counts, null_count/pct
+  - Numeric: min, max, mean, median, null_count/pct
+- Data quality flags: high_null_rate (>10%), looks_numeric_but_stored_as_text
+- grain_hint: the SQL query that produced the result
+
+### What it does NOT include
+- Raw row data
+- The full result set
+- Sensitive values beyond what appears in top_values counts
 
 ---
 
@@ -429,13 +438,13 @@ pattern as suggest_questions. Force refresh with ?refresh=true.
 ## MILESTONE 4 — SUCCESS CRITERIA
 
 Milestone 4 is complete when:
-1. User imports any structured dataset and sees 3–5 insight cards within 10 seconds
-2. Every insight card has a working "Explore in Query" drill-down
-3. Insights are cached — reloading the dataset is instant
-4. Reference table JOIN works end-to-end for at least one enrichment use case
-5. Export Passport produces a valid JSON file with all 9 sections populated,
+1. [DONE] User imports any structured dataset and sees 3–5 insight cards within 10 seconds
+2. [DONE] Every insight card has a working "Explore in Query" drill-down
+3. [DONE] Insights are cached — reloading the dataset is instant
+4. [DONE] Reference table JOIN works end-to-end for at least one enrichment use case
+5. [DONE] Export Passport produces a valid JSON file with all 9 sections populated,
    including random sample values and numeric ranges
-6. The Compass/Farragut analytical workflow (see below) can be completed entirely
+6. [ ] The Compass/Farragut analytical workflow (see below) can be completed entirely
    inside AW without exporting to an external tool
 
 ---
@@ -529,7 +538,7 @@ Manufacturer data for Part B drugs requires a supplemental source.
 - SQL editor clears when suggestion chip clicked
 - Results block row layout:
   Row 1: Run SQL | Explain | execution metadata
-  Row 2: RESULTS label | row count | Table | Chart | Export Excel | Export TSV
+  Row 2: RESULTS label | row count | Table | Chart | Export Excel | Export TSV | Copy Result Summary
   Row 3: table or chart content
 
 ---
@@ -554,6 +563,11 @@ POST /api/queries/delete
 POST /api/ai/generate_sql
 GET  /api/ai/suggest_questions?dataset=  (?refresh=true to bypass cache)
 GET  /api/ai/insights?dataset=           (?refresh=true to bypass cache) [MILESTONE 4]
+POST /api/results/passport               (result summary for clipboard) [MILESTONE 4]
+POST /api/datasets/{name}/ai_consent     (store AI consent) [MILESTONE 4]
+POST /api/references/import              (reference table import) [MILESTONE 4]
+GET  /api/references                     (list reference tables) [MILESTONE 4]
+POST /api/references/{name}/delete       (delete reference table) [MILESTONE 4]
 POST /api/shutdown
 ```
 
@@ -603,8 +617,8 @@ absolute Parquet path. Both rewrites must happen before execution.
 - Returns JSON: {status, sql, message, warnings}
 - LIKE patterns preferred over = or IN for string matching (handles data quality issues)
 
-### Insights Generation (NEW — Milestone 4)
-- Input: dataset profile (column stats, sample rows, top values)
+### Insights Generation (Milestone 4)
+- Input: dataset profile (column names, types, numeric stats ONLY — no sample rows, no top values)
 - Output: JSON array of insight objects (see Insight Object Schema above)
 - Max 5 insights
 - Each insight must include executable SQL

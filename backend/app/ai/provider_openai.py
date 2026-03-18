@@ -541,12 +541,11 @@ def build_insights_prompt(
         dataset_source_path_fn=dataset_source_path_fn,
     )
 
+    # PRIVACY: Insights prompt uses schema + aggregate stats ONLY.
+    # No sample rows, no top values (categorical). The AI generates SQL
+    # that runs locally — it does not need to see raw data values.
     columns_text = _format_columns(context.get("columns", []))
-    sample_rows_text = _format_sample_rows(context.get("sample_rows", []))
     numeric_stats_text = _format_numeric_stats(context.get("numeric_stats", []))
-    categorical_values_text = _format_categorical_values(
-        context.get("categorical_values", [])
-    )
 
     prompt = f"""
 You are a data analyst identifying non-obvious insights in a dataset.
@@ -605,14 +604,11 @@ Dataset name: {dataset_name}
 Available columns (USE ONLY THESE):
 {columns_text}
 
-Sample rows (shows real data values and formats):
-{sample_rows_text}
-
-Numeric column stats (min/max/avg):
+Numeric column stats (min/max/avg — use these to identify patterns):
 {numeric_stats_text}
 
-Categorical column values:
-{categorical_values_text}
+Note: You are seeing column names and aggregate statistics only — no raw data values.
+Generate SQL queries that will compute the actual values when run locally.
 """.strip()
 
     return prompt

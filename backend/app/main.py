@@ -469,6 +469,12 @@ class SqlExportRequest(BaseModel):
     reference: str | None = None
 
 
+class ResultPassportRequest(BaseModel):
+    columns: list[str]
+    rows: list[dict]
+    sql: str = ""
+
+
 # ============================================================
 # HELPER FUNCTIONS
 # ============================================================
@@ -2053,6 +2059,7 @@ def api_dataset_meta(name: str):
             "file_size_bytes": file_size_bytes,
             "last_scanned": meta.get("last_scanned"),
             "meta_source": "cached",
+            "ai_consent": meta.get("ai_consent", True),
         }
         _audit_log(
             {
@@ -2124,6 +2131,41 @@ def api_dataset_meta(name: str):
         con.close()
 
 
+
+
+class AiConsentRequest(BaseModel):
+    ai_consent: bool = True
+
+
+@app.post("/api/datasets/{name}/ai_consent")
+def set_ai_consent(name: str, req: AiConsentRequest):
+    """
+    Store per-dataset AI consent decision in _meta.json.
+
+    Called once after import. The frontend checks this flag before
+    triggering insights or suggestions for the dataset.
+    """
+    ds_dir = _dataset_dir(name)
+    if not ds_dir.exists():
+        raise HTTPException(status_code=404, detail=f"Dataset not found: {name}")
+
+    meta_path = ds_dir / "_meta.json"
+    meta: dict = {}
+    if meta_path.exists():
+        try:
+            meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+
+    meta["ai_consent"] = req.ai_consent
+
+    try:
+        with meta_path.open("w", encoding="utf-8") as f:
+            json.dump(meta, f, indent=2)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to save consent: {exc}") from exc
+
+    return {"dataset": name, "ai_consent": req.ai_consent}
 
 
 @app.get("/api/datasets/{name}/passport")
@@ -3199,6 +3241,110 @@ async def import_uploaded_dataset(
         "column_count": metadata.column_count,
         "columns": [asdict(col) for col in metadata.columns],
         "created_at": metadata.created_at,
+    }
+
+
+# ============================================================
+# RESULT PASSPORT ENDPOINT
+# ============================================================
+
+
+@app.post("/api/results/passport")
+def result_passport(req: ResultPassportRequest):
+    """
+    Generate a structured summary of a query result set.
+
+    This is the query-result equivalent of Export Passport. It produces
+    a per-column profile (top values, numeric stats, null rates, data
+    quality flags) from the rows passed in the request body — no raw
+    row data is included in the output.
+
+    Designed to be copied to clipboard and shared with an external AI
+    assistant instead of exporting raw rows.
+    """
+    import statistics
+
+    columns = req.columns
+    rows = req.rows
+    sql = req.sql
+    row_count = len(rows)
+
+    if not columns or not rows:
+        raise HTTPException(status_code=400, detail="No result data to profile.")
+
+    per_column: list[dict] = []
+
+    for col in columns:
+        values = [r.get(col) for r in rows]
+        non_null = [v for v in values if v is not None and v != ""]
+        null_count = row_count - len(non_null)
+        null_pct = round(null_count / row_count * 100, 1) if row_count > 0 else 0
+
+        profile: dict = {
+            "column": col,
+            "null_count": null_count,
+            "null_pct": null_pct,
+        }
+
+        # Try to detect numeric values
+        numeric_vals: list[float] = []
+        for v in non_null:
+            try:
+                numeric_vals.append(float(v))
+            except (ValueError, TypeError):
+                break
+        else:
+            # All non-null values are numeric
+            if numeric_vals:
+                profile["type"] = "numeric"
+                profile["min"] = min(numeric_vals)
+                profile["max"] = max(numeric_vals)
+                profile["mean"] = round(statistics.mean(numeric_vals), 4)
+                profile["median"] = round(statistics.median(numeric_vals), 4)
+                per_column.append(profile)
+                continue
+
+        # String column: distinct count and top values
+        profile["type"] = "string"
+        str_vals = [str(v) for v in non_null]
+        profile["distinct_count"] = len(set(str_vals))
+
+        # Top values with counts (up to 15)
+        from collections import Counter
+        counts = Counter(str_vals).most_common(15)
+        profile["top_values"] = [{"value": v, "count": c} for v, c in counts]
+
+        per_column.append(profile)
+
+    # Data quality flags
+    quality_flags: list[dict] = []
+    for p in per_column:
+        if p["null_pct"] > 10:
+            quality_flags.append({
+                "column": p["column"],
+                "flag": "high_null_rate",
+                "detail": f"{p['null_pct']}% null",
+            })
+        # Detect looks-numeric-but-typed-as-string
+        if p.get("type") == "string" and p.get("distinct_count", 0) > 5:
+            vals = [tv["value"] for tv in p.get("top_values", [])]
+            try:
+                [float(v) for v in vals[:5] if v]
+                quality_flags.append({
+                    "column": p["column"],
+                    "flag": "looks_numeric_but_stored_as_text",
+                    "detail": "Top values parse as numbers",
+                })
+            except (ValueError, TypeError):
+                pass
+
+    return {
+        "row_count": row_count,
+        "column_count": len(columns),
+        "columns": columns,
+        "per_column_profile": per_column,
+        "data_quality_flags": quality_flags,
+        "grain_hint": sql,
     }
 
 

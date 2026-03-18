@@ -13,9 +13,9 @@
 **M4 features and status:**
 - Insights View — COMPLETE (auto-generates 3-5 AI insight cards on dataset load, cached)
 - Export Passport — COMPLETE (9-section JSON profile, validated on 227M row file)
-- Reference Table JOIN — not started (lookup CSV joined to primary dataset in-app)
-- Privacy and Transparency Layer — not started (schema-only AI mode, per-dataset consent)
-- Result Passport — not started (query result summary for external AI collaboration) [NEW]
+- Reference Table JOIN — COMPLETE (import CSV/TSV/XLSX, JOIN reference in SQL, AI-aware)
+- Privacy and Transparency Layer — COMPLETE (schema-only insights, privacy disclosure, per-dataset AI consent)
+- Result Passport — COMPLETE (Copy Result Summary button, clipboard JSON, no raw data)
 - Bug #2 (NOT LIKE chains ~26 conditions) — FIXED (literal-stripping in readonly validator)
 - Bug #3 (ORDER BY DESC parser error when AW wraps query) — FIXED (could not reproduce)
 
@@ -130,6 +130,8 @@ NOT: "AI analyzes your data."
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-18] [CODE] — Built Result Passport + Privacy Layer: Copy Result Summary button, schema-only insights prompt, privacy disclosure in Insights view, per-dataset AI consent on import. v1.4.0.
+[2026-03-18] [CODE] — Built Reference Table JOIN end-to-end: import pipeline, SQL rewrite, AI context, frontend UI. Confirmed Bug #2 and #3 already fixed. v1.3.0.
 [2026-03-18] [BD] — Specced Milestone 5 privacy architecture: Result Passport (M4 add), Local AI via Ollama, In-App Analyst Chat. Defined three-tier privacy story mapped to customer tiers.
 [2026-03-18] [BD] — Completed Part B GLOBE analysis for Compass/Farragut: 57 confirmed candidates, 14 sole orphan, 40 MFN deal manufacturers. Produced Word memo. Identified Result Passport as next product feature.
 [2026-03-18] [CODE] — No code changes. M4 status audit: Insights + Passport done, Reference Table JOIN + Privacy/Consent UI + Bug #2 (NOT LIKE chains) still open.
@@ -160,9 +162,9 @@ NOT: "AI analyzes your data."
 - Draft proposal and contract template skeleton
 
 **Product / code (Claude Code):**
-- Build M4 Reference Table JOIN
-- Build M4 Privacy and Transparency Layer
-- Build M4 Result Passport (small add — 1 day)
+- ~~Build M4 Reference Table JOIN~~ DONE
+- ~~Build M4 Privacy and Transparency Layer~~ DONE
+- ~~Build M4 Result Passport~~ DONE
 - ~~Fix Bug #2 (NOT LIKE/NOT IN chains)~~ DONE — literal-stripping fix already in place
 - ~~Fix Bug #3 (ORDER BY DESC parser error)~~ DONE — could not reproduce, wrapping logic correct
 - Validate M4 with Compass/Farragut CMS workflow before healthcare demo

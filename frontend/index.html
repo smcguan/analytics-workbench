@@ -1242,6 +1242,7 @@ LIMIT 100</textarea>
                             <div class="tab-group" style="margin-left:auto;">
                                 <button class="btn small" id="exportExcelBtn">Export Excel</button>
                                 <button class="btn small" id="exportTsvBtn">Export TSV</button>
+                                <button class="btn small" id="copyResultSummaryBtn" disabled>Copy Result Summary</button>
                             </div>
                         </div>
 
@@ -1317,6 +1318,9 @@ LIMIT 100</textarea>
                             <div class="saved-title">Insights</div>
                             <button class="btn small" id="refreshInsightsBtn">↺ Refresh Insights</button>
                         </div>
+                        <div style="font-size:0.8em; color:var(--fg2); margin-top:4px;">
+                            AI generates analysis instructions from column names and statistics only. Your data stays on your computer.
+                        </div>
                         <div class="help-text" id="insightsHelpText">
                             Select a dataset to generate AI-powered insights.
                         </div>
@@ -1390,6 +1394,12 @@ LIMIT 100</textarea>
         let inspectMode = "";
         const insightsCache = {}; // dataset → insights[] (JS-level, survives card re-renders)
 
+        function _hasAiConsent() {
+            if (!selectedDataset) return false;
+            const d = datasets.find(ds => (ds.name || "") === selectedDataset);
+            return d ? d.ai_consent !== false : true;
+        }
+
         function setActiveNav(buttonId) {
             ["navInsights","navQuery","navSavedQueries"].forEach((id) => {
                 $(id).classList.toggle("active", id === buttonId);
@@ -1408,7 +1418,7 @@ LIMIT 100</textarea>
             if (viewName === "insights") {
                 setActiveNav("navInsights");
                 // Auto-fetch insights when navigating here with a dataset loaded
-                if (selectedDataset && !insightsCache[selectedDataset]) {
+                if (selectedDataset && !insightsCache[selectedDataset] && _hasAiConsent()) {
                     fetchInsights(false);
                 }
             }
@@ -1475,8 +1485,8 @@ LIMIT 100</textarea>
                     $("resultsCount").textContent = "0 rows";
                     $("resultsHead").innerHTML = "";
                     $("resultsBody").innerHTML = "";
-                    // Auto-fetch insights if the Insights view is active
-                    if (currentView === "insights") {
+                    // Auto-fetch insights if the Insights view is active and AI is consented
+                    if (currentView === "insights" && _hasAiConsent()) {
                         fetchInsights(false);
                     }
                 });
@@ -1546,7 +1556,8 @@ LIMIT 100</textarea>
                         row_count: data.row_count,
                         column_count: data.column_count,
                         file_size_bytes: data.file_size_bytes,
-                        meta_source: data.meta_source
+                        meta_source: data.meta_source,
+                        ai_consent: data.ai_consent !== false, // default true
                     };
                 }
                 updateSelectedDatasetSummary();
@@ -1771,6 +1782,29 @@ LIMIT 100</textarea>
                 clearStatus();
                 toast(`Imported: ${returnedName}`);
 
+                // Per-dataset AI consent — one-time disclosure on import
+                const aiConsent = window.confirm(
+                    "AI features will use column names and statistics to generate insights " +
+                    "and suggested questions. No raw data is sent.\n\n" +
+                    "Enable AI features for this dataset?\n\n" +
+                    "Click OK to enable, or Cancel to use manual queries only."
+                );
+                // Store consent decision via backend
+                try {
+                    await apiJson(`/api/datasets/${returnedName}/ai_consent`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ ai_consent: aiConsent })
+                    });
+                } catch (_) {
+                    // non-fatal — default to enabled
+                }
+
+                // If consent granted and on Insights view, auto-fetch
+                if (aiConsent && currentView === "insights") {
+                    fetchInsights();
+                }
+
             } catch (e) {
                 clearStatus();
                 toast("Import failed: " + e.message, 8000);
@@ -1896,6 +1930,11 @@ LIMIT 100</textarea>
 
             if (!dataset) {
                 toast("Select a dataset first to get suggestions.");
+                return;
+            }
+
+            if (!_hasAiConsent()) {
+                toast("AI features are disabled for this dataset.");
                 return;
             }
 
@@ -2153,6 +2192,13 @@ LIMIT 100</textarea>
             if (!dataset) {
                 $("insightsHelpText").style.display = "block";
                 $("insightsHelpText").textContent = "Select a dataset to generate AI-powered insights.";
+                clearInsights();
+                return;
+            }
+
+            if (!_hasAiConsent()) {
+                $("insightsHelpText").style.display = "block";
+                $("insightsHelpText").textContent = "AI features are disabled for this dataset. Use manual queries in the Query tab.";
                 clearInsights();
                 return;
             }
@@ -2568,6 +2614,7 @@ LIMIT 100</textarea>
 
                 renderResults(lastRun.columns, lastRun.rows);
                 $("resultsCount").textContent = `${num(lastRun.rowcount)} rows`;
+                $("copyResultSummaryBtn").disabled = false;
                 $("resultsMeta").textContent = `executed in ${lastRun.elapsed}s • DuckDB local`;
                 toast("SQL executed.");
             } catch (e) {
@@ -2575,6 +2622,36 @@ LIMIT 100</textarea>
                 $("resultsMeta").textContent = "ERROR: " + errMsg;
                 toast("SQL failed: " + errMsg, 8000);
                 console.error("SQL execution error:", errMsg);
+            }
+        }
+
+        async function copyResultSummary() {
+            if (!lastRun.columns.length || !lastRun.rows.length) {
+                toast("Run a query first.");
+                return;
+            }
+            try {
+                $("copyResultSummaryBtn").disabled = true;
+                $("copyResultSummaryBtn").textContent = "Generating...";
+
+                const data = await apiJson("/api/results/passport", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        columns: lastRun.columns,
+                        rows: lastRun.rows,
+                        sql: lastRun.sql || "",
+                    })
+                });
+
+                const json = JSON.stringify(data, null, 2);
+                await navigator.clipboard.writeText(json);
+                toast("Result summary copied \u2014 paste into Claude or any AI assistant");
+            } catch (e) {
+                toast("Result summary failed: " + (e.message || "Unknown error"), 8000);
+            } finally {
+                $("copyResultSummaryBtn").disabled = false;
+                $("copyResultSummaryBtn").textContent = "Copy Result Summary";
             }
         }
 
@@ -2957,6 +3034,7 @@ LIMIT 100</textarea>
 
         $("exportExcelBtn").addEventListener("click", () => exportSqlWorkspaceResult("xlsx"));
         $("exportTsvBtn").addEventListener("click", () => exportSqlWorkspaceResult("tsv"));
+        $("copyResultSummaryBtn").addEventListener("click", copyResultSummary);
 
         $("inspectSchemaBtn").addEventListener("click", inspectSchema);
         $("inspectPreviewBtn").addEventListener("click", inspectPreview);
