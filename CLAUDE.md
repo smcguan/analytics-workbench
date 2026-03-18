@@ -261,6 +261,166 @@ table. Keep it simple. Do not build a general multi-dataset join engine.
 
 ---
 
+## MILESTONE 4 — DATA PRIVACY & AI TRANSPARENCY
+
+### Core product promise
+Analytics Workbench's primary differentiator is that user data never leaves
+the user's computer. This promise must remain true and visible in Milestone 4.
+The Insights view makes AI more prominent — which makes the privacy story
+more important, not less.
+
+### What actually gets sent to OpenAI
+Be precise about this. The context builder sends:
+- Column names and data types
+- Aggregate statistics (min, max, mean, null counts, top values)
+- A sample of rows (capped by AW_CONTEXT_SAMPLE_ROWS)
+
+It does NOT send the full dataset. But top values and sample rows do contain
+real data values. For sensitive datasets this is a real exposure.
+
+### Required: Schema-only mode for Insights (DEFAULT)
+For the /api/ai/insights endpoint, the AI prompt must use ONLY:
+- Column names and data types
+- Aggregate statistics (row count, min, max, mean, null rate per column)
+
+Do NOT include sample rows or top values in the insights prompt.
+
+Rationale: Insights are generated as SQL queries that run locally in DuckDB.
+The AI generates the analysis instructions — not the analysis itself. The
+actual data computation happens entirely on the user's machine. No raw data
+values need to leave to make this work.
+
+This is not a quality tradeoff. It is the correct architecture.
+
+### Required: Permanent privacy disclosure in UI
+Add a single quiet line of text in the Insights view, visible at all times:
+
+  "AI generates analysis instructions from column names and statistics only.
+   Your data stays on your computer."
+
+This is not a modal. Not a consent dialog. Not a legal disclaimer. Just an
+honest, permanent, plain-English statement. Styled as secondary text — present
+but not intrusive. Visible below the Refresh Insights button without scrolling.
+
+### Required: Per-dataset AI consent on import
+When a dataset is imported, show a clear one-time disclosure before AI features
+activate for that dataset:
+
+  "AI features will use column names and statistics to generate insights and
+   suggested questions. No raw data is sent. Enable AI features?"
+   [Enable] [Skip — use manual queries only]
+
+Default: Enable. Store the consent decision in _meta.json per dataset. Do not
+ask again once decided. Allow the user to change it in dataset settings.
+
+### Framing guidance for UI copy
+Always describe what the AI does accurately:
+
+  WRONG: "AI analyzes your data"
+  RIGHT: "AI generates analysis instructions that run on your computer"
+
+  WRONG: "Insights are powered by AI"
+  RIGHT: "AI identifies patterns to explore — all computation runs locally"
+
+The distinction is real and important. The AI generates SQL. DuckDB runs it.
+The data never moves.
+
+### Future: Local AI mode (Milestone 5 — not Milestone 4)
+For users who need full air-gap operation, plan for a local AI mode using
+Ollama + a locally-running model in Milestone 5. Do not build it in Milestone 4
+but ensure Milestone 4 architecture decisions don't block it. When active, UI
+shows "Local AI mode — all processing on this machine."
+
+---
+
+
+---
+
+## MILESTONE 4 — EXPORT PASSPORT (COMPANION FEATURE)
+
+### Purpose
+Allow the user to export a structured JSON file — the "dataset passport" —
+that captures everything needed to write accurate SQL against a dataset without
+seeing the data. Designed to be uploaded to Claude or any AI assistant as a
+cold-start context file.
+
+### Status
+COMPLETE — built and validated on a 227M row / 9.5GB Parquet file.
+Four iteration cycles. All sections verified working.
+
+### UI
+Export Passport button lives in the Inspect row, after Preview:
+  Schema  |  Preview  |  Export Passport
+
+Single click triggers a direct download of <dataset_name>_passport.json.
+No panel opens. No toggle. Button shows loading state during AI grain
+description call (2-3 seconds). On error: toast with error message.
+
+### Endpoint
+  GET /api/datasets/{name}/passport
+
+Returns the full passport JSON. Grain description cached in
+dataset_context.json under "grain_description" key — same caching
+pattern as suggest_questions. Force refresh with ?refresh=true.
+
+### Passport JSON Structure (9 sections)
+
+1. identity
+   - dataset_name, row_count, column_count, source_file_type,
+     import_date, file_size_bytes
+
+2. schema — per column:
+   - column_name, data_type, nullable, null_count, null_pct
+   - sample_values: 5 RANDOM values drawn via USING SAMPLE
+     (NOT top-of-file — must use DuckDB random sampling)
+   - distribution (string columns): top_values (15), distinct_count
+   - numeric_range (numeric columns): min, max, mean, median,
+     has_negatives (bool), is_year_column (bool)
+
+3. grain_description
+   - AI-generated 1-2 sentences describing what one row represents
+   - Includes explicit grouping guidance to prevent double-counting
+   - Generated by GPT-4.1-mini from schema + stats only (no raw data)
+   - Cached in dataset_context.json
+
+4. data_quality_flags (auto-detected, no AI)
+   - looks_numeric_but_stored_as_text
+   - high_null_rate (>10%)
+   - trailing_special_characters (>5% of values contain *, †, etc.)
+   - low_distinct_count (flagged with sample size context)
+
+5. time_series_column_families
+   - Detects columns sharing a name pattern + year suffix
+     (e.g. Tot_Spndng_2019...Tot_Spndng_2023)
+   - Reports base pattern and detected years
+
+6. sql_quickstart
+   - select_all: SELECT all columns FROM dataset LIMIT 100
+   - aggregate_by_top_category: GROUP BY best categorical column,
+     SUM all measure columns, ORDER BY paid/spend/cost/amount column
+     DESC (falls back to count/claims/beneficiaries if no paid column)
+   - measure_columns: list of detected measure columns
+   - group_column: detected categorical grouping column
+   - Column aliases match source column names exactly (no redundant
+     prefixes like "total_total_paid")
+
+### Critical implementation notes
+- Sample values MUST use DuckDB random sampling, not top-of-file scan:
+    SELECT col FROM dataset USING SAMPLE 10000 ROWS WHERE col IS NOT NULL LIMIT 5
+- numeric_range queries must run for ALL BIGINT, INTEGER, DOUBLE, FLOAT columns
+- Aggregation query must prefer paid/spend/cost/amount for ORDER BY
+- Grain description prompt sends schema + stats ONLY — no sample rows
+  (privacy: no raw data values sent to OpenAI)
+
+### Validated behavior (stress test results)
+- Works correctly on 227M rows / 9.5GB Parquet
+- Random sampling produces genuinely representative sample values
+- Grain description correctly identifies aggregation grain and warns
+  about double-counting risk
+- has_negatives correctly detected on TOTAL_PAID (payment reversals)
+- Non-standard provider ID formats detected as data quality flags
+- Passport generation completes in seconds on large files
+
 ## MILESTONE 4 — SUCCESS CRITERIA
 
 Milestone 4 is complete when:
@@ -268,7 +428,9 @@ Milestone 4 is complete when:
 2. Every insight card has a working "Explore in Query" drill-down
 3. Insights are cached — reloading the dataset is instant
 4. Reference table JOIN works end-to-end for at least one enrichment use case
-5. The Compass/Farragut analytical workflow (see below) can be completed entirely
+5. Export Passport produces a valid JSON file with all 9 sections populated,
+   including random sample values and numeric ranges
+6. The Compass/Farragut analytical workflow (see below) can be completed entirely
    inside AW without exporting to an external tool
 
 ---
