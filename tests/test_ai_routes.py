@@ -569,3 +569,229 @@ def test_explain_returns_explanation_string(client):
 def test_explain_missing_sql_returns_422(client):
     resp = client.post("/api/ai/explain", json={"dataset": DATASET})
     assert resp.status_code == 422
+
+
+# ===========================================================================
+# INSIGHT SQL EXECUTABILITY
+# ------------------------------------------------------------
+# The most critical AI reliability gap: insight cards carry SQL but we
+# never verified that SQL can actually run against the dataset.
+# If the AI hallucinates a column name, the Explore button silently fails.
+# These tests catch that before it reaches the user.
+# ===========================================================================
+
+# Prevents any cached insight's SQL from being non-executable.
+# Each insight SQL is sent through /api/sql and must return 200.
+def test_all_cached_insight_sql_is_executable(client):
+    data = client.get(f"/api/ai/insights?dataset={DATASET}").json()
+    for insight in data["insights"]:
+        sql = insight["sql"]
+        resp = client.post("/api/sql", json={"dataset": DATASET, "sql": sql})
+        assert resp.status_code == 200, (
+            f"Insight SQL failed execution (status {resp.status_code}):\n"
+            f"  SQL: {sql}\n"
+            f"  Error: {resp.text[:300]}"
+        )
+
+
+# Prevents insight SQL from returning no columns (structural failure)
+def test_cached_insight_sql_returns_columns(client):
+    data = client.get(f"/api/ai/insights?dataset={DATASET}").json()
+    for insight in data["insights"]:
+        resp = client.post("/api/sql", json={"dataset": DATASET, "sql": insight["sql"]})
+        assert resp.json().get("columns"), (
+            f"Insight SQL returned no columns: {insight['sql']}"
+        )
+
+
+# Prevents insight SQL from using table names other than 'dataset'.
+# If AI uses the actual dataset name, the SQL rewriter in /api/sql won't
+# recognise it and the Explore button will always fail.
+def test_cached_insight_sql_uses_dataset_table_name(client):
+    data = client.get(f"/api/ai/insights?dataset={DATASET}").json()
+    for insight in data["insights"]:
+        sql_lower = insight["sql"].lower()
+        assert "from dataset" in sql_lower or "join dataset" in sql_lower, (
+            f"Insight SQL must use 'dataset' as table name, got: {insight['sql']}"
+        )
+
+
+# ===========================================================================
+# CACHE CORRUPTION — AI ROUTES ROBUSTNESS
+# ------------------------------------------------------------
+# Corrupted or malformed cache must never crash the endpoint.
+# The app must degrade gracefully to empty results, not 500.
+# ===========================================================================
+
+# Prevents malformed JSON in dataset_context.json from crashing insights
+def test_insights_corrupted_json_cache_returns_empty(client, datasets_tmp):
+    name = "aw_ai_corrupt_json"
+    d = datasets_tmp / name
+    d.mkdir(exist_ok=True)
+    _create_dataset(d, seed_cache=False)
+    (d / "dataset_context.json").write_text("{ this is NOT valid json !!!", encoding="utf-8")
+
+    resp = client.get(f"/api/ai/insights?dataset={name}")
+    assert resp.status_code == 200
+    assert resp.json()["insights"] == []
+
+
+# Prevents wrong type for insights key from crashing (insights: "string" not list)
+def test_insights_wrong_type_in_cache_returns_empty(client, datasets_tmp):
+    name = "aw_ai_wrong_type_cache"
+    d = datasets_tmp / name
+    d.mkdir(exist_ok=True)
+    _create_dataset(d, seed_cache=False)
+    (d / "dataset_context.json").write_text(
+        json.dumps({"insights": "this should be a list not a string"}),
+        encoding="utf-8",
+    )
+    resp = client.get(f"/api/ai/insights?dataset={name}")
+    assert resp.status_code == 200
+    assert resp.json()["insights"] == []
+
+
+# Prevents malformed JSON from crashing suggest_questions
+def test_suggest_questions_corrupted_cache_returns_empty(client, datasets_tmp):
+    name = "aw_ai_corrupt_suggestions"
+    d = datasets_tmp / name
+    d.mkdir(exist_ok=True)
+    _create_dataset(d, seed_cache=False)
+    (d / "dataset_context.json").write_text("INVALID JSON {{{{", encoding="utf-8")
+
+    resp = client.get(f"/api/ai/suggest_questions?dataset={name}")
+    assert resp.status_code == 200
+    assert resp.json()["questions"] == []
+
+
+# Prevents an insights cache with some valid and some broken items from crashing.
+# The parser must skip malformed items silently and return the valid ones.
+def test_insights_partial_cache_skips_malformed_items(client, datasets_tmp):
+    name = "aw_ai_partial_cache"
+    d = datasets_tmp / name
+    d.mkdir(exist_ok=True)
+    _create_dataset(d, seed_cache=False)
+    mixed = [
+        CACHED_INSIGHTS[0],                       # valid
+        {"type": "broken_no_required_fields"},    # missing headline, explanation, sql
+        CACHED_INSIGHTS[1],                       # valid
+    ]
+    (d / "dataset_context.json").write_text(
+        json.dumps({"insights": mixed}),
+        encoding="utf-8",
+    )
+    resp = client.get(f"/api/ai/insights?dataset={name}")
+    assert resp.status_code == 200
+    # Must return the 2 valid items, silently dropping the broken one
+    assert len(resp.json()["insights"]) == 2
+
+
+# Prevents a cache write followed by immediate re-read from losing any data
+def test_insights_cache_round_trip_preserves_all_fields(client, datasets_tmp):
+    name = "aw_ai_roundtrip"
+    d = datasets_tmp / name
+    d.mkdir(exist_ok=True)
+    _create_dataset(d, seed_cache=False)
+    ctx = {
+        "insights": CACHED_INSIGHTS,
+        "insights_synopsis": CACHED_SYNOPSIS,
+    }
+    (d / "dataset_context.json").write_text(json.dumps(ctx), encoding="utf-8")
+
+    data = client.get(f"/api/ai/insights?dataset={name}").json()
+    assert data["synopsis"] == CACHED_SYNOPSIS
+    assert len(data["insights"]) == len(CACHED_INSIGHTS)
+    assert data["insights"][0]["headline"] == CACHED_INSIGHTS[0]["headline"]
+    assert data["insights"][0]["sql"] == CACHED_INSIGHTS[0]["sql"]
+
+
+# ===========================================================================
+# generate_sql — DuckDB EXPLAIN VALIDATION
+# ------------------------------------------------------------
+# The AI layer runs EXPLAIN on generated SQL before returning it.
+# These tests verify that the EXPLAIN step catches hallucinated columns
+# and that valid SQL passes through.
+# ===========================================================================
+
+# Prevents AI-hallucinated column from reaching the user undetected.
+# The DuckDB EXPLAIN step must catch it and return status: "error".
+def test_generate_sql_hallucinated_column_blocked_by_explain(client):
+    bad_sql = json.dumps({
+        "status": "ok",
+        "sql": "SELECT totally_invented_column_xyz FROM dataset LIMIT 10",
+        "message": "Returns invented column.",
+        "warnings": [],
+    })
+    with patch("app.ai.routes.generate_sql_for_dataset", return_value=bad_sql):
+        resp = client.post(
+            "/api/ai/generate_sql",
+            json={"dataset": DATASET, "question": "show invented column"},
+        )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] == "error", (
+        "DuckDB EXPLAIN must block SQL referencing nonexistent columns"
+    )
+    # SQL must be empty — never returned to user when validation fails
+    assert data["sql"] == ""
+
+
+# Prevents the EXPLAIN step from blocking valid AI-generated SQL
+def test_generate_sql_valid_columns_pass_explain(client):
+    good_sql = json.dumps({
+        "status": "ok",
+        "sql": "SELECT drug_name, SUM(total_paid) AS s FROM dataset GROUP BY drug_name ORDER BY s DESC",
+        "message": "Total paid by drug.",
+        "warnings": [],
+    })
+    with patch("app.ai.routes.generate_sql_for_dataset", return_value=good_sql):
+        resp = client.post(
+            "/api/ai/generate_sql",
+            json={"dataset": DATASET, "question": "total paid by drug"},
+        )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] == "ok"
+    assert "drug_name" in data["sql"]
+
+
+# Prevents a CTE with a hallucinated column from slipping through EXPLAIN
+def test_generate_sql_cte_with_bad_column_blocked_by_explain(client):
+    cte_sql = json.dumps({
+        "status": "ok",
+        "sql": (
+            "WITH summary AS ("
+            "SELECT drug_name, fake_column_xyz FROM dataset"
+            ") SELECT * FROM summary"
+        ),
+        "message": "CTE with bad column.",
+        "warnings": [],
+    })
+    with patch("app.ai.routes.generate_sql_for_dataset", return_value=cte_sql):
+        resp = client.post(
+            "/api/ai/generate_sql",
+            json={"dataset": DATASET, "question": "summarise"},
+        )
+    assert resp.status_code == 200
+    assert resp.json()["status"] == "error"
+
+
+# Prevents AI-generated SQL that passes safety AND EXPLAIN from being blocked
+def test_generate_sql_aggregation_with_real_columns_passes(client):
+    agg_sql = json.dumps({
+        "status": "ok",
+        "sql": (
+            "SELECT hcpcs_code, COUNT(*) AS n, SUM(total_paid) AS total "
+            "FROM dataset GROUP BY hcpcs_code ORDER BY total DESC LIMIT 20"
+        ),
+        "message": "Claims by HCPCS code.",
+        "warnings": [],
+    })
+    with patch("app.ai.routes.generate_sql_for_dataset", return_value=agg_sql):
+        resp = client.post(
+            "/api/ai/generate_sql",
+            json={"dataset": DATASET, "question": "claims by code"},
+        )
+    assert resp.status_code == 200
+    assert resp.json()["status"] == "ok"
+    assert resp.json()["sql"]  # non-empty

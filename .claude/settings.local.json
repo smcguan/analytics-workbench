@@ -27,7 +27,13 @@
       "Read(//c/dev/analytics-workbench/**)",
       "Bash(do)",
       "Bash(echo \"=== $f ===\")",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(find /dev/analytics-workbench/tests -name *.py -type f)",
+      "Bash(grep -h \"def test_\" /c/dev/analytics-workbench/tests/*.py)",
+      "Bash(/tmp/endpoints_summary.txt:*)",
+      "Read(//tmp/**)",
+      "Bash(grep -n \"^# =\\\\+$\\\\|^def test_\" tests/test_ai_routes.py)",
+      "Bash(.venv/Scripts/python.exe -m pytest tests/ -v --tb=short 2>&1)"
     ]
   }
 }
