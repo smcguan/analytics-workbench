@@ -375,6 +375,16 @@
             0%{background-position:200% 0;}
             100%{background-position:-200% 0;}
         }
+        .insights-synopsis{
+            background:rgba(79,140,255,.06);
+            border:1px solid rgba(79,140,255,.14);
+            border-radius:10px;
+            padding:14px 16px;
+            margin-bottom:16px;
+            font-size:13px;
+            color:var(--text);
+            line-height:1.6;
+        }
         .insights-empty{
             color:var(--muted);
             font-size:13px;
@@ -1296,6 +1306,7 @@ LIMIT 100</textarea>
                         <div class="help-text" id="insightsHelpText">
                             Select a dataset to generate AI-powered insights.
                         </div>
+                        <div id="insightsSynopsis" class="insights-synopsis" style="display:none;"></div>
                         <div id="insightsGrid" class="insights-grid"></div>
                     </section>
                 </section>
@@ -1869,6 +1880,8 @@ LIMIT 100</textarea>
             _insightChartInstances.forEach(c => { try { c.destroy(); } catch(_) {} });
             _insightChartInstances = [];
             $("insightsGrid").innerHTML = "";
+            $("insightsSynopsis").style.display = "none";
+            $("insightsSynopsis").textContent = "";
         }
 
         function _renderInsightsSkeleton() {
@@ -2049,7 +2062,16 @@ LIMIT 100</textarea>
             return card;
         }
 
-        function _renderInsightsFromData(insights) {
+        function _renderInsightsFromData(synopsis, insights) {
+            // Synopsis block
+            const synopsisEl = $("insightsSynopsis");
+            if (synopsis) {
+                synopsisEl.textContent = synopsis;
+                synopsisEl.style.display = "block";
+            } else {
+                synopsisEl.style.display = "none";
+            }
+            // Insight cards
             const grid = $("insightsGrid");
             grid.innerHTML = "";
             for (let i = 0; i < insights.length; i++) {
@@ -2072,7 +2094,8 @@ LIMIT 100</textarea>
             // JS cache hit — render instantly without any network call
             if (!force && insightsCache[dataset]) {
                 clearInsights();
-                _renderInsightsFromData(insightsCache[dataset]);
+                const cached = insightsCache[dataset];
+                _renderInsightsFromData(cached.synopsis || "", cached.insights || []);
                 return;
             }
 
@@ -2088,10 +2111,11 @@ LIMIT 100</textarea>
                     (force ? "&refresh=true" : "");
 
                 const data = await apiJson(url);
+                const synopsis = data.synopsis || "";
                 const insights = data.insights || [];
 
                 // Store in JS cache
-                insightsCache[dataset] = insights;
+                insightsCache[dataset] = { synopsis, insights };
 
                 clearInsights();
 
@@ -2099,7 +2123,7 @@ LIMIT 100</textarea>
                     $("insightsGrid").innerHTML =
                         '<div class="insights-empty">No insights could be generated for this dataset.</div>';
                 } else {
-                    _renderInsightsFromData(insights);
+                    _renderInsightsFromData(synopsis, insights);
                 }
 
             } catch (e) {

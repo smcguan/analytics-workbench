@@ -182,6 +182,7 @@ class InsightItem(BaseModel):
 
 class InsightsResponse(BaseModel):
     dataset: str
+    synopsis: str = ""
     insights: List[InsightItem] = []
     cached: bool = False
     error: str = ""

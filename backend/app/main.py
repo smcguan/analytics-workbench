@@ -1291,6 +1291,11 @@ _PASSPORT_MEASURE_KEYWORDS = {
     "claims", "beneficiaries",
 }
 
+# Column name suffixes that indicate identifier/classifier columns even when
+# a measure keyword also appears in the name (e.g. "payment_code" should not
+# be treated as a numeric measure).
+_EXCLUDE_MEASURE_SUFFIXES = {"_type", "_id", "_code", "_flag"}
+
 # Preferred group-by columns for the quickstart aggregation query.
 # Checked as case-insensitive substrings, in priority order.
 _PASSPORT_GROUP_PRIORITY = ["hcpcs_code", "category", "type", "code"]
@@ -1577,6 +1582,27 @@ def _passport_duckdb_analysis(
                     "is_year_column": is_year,
                 }
 
+                # Quality flag: extreme outlier (max > 100× median)
+                # Only fires when median is positive — a positive max is always
+                # > 100× a negative median, which is not a meaningful outlier.
+                try:
+                    if (
+                        median_val is not None
+                        and float(median_val) > 0
+                        and max_val is not None
+                        and float(max_val) > 100 * float(median_val)
+                    ):
+                        quality_flags.append({
+                            "flag": "extreme_outlier",
+                            "column": col_name,
+                            "detail": (
+                                f"max ({max_val}) is more than 100× "
+                                f"the median ({median_val})"
+                            ),
+                        })
+                except (TypeError, ValueError):
+                    pass
+
             col_entry["numeric_range"] = num_range
 
         # Quality flag: high null rate (applies to all column kinds)
@@ -1649,13 +1675,15 @@ def _passport_sql_quickstart(schema: list[dict[str, Any]]) -> dict[str, Any]:
         "LIMIT 100"
     )
 
-    # Detect measure columns purely by keyword match in the column name.
-    # This is intentionally independent of numeric_range so it cannot be
-    # broken by a stats-query failure.
+    # Detect measure columns by keyword match in the column name.
+    # Excludes columns whose name ends with an identifier/classifier suffix
+    # (_type, _id, _code, _flag) even if a measure keyword also appears
+    # (e.g. "payment_code" → excluded; "total_paid" → included).
     measure_cols: list[str] = [
         col["column_name"]
         for col in schema
         if any(kw in col["column_name"].lower() for kw in _PASSPORT_MEASURE_KEYWORDS)
+        and not any(col["column_name"].lower().endswith(sfx) for sfx in _EXCLUDE_MEASURE_SUFFIXES)
     ]
 
     quickstart: dict[str, Any] = {"select_all": select_all}
@@ -2697,14 +2725,20 @@ def api_schema(dataset: str = Query(...)):
         )
         return {"dataset": dataset, "columns": columns}
     except Exception as e:
+        msg = str(e)
         _audit_log(
             {
                 "event": "schema",
                 "status": "error",
                 "dataset": dataset,
-                "error": str(e),
+                "error": msg,
             }
         )
+        if "No files found" in msg or "no files" in msg.lower():
+            raise HTTPException(
+                status_code=404,
+                detail=f"No parquet files found for dataset: {dataset}",
+            ) from e
         raise
     finally:
         con.close()

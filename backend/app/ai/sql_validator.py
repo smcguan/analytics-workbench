@@ -107,14 +107,23 @@ def validate_generated_sql(sql: str) -> tuple[bool, str]:
         "detach",
     ]
 
+    # Strip single-quoted literals before keyword scanning so that values like
+    # '%update%' or 'Alteplase' inside LIKE/IN conditions don't trigger a false
+    # positive.  The regex replaces 'anything' (including SQL-escaped '' pairs)
+    # with ''.  This mirrors the same fix applied in main._validate_readonly_sql.
+    lowered_no_literals = re.sub(r"'[^']*'", "''", lowered)
+
     for token in blocked:
-        if re.search(rf"\b{token}\b", lowered):
+        if re.search(rf"\b{token}\b", lowered_no_literals):
             return False, f"Blocked SQL keyword: {token}"
 
     # Optional extra protection:
     # block multiple statements separated by semicolons
     stripped = s.rstrip(";").strip()
-    if ";" in stripped:
+    # Strip literals before checking for semicolons to avoid false positives
+    # when a semicolon appears inside a quoted string value.
+    stripped_no_literals = re.sub(r"'[^']*'", "''", stripped)
+    if ";" in stripped_no_literals:
         return False, "Multiple SQL statements are not allowed."
 
     return True, "SQL passed safety validation."

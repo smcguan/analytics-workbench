@@ -183,20 +183,61 @@ def _write_suggestions_cache(dataset: str, questions: list[str]) -> None:
         logger.warning("Could not write suggestions cache for %s: %s", dataset, exc)
 
 
-def _read_insights_cache(dataset: str) -> list[dict] | None:
-    """Return cached insights list, or None if no valid cache exists."""
+def _build_synopsis_from_meta(dataset: str) -> str:
+    """
+    Build a basic dataset synopsis from _meta.json without any AI call.
+
+    _meta.json always lives in the dataset directory (DATASETS_DIR/<name>/),
+    regardless of whether the dataset is copy-mode or reference-mode.
+
+    Used as a fallback when neither insights_synopsis nor grain_description
+    is present — ensures the synopsis block always shows something useful
+    for existing cached insights without requiring a refresh.
+    """
+    try:
+        try:
+            from app.main import DATASETS_DIR
+        except Exception:
+            from main import DATASETS_DIR  # type: ignore[no-redef]
+        meta_path = (DATASETS_DIR / dataset / "_meta.json").resolve()
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        row_count = meta.get("row_count", 0)
+        columns: list = meta.get("columns", [])
+        col_count = meta.get("column_count", len(columns))
+        shown = columns[:6]
+        col_str = ", ".join(shown)
+        if col_count > len(shown):
+            col_str += f", and {col_count - len(shown)} more"
+        return (
+            f"{dataset} — {row_count:,} rows × {col_count} columns. "
+            f"Columns: {col_str}."
+        )
+    except Exception:
+        return ""
+
+
+def _read_insights_cache(dataset: str) -> dict | None:
+    """Return cached insights dict {"synopsis": str, "insights": list}, or None."""
     try:
         cache = json.loads(_suggestions_cache_path(dataset).read_text(encoding="utf-8"))
         insights = cache.get("insights")
         if isinstance(insights, list) and insights:
-            return insights
+            # Priority: AI-generated synopsis → grain description → metadata fallback.
+            # This ensures the synopsis block is always populated, even for
+            # pre-existing caches that predate the synopsis field.
+            synopsis = (
+                cache.get("insights_synopsis")
+                or cache.get("grain_description")
+                or _build_synopsis_from_meta(dataset)
+            )
+            return {"synopsis": synopsis, "insights": insights}
     except Exception:
         pass
     return None
 
 
-def _write_insights_cache(dataset: str, insights: list[dict]) -> None:
-    """Persist insights to dataset_context.json under 'insights' key.
+def _write_insights_cache(dataset: str, synopsis: str, insights: list[dict]) -> None:
+    """Persist insights and synopsis to dataset_context.json.
 
     Reads then merges so the 'questions' key is preserved.
     """
@@ -208,6 +249,7 @@ def _write_insights_cache(dataset: str, insights: list[dict]) -> None:
         except Exception:
             pass
         existing["insights"] = insights
+        existing["insights_synopsis"] = synopsis
         existing["insights_generated_at"] = datetime.now(timezone.utc).isoformat()
         cache_path.write_text(json.dumps(existing, indent=2), encoding="utf-8")
     except Exception as exc:
@@ -368,7 +410,8 @@ def get_insights(
                 logger.info("insights cache hit | dataset=%s", dataset)
                 return InsightsResponse(
                     dataset=dataset,
-                    insights=[InsightItem(**i) for i in cached],
+                    synopsis=cached["synopsis"],
+                    insights=[InsightItem(**i) for i in cached["insights"]],
                     cached=True,
                 )
 
@@ -381,23 +424,26 @@ def get_insights(
             refresh,
         )
 
-        raw_insights = generate_insights_for_dataset(
+        result = generate_insights_for_dataset(
             dataset_name=dataset,
             dataset_source_path_fn=_get_dataset_source_path,
             max_insights=max_insights,
         )
+        synopsis = result.get("synopsis", "")
+        raw_insights = result.get("insights", [])
 
         # ----------------------------------------------------
         # STEP 3 — Persist to cache so next load is instant
         # ----------------------------------------------------
         if raw_insights:
-            _write_insights_cache(dataset, raw_insights)
+            _write_insights_cache(dataset, synopsis, raw_insights)
 
         # ----------------------------------------------------
         # STEP 4 — Return structured response
         # ----------------------------------------------------
         return InsightsResponse(
             dataset=dataset,
+            synopsis=synopsis,
             insights=[InsightItem(**i) for i in raw_insights],
             cached=False,
         )
@@ -416,7 +462,8 @@ def get_insights(
                 )
                 return InsightsResponse(
                     dataset=dataset,
-                    insights=[InsightItem(**i) for i in stale],
+                    synopsis=stale["synopsis"],
+                    insights=[InsightItem(**i) for i in stale["insights"]],
                     cached=True,
                 )
 

@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /c/dev/analytics-workbench -type f -name *.py -path */test* ! -path */.venv/* ! -path */dist/*)",
+      "Bash(.venv/Scripts/python -m pytest tests/test_passport.py -v)",
+      "Bash(.venv/Scripts/pip install:*)",
+      "Bash(.venv/Scripts/pip.exe install:*)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(cmd /c \".venv\\\\Scripts\\\\pip.exe install pytest httpx\")",
+      "Bash(cmd /c \".venv\\\\Scripts\\\\python.exe -m pip install pytest httpx\")",
+      "Bash(cmd /c \".venv\\\\Scripts\\\\python.exe -m pip install pytest httpx 2>&1\")",
+      "Bash(C:/dev/analytics-workbench/.venv/Scripts/python.exe -m pip install pytest httpx 2>&1)",
+      "Bash(C:/dev/analytics-workbench/.venv/Scripts/python.exe -m pytest tests/test_passport.py -v 2>&1)",
+      "Bash(.venv/Scripts/python.exe -m pytest tests/test_core.py -v 2>&1)",
+      "Bash(.venv/Scripts/python.exe -m pytest tests/test_sql.py -v 2>&1)",
+      "Bash(.venv/Scripts/python.exe -m pytest tests/ -v)",
+      "Bash(.venv/Scripts/python.exe -m pytest tests/test_ai_routes.py -v 2>&1)",
+      "Bash(.venv/Scripts/python.exe -m pytest tests/ -v --tb=no -q 2>&1)",
+      "Bash(.venv/Scripts/python.exe -m pytest tests/ -q --tb=short)",
+      "Bash(.venv/Scripts/python.exe -m grep -n \"insights\\\\|generate_insights\" backend/app/ai/provider_openai.py)",
+      "Bash(.venv/Scripts/python.exe -m pytest tests/test_ai_routes.py -v -k \"synopsis\" 2>&1)",
+      "Bash(for f:*)",
+      "Bash(do echo:*)",
+      "Bash(python -c \"import json; d=json.load\\(open\\(''$f''\\)\\); print\\(''grain_description:'', bool\\(d.get\\(''grain_description''\\)\\)\\); print\\(''insights_synopsis:'', bool\\(d.get\\(''insights_synopsis''\\)\\)\\); print\\(''insights:'', bool\\(d.get\\(''insights''\\)\\)\\)\")",
+      "Bash(done)",
+      "Bash(for d:*)",
+      "Read(//c/dev/analytics-workbench/**)",
+      "Bash(do)",
+      "Bash(echo \"=== $f ===\")",
+      "Bash(python:*)"
+    ]
+  }
+}

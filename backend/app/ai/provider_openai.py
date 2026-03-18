@@ -566,6 +566,7 @@ date/time and one is numeric. Use "" (empty string) otherwise.
 
 Return JSON with exactly this structure:
 {{
+  "synopsis": "2-3 sentences describing what this dataset contains, what it measures, and who or what each row represents. Be specific — mention the domain, key columns, and scale (e.g. number of rows, time range, or geography if visible).",
   "insights": [
     {{
       "type": "concentration",
@@ -603,14 +604,18 @@ Categorical column values:
 # Skips malformed items so one bad insight doesn't crash the
 # endpoint. Returns [] on any parse failure.
 # ============================================================
-def parse_insights_response(raw_text: str) -> list[dict]:
+def parse_insights_response(raw_text: str) -> dict:
     """
     Parse the model output for insights.
 
     Expected JSON:
     {
+      "synopsis": "2-3 sentence dataset description.",
       "insights": [ { type, headline, explanation, sql, chart_type, priority }, ... ]
     }
+
+    Returns:
+        {"synopsis": str, "insights": list[dict]}
     """
     required_keys = {"type", "headline", "explanation", "sql"}
 
@@ -629,13 +634,17 @@ def parse_insights_response(raw_text: str) -> list[dict]:
         start = cleaned.find("{")
         end = cleaned.rfind("}")
         if start == -1 or end == -1 or end < start:
-            return []
+            return {"synopsis": "", "insights": []}
 
         data = json.loads(cleaned[start:end + 1])
-        raw_insights = data.get("insights", [])
 
+        synopsis = data.get("synopsis", "")
+        if not isinstance(synopsis, str):
+            synopsis = ""
+
+        raw_insights = data.get("insights", [])
         if not isinstance(raw_insights, list):
-            return []
+            return {"synopsis": synopsis, "insights": []}
 
         result = []
         for item in raw_insights:
@@ -654,10 +663,10 @@ def parse_insights_response(raw_text: str) -> list[dict]:
                 item["chart_type"] = ""
             result.append(item)
 
-        return result
+        return {"synopsis": synopsis, "insights": result}
 
     except Exception:
-        return []
+        return {"synopsis": "", "insights": []}
 
 
 # ============================================================
@@ -672,9 +681,12 @@ def generate_insights_for_dataset(
     dataset_name: str,
     dataset_source_path_fn,
     max_insights: int = 5,
-) -> list[dict]:
+) -> dict:
     """
     Generate AI-powered insights for a dataset.
+
+    Returns:
+        {"synopsis": str, "insights": list[dict]}
     """
     prompt = build_insights_prompt(
         dataset_name=dataset_name,
