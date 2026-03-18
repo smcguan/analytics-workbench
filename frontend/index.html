@@ -1068,6 +1068,20 @@
                         class="visually-hidden-file"
                         accept=".csv,.tsv,.xlsx,.xls,.parquet"
                     />
+
+                    <label for="importReferenceFile" class="btn import-btn" id="importReferenceBtn" style="margin-top:8px;">
+                        + Reference Table
+                    </label>
+                    <input
+                        id="importReferenceFile"
+                        type="file"
+                        class="visually-hidden-file"
+                        accept=".csv,.tsv,.xlsx,.xls"
+                    />
+                    <div id="referenceIndicator" style="display:none; margin-top:8px; font-size:0.85em; color:var(--fg2);">
+                        Reference: <strong id="referenceName"></strong>
+                        <button class="btn-link" id="clearReferenceBtn" style="margin-left:8px; font-size:0.85em;">✕ Remove</button>
+                    </div>
                 </section>
             </aside>
 
@@ -1371,6 +1385,7 @@ LIMIT 100</textarea>
         let _insightChartInstances = []; // one Chart.js instance per insight card
         let datasets = [];
         let selectedDataset = "";
+        let currentReference = ""; // name of loaded reference table for JOINs
         let currentView = "query";
         let inspectMode = "";
         const insightsCache = {}; // dataset → insights[] (JS-level, survives card re-renders)
@@ -1762,6 +1777,57 @@ LIMIT 100</textarea>
             } finally {
                 unlockUi();
             }
+        }
+
+        // ---------------------------------------------------------------
+        // Reference table import
+        // ---------------------------------------------------------------
+        async function importReferenceFile(file) {
+            if (!file) return;
+
+            const maybeName = window.prompt(
+                "Reference table name (optional). Leave blank to use the filename:",
+                ""
+            );
+            if (maybeName === null) return; // cancelled
+
+            const formData = new FormData();
+            formData.append("file", file);
+            if (maybeName.trim()) {
+                formData.append("reference_name", maybeName.trim());
+            }
+
+            try {
+                $("importReferenceBtn").classList.add("busy");
+                const data = await apiJson("/api/references/import", {
+                    method: "POST",
+                    body: formData,
+                });
+
+                currentReference = data.reference;
+                $("referenceName").textContent = `${data.reference} (${num(data.row_count)} rows, ${data.columns.length} cols)`;
+                $("referenceIndicator").style.display = "block";
+                toast(`Reference table loaded: ${data.reference}`);
+            } catch (e) {
+                toast("Reference import failed: " + e.message, 8000);
+            } finally {
+                $("importReferenceBtn").classList.remove("busy");
+            }
+        }
+
+        async function clearReference() {
+            if (!currentReference) return;
+            try {
+                await apiJson(`/api/references/${currentReference}/delete`, {
+                    method: "POST",
+                });
+            } catch (_) {
+                // non-fatal
+            }
+            currentReference = "";
+            $("referenceIndicator").style.display = "none";
+            $("referenceName").textContent = "";
+            toast("Reference table removed.");
         }
 
         function toggleInfoPopover() {
@@ -2209,11 +2275,14 @@ LIMIT 100</textarea>
                 parquet_hint:  rawSource === "parquet" ? true : undefined
             };
 
+            // Include reference table name if one is loaded
+            const refHint = currentReference ? { reference: currentReference } : {};
+
             const attempts = [
-                { url: "/api/ai/generate_sql", body: { dataset, question: prompt, ...typeHints } },
-                { url: "/api/ai/generate_sql", body: { dataset, prompt: prompt,   ...typeHints } },
-                { url: "/api/sql/generate",    body: { dataset, prompt: prompt,   ...typeHints } },
-                { url: "/api/sql/generate",    body: { dataset, question: prompt, ...typeHints } }
+                { url: "/api/ai/generate_sql", body: { dataset, question: prompt, ...typeHints, ...refHint } },
+                { url: "/api/ai/generate_sql", body: { dataset, prompt: prompt,   ...typeHints, ...refHint } },
+                { url: "/api/sql/generate",    body: { dataset, prompt: prompt,   ...typeHints, ...refHint } },
+                { url: "/api/sql/generate",    body: { dataset, question: prompt, ...typeHints, ...refHint } }
             ];
 
             let lastError = null;
@@ -2476,10 +2545,12 @@ LIMIT 100</textarea>
                 $("resultsMeta").textContent = "Running SQL...";
                 setActiveTab("table");
 
+                const sqlBody = { dataset, sql };
+                if (currentReference) sqlBody.reference = currentReference;
                 const data = await apiJson("/api/sql", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ dataset, sql })
+                    body: JSON.stringify(sqlBody)
                 });
 
                 lastRun = {
@@ -2515,10 +2586,12 @@ LIMIT 100</textarea>
             if (!sql) { toast("Run or edit a SQL query first."); return; }
 
             try {
+                const exportBody = { dataset, sql, format };
+                if (currentReference) exportBody.reference = currentReference;
                 const response = await fetch("/api/sql/export", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ dataset, sql, format })
+                    body: JSON.stringify(exportBody)
                 });
 
                 if (!response.ok) {
@@ -2857,6 +2930,16 @@ LIMIT 100</textarea>
             const file = e.target.files && e.target.files[0];
             importDatasetFile(file);
         });
+
+        // Reference table import
+        $("importReferenceFile").addEventListener("click", () => {
+            $("importReferenceFile").value = "";
+        });
+        $("importReferenceFile").addEventListener("change", (e) => {
+            const file = e.target.files && e.target.files[0];
+            if (file) importReferenceFile(file);
+        });
+        $("clearReferenceBtn").addEventListener("click", clearReference);
 
         $("infoBtn").addEventListener("click", toggleInfoPopover);
         $("suggestionsBtn").addEventListener("click", () => fetchSuggestions());

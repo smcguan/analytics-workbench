@@ -608,3 +608,97 @@ def inspect_parquet(parquet_path: Path) -> tuple[int, list[DatasetColumn]]:
     ]
 
     return row_count, columns
+
+
+# -----------------------------------------------------------------------------
+# Reference table import
+# -----------------------------------------------------------------------------
+
+
+@dataclass
+class ReferenceImportResult:
+    """Return value for the lightweight reference table import pipeline."""
+
+    reference_name: str
+    reference_dir: str
+    parquet_path: str
+    columns: list[DatasetColumn]
+    row_count: int
+
+
+def import_reference_table(
+    uploaded_file: BinaryIO,
+    original_filename: str,
+    display_name: str | None = None,
+    registered_root: str | Path = "data/references",
+    overwrite: bool = True,
+) -> ReferenceImportResult:
+    """
+    Import a small reference/lookup table into Parquet storage.
+
+    This is a lightweight version of import_dataset designed for small CSV/TSV/
+    Excel files used as JOIN targets (e.g. IRA exclusion lists, category
+    mappings, manufacturer lists).
+
+    Key differences from import_dataset:
+    - Always overwrites (one reference table at a time)
+    - No profiling, no dataset_context.json, no insights
+    - Writes only _meta.json with column names/types and row count
+    - No Parquet source support (reference tables are always small files)
+    """
+    if not original_filename or not original_filename.strip():
+        raise DatasetValidationError("Uploaded file must include a filename.")
+
+    original_type = detect_file_type(original_filename)
+
+    resolved_display_name = normalize_display_name(display_name, original_filename)
+    registered_name = make_registered_name(resolved_display_name)
+
+    ref_dir = Path(registered_root).resolve() / registered_name
+
+    if ref_dir.exists() and overwrite:
+        _rmtree_robust(ref_dir)
+
+    ref_dir.mkdir(parents=True, exist_ok=True)
+
+    source_upload_path = ref_dir / f"upload.{original_type}"
+    parquet_path = ref_dir / "source.parquet"
+
+    write_uploaded_file(uploaded_file, source_upload_path)
+
+    if original_type == "parquet":
+        normalize_parquet(source_upload_path, parquet_path)
+    elif original_type == "csv":
+        convert_csv_to_parquet(source_upload_path, parquet_path)
+    elif original_type == "tsv":
+        convert_tsv_to_parquet(source_upload_path, parquet_path)
+    elif original_type == "xlsx":
+        convert_xlsx_to_parquet(source_upload_path, parquet_path)
+    else:
+        raise UnsupportedDatasetTypeError(f"Unsupported file type: {original_type}")
+
+    row_count, columns = inspect_parquet(parquet_path)
+
+    if row_count <= 0:
+        raise DatasetValidationError("Reference table is empty.")
+
+    # Write minimal _meta.json — no full metadata.json needed
+    meta_path = ref_dir / "_meta.json"
+    meta_summary = {
+        "reference_name": registered_name,
+        "original_filename": original_filename,
+        "row_count": row_count,
+        "column_count": len(columns),
+        "columns": [{"name": c.name, "type": c.type} for c in columns],
+        "created_at": utc_now_iso(),
+    }
+    with meta_path.open("w", encoding="utf-8") as f:
+        json.dump(meta_summary, f, indent=2)
+
+    return ReferenceImportResult(
+        reference_name=registered_name,
+        reference_dir=str(ref_dir),
+        parquet_path=str(parquet_path),
+        columns=columns,
+        row_count=row_count,
+    )

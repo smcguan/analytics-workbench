@@ -111,6 +111,7 @@ def build_sql_prompt(
     dataset_name: str,
     question: str,
     dataset_source_path_fn,
+    reference_context: dict | None = None,
 ) -> str:
     """
     Build the schema-aware prompt used for SQL generation.
@@ -137,8 +138,9 @@ CRITICAL RULES — FOLLOW EXACTLY:
 - The SQL must be a single SELECT or WITH ... SELECT statement.
 - Do not use INSERT, UPDATE, DELETE, DROP, ALTER, CREATE, COPY, ATTACH, or DETACH.
 - Use ONLY the column names listed under "Available columns". Never invent column names.
-- Always reference the table as: dataset
-- Do not qualify column names with a table prefix (write "revenue", not "dataset.revenue").
+- Always reference the primary table as: dataset
+- If a reference table is available (listed below), you may JOIN it using: JOIN reference ON ...
+- When using both tables, qualify ambiguous columns with table names (dataset.col or reference.col).
 - End the query without a semicolon.
 - If the request cannot be answered from the available columns, return status="error".
 
@@ -207,6 +209,23 @@ Categorical column values (actual values in the data):
 
 User question: {question}
 """.strip()
+
+    # Append reference table context if a reference table is loaded
+    if reference_context:
+        ref_cols = reference_context.get("columns", [])
+        ref_cols_text = "\n".join(
+            f"  - {c['name']} ({c['type']})" for c in ref_cols
+        )
+        prompt += f"""
+
+Reference table available for JOINs:
+Table name: reference
+Columns:
+{ref_cols_text}
+
+You may use JOIN reference ON ... to combine this lookup table with the primary dataset.
+Use LIKE patterns (not =) for string matching to handle trailing special characters.
+"""
 
     return prompt
 
@@ -324,6 +343,7 @@ def generate_sql_for_dataset(
     dataset_name: str,
     question: str,
     dataset_source_path_fn,
+    reference_context: dict | None = None,
 ) -> str:
     """
     High-level helper for question -> raw SQL response text.
@@ -332,6 +352,7 @@ def generate_sql_for_dataset(
         dataset_name=dataset_name,
         question=question,
         dataset_source_path_fn=dataset_source_path_fn,
+        reference_context=reference_context,
     )
     return generate_sql_response(prompt)
 

@@ -401,3 +401,33 @@ def build_context(
     finally:
         # Always close the DuckDB connection
         con.close()
+
+
+def build_reference_context(
+    reference_name: str,
+    reference_source_path: str,
+) -> dict[str, Any]:
+    """
+    Build a lightweight schema-only context for a reference table.
+
+    Unlike build_context, this returns only column names and types —
+    no sample rows, no stats, no categorical values. Reference tables
+    are small lookup tables used for JOINs; the AI only needs to know
+    what columns are available.
+    """
+    import duckdb
+
+    esc = _sql_escape_path(reference_source_path)
+    con = duckdb.connect()
+    try:
+        schema_rows = con.execute(
+            f"DESCRIBE SELECT * FROM read_parquet('{esc}')"
+        ).fetchall()
+        columns = [{"name": str(r[0]), "type": str(r[1])} for r in schema_rows]
+        return {
+            "reference_name": reference_name,
+            "table_name": "reference",
+            "columns": columns,
+        }
+    finally:
+        con.close()

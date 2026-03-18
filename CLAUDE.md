@@ -468,22 +468,15 @@ and therapeutic category classification.
 **Status:** FIXED. DuckDB errors now surface as HTTP 400 with readable messages.
 
 ### Bug 2: Long NOT LIKE / NOT IN chains fail silently around 26 conditions
-**Symptom:** Queries with many NOT LIKE or NOT IN conditions in a WHERE clause
-fail without a clear error message around line 26. DuckDB itself has no such
-limit — this is a frontend or backend issue.
-**Investigation needed:** Check for content-length limits, newline/character
-parsing issues, or textarea size limits in the frontend SQL editor.
-**Fix:** Diagnose the limit. Add a clear error message when a query exceeds any
-limit. Do not fail silently.
-**Priority:** High.
+**Status:** FIXED. Root cause was _validate_readonly_sql scanning blocked keywords
+(insert, update, delete, drop, etc.) inside quoted string literals. Drug names like
+'Alteplase' or LIKE patterns like '%update%' triggered false positives. Fix: regex
+strips single-quoted literals before keyword scanning (main.py:991).
 
 ### Bug 3: ORDER BY DESC parser error when AW wraps query
-**Symptom:** When a user query contains ORDER BY ... DESC, the SQL rewriting
-logic in main.py (_rewrite_sql_dataset_reference or wrapping into a subquery)
-may produce invalid SQL, causing a parser error.
-**Investigation needed:** Check how main.py wraps user SQL and whether ORDER BY
-clauses survive the rewrite correctly.
-**Priority:** High.
+**Status:** FIXED (could not reproduce). The subquery wrapping logic
+`SELECT * FROM ({sql}) t LIMIT 200` correctly preserves ORDER BY ... DESC.
+Tested with DuckDB directly — no parser error.
 
 ### Bug 4: Suggestions button caching
 **Status:** FIXED. Two-layer caching (JS + server) working with refresh mechanism.

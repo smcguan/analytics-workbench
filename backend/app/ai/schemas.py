@@ -84,6 +84,9 @@ class GenerateSQLRequest(BaseModel):
     # Natural language question the user asks the AI.
     question: str
 
+    # Optional reference table name for JOIN operations.
+    reference: str | None = None
+
 
 # ============================================================
 # RESPONSE MODEL — SQL GENERATION

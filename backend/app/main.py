@@ -310,8 +310,11 @@ EXPORTS_DIR = Path(os.getenv("AW_EXPORTS_DIR", str(BASE_DIR / "exports"))).resol
 QUERIES_PATH = Path(os.getenv("AW_QUERIES_PATH", str(DATA_DIR / "queries.json"))).resolve()
 DATASET_CONTEXT_FILENAME = "dataset_context.json"
 
+REFERENCES_DIR = Path(os.getenv("AW_REFERENCES_DIR", str(DATA_DIR / "references"))).resolve()
+
 DATASETS_DIR.mkdir(parents=True, exist_ok=True)
 EXPORTS_DIR.mkdir(parents=True, exist_ok=True)
+REFERENCES_DIR.mkdir(parents=True, exist_ok=True)
 
 
 # ============================================================
@@ -457,11 +460,13 @@ class DeleteQueryRequest(BaseModel):
 class SqlRequest(BaseModel):
     dataset: str
     sql: str
+    reference: str | None = None
 
 class SqlExportRequest(BaseModel):
     dataset: str
     sql: str
     format: str = "xlsx"
+    reference: str | None = None
 
 
 # ============================================================
@@ -1027,6 +1032,7 @@ def _rewrite_sql_dataset_reference(
     sql: str,
     dataset_name: str,
     parquet_sql: str,
+    reference_parquet_sql: str | None = None,
 ) -> str:
     """
     Rewrite logical dataset references to read_parquet(...).
@@ -1046,6 +1052,10 @@ def _rewrite_sql_dataset_reference(
     This avoids runtime failures when older generated SQL uses
     the selected dataset name directly instead of the logical
     placeholder.
+
+    When a reference table is loaded, also rewrites:
+        FROM reference  →  read_parquet('...reference path...')
+        JOIN reference  →  read_parquet('...reference path...')
 
     IMPORTANT
     ---------
@@ -1089,6 +1099,24 @@ def _rewrite_sql_dataset_reference(
                 "FROM dataset / JOIN dataset "
                 f"or FROM {dataset_name} / JOIN {dataset_name}."
             ),
+        )
+
+    # Rewrite reference table if loaded and SQL uses it
+    ref_pattern = re.compile(
+        r'(?i)\b(from|join)\s+(")?reference(")?\b'
+    )
+    if ref_pattern.search(rewritten):
+        if not reference_parquet_sql:
+            raise HTTPException(
+                status_code=400,
+                detail=(
+                    "SQL references a 'reference' table, but no reference "
+                    "table is loaded. Import a reference table first."
+                ),
+            )
+        rewritten = ref_pattern.sub(
+            lambda m: f"{m.group(1)} {reference_parquet_sql}",
+            rewritten,
         )
 
     return rewritten
@@ -1888,7 +1916,7 @@ def favicon():
 def api_version():
     return {
         "name": os.getenv("APP_NAME", "Analytics Workbench"),
-        "version": os.getenv("APP_VERSION", APP_VERSION),
+        "version": APP_VERSION,
         "base_dir": str(BASE_DIR),
         "datasets_dir": str(DATASETS_DIR),
         "exports_dir": str(EXPORTS_DIR),
@@ -2423,19 +2451,24 @@ def api_sql(req: SqlRequest):
         # STEP 4
         # Rewrite logical dataset references in FROM / JOIN
         # clauses to the actual parquet source.
-        #
-        # Supported inputs:
-        #   FROM dataset
-        #   FROM sample
-        #   JOIN dataset
-        #   JOIN sample
-        #
-        # where "sample" is the selected dataset id.
+        # Also rewrites "reference" if a reference table is loaded.
         # ----------------------------------------------------
+        reference_parquet_sql = None
+        if req.reference:
+            ref_pq = (REFERENCES_DIR / req.reference / "source.parquet").resolve()
+            if not ref_pq.exists():
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Reference table not found: {req.reference}",
+                )
+            ref_esc = _sql_escape_path(str(ref_pq))
+            reference_parquet_sql = f"read_parquet('{ref_esc}')"
+
         sql = _rewrite_sql_dataset_reference(
             sql=cleaned_sql,
             dataset_name=req.dataset,
             parquet_sql=parquet_sql,
+            reference_parquet_sql=reference_parquet_sql,
         )
 
         # ----------------------------------------------------
@@ -2596,10 +2629,22 @@ def api_sql_export(req: SqlExportRequest):
         esc = _sql_escape_path(src)
         parquet_sql = f"read_parquet('{esc}')"
 
+        reference_parquet_sql = None
+        if req.reference:
+            ref_pq = (REFERENCES_DIR / req.reference / "source.parquet").resolve()
+            if not ref_pq.exists():
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Reference table not found: {req.reference}",
+                )
+            ref_esc = _sql_escape_path(str(ref_pq))
+            reference_parquet_sql = f"read_parquet('{ref_esc}')"
+
         sql = _rewrite_sql_dataset_reference(
             sql=cleaned_sql,
             dataset_name=req.dataset,
             parquet_sql=parquet_sql,
+            reference_parquet_sql=reference_parquet_sql,
         )
 
         # ----------------------------------------------------
@@ -2715,6 +2760,7 @@ def api_sql_export(req: SqlExportRequest):
 
 from app.services.dataset_import import (
     import_dataset,
+    import_reference_table,
     DatasetImportError,
 )
 
@@ -3154,6 +3200,80 @@ async def import_uploaded_dataset(
         "columns": [asdict(col) for col in metadata.columns],
         "created_at": metadata.created_at,
     }
+
+
+# ============================================================
+# REFERENCE TABLE ENDPOINTS
+# ============================================================
+
+
+@app.post("/api/references/import")
+async def import_reference_endpoint(
+    file: UploadFile = File(...),
+    reference_name: str | None = Form(None),
+):
+    """
+    Import a small reference/lookup table for JOIN operations.
+
+    Reference tables are lightweight — no profiling, no insights.
+    One reference table at a time; importing a new one with the same
+    name overwrites the previous one.
+    """
+    clean_name = reference_name
+    if clean_name is not None:
+        clean_name = clean_name.strip()
+        if not clean_name or clean_name.lower() == "string":
+            clean_name = None
+
+    try:
+        result = import_reference_table(
+            uploaded_file=file.file,
+            original_filename=file.filename,
+            display_name=clean_name,
+            registered_root=REFERENCES_DIR,
+            overwrite=True,
+        )
+    except DatasetImportError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Reference table import failed: {exc}",
+        ) from exc
+
+    return {
+        "reference": result.reference_name,
+        "parquet_path": result.parquet_path,
+        "row_count": result.row_count,
+        "columns": [{"name": c.name, "type": c.type} for c in result.columns],
+    }
+
+
+@app.get("/api/references")
+def list_reference_tables():
+    """List all imported reference tables."""
+    refs = []
+    if REFERENCES_DIR.exists():
+        for d in REFERENCES_DIR.iterdir():
+            if d.is_dir() and (d / "source.parquet").exists():
+                meta_path = d / "_meta.json"
+                meta: dict = {}
+                if meta_path.exists():
+                    try:
+                        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+                    except Exception:
+                        pass
+                refs.append({"name": d.name, **meta})
+    return {"references": refs}
+
+
+@app.post("/api/references/{name}/delete")
+def delete_reference_table(name: str):
+    """Delete a reference table."""
+    ref_dir = (REFERENCES_DIR / name).resolve()
+    if ref_dir.exists():
+        _rmtree_robust(ref_dir)
+    return {"deleted": name}
 
 
 class SqlGenerateRequest(BaseModel):

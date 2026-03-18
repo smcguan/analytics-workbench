@@ -83,6 +83,7 @@ from .provider_openai import (
     generate_insights_for_dataset,
     generate_explanation,
 )
+from .context_builder import build_reference_context
 
 from .response_parser import parse_generate_sql_response
 
@@ -141,6 +142,30 @@ def _get_dataset_source_path(dataset: str):
         from main import dataset_source_path
 
     return dataset_source_path(dataset)
+
+
+def _build_reference_context_if_loaded(reference_name: str | None) -> dict | None:
+    """
+    Build reference table context for AI prompts if a reference table is loaded.
+    Returns None if no reference table is specified or found.
+    """
+    if not reference_name:
+        return None
+    try:
+        try:
+            from app.main import REFERENCES_DIR
+        except Exception:
+            from main import REFERENCES_DIR
+        ref_pq = (REFERENCES_DIR / reference_name / "source.parquet").resolve()
+        if not ref_pq.exists():
+            return None
+        return build_reference_context(
+            reference_name=reference_name,
+            reference_source_path=str(ref_pq),
+        )
+    except Exception:
+        logger.warning("Failed to build reference context for %s", reference_name)
+        return None
 
 
 def _suggestions_cache_path(dataset: str) -> Path:
@@ -565,10 +590,14 @@ def generate_sql(payload: GenerateSQLRequest) -> GenerateSQLResponse:
         # ----------------------------------------------------
         # STEP 2 — Generate SQL using the AI provider
         # ----------------------------------------------------
+        ref_ctx = _build_reference_context_if_loaded(
+            getattr(payload, "reference", None)
+        )
         model_output = generate_sql_for_dataset(
             dataset_name=payload.dataset,
             question=question,
             dataset_source_path_fn=_get_dataset_source_path,
+            reference_context=ref_ctx,
         )
 
         # ----------------------------------------------------

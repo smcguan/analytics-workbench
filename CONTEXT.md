@@ -16,8 +16,8 @@
 - Reference Table JOIN — not started (lookup CSV joined to primary dataset in-app)
 - Privacy and Transparency Layer — not started (schema-only AI mode, per-dataset consent)
 - Result Passport — not started (query result summary for external AI collaboration) [NEW]
-- Bug #2 (NOT LIKE chains ~26 conditions) — not fixed
-- Bug #3 (ORDER BY DESC parser error when AW wraps query) — not fixed
+- Bug #2 (NOT LIKE chains ~26 conditions) — FIXED (literal-stripping in readonly validator)
+- Bug #3 (ORDER BY DESC parser error when AW wraps query) — FIXED (could not reproduce)
 
 **Validated at scale:** 220M rows, DuckDB local execution, sub-second import.
 
@@ -163,8 +163,8 @@ NOT: "AI analyzes your data."
 - Build M4 Reference Table JOIN
 - Build M4 Privacy and Transparency Layer
 - Build M4 Result Passport (small add — 1 day)
-- Fix Bug #2 (NOT LIKE/NOT IN chains fail silently ~26 conditions)
-- Fix Bug #3 (ORDER BY DESC parser error when AW wraps query)
+- ~~Fix Bug #2 (NOT LIKE/NOT IN chains)~~ DONE — literal-stripping fix already in place
+- ~~Fix Bug #3 (ORDER BY DESC parser error)~~ DONE — could not reproduce, wrapping logic correct
 - Validate M4 with Compass/Farragut CMS workflow before healthcare demo
 - Spec Milestone 5 Local AI Mode (Ollama) in CLAUDE.md when M4 is complete
 - Spec Milestone 5 In-App Analyst Chat when Local AI Mode is underway

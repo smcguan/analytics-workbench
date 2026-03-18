@@ -40,7 +40,9 @@
       "Bash(.venv/Scripts/python -m pytest tests/test_chart_recommender.py tests/test_response_parser.py tests/test_sql_validator.py -v --tb=short)",
       "Bash(while read:*)",
       "Bash(.venv/Scripts/python -m pytest tests/test_sql_rewrite.py tests/test_sanitize_row.py -v --tb=short)",
-      "Bash(.venv/Scripts/python -m pytest tests/ --tb=short -q)"
+      "Bash(.venv/Scripts/python -m pytest tests/ --tb=short -q)",
+      "Bash(.venv/Scripts/python -c \"from backend.app.main import app; print\\('main.py OK'\\)\" 2>&1)",
+      "Bash(../.venv/Scripts/python -c \"from app.main import app; print\\(''main.py OK''\\)\")"
     ]
   }
 }
