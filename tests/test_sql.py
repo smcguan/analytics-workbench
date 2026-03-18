@@ -254,6 +254,41 @@ def test_sql_many_not_like_conditions_with_blocked_word_in_value(client):
     assert resp.json()["rows"][0]["n"] == 100
 
 
+# Bug 2 stress test: 45 NOT LIKE conditions with multiple blocked keywords
+# scattered in the quoted values.  This exceeds the ~26-condition threshold
+# where the original bug manifested.
+def test_sql_45_not_like_conditions_with_multiple_blocked_keywords(client):
+    # Drug names that contain blocked SQL keywords inside quotes
+    keyword_drugs = [
+        "Updaterol", "Insertase", "Dropivir", "Deletumab",
+        "Alterixin", "Copyzine", "Attachol", "Detachase",
+        "Createnil", "Alteplase",
+    ]
+    generic_drugs = [f"GenericDrug_{i}" for i in range(35)]
+    all_drugs = keyword_drugs + generic_drugs
+    conditions = " AND ".join(
+        f"drug_name NOT LIKE '{name}%'" for name in all_drugs
+    )
+    sql = f"SELECT COUNT(*) AS n FROM dataset WHERE {conditions}"
+    resp = _run(client, sql)
+    assert resp.status_code == 200, (
+        f"Bug 2 regression: 45 NOT LIKE conditions with blocked keywords in "
+        f"values should succeed, got {resp.status_code}: {resp.text[:300]}"
+    )
+    assert resp.json()["rows"][0]["n"] == 100
+
+
+# Bug 2 stress test: 40 NOT IN values with blocked keywords
+def test_sql_40_not_in_values_with_blocked_keywords(client):
+    values = [f"Drug_{i}" for i in range(35)]
+    values.extend(["DropExcluded", "UpdateTest", "DeleteOld", "AlterDrug", "InsertNew"])
+    in_list = ", ".join(f"'{v}'" for v in values)
+    sql = f"SELECT COUNT(*) AS n FROM dataset WHERE drug_name NOT IN ({in_list})"
+    resp = _run(client, sql)
+    assert resp.status_code == 200
+    assert resp.json()["rows"][0]["n"] == 100
+
+
 # ===========================================================================
 # ERROR HANDLING — INVALID SQL (Bug 1 regression)
 # ===========================================================================
@@ -271,6 +306,36 @@ def test_sql_invalid_duckdb_syntax_returns_400(client):
         f"Expected 400 for invalid DuckDB syntax but got {resp.status_code}. "
         f"Body: {resp.text[:300]}"
     )
+
+
+# Bug 1 clarification: regexp_replace with 'g' flag is VALID DuckDB syntax.
+# The original bug report used this as an example of "invalid syntax", but
+# DuckDB supports the 'g' flag. This test confirms it executes correctly
+# and returns filtered results — not the entire unfiltered dataset.
+def test_sql_regexp_replace_with_g_flag_is_valid_duckdb(client):
+    sql = (
+        "SELECT drug_name, regexp_replace(drug_name, 'Drug', 'Med', 'g') AS replaced "
+        "FROM dataset WHERE drug_name = 'DrugA' LIMIT 5"
+    )
+    resp = _run(client, sql)
+    assert resp.status_code == 200
+    rows = resp.json()["rows"]
+    assert len(rows) > 0
+    # Verify the replacement actually worked — not returning unfiltered data
+    for r in rows:
+        assert r["replaced"] == "MedA"
+        assert r["drug_name"] == "DrugA"
+
+
+# Bug 1 regression: the actual DuckDB error message must be in the response
+# detail field, not a generic "Internal Server Error"
+def test_sql_error_detail_contains_duckdb_message(client):
+    sql = "SELECT nonexistent_column_xyz FROM dataset"
+    resp = _run(client, sql)
+    assert resp.status_code == 400
+    detail = resp.json()["detail"]
+    # The DuckDB error should mention the column name
+    assert "nonexistent_column_xyz" in detail.lower() or "not found" in detail.lower()
 
 
 # Prevents the error message from being swallowed — user must see what went wrong

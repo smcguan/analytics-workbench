@@ -252,3 +252,43 @@ def test_delete_removes_dataset(client, datasets_tmp):
 # Prevents delete from returning 200 for a dataset that doesn't exist
 def test_delete_404_for_nonexistent(client):
     assert client.post("/api/datasets/does_not_exist_xyz/delete").status_code == 404
+
+
+# Bug 3 regression: if rmtree fails to fully remove the directory (e.g. due to
+# a Windows file lock), the endpoint must return an error — not false success.
+def test_delete_returns_500_when_rmtree_fails(client, datasets_tmp):
+    from unittest.mock import patch
+
+    name = "aw_test_delete_locked"
+    d = datasets_tmp / name
+    d.mkdir()
+    _create_dataset(d)
+
+    # Simulate a persistent file lock: _rmtree_robust raises PermissionError
+    # after exhausting all retries.
+    with patch(
+        "app.main._rmtree_robust",
+        side_effect=PermissionError("[WinError 32] The process cannot access the file"),
+    ):
+        resp = client.post(f"/api/datasets/{name}/delete")
+    assert resp.status_code == 500
+    assert "delete" in resp.json()["detail"].lower() or "failed" in resp.json()["detail"].lower()
+    # Directory should still exist since delete failed
+    assert d.exists()
+
+
+# Bug 3 regression: after a successful delete, the directory must actually be gone.
+# This guards against rmtree silently skipping locked files via the onerror callback.
+def test_delete_actually_removes_all_files(client, datasets_tmp):
+    name = "aw_test_delete_verify"
+    d = datasets_tmp / name
+    d.mkdir()
+    _create_dataset(d)
+
+    resp = client.post(f"/api/datasets/{name}/delete")
+    assert resp.status_code == 200
+    # The critical check: directory must not exist
+    assert not d.exists(), (
+        "Bug 3: delete returned ok=True but directory still exists. "
+        "rmtree may have silently skipped locked files."
+    )

@@ -571,9 +571,13 @@ def _rmtree_robust(path: Path) -> None:
 
     Strategy:
     1. onerror callback clears read-only flags and retries the failed op.
-    2. Retry the entire rmtree up to 3 times with a short delay for
-       PermissionError — covers the brief lock-release window after DuckDB
-       closes a connection on Windows.
+    2. Retry the entire rmtree up to 5 times with a short delay for
+       PermissionError/OSError — covers the brief lock-release window
+       after DuckDB closes a connection on Windows.
+    3. After each rmtree call, verify the directory is actually gone.
+       The onerror callback may silently skip locked files (per Python docs,
+       if onerror doesn't raise, rmtree continues), so rmtree can return
+       without error while files remain. Verification catches this.
     """
     def _on_error(func, failed_path, exc_info):
         # Clear read-only flag (common on Windows for extracted files) and retry.
@@ -583,15 +587,40 @@ def _rmtree_robust(path: Path) -> None:
         except Exception:
             pass  # let the outer retry loop handle persistent failures
 
+    max_attempts = 5
     last_err: Exception | None = None
-    for attempt in range(3):
+
+    for attempt in range(max_attempts):
         try:
             shutil.rmtree(path, onerror=_on_error)
-            return
-        except PermissionError as exc:
+
+            # Verify the directory is actually gone.  onerror silently skips
+            # locked files, so rmtree can return "successfully" while files
+            # remain.  Without this check the delete endpoint returns ok=True
+            # even though the directory still exists.
+            if not path.exists():
+                return
+
+            # Directory still exists after rmtree returned without error —
+            # some files were skipped by the onerror callback.
+            last_err = PermissionError(
+                f"rmtree completed but directory still exists "
+                f"(locked files skipped): {path}"
+            )
+            logger.warning(
+                "rmtree incomplete | attempt=%d/%d | path=%s",
+                attempt + 1, max_attempts, path,
+            )
+
+        except (PermissionError, OSError) as exc:
             last_err = exc
-            if attempt < 2:
-                time.sleep(0.5)  # brief wait for Windows to release file locks
+            logger.warning(
+                "rmtree failed | attempt=%d/%d | path=%s | error=%s",
+                attempt + 1, max_attempts, path, exc,
+            )
+
+        if attempt < max_attempts - 1:
+            time.sleep(0.3)
 
     if last_err:
         raise last_err
