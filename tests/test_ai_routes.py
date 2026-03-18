@@ -623,7 +623,9 @@ def test_cached_insight_sql_uses_dataset_table_name(client):
 # The app must degrade gracefully to empty results, not 500.
 # ===========================================================================
 
-# Prevents malformed JSON in dataset_context.json from crashing insights
+# Prevents malformed JSON in dataset_context.json from crashing insights.
+# Mock the AI provider so that when the corrupted cache falls through to
+# OpenAI generation, it raises — testing the full graceful-degradation path.
 def test_insights_corrupted_json_cache_returns_empty(client, datasets_tmp):
     name = "aw_ai_corrupt_json"
     d = datasets_tmp / name
@@ -631,7 +633,8 @@ def test_insights_corrupted_json_cache_returns_empty(client, datasets_tmp):
     _create_dataset(d, seed_cache=False)
     (d / "dataset_context.json").write_text("{ this is NOT valid json !!!", encoding="utf-8")
 
-    resp = client.get(f"/api/ai/insights?dataset={name}")
+    with patch("app.ai.routes.generate_insights_for_dataset", side_effect=RuntimeError("mock AI unavailable")):
+        resp = client.get(f"/api/ai/insights?dataset={name}")
     assert resp.status_code == 200
     assert resp.json()["insights"] == []
 
@@ -646,7 +649,8 @@ def test_insights_wrong_type_in_cache_returns_empty(client, datasets_tmp):
         json.dumps({"insights": "this should be a list not a string"}),
         encoding="utf-8",
     )
-    resp = client.get(f"/api/ai/insights?dataset={name}")
+    with patch("app.ai.routes.generate_insights_for_dataset", side_effect=RuntimeError("mock AI unavailable")):
+        resp = client.get(f"/api/ai/insights?dataset={name}")
     assert resp.status_code == 200
     assert resp.json()["insights"] == []
 
@@ -659,7 +663,8 @@ def test_suggest_questions_corrupted_cache_returns_empty(client, datasets_tmp):
     _create_dataset(d, seed_cache=False)
     (d / "dataset_context.json").write_text("INVALID JSON {{{{", encoding="utf-8")
 
-    resp = client.get(f"/api/ai/suggest_questions?dataset={name}")
+    with patch("app.ai.routes.suggest_questions_for_dataset", side_effect=RuntimeError("mock AI unavailable")):
+        resp = client.get(f"/api/ai/suggest_questions?dataset={name}")
     assert resp.status_code == 200
     assert resp.json()["questions"] == []
 

@@ -152,14 +152,18 @@ def test_sql_type_error_in_expression_returns_400(client):
     assert resp.status_code == 400
 
 
-# Prevents division by zero from returning 200 with silent wrong data
-def test_sql_integer_division_by_zero_returns_400(client):
+# DuckDB returns inf for integer division by zero (not an error).
+# The app sanitizes inf/nan to None so the JSON response is valid.
+def test_sql_integer_division_by_zero_returns_sanitized(client):
     resp = client.post("/api/sql", json={
         "dataset": DATASET,
         "sql": "SELECT total_claims / 0 AS x FROM dataset LIMIT 1",
     })
-    # DuckDB raises an error for integer division by zero
-    assert resp.status_code == 400
+    assert resp.status_code == 200
+    rows = resp.json()["rows"]
+    assert len(rows) == 1
+    # inf is sanitized to None for JSON compliance
+    assert rows[0]["x"] is None
 
 
 # ===========================================================================

@@ -86,6 +86,8 @@ from .provider_openai import (
 
 from .response_parser import parse_generate_sql_response
 
+from pydantic import ValidationError
+
 from .schemas import (
     GenerateSQLRequest,
     GenerateSQLResponse,
@@ -217,11 +219,34 @@ def _build_synopsis_from_meta(dataset: str) -> str:
 
 
 def _read_insights_cache(dataset: str) -> dict | None:
-    """Return cached insights dict {"synopsis": str, "insights": list}, or None."""
+    """Return cached insights dict {"synopsis": str, "insights": list}, or None.
+
+    Malformed items in the cached list are silently skipped so that a single
+    bad entry doesn't discard the entire cache.
+    """
     try:
         cache = json.loads(_suggestions_cache_path(dataset).read_text(encoding="utf-8"))
-        insights = cache.get("insights")
-        if isinstance(insights, list) and insights:
+        raw_insights = cache.get("insights")
+        if isinstance(raw_insights, list) and raw_insights:
+            # Filter out items that fail InsightItem validation so a single
+            # corrupt entry never breaks the whole response.
+            valid: list[dict] = []
+            for item in raw_insights:
+                if not isinstance(item, dict):
+                    continue
+                try:
+                    InsightItem(**item)
+                    valid.append(item)
+                except (ValidationError, TypeError):
+                    logger.warning(
+                        "skipping malformed insight cache item | dataset=%s | item=%s",
+                        dataset,
+                        str(item)[:120],
+                    )
+
+            if not valid:
+                return None
+
             # Priority: AI-generated synopsis → grain description → metadata fallback.
             # This ensures the synopsis block is always populated, even for
             # pre-existing caches that predate the synopsis field.
@@ -230,7 +255,7 @@ def _read_insights_cache(dataset: str) -> dict | None:
                 or cache.get("grain_description")
                 or _build_synopsis_from_meta(dataset)
             )
-            return {"synopsis": synopsis, "insights": insights}
+            return {"synopsis": synopsis, "insights": valid}
     except Exception:
         pass
     return None

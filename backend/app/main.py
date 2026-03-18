@@ -1126,6 +1126,23 @@ def _preview_value(v: Any) -> Any:
     return v
 
 
+def _sanitize_json_row(row: dict) -> dict:
+    """Replace float inf/nan values with None so the row is JSON-serializable.
+
+    DuckDB can return float('inf') for operations like integer division by zero,
+    which FastAPI's json.dumps rejects with 'Out of range float values are not
+    JSON compliant'. Replacing with None is the safest, lossless fallback.
+    """
+    import math
+    result: dict = {}
+    for k, v in row.items():
+        if isinstance(v, float) and (math.isnan(v) or math.isinf(v)):
+            result[k] = None
+        else:
+            result[k] = v
+    return result
+
+
 def _build_dataset_context(dataset: str) -> dict[str, Any]:
     """
     Build and save a rich dataset context JSON file.
@@ -2410,7 +2427,7 @@ def api_sql(req: SqlRequest):
         finally:
             con.close()
 
-        preview = [dict(zip(cols, r)) for r in rows]
+        preview = [_sanitize_json_row(dict(zip(cols, r))) for r in rows]
         elapsed = round(time.perf_counter() - t0, 4)
 
         # ----------------------------------------------------

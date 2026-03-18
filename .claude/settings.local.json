@@ -33,7 +33,11 @@
       "Bash(/tmp/endpoints_summary.txt:*)",
       "Read(//tmp/**)",
       "Bash(grep -n \"^# =\\\\+$\\\\|^def test_\" tests/test_ai_routes.py)",
-      "Bash(.venv/Scripts/python.exe -m pytest tests/ -v --tb=short 2>&1)"
+      "Bash(.venv/Scripts/python.exe -m pytest tests/ -v --tb=short 2>&1)",
+      "Bash(.venv/Scripts/python -m pytest tests/test_ai_routes.py::test_insights_corrupted_json_cache_returns_empty tests/test_ai_routes.py::test_insights_wrong_type_in_cache_returns_empty tests/test_ai_routes.py::test_suggest_questions_corrupted_cache_returns_empty tests/test_ai_routes.py::test_insights_partial_cache_skips_malformed_items tests/test_sql_extended.py::test_sql_integer_division_by_zero_returns_400 -v --tb=short)",
+      "Bash(.venv/Scripts/python -m pytest tests/test_ai_routes.py::test_insights_corrupted_json_cache_returns_empty tests/test_ai_routes.py::test_insights_wrong_type_in_cache_returns_empty tests/test_ai_routes.py::test_suggest_questions_corrupted_cache_returns_empty tests/test_ai_routes.py::test_insights_partial_cache_skips_malformed_items tests/test_sql_extended.py::test_sql_integer_division_by_zero_returns_sanitized -v --tb=short)",
+      "Bash(.venv/Scripts/python -m pytest tests/ -v --tb=short)",
+      "Bash(.venv/Scripts/python -m pytest tests/test_chart_recommender.py tests/test_response_parser.py tests/test_sql_validator.py -v --tb=short)"
     ]
   }
 }
