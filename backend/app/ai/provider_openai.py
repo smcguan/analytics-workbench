@@ -684,3 +684,79 @@ def generate_insights_for_dataset(
 
     raw_text = generate_sql_response(prompt)
     return parse_insights_response(raw_text)
+
+
+# ============================================================
+# GRAIN DESCRIPTION PROMPT BUILDER
+# ------------------------------------------------------------
+# Given a dataset schema and sample values, asks the model to
+# write 1-2 sentences describing what one row represents and
+# any aggregation guidance.
+# ============================================================
+
+def _build_grain_description_prompt(
+    *,
+    dataset_name: str,
+    schema: list[dict],
+) -> str:
+    """
+    Build the prompt used to generate a dataset grain description.
+
+    The grain description answers: what does one row represent?
+    """
+    # Cap at 30 columns to keep the prompt concise
+    lines = []
+    for col in schema[:30]:
+        samples = col.get("sample_values", [])
+        sample_str = ", ".join(str(s) for s in samples[:3]) if samples else "N/A"
+        lines.append(f"- {col['column_name']} ({col['data_type']}): e.g. {sample_str}")
+    schema_text = "\n".join(lines)
+
+    return f"""You are a data analyst writing concise documentation for a dataset.
+
+Given the column names, types, and sample values below, write 1-2 sentences that describe:
+1. What one row in this dataset represents (the unit of observation / grain)
+2. Any important aggregation guidance (e.g. GROUP BY before summing, or "already aggregated by drug and year")
+
+Rules:
+- Return ONLY the plain text description. No JSON. No markdown. No bullet points.
+- Maximum 2 sentences.
+- Be specific — use actual column names if helpful.
+- Focus on what ONE ROW represents, not the entire dataset.
+
+Dataset name: {dataset_name}
+
+Columns and sample values:
+{schema_text}
+
+Grain description:""".strip()
+
+
+# ============================================================
+# GRAIN DESCRIPTION WRAPPER
+# ============================================================
+
+def generate_grain_description_for_dataset(
+    *,
+    dataset_name: str,
+    schema: list[dict],
+) -> str:
+    """
+    Generate a 1-2 sentence grain description for a dataset.
+
+    Called by the Export Passport endpoint in main.py.
+    The result is cached in dataset_context.json so only one
+    OpenAI call is needed per dataset.
+    """
+    import re as _re
+
+    prompt = _build_grain_description_prompt(
+        dataset_name=dataset_name,
+        schema=schema,
+    )
+    raw = generate_sql_response(prompt)
+    # Strip stray quotes or markdown the model might have emitted
+    result = raw.strip().strip('"').strip("'")
+    # Collapse multiple newlines to a single space
+    result = _re.sub(r"\n+", " ", result).strip()
+    return result

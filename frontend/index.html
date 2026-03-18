@@ -825,14 +825,14 @@
            Inspect Dataset Header Layout
            -----------------------------------------------------
            Fixed seven-slot row:
-           Rows | Columns | Size | Source | Profile | Schema | Preview
+           Rows | Columns | Size | Source | Schema | Preview | Export Passport
 
            This header does not scale with the data table below.
            The lower inspect data window owns horizontal scrolling.
         ====================================================== */
         .inspect-toolbar{
             display:grid;
-            grid-template-columns:120px 120px 120px 170px 92px 92px 92px;
+            grid-template-columns:120px 120px 120px 170px 92px 92px 140px;
             gap:12px;
             align-items:start;
             margin-top:12px;
@@ -881,6 +881,12 @@
             min-width:92px;
             padding-left:0;
             padding-right:0;
+        }
+
+        /* Export Passport is wider than Schema/Preview to fit the label */
+        #exportPassportBtn{
+            width:140px;
+            min-width:140px;
         }
 
         .inspect-shell,
@@ -1060,7 +1066,7 @@
                     <section class="panel inspect-shell">
                         <div class="inspect-title">Inspect Dataset</div>
                         <div class="help-text" style="margin-top:8px;">
-                            Select a dataset, then use the toggles to show or hide Profile, Schema, or Preview.
+                            Select a dataset, then use Schema or Preview to inspect it, or Export Passport to download a full data profile.
                         </div>
 
                         <div class="dataset-summary" id="selectedDatasetSummary">No dataset selected.</div>
@@ -1096,6 +1102,7 @@
                             <div class="inspect-actions">
                                 <button class="btn small" id="inspectSchemaBtn">Schema</button>
                                 <button class="btn small" id="inspectPreviewBtn">Preview</button>
+                                <button class="btn small" id="exportPassportBtn">Export Passport</button>
                             </div>
                         </div>
 
@@ -1388,7 +1395,7 @@ LIMIT 100</textarea>
         async function loadVersion() {
             try {
                 const v = await apiJson("/api/version");
-                setVersionState("ok", `${v.name} • v${v.version} • exports: ${v.exports_dir}`);
+                setVersionState("ok", `${v.name} • v${v.version}`);
                 document.title = `Analytics Workbench v${v.version}`;
             } catch (e) {
                 setVersionState("bad", "Version unavailable");
@@ -2595,6 +2602,55 @@ LIMIT 100</textarea>
             }
         }
 
+        // ---------------------------------------------------------------
+        // exportPassport
+        // ---------------------------------------------------------------
+        // Calls GET /api/datasets/{name}/passport and triggers a browser
+        // download of <dataset_name>_passport.json.
+        //
+        // The endpoint runs DuckDB analysis and one AI call (grain
+        // description). The AI result is cached in dataset_context.json
+        // so subsequent clicks return instantly without an OpenAI call.
+        //
+        // Loading state is shown on the button during the request since
+        // the first call may take 2-3 seconds while the AI runs.
+        // ---------------------------------------------------------------
+        async function exportPassport() {
+            if (!selectedDataset) { toast("Select a dataset first."); return; }
+
+            const btn = $("exportPassportBtn");
+            const origText = btn.textContent;
+            btn.disabled = true;
+            btn.textContent = "Generating…";
+
+            try {
+                const data = await apiJson(
+                    "/api/datasets/" + encodeURIComponent(selectedDataset) + "/passport"
+                );
+
+                // Trigger browser download of the JSON file
+                const blob = new Blob(
+                    [JSON.stringify(data, null, 2)],
+                    { type: "application/json" }
+                );
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = selectedDataset + "_passport.json";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                toast("Passport exported: " + selectedDataset + "_passport.json");
+            } catch (e) {
+                toast("Export Passport failed: " + e.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = origText;
+            }
+        }
+
         async function inspectPreview() {
             if (inspectMode === "preview") {
                 resetInspectState();
@@ -2793,6 +2849,7 @@ LIMIT 100</textarea>
 
         $("inspectSchemaBtn").addEventListener("click", inspectSchema);
         $("inspectPreviewBtn").addEventListener("click", inspectPreview);
+        $("exportPassportBtn").addEventListener("click", exportPassport);
 
         $("saveQueryBtn").addEventListener("click", saveCurrentQuery);
         $("refreshQueriesBtn").addEventListener("click", loadSavedQueries);

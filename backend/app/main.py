@@ -190,7 +190,7 @@ from app.ai.routes import router as ai_router  # noqa: E402
 logger = logging.getLogger("app")
 app = FastAPI(title="Analytics Workbench")
 
-APP_VERSION = "1.2.0"
+APP_VERSION = "1.2.1"
 
 
 # ============================================================
@@ -324,6 +324,10 @@ EXPORTS_DIR.mkdir(parents=True, exist_ok=True)
 DEFAULT_PREVIEW_ROWS = int(os.getenv("AW_DEFAULT_PREVIEW_ROWS", "50"))
 MAX_PREVIEW_ROWS = int(os.getenv("AW_MAX_PREVIEW_ROWS", "200"))
 MAX_EXPORT_ROWS = int(os.getenv("AW_MAX_EXPORT_ROWS", "200000"))
+
+# Row sample size used when building dataset context and passport analysis.
+# Keeps stats queries fast on large datasets (100M+ rows) without full scans.
+_CONTEXT_SAMPLE_ROWS = int(os.getenv("AW_CONTEXT_SAMPLE_ROWS", "100000"))
 
 
 # ============================================================
@@ -1272,6 +1276,513 @@ def _load_dataset_context(dataset: str, refresh: bool = False) -> dict[str, Any]
 
 
 # ============================================================
+# PASSPORT HELPERS
+# ------------------------------------------------------------
+# These support the GET /api/datasets/{name}/passport endpoint.
+# The passport is a single-download JSON document giving a
+# complete picture of a dataset: schema, samples, distributions,
+# numeric ranges, quality flags, grain description, and quick-
+# start SQL.
+# ============================================================
+
+_PASSPORT_MEASURE_KEYWORDS = {
+    "paid", "spend", "cost", "amount", "revenue", "count", "total",
+    "payment", "price", "sales", "sum", "dollars", "value",
+    "claims", "beneficiaries",
+}
+
+# Preferred group-by columns for the quickstart aggregation query.
+# Checked as case-insensitive substrings, in priority order.
+_PASSPORT_GROUP_PRIORITY = ["hcpcs_code", "category", "type", "code"]
+
+
+def _passport_read_identity(name: str, ds_dir: Path) -> dict[str, Any]:
+    """Read dataset identity fields from cached metadata files."""
+    row_count: int | None = None
+    column_count: int | None = None
+    original_type: str | None = None
+    created_at: str | None = None
+
+    # metadata.json has original_type and created_at (written by import pipeline)
+    meta_path = ds_dir / "metadata.json"
+    if meta_path.exists():
+        try:
+            m = json.loads(meta_path.read_text(encoding="utf-8"))
+            row_count = m.get("row_count")
+            col_count_raw = m.get("column_count")
+            if col_count_raw is None:
+                cols = m.get("columns")
+                col_count_raw = len(cols) if isinstance(cols, list) else None
+            column_count = col_count_raw
+            original_type = m.get("original_type")
+            created_at = m.get("created_at")
+        except Exception:
+            pass
+
+    # _meta.json fallback for row/col counts
+    if row_count is None:
+        try:
+            m = json.loads((ds_dir / "_meta.json").read_text(encoding="utf-8"))
+            row_count = m.get("row_count")
+            if column_count is None:
+                column_count = m.get("column_count")
+        except Exception:
+            pass
+
+    try:
+        file_size_bytes: int | None = sum(
+            f.stat().st_size for f in ds_dir.glob("*.parquet") if f.is_file()
+        ) or None
+    except Exception:
+        file_size_bytes = None
+
+    return {
+        "dataset_name": name,
+        "row_count": row_count,
+        "column_count": column_count,
+        "source_file_type": original_type,
+        "import_date": created_at,
+        "file_size_bytes": file_size_bytes,
+    }
+
+
+def _passport_duckdb_analysis(
+    con: duckdb.DuckDBPyConnection,
+    esc: str,
+    total_rows: int | None,
+) -> dict[str, Any]:
+    """
+    Run DuckDB queries to build schema, sample values, distributions,
+    numeric ranges, and quality flags for the passport.
+
+    Uses USING SAMPLE for large-dataset safety — identical to the pattern
+    in _build_dataset_context.  Each column is analysed individually so
+    failures in one column do not block the rest.
+    """
+    SAMPLE = _CONTEXT_SAMPLE_ROWS
+
+    # DESCRIBE returns: (col_name, col_type, null_str, key, default, extra)
+    try:
+        desc_rows = con.execute(
+            f"DESCRIBE SELECT * FROM read_parquet('{esc}')"
+        ).fetchall()
+    except duckdb.Error as exc:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Could not read dataset schema: {exc}",
+        ) from exc
+
+    schema: list[dict[str, Any]] = []
+    quality_flags: list[dict[str, Any]] = []
+
+    for row in desc_rows:
+        col_name = row[0]
+        col_type = row[1]
+        nullable_str = str(row[2]).upper() if row[2] is not None else "YES"
+        nullable = nullable_str != "NO"
+        kind = _classify_column_kind(col_type)
+        # Double-quote column name for safe SQL embedding
+        quoted = '"' + col_name.replace('"', '""') + '"'
+
+        col_entry: dict[str, Any] = {
+            "column_name": col_name,
+            "data_type": col_type,
+            "nullable": nullable,
+            "null_count": 0,
+            "null_pct": 0.0,
+            "sample_values": [],
+        }
+
+        # --- Null count (sampled) ---
+        null_count = 0
+        sampled_total = SAMPLE
+        try:
+            result = con.execute(
+                f"SELECT "
+                f"  SUM(CASE WHEN {quoted} IS NULL THEN 1 ELSE 0 END) AS nc, "
+                f"  COUNT(*) AS tot "
+                f"FROM (SELECT {quoted} FROM read_parquet('{esc}') USING SAMPLE {SAMPLE} ROWS)"
+            ).fetchone()
+            null_count = int(result[0] or 0)
+            sampled_total = int(result[1] or SAMPLE)
+        except Exception:
+            pass
+
+        null_pct = round(null_count / sampled_total * 100, 2) if sampled_total > 0 else 0.0
+        col_entry["null_count"] = null_count
+        col_entry["null_pct"] = null_pct
+
+        # --- Sample values: 5 representative non-null values drawn randomly ---
+        # Use an intermediate random sample so values come from across the full
+        # dataset rather than the first rows of the first Parquet row group.
+        try:
+            samp = con.execute(
+                f"SELECT {quoted} "
+                f"FROM (SELECT {quoted} FROM read_parquet('{esc}') USING SAMPLE {SAMPLE} ROWS) "
+                f"WHERE {quoted} IS NOT NULL LIMIT 5"
+            ).fetchall()
+            col_entry["sample_values"] = [str(r[0]) for r in samp if r[0] is not None]
+        except Exception:
+            pass
+
+        # --- Distributions for string / categorical columns ---
+        if kind in {"categorical", "boolean"}:
+            dist: dict[str, Any] = {"top_values": [], "distinct_count": 0}
+
+            try:
+                top_vals = con.execute(
+                    f"SELECT {quoted} AS value, COUNT(*) AS cnt "
+                    f"FROM (SELECT {quoted} FROM read_parquet('{esc}') USING SAMPLE {SAMPLE} ROWS) "
+                    f"GROUP BY {quoted} ORDER BY cnt DESC LIMIT 15"
+                ).fetchall()
+                dist["top_values"] = [
+                    {"value": str(v) if v is not None else None, "count": int(c)}
+                    for v, c in top_vals
+                ]
+            except Exception:
+                pass
+
+            try:
+                dc = con.execute(
+                    f"SELECT COUNT(DISTINCT {quoted}) "
+                    f"FROM (SELECT {quoted} FROM read_parquet('{esc}') USING SAMPLE {SAMPLE} ROWS)"
+                ).fetchone()[0]
+                dist["distinct_count"] = int(dc or 0)
+            except Exception:
+                pass
+
+            col_entry["distribution"] = dist
+
+            # Quality flag: suspiciously low distinct count
+            dc_val = dist["distinct_count"]
+            effective_rows = min(total_rows, SAMPLE) if total_rows else sampled_total
+            if dc_val > 0 and effective_rows > 100 and dc_val / effective_rows < 0.001:
+                quality_flags.append({
+                    "flag": "low_distinct_count",
+                    "column": col_name,
+                    "detail": f"{dc_val} distinct values in {effective_rows:,} sampled rows",
+                })
+
+            # Quality flag: looks numeric but stored as text
+            try:
+                total_nn = int(con.execute(
+                    f"SELECT COUNT(*) FROM "
+                    f"(SELECT {quoted} FROM read_parquet('{esc}') USING SAMPLE {SAMPLE} ROWS) "
+                    f"WHERE {quoted} IS NOT NULL"
+                ).fetchone()[0] or 0)
+                if total_nn > 0:
+                    numeric_like = int(con.execute(
+                        f"SELECT COUNT(*) FROM "
+                        f"(SELECT {quoted} FROM read_parquet('{esc}') USING SAMPLE {SAMPLE} ROWS) "
+                        f"WHERE TRY_CAST({quoted} AS DOUBLE) IS NOT NULL"
+                    ).fetchone()[0] or 0)
+                    if numeric_like / total_nn > 0.90:
+                        quality_flags.append({
+                            "flag": "looks_numeric_but_stored_as_text",
+                            "column": col_name,
+                            "detail": f"{int(numeric_like / total_nn * 100)}% of non-null values parse as numbers",
+                        })
+            except Exception:
+                pass
+
+            # Quality flag: trailing special characters (*, †, #, etc.)
+            try:
+                total_nn2 = int(con.execute(
+                    f"SELECT COUNT(*) FROM "
+                    f"(SELECT {quoted} FROM read_parquet('{esc}') USING SAMPLE {SAMPLE} ROWS) "
+                    f"WHERE {quoted} IS NOT NULL"
+                ).fetchone()[0] or 0)
+                if total_nn2 > 0:
+                    trailing_count = int(con.execute(
+                        f"SELECT COUNT(*) FROM "
+                        f"(SELECT {quoted} FROM read_parquet('{esc}') USING SAMPLE {SAMPLE} ROWS) "
+                        f"WHERE {quoted} IS NOT NULL "
+                        f"AND regexp_extract(CAST({quoted} AS VARCHAR), '[^A-Za-z0-9 ]$', 0) != ''"
+                    ).fetchone()[0] or 0)
+                    if trailing_count / total_nn2 > 0.05:
+                        examples = [
+                            str(r[0]) for r in con.execute(
+                                f"SELECT {quoted} FROM "
+                                f"(SELECT {quoted} FROM read_parquet('{esc}') USING SAMPLE {SAMPLE} ROWS) "
+                                f"WHERE {quoted} IS NOT NULL "
+                                f"AND regexp_extract(CAST({quoted} AS VARCHAR), '[^A-Za-z0-9 ]$', 0) != '' "
+                                f"LIMIT 3"
+                            ).fetchall()
+                        ]
+                        quality_flags.append({
+                            "flag": "trailing_special_chars",
+                            "column": col_name,
+                            "detail": f"{int(trailing_count / total_nn2 * 100)}% of values have trailing special characters",
+                            "example_values": examples,
+                        })
+            except Exception:
+                pass
+
+        # --- Numeric ranges ---
+        elif kind == "numeric":
+            num_range: dict[str, Any] = {}
+
+            # MIN / MAX / AVG — all standard aggregates that ignore NULLs by
+            # default, so no WHERE filter is needed inside the subquery.
+            # Keeping the subquery pattern consistent with the null-count query
+            # (which is known to work) avoids any DuckDB parsing edge-case with
+            # USING SAMPLE + WHERE in a subquery.
+            try:
+                base_stats = con.execute(
+                    f"SELECT MIN({quoted}), MAX({quoted}), AVG({quoted}) "
+                    f"FROM (SELECT {quoted} FROM read_parquet('{esc}') USING SAMPLE {SAMPLE} ROWS)"
+                ).fetchone()
+            except Exception:
+                base_stats = None
+
+            if base_stats:
+                min_val = _preview_value(base_stats[0])
+                max_val = _preview_value(base_stats[1])
+                mean_val = _preview_value(base_stats[2])
+
+                # Median — separate query so a failure here doesn't lose min/max/mean
+                median_val = None
+                try:
+                    med_row = con.execute(
+                        f"SELECT APPROX_QUANTILE({quoted}, 0.5) "
+                        f"FROM (SELECT {quoted} FROM read_parquet('{esc}') USING SAMPLE {SAMPLE} ROWS)"
+                    ).fetchone()
+                    if med_row:
+                        median_val = _preview_value(med_row[0])
+                except Exception:
+                    pass
+
+                has_negatives = False
+                try:
+                    has_negatives = min_val is not None and float(min_val) < 0
+                except (TypeError, ValueError):
+                    pass
+
+                is_year = False
+                try:
+                    if min_val is not None and max_val is not None:
+                        is_year = (
+                            1900 <= float(min_val) <= 2100
+                            and 1900 <= float(max_val) <= 2100
+                        )
+                except (TypeError, ValueError):
+                    pass
+
+                num_range = {
+                    "min": min_val,
+                    "max": max_val,
+                    "mean": mean_val,
+                    "median": median_val,
+                    "has_negatives": has_negatives,
+                    "is_year_column": is_year,
+                }
+
+            col_entry["numeric_range"] = num_range
+
+        # Quality flag: high null rate (applies to all column kinds)
+        if null_pct > 10.0:
+            quality_flags.append({
+                "flag": "high_null_rate",
+                "column": col_name,
+                "detail": f"{null_pct}% null values in sampled rows",
+            })
+
+        schema.append(col_entry)
+
+    return {"schema": schema, "quality_flags": quality_flags}
+
+
+def _detect_time_series_families(schema: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """
+    Detect groups of columns that share a base name with a year suffix.
+
+    Example: Tot_Spndng_2019, Tot_Spndng_2020, Tot_Spndng_2021
+    → {base_pattern: "Tot_Spndng", years: [2019, 2020, 2021], ...}
+
+    Reports only families with 2+ year columns.
+    """
+    year_re = re.compile(r"^(.+)_(\d{4})$")
+    families: dict[str, list[int]] = {}
+
+    for col in schema:
+        m = year_re.match(col["column_name"])
+        if m:
+            base = m.group(1)
+            year = int(m.group(2))
+            if 1900 <= year <= 2100:
+                families.setdefault(base, []).append(year)
+
+    result = []
+    for base, years in families.items():
+        if len(years) >= 2:
+            sorted_years = sorted(years)
+            result.append({
+                "base_pattern": base,
+                "years": sorted_years,
+                "column_count": len(years),
+                "example_columns": [f"{base}_{y}" for y in sorted_years[:3]],
+            })
+    return result
+
+
+def _passport_sql_quickstart(schema: list[dict[str, Any]]) -> dict[str, Any]:
+    """
+    Build ready-to-run SQL quick-start queries for the passport.
+
+    Always includes a SELECT * query.
+
+    If any column name contains a measure keyword (paid, total, claims, etc.),
+    also includes an aggregate_by_top_category query that SUMs all measure
+    columns grouped by the best categorical column.  Group-by column selection
+    prefers HCPCS_CODE, category, type, or code columns before falling back to
+    the first non-measure column in the schema.
+
+    Measure detection is purely name-based so it works even when numeric_range
+    stats could not be computed for a column.
+    """
+    col_names = [col["column_name"] for col in schema]
+    cols_quoted = ['"' + c.replace('"', '""') + '"' for c in col_names]
+
+    select_all = (
+        "SELECT " + ", ".join(cols_quoted) + "\n"
+        "FROM dataset\n"
+        "LIMIT 100"
+    )
+
+    # Detect measure columns purely by keyword match in the column name.
+    # This is intentionally independent of numeric_range so it cannot be
+    # broken by a stats-query failure.
+    measure_cols: list[str] = [
+        col["column_name"]
+        for col in schema
+        if any(kw in col["column_name"].lower() for kw in _PASSPORT_MEASURE_KEYWORDS)
+    ]
+
+    quickstart: dict[str, Any] = {"select_all": select_all}
+
+    if measure_cols:
+        measure_set = set(measure_cols)
+        non_measure = [col["column_name"] for col in schema if col["column_name"] not in measure_set]
+
+        # Find the best group-by column: check priority keywords first (case-insensitive
+        # substring), then fall back to the first non-measure column.
+        group_col: str | None = None
+        non_measure_lower = {c.lower(): c for c in non_measure}
+        for priority in _PASSPORT_GROUP_PRIORITY:
+            for lc, orig in non_measure_lower.items():
+                if priority in lc:
+                    group_col = orig
+                    break
+            if group_col:
+                break
+        if group_col is None and non_measure:
+            group_col = non_measure[0]
+
+        if group_col:
+            q_g = '"' + group_col.replace('"', '""') + '"'
+
+            # Sort measure columns so paid/spend/cost/amount come first.
+            # This ensures ORDER BY uses the most financially meaningful column.
+            _PRIMARY_MEASURE_KW = {"paid", "spend", "cost", "amount"}
+            def _measure_sort_key(name: str) -> int:
+                lc = name.lower()
+                return 0 if any(kw in lc for kw in _PRIMARY_MEASURE_KW) else 1
+            ordered_measures = sorted(measure_cols, key=_measure_sort_key)
+
+            sum_parts = []
+            for mc in ordered_measures:
+                q_m = '"' + mc.replace('"', '""') + '"'
+                # Use the original column name as the alias — avoids redundant
+                # "total_" prefix when the source column already starts with
+                # "TOTAL_" (e.g. SUM("TOTAL_PAID") AS TOTAL_PAID, not
+                # AS total_total_paid).  Quote the alias to handle any special
+                # characters in the column name.
+                alias = '"' + mc.replace('"', '""') + '"'
+                sum_parts.append(f"  SUM({q_m}) AS {alias}")
+
+            # ORDER BY the first (highest-priority) measure column
+            order_alias = '"' + ordered_measures[0].replace('"', '""') + '"'
+            quickstart["aggregate_by_top_category"] = (
+                f"SELECT {q_g},\n"
+                + ",\n".join(sum_parts) + "\n"
+                f"FROM dataset\n"
+                f"GROUP BY {q_g}\n"
+                f"ORDER BY {order_alias} DESC\n"
+                f"LIMIT 20"
+            )
+            quickstart["measure_columns"] = ordered_measures
+            quickstart["group_column"] = group_col
+
+    return quickstart
+
+
+def _generate_grain_description(name: str, schema: list[dict[str, Any]]) -> str:
+    """Call the AI provider to generate a 1-2 sentence grain description."""
+    try:
+        from app.ai.provider_openai import generate_grain_description_for_dataset
+    except ImportError:
+        try:
+            from ai.provider_openai import generate_grain_description_for_dataset
+        except ImportError:
+            return ""
+
+    try:
+        return generate_grain_description_for_dataset(dataset_name=name, schema=schema)
+    except Exception as exc:
+        logger.warning("grain description AI call failed | dataset=%s | reason=%s", name, exc)
+        return ""
+
+
+def _passport_grain_description(
+    name: str,
+    ds_dir: Path,
+    schema: list[dict[str, Any]],
+) -> str:
+    """
+    Return a grain description, using the cached value when available.
+
+    Caching follows the exact same pattern as suggest_questions:
+    the result is stored in dataset_context.json under "grain_description"
+    and returned instantly on subsequent calls without an OpenAI round-trip.
+    """
+    ctx_path = ds_dir / DATASET_CONTEXT_FILENAME
+
+    # Cache hit
+    try:
+        cached = json.loads(ctx_path.read_text(encoding="utf-8"))
+        grain = cached.get("grain_description")
+        if grain and isinstance(grain, str) and grain.strip():
+            logger.info("passport grain_description cache hit | dataset=%s", name)
+            return grain.strip()
+    except Exception:
+        pass
+
+    # Cache miss — generate with AI
+    grain = _generate_grain_description(name, schema)
+
+    # Persist result to cache, merging into the existing context file
+    if grain:
+        try:
+            existing: dict[str, Any] = {}
+            try:
+                existing = json.loads(ctx_path.read_text(encoding="utf-8"))
+            except Exception:
+                pass
+            existing["grain_description"] = grain
+            existing["grain_description_generated_at"] = datetime.now().isoformat()
+            ctx_path.write_text(
+                json.dumps(existing, indent=2, ensure_ascii=False, default=str),
+                encoding="utf-8",
+            )
+        except Exception as exc:
+            logger.warning(
+                "grain description cache write failed | dataset=%s | reason=%s", name, exc
+            )
+
+    return grain
+
+
+# ============================================================
 # UI MOUNT
 # ============================================================
 
@@ -1511,6 +2022,86 @@ def api_dataset_meta(name: str):
         con.close()
 
 
+
+
+@app.get("/api/datasets/{name}/passport")
+def api_dataset_passport(name: str):
+    """
+    Generate and return an Export Passport JSON for a dataset.
+
+    The passport is a structured document containing:
+    - Dataset identity (name, row count, columns, file size, import date)
+    - Full schema with nullable, null rates, and sample values per column
+    - Distributions (top 15 values + distinct count) for string columns
+    - Numeric ranges (min/max/mean/median) for numeric columns
+    - AI-generated grain description (1-2 sentences, cached in dataset_context.json)
+    - Automatic data quality flags (high nulls, trailing chars, looks-numeric, low distinct)
+    - Time-series column family detection (year-suffix column groups)
+    - Ready-to-run SQL quick-start queries
+
+    The grain description is cached after the first call — subsequent calls return instantly
+    without an OpenAI round-trip, following the same pattern as suggest_questions.
+    """
+    ds_dir = _dataset_dir(name)
+    if not ds_dir.exists() or not ds_dir.is_dir():
+        raise HTTPException(status_code=404, detail=f"Dataset not found: {name}")
+
+    try:
+        src, _is_glob = dataset_source_path(name)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+    esc = _sql_escape_path(src)
+
+    # Identity from cached metadata files (no DuckDB required)
+    identity = _passport_read_identity(name, ds_dir)
+
+    # DuckDB analysis: schema, distributions, numeric ranges, quality flags
+    con = _connect()
+    try:
+        analysis = _passport_duckdb_analysis(con, esc, identity.get("row_count"))
+    except HTTPException:
+        raise
+    except duckdb.Error as exc:
+        logger.exception("passport duckdb analysis failed | dataset=%s", name)
+        raise HTTPException(
+            status_code=400,
+            detail=f"Dataset analysis failed: {exc}",
+        ) from exc
+    except Exception as exc:
+        logger.exception("passport analysis failed | dataset=%s", name)
+        raise HTTPException(
+            status_code=400,
+            detail=f"Dataset analysis failed: {exc}",
+        ) from exc
+    finally:
+        con.close()
+
+    schema = analysis["schema"]
+
+    # Grain description (AI-generated, cached in dataset_context.json)
+    grain_description = _passport_grain_description(name, ds_dir, schema)
+
+    # Time-series column families (year-suffix pattern detection)
+    time_series_families = _detect_time_series_families(schema)
+
+    # Ready-to-run SQL quick-start queries
+    sql_quickstart = _passport_sql_quickstart(schema)
+
+    logger.info(
+        "passport generated | dataset=%s | columns=%d | quality_flags=%d",
+        name, len(schema), len(analysis["quality_flags"]),
+    )
+    _audit_log({"event": "passport", "status": "success", "dataset": name})
+
+    return {
+        "identity": identity,
+        "schema": schema,
+        "grain_description": grain_description,
+        "data_quality_flags": analysis["quality_flags"],
+        "time_series_column_families": time_series_families,
+        "sql_quickstart": sql_quickstart,
+    }
 
 
 @app.post("/api/datasets/{name}/delete")
