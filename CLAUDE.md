@@ -1,8 +1,10 @@
 # Analytics Workbench — Claude Code Context
 
-> **See CONTEXT.md for current product and business state.**
+> **IMPORTANT: Read CONTEXT.md before starting any session.**
 > CONTEXT.md is the single source of truth for milestone status, open decisions,
-> session log, and next actions. Read it at the start of every Claude Code session.
+> session log, and next actions. Always read CONTEXT.md alongside this file —
+> it contains business context, validation results, and backlog items that
+> inform coding decisions.
 
 
 ## PROJECT NAME
@@ -472,8 +474,9 @@ and therapeutic category classification.
 - Mechanics test: PASSED — 25 exclusions in combined CSV, single JOIN query,
   94→59 drugs. LIKE pattern handled trailing asterisks. Brand name matching
   correctly caught formulation variants (Enbrel/Enbrel Sureclick, Austedo/Austedo XR).
-- Cold-start test: NOT YET RUN — requires fresh dataset neither analyst nor Claude
-  has seen before. Cannot use Compass data — prior knowledge contaminates the test.
+- Cold-start validation: PARTIALLY COMPLETE — Part D/GUARD analysis (March 2026)
+  served as informal cold-start. Fresh dataset, fresh policy research, no prior
+  knowledge. Formal controlled test not yet run — treat as nice-to-have, not blocker.
 
 **Deliverables:**
 - Part B / GLOBE memo — COMPLETE (57 confirmed candidates, 14 sole orphan, 40 MFN deal manufacturers)
@@ -482,39 +485,52 @@ and therapeutic category classification.
 
 ---
 
-## KNOWN BUGS — ACTIVE (Fix before or during Milestone 4)
+## KNOWN BUGS — RESOLVED
 
-### Bug 1: Silent SQL failure on invalid DuckDB syntax
-**Status:** FIXED. DuckDB errors now surface as HTTP 400 with readable messages.
+### Bug 1: Silent SQL failure on invalid DuckDB syntax — FIXED
+### Bug 2: Long NOT LIKE / NOT IN chains (~26 conditions) — FIXED
+### Bug 3: ORDER BY DESC parser error when AW wraps query — FIXED
+### Bug 4: Suggestions button caching — FIXED (renamed from old #4)
 
-### Bug 2: Long NOT LIKE / NOT IN chains fail silently around 26 conditions
-**Status:** FIXED. Root cause was _validate_readonly_sql scanning blocked keywords
-(insert, update, delete, drop, etc.) inside quoted string literals. Drug names like
-'Alteplase' or LIKE patterns like '%update%' triggered false positives. Fix: regex
-strips single-quoted literals before keyword scanning (main.py:991).
+## KNOWN BUGS — ACTIVE
 
-### Bug 3: ORDER BY DESC parser error when AW wraps query
-**Status:** FIXED (could not reproduce). The subquery wrapping logic
-`SELECT * FROM ({sql}) t LIMIT 200` correctly preserves ORDER BY ... DESC.
-Tested with DuckDB directly — no parser error.
-
-### Bug 4: Suggestions button caching
-**Status:** FIXED. Two-layer caching (JS + server) working with refresh mechanism.
-
-### Bug 5: Result Passport display-cap bug
+### Bug 5: Result Passport display-cap (HIGH PRIORITY)
 **Symptom:** Result Passport generates from displayed rows (capped at 200 by
 MAX_PREVIEW_ROWS), not the full result set. When a query returns >200 rows,
 the Result Summary row_count is wrong (shows 200 instead of actual count).
 **Root cause:** Frontend sends lastRun.rows (display-capped) to /api/results/passport.
-**Fix:** Either pass the full rowcount from lastRun.rowcount into the passport request,
-or have the backend compute stats from the full query result instead of the preview rows.
-**Priority:** High — misleading summary for large result sets.
+**Fix:** Result Passport should query the result count from the query engine
+independently of the display limit. row_count must reflect the full result.
+**Priority:** High — correctness issue, not just UX.
+**Note:** CONTEXT.md tracks this as Bug #4. Numbering differs between files.
 
 ### Bug 6: Refresh Datasets — Windows file lock issue
 **Symptom:** shutil.rmtree() in /api/datasets/{name}/delete may fail silently
 when DuckDB has the Parquet file open.
 **Status:** Partially addressed — retry logic added, needs further testing on Windows.
 **Priority:** Medium.
+
+---
+
+## FRICTION REDUCTION BACKLOG
+Items identified from real analytical sessions (Compass/Farragut, March 2026).
+See CONTEXT.md for full specs. Prioritized.
+
+1. **Result Passport display-cap fix** (Bug #5 above) — row_count must reflect
+   full result set. Highest priority.
+
+2. **Rollup row detection in Export Passport** — CMS datasets contain rollup/
+   subtotal rows (e.g. Mftr_Name = 'Overall'). Passport grain description should
+   flag these automatically. Detectable from data distribution — no AI required.
+   Priority: High.
+
+3. **Reference Table JOIN match diagnostic** — After a JOIN query, surface a
+   lightweight diagnostic: "Reference table matched X rows — view matches."
+   One-click verification without writing SQL. Priority: Medium.
+
+4. **Reference Table Library** — Pre-built, maintained reference CSVs for common
+   use cases (IRA drug list, FDA orphan drugs, biosimilar tracker, USP categories).
+   UI shows "Reference Library" alongside import. Priority: Medium-High.
 
 ---
 
@@ -721,7 +737,8 @@ AW_MAX_EXPORT_ROWS=200000
 ---
 
 ## WHEN CONTRIBUTING
-1. Always read the actual file before editing — never assume current state
+1. Always read CONTEXT.md at session start — it has current status, backlog, and next actions
+2. Always read the actual file before editing — never assume current state
 2. Preserve frozen UI decisions unless explicitly told to change them
 3. Distinguish frontend vs backend problems clearly
 4. Prefer targeted fixes over rewrites
