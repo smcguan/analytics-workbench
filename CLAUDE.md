@@ -39,7 +39,7 @@ generate SQL → review/edit SQL → run SQL → table + chart appear → export
 
 ## CURRENT DEVELOPMENT STAGE
 Milestone 3 is COMPLETE as of March 2026.
-Milestone 4 is COMPLETE. Pending cold-start validation before healthcare demo.
+Milestone 4 is COMPLETE. M5 planning in progress.
 
 ---
 
@@ -526,6 +526,42 @@ when DuckDB has the Parquet file open.
 - POST /api/reference_library/{filename}/load — imports library CSV as active reference
 - Frontend: "Reference Library" button with popover in sidebar
 - Additional library files planned: FDA orphan drugs, biosimilar tracker, USP categories
+
+### Reference Table Library — Roadmap and Update Cadence
+Planned files (priority order):
+1. FDA orphan drug status — quarterly FDA OOPD publication
+2. Manufacturer MFN deal status — irregular, announce-driven
+3. USP category mappings (GLOBE 7-category + GUARD 17-category) — every 3 years
+4. Biosimilar tracker — monthly FDA approval announcements
+
+IRA list updates annually (new drug selections each February).
+
+Business note: maintained library is a recurring reason for customers to stay on
+maintenance contracts. Position as a living resource, not a static file.
+
+---
+
+## NEW PRODUCT IDEAS (from ChatGPT comparison, March 2026)
+
+See CONTEXT.md for full specs. Summary:
+
+1. **Generic Name Pattern Classifier** — Auto-classify drugs into therapeutic
+   categories using generic name suffix patterns (e.g. -glutide → GLP-1,
+   -mab → Biologic, -nib → Oncology TKI). Covers ~70-80% of branded drugs.
+   Lives in Insights view. Medium build.
+
+2. **Human-in-the-Loop Classification Workflow** — When auto-classification
+   leaves unclassified residual, present items for manual review with suggested
+   categories. Companion to pattern classifier. Medium-large build.
+
+3. **Analysis Summary Artifact** — Auto-generated structured summary of an
+   analytical session (filters applied, exclusions, findings, open questions).
+   Companion to Export Passport (dataset) and Result Passport (query result).
+   Together they form a complete audit trail. Medium build.
+
+4. **Exploration vs. Verification design principle** — Insights view should
+   lean into exploration (propose segmentation schemes, flag hypotheses) rather
+   than just descriptive summaries. Design direction, not a single feature.
 
 ---
 
