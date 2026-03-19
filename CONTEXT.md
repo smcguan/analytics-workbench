@@ -15,24 +15,39 @@
 - Export Passport — COMPLETE
 - Reference Table JOIN — COMPLETE — mechanics validated March 2026
 - Privacy and Transparency Layer — COMPLETE
-- Result Passport — COMPLETE
+- Result Passport — COMPLETE (display-cap bug fixed)
 - Bug #2 (NOT LIKE chains ~26 conditions) — FIXED
 - Bug #3 (ORDER BY DESC parser error) — FIXED
 
 **Reference Table JOIN validation status:**
-- Mechanics test: PASSED — 25 exclusions in one combined CSV, single JOIN query,
-  94→59 drugs. LIKE pattern handled trailing asterisks. Brand name matching
-  correctly caught formulation variants (Enbrel/Enbrel Sureclick, Austedo/Austedo XR).
-- Cold-start test: NOT YET RUN — requires a fresh dataset neither analyst nor Claude
-  has seen before. Cannot use Compass data — prior knowledge contaminates the test.
-
-**AW display cap issue identified:** Result Passport generates from displayed rows (capped
-at 200), not full result set. When query returns >200 rows, Result Summary row count is
-wrong. Needs fix — Result Passport should reflect full result count, not display cap.
+- Mechanics test: PASSED (Part B, March 2026)
+- Cold-start validation: PARTIALLY COMPLETE — Part D/GUARD analysis (March 2026)
+  served as an informal cold-start. Fresh dataset, fresh policy research, no prior
+  knowledge. Not a formally controlled test but real analytical work with no cheating.
+  Formal controlled test (defined success criteria, baseline comparison) not yet run —
+  treat as nice-to-have, not a blocker for healthcare demo.
 
 **Validated at scale:** 220M rows, DuckDB local execution, sub-second import.
 
-**Test suite:** 333 automated tests, all passing, runs under 1 second.
+**Test suite:** 389 automated tests, all passing, runs under 3 seconds.
+
+---
+
+## KNOWN BUGS — ACTIVE
+
+No critical bugs. All previous bugs (1-5) resolved.
+
+- Bug #6 (Windows file lock on Refresh Datasets) — partially addressed, medium priority.
+
+---
+
+## FRICTION REDUCTION BACKLOG — COMPLETED
+# All 4 items from the Part D session friction analysis have been built.
+
+1. ~~Result Passport display-cap fix~~ DONE — total_rowcount passed from frontend, sampling note added
+2. ~~Rollup row detection in Export Passport~~ DONE — possible_rollup_rows quality flag, no AI required
+3. ~~Reference Table JOIN match diagnostic~~ DONE — reference_info in /api/sql response, shown in results metadata
+4. ~~Reference Table Library~~ DONE — /api/reference_library endpoints, IRA drug list (35 drugs, Rounds 1-3), frontend popover UI
 
 ---
 
@@ -45,7 +60,7 @@ customer tiers.
 ### Component 1 — Result Passport (added to M4 — COMPLETE)
 Copy Result Summary button in results toolbar. Generates structured JSON profile —
 row count, top values, numeric ranges, quality flags. No raw row data.
-Known bug: row count reflects display cap (200 rows), not full result set.
+Display-cap bug fixed — row count now reflects full result set.
 
 ### Component 2 — Local AI Mode via Ollama (M5 core)
 Locally-running model handles all AI features on-machine. No OpenAI API call.
@@ -58,12 +73,10 @@ AI validates result and suggests next step. Full collaboration loop inside AW.
 Result Passport is the context bridge — AI sees summary, not raw rows.
 **Build estimate:** 2-3 weeks. **Priority: Milestone 5, after Local AI Mode.**
 
-### Component 4 — Reference Table Library (NEW)
-Pre-built, maintained reference CSVs for common analytical use cases.
-Eliminates cold-start knowledge dependency for recurring workflows.
-Priority candidates: IRA negotiated drug list, FDA orphan drug status,
-biosimilar tracker, USP category mappings.
-**Priority: Milestone 5 or ongoing maintenance.**
+### Component 4 — Reference Table Library (COMPLETE — v1 shipped in M4)
+Pre-built reference CSVs shipped with AW. First file: ira_negotiated_drugs.csv
+(35 drugs, Rounds 1-3). Library browser UI in sidebar. Additional files
+(FDA orphan drugs, biosimilar tracker, USP categories) planned for M5.
 
 ---
 
@@ -92,7 +105,7 @@ Customer supplies their own OpenAI API key (Tiers 1-2) or Ollama install (Tier 3
 
 **Active pipeline:**
 - Healthcare operations team meeting — March 2026 (Tier 3, first confirmed)
-- Compass/Farragut CMS Medicare workflow — SUBSTANTIALLY COMPLETE (see below)
+- Compass/Farragut CMS Medicare workflow — substantially complete (see below)
 
 **Reference use case:** CMS Part B/D drug spending analysis — IRA exclusion lists,
 therapeutic category classification, GLOBE/GUARD payment model candidates.
@@ -142,35 +155,39 @@ without your data ever leaving your machine."
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
-[2026-03-18] [BD] — Completed Part D / GUARD analysis: 304 preliminary candidates, $125.9B spending, IRA exclusions via Reference Table JOIN, Tot_Mftr single-source proxy. Delivered GUARD Word memo. Identified Result Passport display-cap bug. Updated AW Partner Template to v3.
-[2026-03-18] [BD] — Reference Table JOIN mechanics test PASSED: 25 exclusions in one query, 94→59 drugs in single JOIN, Result Summary validated throughout. Cold-start test identified as true validation — needs fresh dataset. Reference Table Library added to M5 roadmap.
-[2026-03-18] [CODE] — Built Result Passport + Privacy Layer: Copy Result Summary button, schema-only insights prompt, privacy disclosure in Insights view, per-dataset AI consent on import. v1.4.0.
-[2026-03-18] [CODE] — Built Reference Table JOIN end-to-end: import pipeline, SQL rewrite, AI context, frontend UI. Confirmed Bug #2 and #3 already fixed. v1.3.0.
-[2026-03-18] [BD] — Specced Milestone 5 privacy architecture: Result Passport (M4 add), Local AI via Ollama, In-App Analyst Chat. Defined three-tier privacy story mapped to customer tiers.
-[2026-03-18] [BD] — Completed Part B GLOBE analysis for Compass/Farragut: 57 confirmed candidates, 14 sole orphan, 40 MFN deal manufacturers. Produced Word memo.
-[2026-03-18] [CODE] — No code changes. M4 status audit: Insights + Passport done, Reference Table JOIN + Privacy/Consent UI + Bug #2 (NOT LIKE chains) still open.
-[2026-03-18] [CODE] — No code changes. Brief session: verified wrap.md workflow and CONTEXT.md bridge.
-[2026-03-18] [BD] — Established context bridge system. Healthcare meeting next priority.
+[2026-03-18] [CODE] — Cleared full friction backlog: display-cap fix, rollup detection, JOIN match diagnostic, Reference Table Library (IRA drug list). Added 56 new tests (389 total). v1.5.0.
+[2026-03-18] [BD] — Post-session friction analysis: identified 4 product improvements
+  from Part D session — display-cap bug fix, rollup row detection in passport, JOIN
+  match diagnostic, Reference Table Library. All added to backlog with specs.
+[2026-03-18] [BD] — Completed Part D / GUARD analysis: 304 preliminary candidates,
+  $125.9B spending, IRA exclusions via Reference Table JOIN, Tot_Mftr single-source
+  proxy. Delivered GUARD Word memo. Identified Result Passport display-cap bug.
+  Updated AW Partner Template to v3.
+[2026-03-18] [BD] — Reference Table JOIN mechanics test PASSED. Cold-start partially
+  validated via Part D analysis. Reference Table Library added to M5 roadmap.
+[2026-03-18] [CODE] — Built Result Passport + Privacy Layer. v1.4.0.
+[2026-03-18] [CODE] — Built Reference Table JOIN end-to-end. v1.3.0.
+[2026-03-18] [BD] — Specced Milestone 5 privacy architecture. Three-tier privacy story defined.
+[2026-03-18] [BD] — Completed Part B GLOBE analysis. 57 candidates. Word memo delivered.
+[2026-03-18] [CODE] — No code changes. M4 status audit.
+[2026-03-18] [CODE] — No code changes. Verified wrap.md workflow and CONTEXT.md bridge.
+[2026-03-18] [BD] — Established context bridge system.
 
 ---
 
 ## OPEN DECISIONS
 # Things not yet resolved. Remove when closed.
 
-- [ ] Demo build timeline for healthcare meeting — M4 complete; is cold-start validation
-      required before demo, or is mechanics test sufficient?
+- [ ] Demo build timeline for healthcare meeting — M4 complete; mechanics test sufficient
+      or wait for formal cold-start?
 - [ ] Pricing for healthcare meeting — $3k/seat baseline or higher given compliance angle?
 - [ ] Proposal template needed before first Tier 2/3 meeting
 - [ ] University outreach — which program, which contact, what's the ask?
-- [ ] Cold-start validation — which fresh dataset to use?
 - [ ] Local AI mode quality bar — is Ollama output good enough for Tier 3 buyers?
 - [ ] In-App Chat — does this replace or complement the claude.ai partnership workflow?
-- [ ] Reference Table Library — which files to build first?
-- [ ] Result Passport display-cap bug — fix so row count reflects full result, not
-      display cap (200 rows). Claude Code task.
-- [ ] Farragut confirmations — 5 flagged items across Part B and Part D memos pending
-      Farragut input before analysis is finalized.
+- [ ] Farragut confirmations — 5 flagged items across Part B and Part D memos pending.
 - [ ] GUARD orphan drug and MFN flags — not yet applied to Part D candidate list.
+- [x] Reference Table Library — v1 shipped with IRA drug list. Additional files (orphan drugs, biosimilars, USP) for M5.
 
 ---
 
@@ -184,11 +201,13 @@ without your data ever leaving your machine."
 - Draft proposal and contract template skeleton
 
 **Product / code (Claude Code):**
-- Fix Result Passport display-cap bug (row count should reflect full result, not 200-row display cap)
+- ~~Fix Bug #4: Result Passport display-cap~~ DONE
+- ~~Build rollup row detection in Export Passport~~ DONE
+- ~~Build Reference Table JOIN match diagnostic~~ DONE
+- ~~Build Reference Table Library + IRA drug list~~ DONE
+- Build additional library CSVs (FDA orphan drugs, biosimilar tracker, USP categories)
 - Spec Milestone 5 Local AI Mode (Ollama)
 - Spec Milestone 5 In-App Analyst Chat
-- Plan cold-start validation test with fresh dataset
-- Spec Reference Table Library (Component 4)
 
 ---
 

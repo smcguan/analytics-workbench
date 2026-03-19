@@ -350,8 +350,9 @@ Response: { row_count, column_count, columns, per_column_profile, data_quality_f
 - The full result set
 - Sensitive values beyond what appears in top_values counts
 
-### Known issue
-Row count reflects display cap (200 rows), not full result set. See Bug #5.
+### Display-cap fix
+Row count now reflects full result set via total_rowcount parameter. When stats
+are computed from a capped display sample, a note explains the sampling.
 
 ---
 
@@ -494,15 +495,9 @@ and therapeutic category classification.
 
 ## KNOWN BUGS — ACTIVE
 
-### Bug 5: Result Passport display-cap (HIGH PRIORITY)
-**Symptom:** Result Passport generates from displayed rows (capped at 200 by
-MAX_PREVIEW_ROWS), not the full result set. When a query returns >200 rows,
-the Result Summary row_count is wrong (shows 200 instead of actual count).
-**Root cause:** Frontend sends lastRun.rows (display-capped) to /api/results/passport.
-**Fix:** Result Passport should query the result count from the query engine
-independently of the display limit. row_count must reflect the full result.
-**Priority:** High — correctness issue, not just UX.
-**Note:** CONTEXT.md tracks this as Bug #4. Numbering differs between files.
+### Bug 5: Result Passport display-cap — FIXED
+Frontend now passes lastRun.rowcount (full count) as total_rowcount. Backend
+uses it for row_count. Sampling note added when stats come from capped display.
 
 ### Bug 6: Refresh Datasets — Windows file lock issue
 **Symptom:** shutil.rmtree() in /api/datasets/{name}/delete may fail silently
@@ -512,25 +507,24 @@ when DuckDB has the Parquet file open.
 
 ---
 
-## FRICTION REDUCTION BACKLOG
-Items identified from real analytical sessions (Compass/Farragut, March 2026).
-See CONTEXT.md for full specs. Prioritized.
+## FRICTION REDUCTION BACKLOG — ALL COMPLETE
 
-1. **Result Passport display-cap fix** (Bug #5 above) — row_count must reflect
-   full result set. Highest priority.
+1. **Result Passport display-cap fix** — DONE. total_rowcount in request, sampling note.
+2. **Rollup row detection** — DONE. possible_rollup_rows quality flag in Export Passport.
+   Detects generic aggregation terms (Overall, Total, All, etc.) appearing >= 3x more
+   than the second value. No AI required.
+3. **JOIN match diagnostic** — DONE. reference_info in /api/sql response. Frontend shows
+   "Reference: {name} ({ref_rows} rows) → {result_rows} results" in results metadata.
+4. **Reference Table Library** — DONE. GET /api/reference_library, POST load endpoint.
+   First file: ira_negotiated_drugs.csv (35 drugs, IRA Rounds 1-3). Frontend popover UI.
 
-2. **Rollup row detection in Export Passport** — CMS datasets contain rollup/
-   subtotal rows (e.g. Mftr_Name = 'Overall'). Passport grain description should
-   flag these automatically. Detectable from data distribution — no AI required.
-   Priority: High.
-
-3. **Reference Table JOIN match diagnostic** — After a JOIN query, surface a
-   lightweight diagnostic: "Reference table matched X rows — view matches."
-   One-click verification without writing SQL. Priority: Medium.
-
-4. **Reference Table Library** — Pre-built, maintained reference CSVs for common
-   use cases (IRA drug list, FDA orphan drugs, biosimilar tracker, USP categories).
-   UI shows "Reference Library" alongside import. Priority: Medium-High.
+### Reference Table Library — Implementation Details
+- Storage: data/reference_library/ with _library.json manifest
+- Manifest fields: filename, name, description, columns, row_count, version, join_hint
+- GET /api/reference_library — returns manifest
+- POST /api/reference_library/{filename}/load — imports library CSV as active reference
+- Frontend: "Reference Library" button with popover in sidebar
+- Additional library files planned: FDA orphan drugs, biosimilar tracker, USP categories
 
 ---
 
@@ -604,6 +598,8 @@ POST /api/datasets/{name}/ai_consent     (store AI consent) [MILESTONE 4]
 POST /api/references/import              (reference table import) [MILESTONE 4]
 GET  /api/references                     (list reference tables) [MILESTONE 4]
 POST /api/references/{name}/delete       (delete reference table) [MILESTONE 4]
+GET  /api/reference_library              (list library CSV files) [MILESTONE 4]
+POST /api/reference_library/{name}/load  (load library CSV as reference) [MILESTONE 4]
 POST /api/shutdown
 ```
 
