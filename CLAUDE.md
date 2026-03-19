@@ -497,6 +497,11 @@ and therapeutic category classification.
 ### Bug 3: ORDER BY DESC parser error when AW wraps query — FIXED
 ### Bug 4: Suggestions button caching — FIXED
 ### Bug 5: Result Passport display-cap — FIXED
+### Bug 7: Reference Library tables not registering in DuckDB — FIXED
+### Bug 8: Reference Library case mismatch on JOIN — FIXED
+Reference table string columns now title-cased on import so JOINs match
+CMS data without LOWER() wrappers. Fix in dataset_import.py
+`_title_case_string_columns()`. 3 regression tests added.
 
 ## KNOWN BUGS — ACTIVE
 

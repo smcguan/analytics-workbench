@@ -8,24 +8,30 @@
 
 ## PRODUCT STATE
 
-**Current milestone:** Milestone 4 complete. Pending cold-start validation before healthcare demo.
+**Current milestone:** Milestone 4 complete. M5 planning in progress.
 
 **M4 features and status:**
 - Insights View — COMPLETE
 - Export Passport — COMPLETE
 - Reference Table JOIN — COMPLETE — mechanics validated March 2026
 - Privacy and Transparency Layer — COMPLETE
-- Result Passport — COMPLETE (display-cap bug fixed)
-- Bug #2 (NOT LIKE chains ~26 conditions) — FIXED
+- Result Passport — COMPLETE (display-cap bug fixed in v1.5.0)
+- Reference Table Library — COMPLETE v1 (IRA drug list, 35 drugs Rounds 1-3)
+- Bug #2 (NOT LIKE chains) — FIXED
 - Bug #3 (ORDER BY DESC parser error) — FIXED
+- Bug #4 (Result Passport display-cap) — FIXED
+- Bug #5 (Rollup row detection) — FIXED (new feature, not a bug fix per se)
+- Bug #6 (Windows file lock on Refresh Datasets) — partially addressed, medium priority
+- Bug #7 (Reference Library tables not registering in DuckDB) — FIXED. Tables showed
+  in UI but were not queryable. Fix applied in Claude Code session same day.
+- Bug #8 (Reference Library case mismatch) — FIXED v1.5.1. Reference table string
+  columns now title-cased on import. JOINs match CMS data without LOWER() wrappers.
 
-**Reference Table JOIN validation status:**
+**Reference Table JOIN validation:**
 - Mechanics test: PASSED (Part B, March 2026)
-- Cold-start validation: PARTIALLY COMPLETE — Part D/GUARD analysis (March 2026)
-  served as an informal cold-start. Fresh dataset, fresh policy research, no prior
-  knowledge. Not a formally controlled test but real analytical work with no cheating.
-  Formal controlled test (defined success criteria, baseline comparison) not yet run —
-  treat as nice-to-have, not a blocker for healthcare demo.
+- Cold-start: INFORMALLY VALIDATED — Part D/GUARD analysis (March 2026) used
+  fresh dataset and fresh policy research with no prior knowledge. Real analytical
+  work, not a controlled test. Formal controlled test is nice-to-have, not a blocker.
 
 **Validated at scale:** 220M rows, DuckDB local execution, sub-second import.
 
@@ -33,50 +39,137 @@
 
 ---
 
-## KNOWN BUGS — ACTIVE
+## REFERENCE TABLE LIBRARY — STATUS AND ROADMAP
 
-No critical bugs. All previous bugs (1-5) resolved.
+**v1 shipped (M4):**
+- ira_negotiated_drugs.csv — 35 drugs, IRA Rounds 1-3, prices and effective dates
+- Frontend: library browser popover in sidebar
+- Backend: /api/reference_library endpoints
 
-- Bug #6 (Windows file lock on Refresh Datasets) — partially addressed, medium priority.
+**Planned for M5 (priority order):**
+1. FDA orphan drug status — needed for Farragut Deliverable 2, currently applied
+   from training knowledge only. High churn risk as new designations are added.
+2. Manufacturer MFN deal status — needed for Farragut Deliverable 3, currently
+   applied from web research. Changes as new deals are announced (irregular cadence).
+3. USP category mappings — both 7-category GLOBE list and 17-category GUARD list.
+   Currently applied via manual CASE statements. Stable; updates with USP MMG versions.
+4. Biosimilar tracker — needed for single-source filtering. Currently applied from
+   training knowledge. FDA biosimilar approvals are the update trigger.
+
+**Update cadence:**
+- IRA list: annual (new drug selections each February)
+- MFN deal status: irregular (announce-driven, roughly monthly during active periods)
+- Orphan drug: quarterly FDA OOPD publication
+- Biosimilar: monthly FDA approval announcements
+- USP categories: every 3 years (USP MMG revision cycle)
+
+**Business note:** Maintained reference library is a recurring reason for customers
+to stay on maintenance contracts. Position as a living resource, not a static file.
 
 ---
 
-## FRICTION REDUCTION BACKLOG — COMPLETED
-# All 4 items from the Part D session friction analysis have been built.
+## NEW PRODUCT IDEAS — FROM CHATGPT COMPARISON (March 2026)
 
-1. ~~Result Passport display-cap fix~~ DONE — total_rowcount passed from frontend, sampling note added
-2. ~~Rollup row detection in Export Passport~~ DONE — possible_rollup_rows quality flag, no AI required
-3. ~~Reference Table JOIN match diagnostic~~ DONE — reference_info in /api/sql response, shown in results metadata
-4. ~~Reference Table Library~~ DONE — /api/reference_library endpoints, IRA drug list (35 drugs, Rounds 1-3), frontend popover UI
+Identified by comparing the AW/Claude approach to a parallel ChatGPT session on
+the same Compass dataset. Four new product directions.
+
+### 1. Generic Name Pattern Classifier
+**What it is:** Auto-classify drugs into therapeutic categories using generic name
+suffix patterns. Well-established pharmaceutical naming conventions map reliably:
+- glutide → GLP-1 / Diabetes / Obesity
+- flozin → SGLT2
+- gliptin → DPP-4
+- mab / umab → Autoimmune / Biologic
+- nib → Oncology (TKI / kinase inhibitor)
+- ciclib → Oncology (CDK inhibitor)
+- limid → Oncology (IMiD)
+- aban → Anticoagulant
+- vir → Antiviral
+- pril / sartan → Cardiovascular (ACE/ARB)
+
+**Where it lives:** Insights view — when a drug spending dataset is imported, AW
+auto-attempts classification and surfaces a suggested therapy_class column in the
+first insight card. Covers ~70-80% of branded drugs; remainder flagged for review.
+
+**Why it matters:** Therapeutic category classification was the most time-consuming
+step in both the GLOBE and GUARD analyses. Manual CASE statements or external
+research required. A pattern classifier eliminates this for the majority of drugs
+and makes classification a first-class AW feature rather than an analyst task.
+
+**Build estimate:** Medium. Pattern library is a CSV; matching logic is simple SQL
+or Python. UI integration into Insights view is the heavier lift.
+
+### 2. Human-in-the-Loop Classification Workflow
+**What it is:** When auto-classification leaves an unclassified residual (the "Other"
+bucket), AW presents those items for manual review with suggested categories. Analyst
+clicks to accept or override. Classifications are saved per dataset.
+
+**Why it matters:** Both the AW session and the ChatGPT session ended with a large
+"Other" residual — 24 drugs in ChatGPT's analysis. Pattern matching will never
+classify everything. A structured review workflow makes the residual manageable
+rather than just flagging it and walking away.
+
+**Relationship to pattern classifier:** These two features are companions.
+Classifier handles the automatable portion; human-in-the-loop handles the rest.
+
+**Build estimate:** Medium-large. Requires a new UI component and per-dataset
+classification storage.
+
+### 3. Analysis Summary Artifact
+**What it is:** A structured, exportable summary of an analytical session capturing:
+- Which filters were applied and why
+- What was excluded and the reason
+- Key findings at each step
+- Open questions flagged for review
+
+Essentially what our Farragut memos contain — but auto-generated from the session
+rather than written manually.
+
+**Why it matters:** The ChatGPT session produced a handoff prompt as its primary
+deliverable. That's useful but manual. AW sessions already contain all the
+information needed to auto-generate this — the queries run, the row counts at each
+step, the reference table joins applied, the result summaries. Packaging that
+automatically would make every AW session self-documenting.
+
+**Relationship to existing features:** Companion to Export Passport (documents the
+dataset) and Result Passport (documents a query result). Analysis Summary documents
+the session. Together they form a complete analytical audit trail.
+
+**Build estimate:** Medium. Most data is already available; the work is structuring
+and formatting it into a readable output.
+
+### 4. Two Analytical Modes — Exploration vs. Verification
+**What it is:** Not a feature per se, but a product design principle that emerged
+from the comparison.
+
+The ChatGPT approach excels at exploration — quick segmentation, pattern finding,
+generating hypotheses. AW currently excels at verification — applying specific
+criteria to produce defensible, auditable output.
+
+The Insights view should lean harder into exploration. Rather than running
+predefined insight types (concentration, outliers, trend), it should:
+- Propose segmentation schemes based on column patterns
+- Flag concentration and outlier hypotheses for the analyst to investigate
+- Suggest classification approaches before the analyst has to ask
+
+This makes AW genuinely complementary to ChatGPT-style tools rather than
+competing with them on different terms.
+
+**Design implication:** When planning Insights view enhancements, bias toward
+exploratory, hypothesis-generating cards over descriptive summary cards.
 
 ---
 
 ## MILESTONE 5 — PRIVACY ARCHITECTURE (PLANNED)
 
-**Goal:** Close the gap between the privacy promise and the real-world analytical
-collaboration workflow. Deliver a three-tier privacy story that maps to the three
-customer tiers.
-
-### Component 1 — Result Passport (added to M4 — COMPLETE)
-Copy Result Summary button in results toolbar. Generates structured JSON profile —
-row count, top values, numeric ranges, quality flags. No raw row data.
-Display-cap bug fixed — row count now reflects full result set.
-
-### Component 2 — Local AI Mode via Ollama (M5 core)
-Locally-running model handles all AI features on-machine. No OpenAI API call.
-True air-gap for healthcare/government customers.
-**Build estimate:** 1-2 weeks. **Priority: Milestone 5.**
-
-### Component 3 — In-App Analyst Chat (M5 companion)
-Dedicated Chat tab — analyst describes goal, AW generates/runs query locally,
-AI validates result and suggests next step. Full collaboration loop inside AW.
-Result Passport is the context bridge — AI sees summary, not raw rows.
-**Build estimate:** 2-3 weeks. **Priority: Milestone 5, after Local AI Mode.**
-
-### Component 4 — Reference Table Library (COMPLETE — v1 shipped in M4)
-Pre-built reference CSVs shipped with AW. First file: ira_negotiated_drugs.csv
-(35 drugs, Rounds 1-3). Library browser UI in sidebar. Additional files
-(FDA orphan drugs, biosimilar tracker, USP categories) planned for M5.
+### Component 1 — Result Passport (M4 — COMPLETE)
+### Component 2 — Local AI Mode via Ollama
+True air-gap for Tier 3 customers. **Build estimate:** 1-2 weeks.
+### Component 3 — In-App Analyst Chat
+Full collaboration loop inside AW. Result Passport as context bridge.
+**Build estimate:** 2-3 weeks. After Local AI Mode.
+### Component 4 — Reference Table Library (M4 v1 COMPLETE — M5 expansion planned)
+Additional files: orphan drugs, biosimilar tracker, USP categories, MFN status.
 
 ---
 
@@ -105,7 +198,7 @@ Customer supplies their own OpenAI API key (Tiers 1-2) or Ollama install (Tier 3
 
 **Active pipeline:**
 - Healthcare operations team meeting — March 2026 (Tier 3, first confirmed)
-- Compass/Farragut CMS Medicare workflow — substantially complete (see below)
+- Compass/Farragut CMS Medicare workflow — substantially complete
 
 **Reference use case:** CMS Part B/D drug spending analysis — IRA exclusion lists,
 therapeutic category classification, GLOBE/GUARD payment model candidates.
@@ -117,23 +210,20 @@ Validated March 2026. Both Part B and Part D memos delivered.
 
 **Part B / GLOBE memo — COMPLETE**
 - 57 confirmed GLOBE candidates, 2 borderline (Farragut review needed)
-- 14 sole orphan drugs identified
-- Manufacturer and MFN deal flags applied
+- 14 sole orphan drugs, manufacturer and MFN flags applied
 - Word memo delivered March 18, 2026
 
 **Part D / GUARD memo — COMPLETE (preliminary)**
 - 304 preliminary GUARD candidates, $125.9B combined 2023 spending
-- Upper-bound estimate — Tot_Mftr proxy used for single-source filter
-- Independent estimate (Avalere, 2024 data): ~170 drugs / ~$93B
-- 3 vaccines flagged for Farragut scope confirmation
-- Wegovy IRA overlap flagged for Farragut confirmation
-- IRA Round 3 (Feb 2026) not yet applied — Farragut to check
+- Upper-bound — Tot_Mftr proxy for single-source; Avalere estimate ~170 drugs / ~$93B
+- 3 vaccines and Wegovy flagged for Farragut confirmation
+- IRA Round 3 not yet applied — Farragut to check
+- Orphan drug status and MFN flags not yet applied
 - Word memo delivered March 18, 2026
 
-**Remaining Farragut items:**
-- Orphan drug status for GUARD candidates (not yet applied)
-- Manufacturer and MFN flags for GUARD candidates (not yet applied)
-- Farragut confirmation on 5 flagged items across both memos
+**Remaining:**
+- Farragut confirmation on 5 flagged items
+- Orphan drug + MFN flags for Part D list
 
 ---
 
@@ -148,66 +238,75 @@ without your data ever leaving your machine."
 **Correct language:** "AI generates analysis instructions that run on your computer."
 
 **Target sequence:** Consultants/freelancers → Mid-market finance/ops → Healthcare/government
-**University beachhead:** Planned (mirrors prior biomechanics playbook)
+**University beachhead:** Planned
 
 ---
 
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
-[2026-03-18] [CODE] — Cleared full friction backlog: display-cap fix, rollup detection, JOIN match diagnostic, Reference Table Library (IRA drug list). Added 56 new tests (389 total). v1.5.0.
-[2026-03-18] [BD] — Post-session friction analysis: identified 4 product improvements
-  from Part D session — display-cap bug fix, rollup row detection in passport, JOIN
-  match diagnostic, Reference Table Library. All added to backlog with specs.
-[2026-03-18] [BD] — Completed Part D / GUARD analysis: 304 preliminary candidates,
-  $125.9B spending, IRA exclusions via Reference Table JOIN, Tot_Mftr single-source
-  proxy. Delivered GUARD Word memo. Identified Result Passport display-cap bug.
-  Updated AW Partner Template to v3.
-[2026-03-18] [BD] — Reference Table JOIN mechanics test PASSED. Cold-start partially
-  validated via Part D analysis. Reference Table Library added to M5 roadmap.
-[2026-03-18] [CODE] — Built Result Passport + Privacy Layer. v1.4.0.
-[2026-03-18] [CODE] — Built Reference Table JOIN end-to-end. v1.3.0.
-[2026-03-18] [BD] — Specced Milestone 5 privacy architecture. Three-tier privacy story defined.
-[2026-03-18] [BD] — Completed Part B GLOBE analysis. 57 candidates. Word memo delivered.
-[2026-03-18] [CODE] — No code changes. M4 status audit.
-[2026-03-18] [CODE] — No code changes. Verified wrap.md workflow and CONTEXT.md bridge.
+[2026-03-18] [CODE] — Bug #8 fix: reference table string columns title-cased on import.
+  3 new tests (Bug #7 regression + Bug #8 unit + end-to-end JOIN). 397 tests. v1.5.1.
+[2026-03-18] [BD] — Reference Library end-to-end validation: Bug #7 (DuckDB registration)
+  found and fixed. Case mismatch (Bug #8) identified — LOWER() workaround confirmed working.
+  IRA JOIN against Part D dataset fully validated: 3,549 non-IRA drugs, clean grain.
+[2026-03-18] [BD] — ChatGPT comparison session: identified 4 new product directions —
+  generic name pattern classifier, human-in-the-loop classification, Analysis Summary
+  artifact, exploration vs. verification design principle. All added to roadmap.
+[2026-03-18] [CODE] — Cleared full friction backlog: display-cap fix, rollup detection,
+  JOIN match diagnostic, Reference Table Library v1 (IRA 35 drugs). 389 tests. v1.5.0.
+[2026-03-18] [BD] — Post-session friction analysis: 4 product improvements specced.
+[2026-03-18] [BD] — Part D / GUARD analysis complete. 304 candidates. GUARD memo delivered.
+  Display-cap bug identified. AW Partner Template updated to v3.
+[2026-03-18] [BD] — Reference Table JOIN mechanics test PASSED. Cold-start informally validated.
+[2026-03-18] [CODE] — Result Passport + Privacy Layer built. v1.4.0.
+[2026-03-18] [CODE] — Reference Table JOIN built. v1.3.0.
+[2026-03-18] [BD] — Milestone 5 privacy architecture specced. Three-tier story defined.
+[2026-03-18] [BD] — Part B GLOBE analysis complete. 57 candidates. GLOBE memo delivered.
+[2026-03-18] [CODE] — M4 status audit. No code changes.
+[2026-03-18] [CODE] — Verified wrap.md and CONTEXT.md bridge. No code changes.
 [2026-03-18] [BD] — Established context bridge system.
 
 ---
 
 ## OPEN DECISIONS
-# Things not yet resolved. Remove when closed.
 
-- [ ] Demo build timeline for healthcare meeting — M4 complete; mechanics test sufficient
-      or wait for formal cold-start?
-- [ ] Pricing for healthcare meeting — $3k/seat baseline or higher given compliance angle?
+- [ ] Demo build timeline — M4 complete, mechanics passed. Formal cold-start needed
+      before demo, or is current validation sufficient?
+- [ ] Healthcare meeting pricing — $3k/seat or higher given compliance angle?
 - [ ] Proposal template needed before first Tier 2/3 meeting
-- [ ] University outreach — which program, which contact, what's the ask?
-- [ ] Local AI mode quality bar — is Ollama output good enough for Tier 3 buyers?
-- [ ] In-App Chat — does this replace or complement the claude.ai partnership workflow?
-- [ ] Farragut confirmations — 5 flagged items across Part B and Part D memos pending.
-- [ ] GUARD orphan drug and MFN flags — not yet applied to Part D candidate list.
-- [x] Reference Table Library — v1 shipped with IRA drug list. Additional files (orphan drugs, biosimilars, USP) for M5.
+- [ ] University outreach — program, contact, ask?
+- [ ] Local AI mode quality bar — Ollama good enough for Tier 3?
+- [ ] In-App Chat — replaces or complements claude.ai partnership workflow?
+- [ ] Farragut confirmations — 5 flagged items pending
+- [ ] GUARD orphan drug and MFN flags — not yet applied
+- [ ] Generic name pattern classifier — build in M5 or as M4.1 patch?
+- [ ] Analysis Summary artifact — scope: auto-generated or analyst-curated?
+- [ ] Reference Table Library maintenance model — who updates, how distributed?
 
 ---
 
 ## NEXT ACTIONS
 
 **Business development (Claude.ai):**
-- Build prep materials for healthcare operations meeting (lead with three-tier privacy story)
-- Apply orphan drug status and MFN flags to GUARD Part D candidate list
-- Await Farragut confirmation on flagged items in both memos
+- Build healthcare meeting prep materials (three-tier privacy story + Compass demo)
+- Apply orphan drug + MFN flags to GUARD Part D candidate list
+- Await Farragut confirmation on flagged items
 - Draft one-pager for Tier 1 consultant outreach
 - Draft proposal and contract template skeleton
 
 **Product / code (Claude Code):**
-- ~~Fix Bug #4: Result Passport display-cap~~ DONE
-- ~~Build rollup row detection in Export Passport~~ DONE
-- ~~Build Reference Table JOIN match diagnostic~~ DONE
-- ~~Build Reference Table Library + IRA drug list~~ DONE
-- Build additional library CSVs (FDA orphan drugs, biosimilar tracker, USP categories)
+- Build additional Reference Table Library files (orphan drugs, biosimilar tracker,
+  USP categories, MFN deal status)
+- Spec Generic Name Pattern Classifier
+- Spec Human-in-the-Loop Classification Workflow
+- Spec Analysis Summary Artifact
 - Spec Milestone 5 Local AI Mode (Ollama)
 - Spec Milestone 5 In-App Analyst Chat
+- Fix Bug #8 (case mismatch in Reference Library JOIN) — normalize IRA table names
+  to title case at registration time, or apply LOWER() automatically in JOIN logic
+- Add regression test for Bug #7 (Reference Library DuckDB registration)
+- Fix Bug #6 (Windows file lock on Refresh Datasets)
 
 ---
 
@@ -220,7 +319,7 @@ without your data ever leaving your machine."
 [DATE] [BD] — decision made, document produced, or strategy updated
 
 **At the start of any session**, read this file first.
-For Claude Code: add to CLAUDE.md → `See CONTEXT.md for current product and business state.`
+For Claude Code: add to CLAUDE.md → See CONTEXT.md for current product and business state.
 For Claude.ai: paste the full file or the relevant sections.
 
 **To trigger a context update:** say "update the context file" at end of session.

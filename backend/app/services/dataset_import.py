@@ -615,6 +615,27 @@ def inspect_parquet(parquet_path: Path) -> tuple[int, list[DatasetColumn]]:
 # -----------------------------------------------------------------------------
 
 
+def _title_case_string_columns(parquet_path: Path) -> None:
+    """
+    Read a Parquet file, apply str.title() to every string column, rewrite.
+
+    Reference tables are small (tens to hundreds of rows), so reading the
+    entire file into memory is fine.  This ensures JOIN conditions match
+    the primary dataset without requiring LOWER() on both sides.
+    """
+    df = pd.read_parquet(parquet_path)
+    changed = False
+    for col in df.columns:
+        if pd.api.types.is_string_dtype(df[col]):
+            df[col] = df[col].apply(
+                lambda v: v.title() if isinstance(v, str) else v
+            )
+            changed = True
+    if changed:
+        table = pa.Table.from_pandas(df, preserve_index=False)
+        pq.write_table(table, parquet_path)
+
+
 @dataclass
 class ReferenceImportResult:
     """Return value for the lightweight reference table import pipeline."""
@@ -676,6 +697,11 @@ def import_reference_table(
         convert_xlsx_to_parquet(source_upload_path, parquet_path)
     else:
         raise UnsupportedDatasetTypeError(f"Unsupported file type: {original_type}")
+
+    # Normalize string columns to title case so JOINs between the reference
+    # table and the primary dataset match without LOWER() wrappers.
+    # Example: IRA CSV stores "apixaban" but CMS data stores "Apixaban".
+    _title_case_string_columns(parquet_path)
 
     row_count, columns = inspect_parquet(parquet_path)
 
