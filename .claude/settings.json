@@ -1,15 +1,17 @@
 {
   "permissions": {
     "allow": [
-      "Read(**)",
-      "Edit(**)",
-      "Bash(.venv/Scripts/python -m pytest*)",
-      "Bash(.venv/Scripts/python -c*)",
-      "Bash(.venv/Scripts/pip*)",
-      "Bash(git diff*)",
-      "Bash(git log*)",
-      "Bash(git status*)",
-      "Bash(git pull*)"
+      "Read",
+      "Edit",
+      "Glob",
+      "Grep",
+      "Bash(ls:*)",
+      "Bash(dir:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(.venv/Scripts/python -m pytest:*)",
+      "Bash(.venv/Scripts/python -c:*)"
     ]
   }
 }

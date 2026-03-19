@@ -40,7 +40,7 @@
 
 **Validated at scale:** 220M rows, DuckDB local execution, sub-second import.
 
-**Test suite:** 534 automated tests (+ 3 xfail), all passing, runs under 10 seconds.
+**Test suite:** 557 automated tests (+ 3 xfail), all passing, runs under 10 seconds.
 Pre-commit and pre-push git hooks enforce green suite on every commit and push.
 
 ---
@@ -211,9 +211,13 @@ events. Exports on shutdown. 3 new endpoints: /api/session, /api/session/export,
 **Build estimate:** Small-medium. Most data already flows through AW — work is
 capturing it systematically and writing to a structured log format.
 
-### Component 3a — Session File (Reproducible Session + Test Harness)
+### Component 3a — Session File (Reproducible Session + Test Harness) — AUTOMATIC MODE COMPLETE (v1.6.0)
 Machine-executable version of the Session Log. Every step recorded as a replayable
 instruction sequence. Inspired by session file pattern from prior enterprise software.
+**Status:** Automatic replay mode built. SessionReplayEngine replays query_run,
+reference_load, reference_delete events. Schema mismatch detection, baseline
+annotation, stop-on-failure. 3 new endpoints. 23 tests. Interactive and Tutorial
+modes pending (need frontend UI).
 
 **Two modes of use:**
 
@@ -452,6 +456,18 @@ without your data ever leaving your machine."
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-19] [BD] — Session Log validated end-to-end: session JSON confirmed capturing
+  session_start, dataset_import, insights_generated, query_run, reference_load, export
+  events with SQL, row counts, elapsed times, user, machine, AI mode. All correct.
+  Session File replay engine not yet built — no UI. Next build item.
+[2026-03-19] [CODE] — Session File replay engine (M5 Component 3a) built: automatic replay mode,
+  schema mismatch detection, baseline annotation. Replays query_run, reference_load,
+  reference_delete events. 3 new endpoints (/api/session/files, replay, annotate).
+  Bug #10 real fix (auto-detect reference tables). Bug #11 fix (AI percentile prompt).
+  Permissions configured. 557 tests. v1.6.0.
+[2026-03-19] [BD] — usp_guard_categories JOIN validated: 8 matches on Part B dataset.
+  Categories correct. Reference table must be manually loaded each session — auto-load
+  on startup is a UX improvement to spec.
 [2026-03-19] [CODE] — Bug #10 real fix: backend auto-detects reference tables from REFERENCES_DIR
   when frontend doesn't pass reference name (e.g. after restart). Bug #11: AI percentile prompt
   fixed. Session Log built (M5 Component 3): 14 event types, 14 endpoints instrumented, 3 new
@@ -553,6 +569,21 @@ without your data ever leaving your machine."
 - Draft proposal and contract template skeleton
 
 **Product / code (Claude Code):**
+- ~~Session File (Component 3a) — automatic replay mode~~ COMPLETE v1.6.0
+- Session File remaining work:
+  - Interactive replay mode (needs frontend step-through UI)
+  - Tutorial replay mode (needs frontend + AI narration)
+  - Record Compass Part D analysis as Tutorial #1 and first end-to-end test session
+  - Define three standard tutorial session files (core query, reference JOIN, export)
+- Build Session Library (Component 3b) — in-app browsable Example Cases library
+  - "Example Cases" button in sidebar below Saved Queries
+  - Library browser UI inside AW
+  - Package sample data with initial sessions
+  - v1 library: 4 sessions (Medicare spending, IRA exclusion, concentration, export)
+  - Every Example Case automatically included in end-to-end test suite
+- UX improvement: auto-load previously active reference tables on session start
+  (currently requires manual load each session)
+- Build AI Mode Switch (Component 2 addition) — session-level Local/Cloud toggle
 - Build additional Reference Table Library files (MFN deal status, biosimilar tracker)
 - Spot-check usp_globe_categories, usp_guard_categories, orphan_drug_status CSVs
   against FDA OOPD and USP MMG before adding to production library
@@ -560,23 +591,11 @@ without your data ever leaving your machine."
 - Spec Human-in-the-Loop Classification Workflow
 - Spec Analysis Summary Artifact
 - ~~Build Session Log (Component 3) — append-only record of session activity~~ COMPLETE v1.5.6
-- Build Session File (Component 3a) — machine-executable replay + end-to-end test suite
-  - Automatic replay mode (end-to-end / workflow testing)
-  - Interactive replay mode (analyst step-through)
-  - Tutorial replay mode (narrated, step-by-step learning)
-  - Schema mismatch detection and handling
-  - Record Compass Part D analysis as Tutorial #1 and first end-to-end test session
-  - Define three standard tutorial session files (core query, reference JOIN, export)
-- Build Session Library (Component 3b) — in-app browsable library of session files
-  - Library browser UI inside AW
-  - Package sample data with initial sessions
-  - v1 library: 4 sessions (Medicare spending, IRA exclusion, concentration, export)
-- Build AI Mode Switch (Component 2 addition) — session-level Local/Cloud toggle
-- Spec Milestone 5 Local AI Mode (Ollama) — provider_ollama.py
-- Spec Milestone 5 In-App Analyst Chat
 - ~~Fix Bug #8 (case mismatch in Reference Library JOIN)~~ COMPLETE v1.5.1
 - ~~Add regression test for Bug #7 (Reference Library DuckDB registration)~~ COMPLETE v1.5.1
 - Fix Bug #6 (Windows file lock on Refresh Datasets)
+- Spec Milestone 5 Local AI Mode (Ollama) — provider_ollama.py
+- Spec Milestone 5 In-App Analyst Chat
 
 ---
 

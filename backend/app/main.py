@@ -4022,6 +4022,46 @@ def api_session_summary():
     return session_summary()
 
 
+# ---------------------------------------------------------------------------
+# Session replay endpoints
+# ---------------------------------------------------------------------------
+
+class ReplayRequest(BaseModel):
+    filename: str
+    stop_on_failure: bool = False
+
+
+class AnnotateRequest(BaseModel):
+    filename: str
+
+
+@app.get("/api/session/files")
+def api_session_files():
+    """List available session files for replay."""
+    from app.services.session_replay import SessionReplayEngine
+    engine = SessionReplayEngine(DATASETS_DIR, REFERENCES_DIR, REFERENCE_LIBRARY_DIR, SESSIONS_DIR)
+    return {"files": engine.list_session_files()}
+
+
+@app.post("/api/session/replay")
+def api_session_replay(req: ReplayRequest):
+    """Replay a session file and return the replay report."""
+    from app.services.session_replay import SessionReplayEngine
+    engine = SessionReplayEngine(DATASETS_DIR, REFERENCES_DIR, REFERENCE_LIBRARY_DIR, SESSIONS_DIR)
+    report = engine.replay(req.filename, stop_on_failure=req.stop_on_failure)
+    from dataclasses import asdict
+    return asdict(report)
+
+
+@app.post("/api/session/annotate")
+def api_session_annotate(req: AnnotateRequest):
+    """Run a session and record actual row counts as baselines."""
+    from app.services.session_replay import SessionReplayEngine
+    engine = SessionReplayEngine(DATASETS_DIR, REFERENCES_DIR, REFERENCE_LIBRARY_DIR, SESSIONS_DIR)
+    result = engine.annotate_baselines(req.filename)
+    return {"status": "annotated", "baselines_added": len(result.get("baselines", []))}
+
+
 @app.post("/api/shutdown")
 def api_shutdown(bg: BackgroundTasks):
     """

@@ -658,6 +658,9 @@ POST /api/reference_library/{name}/load  (load library CSV as reference) [MILEST
 GET  /api/session                        (current session log) [MILESTONE 5]
 GET  /api/session/export                 (export session to disk + return) [MILESTONE 5]
 GET  /api/session/summary                (session event counts + duration) [MILESTONE 5]
+GET  /api/session/files                  (list session files for replay) [MILESTONE 5]
+POST /api/session/replay                 (replay a session file) [MILESTONE 5]
+POST /api/session/annotate               (annotate session with baselines) [MILESTONE 5]
 POST /api/shutdown
 ```
 
