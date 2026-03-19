@@ -171,3 +171,60 @@ def test_where_clause_preserved_with_reference_join():
     result = _rewrite_sql_dataset_reference(sql, "mydata", PARQUET, REF_PARQUET)
     assert "WHERE d.spending > 1000000" in result
     assert "ORDER BY d.spending DESC" in result
+
+
+# ===========================================================================
+# REFERENCE BY ACTUAL NAME (Bug #7 fix)
+# ===========================================================================
+
+def test_join_reference_by_actual_name():
+    """User writes JOIN ira_negotiated_drugs instead of JOIN reference."""
+    sql = (
+        "SELECT d.* FROM dataset d "
+        "LEFT JOIN ira_negotiated_drugs r ON d.drug = r.drug_name"
+    )
+    result = _rewrite_sql_dataset_reference(
+        sql, "mydata", PARQUET, REF_PARQUET, reference_name="ira_negotiated_drugs"
+    )
+    assert PARQUET in result
+    assert REF_PARQUET in result
+    assert "ira_negotiated_drugs" not in result
+
+
+def test_from_reference_by_actual_name():
+    """User writes FROM <ref_name> instead of FROM reference."""
+    sql = "SELECT * FROM dataset d JOIN ira_drugs r ON d.drug = r.drug"
+    result = _rewrite_sql_dataset_reference(
+        sql, "mydata", PARQUET, REF_PARQUET, reference_name="ira_drugs"
+    )
+    assert REF_PARQUET in result
+
+
+def test_actual_name_and_keyword_both_work():
+    """Both 'reference' and the actual name should rewrite correctly."""
+    sql1 = "SELECT * FROM dataset JOIN reference ON 1=1"
+    sql2 = "SELECT * FROM dataset JOIN my_ref ON 1=1"
+
+    r1 = _rewrite_sql_dataset_reference(sql1, "ds", PARQUET, REF_PARQUET, reference_name="my_ref")
+    r2 = _rewrite_sql_dataset_reference(sql2, "ds", PARQUET, REF_PARQUET, reference_name="my_ref")
+
+    assert REF_PARQUET in r1
+    assert REF_PARQUET in r2
+
+
+def test_actual_name_without_reference_loaded_raises_400():
+    """Using the reference name in SQL without loading a reference should error."""
+    sql = "SELECT * FROM dataset JOIN ira_drugs ON 1=1"
+    with pytest.raises(HTTPException) as exc_info:
+        _rewrite_sql_dataset_reference(
+            sql, "mydata", PARQUET, reference_parquet_sql=None, reference_name="ira_drugs"
+        )
+    assert exc_info.value.status_code == 400
+
+
+def test_actual_name_case_insensitive():
+    sql = "SELECT * FROM dataset JOIN IRA_NEGOTIATED_DRUGS ON 1=1"
+    result = _rewrite_sql_dataset_reference(
+        sql, "mydata", PARQUET, REF_PARQUET, reference_name="ira_negotiated_drugs"
+    )
+    assert REF_PARQUET in result

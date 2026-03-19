@@ -1041,6 +1041,7 @@ def _rewrite_sql_dataset_reference(
     dataset_name: str,
     parquet_sql: str,
     reference_parquet_sql: str | None = None,
+    reference_name: str | None = None,
 ) -> str:
     """
     Rewrite logical dataset references to read_parquet(...).
@@ -1109,23 +1110,33 @@ def _rewrite_sql_dataset_reference(
             ),
         )
 
-    # Rewrite reference table if loaded and SQL uses it
-    ref_pattern = re.compile(
-        r'(?i)\b(from|join)\s+(")?reference(")?\b'
-    )
-    if ref_pattern.search(rewritten):
-        if not reference_parquet_sql:
-            raise HTTPException(
-                status_code=400,
-                detail=(
-                    "SQL references a 'reference' table, but no reference "
-                    "table is loaded. Import a reference table first."
-                ),
-            )
-        rewritten = ref_pattern.sub(
-            lambda m: f"{m.group(1)} {reference_parquet_sql}",
-            rewritten,
+    # Rewrite reference table if loaded and SQL uses it.
+    # Match both the literal "reference" keyword AND the actual reference
+    # table name (e.g. "ira_negotiated_drugs") — same backward-compat
+    # pattern as the primary dataset.
+    ref_identifiers = ["reference"]
+    if reference_name and reference_name != "reference":
+        ref_identifiers.append(reference_name)
+
+    ref_found = False
+    for ref_ident in ref_identifiers:
+        ref_pattern = re.compile(
+            rf'(?i)\b(from|join)\s+(")?{re.escape(ref_ident)}(")?\b'
         )
+        if ref_pattern.search(rewritten):
+            ref_found = True
+            if not reference_parquet_sql:
+                raise HTTPException(
+                    status_code=400,
+                    detail=(
+                        f"SQL references '{ref_ident}' table, but no reference "
+                        "table is loaded. Import a reference table first."
+                    ),
+                )
+            rewritten = ref_pattern.sub(
+                lambda m: f"{m.group(1)} {reference_parquet_sql}",
+                rewritten,
+            )
 
     return rewritten
 
@@ -2546,6 +2557,7 @@ def api_sql(req: SqlRequest):
             dataset_name=req.dataset,
             parquet_sql=parquet_sql,
             reference_parquet_sql=reference_parquet_sql,
+            reference_name=req.reference,
         )
 
         # ----------------------------------------------------
@@ -2747,6 +2759,7 @@ def api_sql_export(req: SqlExportRequest):
             dataset_name=req.dataset,
             parquet_sql=parquet_sql,
             reference_parquet_sql=reference_parquet_sql,
+            reference_name=req.reference,
         )
 
         # ----------------------------------------------------
