@@ -473,6 +473,7 @@ class ResultPassportRequest(BaseModel):
     columns: list[str]
     rows: list[dict]
     sql: str = ""
+    total_rowcount: int | None = None  # full result count (not display-capped)
 
 
 # ============================================================
@@ -3267,7 +3268,10 @@ def result_passport(req: ResultPassportRequest):
     columns = req.columns
     rows = req.rows
     sql = req.sql
-    row_count = len(rows)
+    # Use the full result count if provided, not the display-capped row count.
+    # AW caps display at 200 rows but the full query may return thousands.
+    sampled_rows = len(rows)
+    row_count = req.total_rowcount if req.total_rowcount is not None else sampled_rows
 
     if not columns or not rows:
         raise HTTPException(status_code=400, detail="No result data to profile.")
@@ -3338,7 +3342,7 @@ def result_passport(req: ResultPassportRequest):
             except (ValueError, TypeError):
                 pass
 
-    return {
+    result = {
         "row_count": row_count,
         "column_count": len(columns),
         "columns": columns,
@@ -3346,6 +3350,16 @@ def result_passport(req: ResultPassportRequest):
         "data_quality_flags": quality_flags,
         "grain_hint": sql,
     }
+
+    # Note when stats are computed from a display-capped sample
+    if row_count > sampled_rows:
+        result["note"] = (
+            f"Statistics computed from {sampled_rows} displayed rows "
+            f"out of {row_count} total. Top values and distributions "
+            f"reflect the displayed sample, not the full result set."
+        )
+
+    return result
 
 
 # ============================================================

@@ -2641,6 +2641,7 @@ LIMIT 100</textarea>
                         columns: lastRun.columns,
                         rows: lastRun.rows,
                         sql: lastRun.sql || "",
+                        total_rowcount: lastRun.rowcount || lastRun.rows.length,
                     })
                 });
 
