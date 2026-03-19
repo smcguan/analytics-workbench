@@ -35,7 +35,8 @@
 
 **Validated at scale:** 220M rows, DuckDB local execution, sub-second import.
 
-**Test suite:** 400 automated tests, all passing, runs under 4 seconds.
+**Test suite:** 508 automated tests (+ 3 xfail), all passing, runs under 8 seconds.
+Pre-commit and pre-push git hooks enforce green suite on every commit and push.
 
 ---
 
@@ -245,6 +246,10 @@ without your data ever leaving your machine."
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-18] [CODE] — Commercial test hardening: 108 new tests across 5 files (import pipeline,
+  context builder, AI parsers, reference JOIN integration, export correctness, audit log, profile
+  depth, scan/register, robustness). Pre-commit + pre-push hooks added. 3 xfail findings:
+  strip_trailing_chars broken on pandas>=2.0, AI consent not enforced server-side. 508 tests. v1.5.4.
 [2026-03-18] [CODE] — Diagnosed Reference Library file-not-showing bug: packaged build reads from
   dist/data/reference_library/, not source data/. Synced files to dist. No code change needed. 400 tests. v1.5.3.
 [2026-03-18] [CODE] — Reference Library auto-discover: CSVs dropped into library dir appear
