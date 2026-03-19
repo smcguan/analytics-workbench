@@ -7,5 +7,14 @@
     "row_count": 35,
     "version": "2026-03",
     "join_hint": "JOIN reference ON dataset.Brnd_Name LIKE reference.drug_name || '%'"
+  },
+  {
+    "filename": "globe_exclusions.csv",
+    "name": "GLOBE Model Exclusions",
+    "description": "Drugs excluded from the CMS GLOBE payment model. Covers IRA-negotiated drugs, biosimilars, reference biologics with active biosimilars, generics, and non-GLOBE category drugs.",
+    "columns": ["HCPCS_Cd", "Drug_Name", "Exclusion_Reason"],
+    "row_count": 25,
+    "version": "2026-03",
+    "join_hint": "JOIN reference ON dataset.HCPCS_Cd = reference.HCPCS_Cd"
   }
 ]

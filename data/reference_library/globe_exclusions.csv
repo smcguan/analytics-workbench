@@ -1,0 +1,26 @@
+HCPCS_Cd,Drug_Name,Exclusion_Reason
+J1817,Fiasp,IRA Round 1
+J0178,Eylea,IRA Round 2
+J9271,Keytruda,IRA Round 2
+J9299,Opdivo,IRA Round 2
+J9309,Polivy,IRA Round 2
+Q5107,Mvasi,Biosimilar
+Q5115,Truxima,Biosimilar
+Q5118,Zirabev,Biosimilar
+Q5119,Ruxience,Biosimilar
+Q5128,Cimerli,Biosimilar
+J9035,Avastin,Reference biologic with active biosimilar
+J9312,Rituxan,Reference biologic with active biosimilar
+J2778,Lucentis,Reference biologic with active biosimilar
+J9355,Herceptin,Reference biologic with active biosimilar
+J2506,Neulasta,Reference biologic with active biosimilar
+J1745,Infliximab,Reference biologic with active biosimilar
+J3262,Actemra,Reference biologic with active biosimilar
+J9264,Abraxane,Generic available
+J9217,Eligard,Generic available
+J0897,Prolia,Reference biologic with active biosimilar
+J1306,Leqvio,Non-GLOBE category
+J2785,Lexiscan,Non-GLOBE category
+J3285,Remodulin,Non-GLOBE category
+J7677,Yupelri,Non-GLOBE category
+J7686,Tyvaso,Non-GLOBE category

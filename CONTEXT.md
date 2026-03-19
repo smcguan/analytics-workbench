@@ -35,7 +35,7 @@
 
 **Validated at scale:** 220M rows, DuckDB local execution, sub-second import.
 
-**Test suite:** 389 automated tests, all passing, runs under 3 seconds.
+**Test suite:** 400 automated tests, all passing, runs under 4 seconds.
 
 ---
 
@@ -245,8 +245,14 @@ without your data ever leaving your machine."
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-18] [CODE] — Reference Library auto-discover: CSVs dropped into library dir appear
+  without manifest editing. GLOBE exclusions + 4 new library CSVs added. Pattern classifier
+  specced. 400 tests. v1.5.2.
 [2026-03-18] [CODE] — Bug #8 fix: reference table string columns title-cased on import.
   3 new tests (Bug #7 regression + Bug #8 unit + end-to-end JOIN). 397 tests. v1.5.1.
+[2026-03-18] [BD] — Healthcare meeting materials built: 8-slide deck, one-page leave-behind,
+  full talking points with demo script. Privacy/air-gap angle. Tier 3 audience (VP + new analyst).
+  Compass CMS analysis used as proof of concept throughout.
 [2026-03-18] [BD] — Reference Library end-to-end validation: Bug #7 (DuckDB registration)
   found and fixed. Case mismatch (Bug #8) identified — LOWER() workaround confirmed working.
   IRA JOIN against Part D dataset fully validated: 3,549 non-IRA drugs, clean grain.
@@ -289,7 +295,7 @@ without your data ever leaving your machine."
 ## NEXT ACTIONS
 
 **Business development (Claude.ai):**
-- Build healthcare meeting prep materials (three-tier privacy story + Compass demo)
+- ~~Build healthcare meeting prep materials (three-tier privacy story + Compass demo)~~ COMPLETE
 - Apply orphan drug + MFN flags to GUARD Part D candidate list
 - Await Farragut confirmation on flagged items
 - Draft one-pager for Tier 1 consultant outreach
@@ -303,9 +309,8 @@ without your data ever leaving your machine."
 - Spec Analysis Summary Artifact
 - Spec Milestone 5 Local AI Mode (Ollama)
 - Spec Milestone 5 In-App Analyst Chat
-- Fix Bug #8 (case mismatch in Reference Library JOIN) — normalize IRA table names
-  to title case at registration time, or apply LOWER() automatically in JOIN logic
-- Add regression test for Bug #7 (Reference Library DuckDB registration)
+- ~~Fix Bug #8 (case mismatch in Reference Library JOIN)~~ COMPLETE v1.5.1
+- ~~Add regression test for Bug #7 (Reference Library DuckDB registration)~~ COMPLETE v1.5.1
 - Fix Bug #6 (Windows file lock on Refresh Datasets)
 
 ---

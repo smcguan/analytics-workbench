@@ -1,0 +1,16 @@
+HCPCS_Cd,Drug_Name,Exclusion_Reason
+90662,Fluzone High-Dose,Vaccine
+90677,Prevnar 20,Vaccine
+90694,Fluad Quad,Vaccine
+91320,Comirnaty,Vaccine
+91322,Spikevax,Vaccine
+Q4205,Membrane graft,Non-drug
+Q4217,Woundfix,Non-drug
+Q4236,Carepatch,Non-drug
+Q4253,Zenith amniotic membrane,Non-drug
+Q4262,Dual layer impax membrane,Non-drug
+J1306,Leqvio,Non-GLOBE category
+J2785,Lexiscan,Non-GLOBE category
+J3285,Remodulin,Non-GLOBE category
+J7677,Yupelri,Non-GLOBE category
+J7686,Tyvaso,Non-GLOBE category

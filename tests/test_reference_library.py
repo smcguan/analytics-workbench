@@ -108,6 +108,55 @@ def test_list_library_empty_when_no_manifest(tmp_path):
         main_module.REFERENCE_LIBRARY_DIR = original
 
 
+def test_auto_discover_csv_without_manifest(tmp_path):
+    """CSVs in library dir should appear even without a _library.json entry."""
+    original = main_module.REFERENCE_LIBRARY_DIR
+    lib_dir = tmp_path / "auto_lib"
+    lib_dir.mkdir()
+
+    # Create a CSV with no manifest entry
+    csv_path = lib_dir / "orphan_drugs.csv"
+    csv_path.write_text("drug_name,designation_date\nKeytruda,2017-05-23\nOpdivo,2014-12-22\n")
+
+    main_module.REFERENCE_LIBRARY_DIR = lib_dir
+    try:
+        with TestClient(main_module.app) as c:
+            resp = c.get("/api/reference_library")
+            items = resp.json()["library"]
+            assert len(items) == 1
+            assert items[0]["filename"] == "orphan_drugs.csv"
+            assert items[0]["columns"] == ["drug_name", "designation_date"]
+            assert items[0]["row_count"] == 2
+            assert items[0]["name"] == "Orphan Drugs"
+    finally:
+        main_module.REFERENCE_LIBRARY_DIR = original
+
+
+def test_auto_discover_merges_with_manifest(lib_tmp):
+    """Auto-discovered CSVs should appear alongside manifest entries."""
+    # lib_tmp already has test_drugs.csv in manifest
+    # Add a new CSV without a manifest entry
+    (lib_tmp / "extra_table.csv").write_text("code,label\nA,Alpha\nB,Beta\n")
+
+    with TestClient(main_module.app) as c:
+        resp = c.get("/api/reference_library")
+        items = resp.json()["library"]
+        filenames = [i["filename"] for i in items]
+        assert "test_drugs.csv" in filenames, "Manifest entry should still be present"
+        assert "extra_table.csv" in filenames, "Auto-discovered CSV should appear"
+        # Manifest entry should keep its curated metadata
+        manifest_item = next(i for i in items if i["filename"] == "test_drugs.csv")
+        assert manifest_item["name"] == "Test Drug List"
+
+
+def test_auto_discover_does_not_duplicate_manifest_entries(lib_tmp):
+    """CSVs already in the manifest should not appear twice."""
+    with TestClient(main_module.app) as c:
+        resp = c.get("/api/reference_library")
+        filenames = [i["filename"] for i in resp.json()["library"]]
+        assert filenames.count("test_drugs.csv") == 1
+
+
 # ===========================================================================
 # POST /api/reference_library/{filename}/load
 # ===========================================================================

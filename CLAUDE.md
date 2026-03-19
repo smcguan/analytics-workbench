@@ -525,12 +525,17 @@ when DuckDB has the Parquet file open.
    First file: ira_negotiated_drugs.csv (35 drugs, IRA Rounds 1-3). Frontend popover UI.
 
 ### Reference Table Library — Implementation Details
-- Storage: data/reference_library/ with _library.json manifest
+- Storage: data/reference_library/ with optional _library.json manifest
+- Auto-discover: any CSV in the library dir appears automatically without a manifest entry.
+  The endpoint reads headers and counts rows on the fly. _library.json adds curated
+  metadata (description, join_hint) but is not required.
 - Manifest fields: filename, name, description, columns, row_count, version, join_hint
-- GET /api/reference_library — returns manifest
+- GET /api/reference_library — returns manifest + auto-discovered CSVs merged
 - POST /api/reference_library/{filename}/load — imports library CSV as active reference
 - Frontend: "Reference Library" button with popover in sidebar
-- Additional library files planned: FDA orphan drugs, biosimilar tracker, USP categories
+- Current library files: ira_negotiated_drugs.csv, globe_exclusions.csv,
+  guard_ira_exclusions.csv, ira_exclusions.csv, multisource_exclusions.csv,
+  nonglobe_exclusions.csv
 
 ### Reference Table Library — Roadmap and Update Cadence
 Planned files (priority order):

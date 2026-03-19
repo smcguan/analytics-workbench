@@ -3539,20 +3539,52 @@ def delete_reference_table(name: str):
 @app.get("/api/reference_library")
 def list_reference_library():
     """
-    List pre-built reference CSV files available in the library.
+    List reference CSV files available in the library.
 
-    Returns metadata from _library.json manifest including name,
-    description, column list, and join hints.
+    Merges _library.json manifest entries with auto-discovered CSVs.
+    Any CSV in the library directory that is not in the manifest is
+    auto-registered by reading its headers and counting rows.  This
+    lets users drop a CSV into the folder and have it appear in the
+    UI without editing _library.json.
     """
+    if not REFERENCE_LIBRARY_DIR.exists():
+        return {"library": []}
+
+    # Load manifest entries (keyed by filename for merge)
     manifest_path = REFERENCE_LIBRARY_DIR / "_library.json"
-    if not manifest_path.exists():
-        return {"library": []}
-    try:
-        items = json.loads(manifest_path.read_text(encoding="utf-8"))
-        return {"library": items}
-    except Exception as exc:
-        logger.warning("Failed to read reference library manifest: %s", exc)
-        return {"library": []}
+    manifest_items: list[dict] = []
+    manifest_filenames: set[str] = set()
+    if manifest_path.exists():
+        try:
+            manifest_items = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest_filenames = {item["filename"] for item in manifest_items}
+        except Exception as exc:
+            logger.warning("Failed to read reference library manifest: %s", exc)
+
+    # Auto-discover CSVs not in manifest
+    for csv_path in sorted(REFERENCE_LIBRARY_DIR.glob("*.csv")):
+        if csv_path.name in manifest_filenames:
+            continue
+        try:
+            import csv as csv_mod
+            with open(csv_path, encoding="utf-8", newline="") as f:
+                reader = csv_mod.reader(f)
+                headers = next(reader, [])
+                row_count = sum(1 for _ in reader)
+            display_name = csv_path.stem.replace("_", " ").replace("-", " ").title()
+            manifest_items.append({
+                "filename": csv_path.name,
+                "name": display_name,
+                "description": f"Auto-discovered reference table ({row_count} rows)",
+                "columns": headers,
+                "row_count": row_count,
+                "version": "auto",
+                "join_hint": "",
+            })
+        except Exception as exc:
+            logger.warning("Failed to auto-discover library CSV %s: %s", csv_path.name, exc)
+
+    return {"library": manifest_items}
 
 
 @app.post("/api/reference_library/{filename}/load")
