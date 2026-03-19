@@ -143,6 +143,7 @@ def validate_sql_with_duckdb(
     sql: str,
     dataset_name: str,
     dataset_source_path_fn,
+    reference_parquet_path: str | None = None,
 ) -> tuple[bool, str]:
     """
     Validate AI-generated SQL using DuckDB EXPLAIN.
@@ -154,6 +155,11 @@ def validate_sql_with_duckdb(
 
     The function creates a temporary view named "dataset"
     backed by the Parquet file, then runs EXPLAIN on the SQL.
+
+    If a reference table is loaded, a "reference" view is also
+    created so that JOIN reference queries pass validation.
+    Without this, EXPLAIN fails with "Catalog Error: Table
+    reference does not exist" (Bug #10).
     """
 
     try:
@@ -186,6 +192,25 @@ def validate_sql_with_duckdb(
                 f"CREATE TEMP VIEW dataset AS "
                 f"SELECT * FROM read_parquet('{esc}')"
             )
+
+            # ------------------------------------------------
+            # STEP 3b — Create "reference" view if loaded
+            # ------------------------------------------------
+            # The AI prompt tells the model to JOIN using:
+            #
+            #     JOIN reference ON ...
+            #
+            # Without this view, EXPLAIN fails with a catalog
+            # error when the AI generates a JOIN query against
+            # a loaded reference table.
+            #
+            if reference_parquet_path:
+                ref_esc = _sql_escape_path(reference_parquet_path)
+                con.execute("DROP VIEW IF EXISTS reference")
+                con.execute(
+                    f"CREATE TEMP VIEW reference AS "
+                    f"SELECT * FROM read_parquet('{ref_esc}')"
+                )
 
             # ------------------------------------------------
             # STEP 4 — Validate query using EXPLAIN

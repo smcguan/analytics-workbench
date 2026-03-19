@@ -361,3 +361,85 @@ def test_case_insensitive_join_after_library_load(lib_tmp, tmp_path):
             )
     finally:
         main_module.DATASETS_DIR = original_ds
+
+
+# ===========================================================================
+# Bug #10 regression — DuckDB EXPLAIN validation with reference tables
+# ===========================================================================
+
+def test_duckdb_explain_validates_reference_table(lib_tmp, tmp_path):
+    """
+    Bug #10 regression: validate_sql_with_duckdb must create a 'reference'
+    view when a reference table is loaded, so that AI-generated SQL with
+    JOIN reference passes EXPLAIN validation.
+
+    Previously, only a 'dataset' view was created. Any AI SQL containing
+    JOIN reference failed with 'Catalog Error: Table reference does not exist',
+    causing the generate_sql endpoint to return status=error.
+    """
+    from app.ai.sql_validator import validate_sql_with_duckdb
+    import app.main as main_module
+    from fastapi.testclient import TestClient
+
+    # Set up dataset
+    ds_dir = tmp_path / "datasets"
+    ds_dir.mkdir()
+    test_ds = ds_dir / "test_data"
+    test_ds.mkdir()
+    df = pd.DataFrame({"drug": ["Eliquis", "Keytruda", "Unknown"], "spend": [100, 200, 50]})
+    df.to_parquet(str(test_ds / "source.parquet"), index=False)
+    (test_ds / "_meta.json").write_text(
+        json.dumps({"row_count": 3, "column_count": 2}), encoding="utf-8"
+    )
+    original_ds = main_module.DATASETS_DIR
+    main_module.DATASETS_DIR = ds_dir
+
+    try:
+        with TestClient(main_module.app) as c:
+            # Load a library reference
+            resp = c.post("/api/reference_library/test_drugs.csv/load")
+            assert resp.status_code == 200
+            ref_name = resp.json()["reference"]
+
+            # Resolve the reference parquet path
+            ref_pq = str(
+                (main_module.REFERENCES_DIR / ref_name / "source.parquet").resolve()
+            )
+            ds_pq = str((test_ds / "source.parquet").resolve())
+
+            def mock_source_path(name):
+                return ds_pq, False
+
+            # SQL with JOIN reference — should pass EXPLAIN when ref path provided
+            sql = (
+                "SELECT d.drug, r.round "
+                "FROM dataset d "
+                "JOIN reference r ON d.drug = r.drug"
+            )
+
+            # Without reference path — should FAIL (the original bug)
+            ok_no_ref, msg_no_ref = validate_sql_with_duckdb(
+                sql=sql,
+                dataset_name="test_data",
+                dataset_source_path_fn=mock_source_path,
+                reference_parquet_path=None,
+            )
+            assert not ok_no_ref, (
+                "EXPLAIN should fail without reference view"
+            )
+            assert "reference" in msg_no_ref.lower(), (
+                f"Error should mention 'reference' table: {msg_no_ref}"
+            )
+
+            # With reference path — should PASS (the fix)
+            ok_with_ref, msg_with_ref = validate_sql_with_duckdb(
+                sql=sql,
+                dataset_name="test_data",
+                dataset_source_path_fn=mock_source_path,
+                reference_parquet_path=ref_pq,
+            )
+            assert ok_with_ref, (
+                f"EXPLAIN should pass with reference view: {msg_with_ref}"
+            )
+    finally:
+        main_module.DATASETS_DIR = original_ds

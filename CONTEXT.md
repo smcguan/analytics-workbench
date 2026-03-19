@@ -35,7 +35,7 @@
 
 **Validated at scale:** 220M rows, DuckDB local execution, sub-second import.
 
-**Test suite:** 508 automated tests (+ 3 xfail), all passing, runs under 8 seconds.
+**Test suite:** 523 automated tests (+ 3 xfail), all passing, runs under 10 seconds.
 Pre-commit and pre-push git hooks enforce green suite on every commit and push.
 
 ---
@@ -164,12 +164,213 @@ exploratory, hypothesis-generating cards over descriptive summary cards.
 ## MILESTONE 5 — PRIVACY ARCHITECTURE (PLANNED)
 
 ### Component 1 — Result Passport (M4 — COMPLETE)
+
 ### Component 2 — Local AI Mode via Ollama
 True air-gap for Tier 3 customers. **Build estimate:** 1-2 weeks.
-### Component 3 — In-App Analyst Chat
+
+**AI Mode Switch — session-level design (decided March 2026):**
+- Mode is selected once at session start (or first import). Cannot be toggled mid-session.
+- Two modes: Local (Ollama) and Cloud (OpenAI/Claude API)
+- Mode is displayed persistently in UI so analyst always knows which is active
+- Mode declaration is written to session log and Result Passport
+- UX: prompt on session start — "Select AI Mode for this session" with plain-language
+  privacy description for each option
+- Rationale: session-level lock enables clean audit trail ("all queries in this session
+  ran in Local mode"), simplifies analyst workflow, satisfies Tier 3 compliance needs
+
+**Provider architecture:** Current `provider_openai.py` is the cloud backend.
+Add `provider_ollama.py` with same interface. Mode switch toggles active provider.
+
+### Component 3 — Session Log — COMPLETE (v1.5.6)
+Persistent, append-only record of everything that happened in an AW session.
+**Status:** Built and wired in. 14 endpoints instrumented. Auto-saves every 10
+events. Exports on shutdown. 3 new endpoints: /api/session, /api/session/export,
+/api/session/summary. 15 tests. No frontend UI yet (v1.1 enhancement).
+
+**What it captures:**
+- Session start time and AI mode selected
+- Each dataset imported (name, rows, columns, timestamp)
+- Each reference table loaded
+- Each query run (SQL, row count returned, timestamp)
+- Each export or passport generated
+- Session end time
+
+**Design principles:**
+- Append-only during session — no editing
+- Exported automatically at session end (or on demand)
+- Feeds into Analysis Summary Artifact (auto-generated memo from session activity)
+- Feeds into Session File (machine-executable replay — see below)
+- Complements Result Passport (per-query) and Export Passport (per-dataset)
+- Together these three form the complete analytical audit trail
+
+**Build estimate:** Small-medium. Most data already flows through AW — work is
+capturing it systematically and writing to a structured log format.
+
+### Component 3a — Session File (Reproducible Session + Test Harness)
+Machine-executable version of the Session Log. Every step recorded as a replayable
+instruction sequence. Inspired by session file pattern from prior enterprise software.
+
+**Two modes of use:**
+
+**1. Reproducible analysis**
+- Record a complete analysis session, verify results are correct, save as session file
+- Replay against same or updated data to reproduce results exactly
+- "Show me how you got this number" → run the session file
+- Recurring analyses (monthly reports, quarterly updates) become one-click replays
+- Send a colleague the session file — they run it locally and get the same analysis
+- For Tier 3: replay in front of regulators to demonstrate methodology
+
+**2. End-to-end test suite (workflow testing)**
+- Known-good sessions become end-to-end tests for the software itself
+- Distinct from unit tests (508, test individual functions) — session file tests
+  exercise the complete analytical workflow as a real analyst would run it
+- Three levels of testing, each catching different problems:
+  - Unit tests → a function returning the wrong value
+  - Integration tests → two components not connecting correctly
+  - End-to-end / workflow tests → the full workflow producing the wrong result
+- You can have all unit tests passing and still have a broken end-to-end workflow —
+  session file tests fill that gap
+- After every new feature or bug fix, replay recorded sessions and confirm outputs match
+- The Compass Part D analysis is the natural first end-to-end test:
+  import → IRA exclusion JOIN → 3,549 non-IRA drugs → correct top spenders
+- New features get tested by adding a step to an existing session file and replaying
+- Proven pattern from prior company: run full session library on every commit
+
+**Replay modes:**
+- **Automatic** — run all steps in sequence, confirm outputs match expected values.
+  Best for end-to-end testing and recurring analyses where inputs are stable.
+- **Interactive** — step through one at a time, analyst confirms each step before
+  proceeding. Best for first-time replay or when upstream data has changed.
+- **Tutorial** — step through with narration. Each step pauses, explains what is
+  about to happen, executes, then explains what just happened and why. Analyst
+  follows along and learns the workflow by doing on real data, not toy examples.
+
+**Tutorial Mode details:**
+- Narration is AI-generated from session context (what the query does, why this
+  step matters in the analysis) with optional analyst annotations added at record time
+- The Compass Part D analysis becomes Tutorial #1 — "Analyzing Medicare drug spending
+  data end-to-end." New users run it and learn the full workflow on a validated example
+- Each major AW capability gets a dedicated tutorial session file:
+  - Tutorial 1: Core query workflow (import, insights, natural language query)
+  - Tutorial 2: Reference Table JOIN (IRA exclusion, drug classification)
+  - Tutorial 3: Export and Passport generation (audit trail, reproducible output)
+- Onboarding use: new analyst runs three tutorials in an afternoon, is productive
+- Sales use: prospect runs a tutorial on their own data during evaluation —
+  experiences the workflow firsthand rather than watching a demo
+- Tier 3 consulting engagement: tutorial session files are a standard deliverable
+
+**Tutorial content authoring:**
+- AI generates first draft narration from session context automatically
+- Analyst can annotate steps at record time to refine or add domain context
+- Annotations travel with the session file — shared with the file, not stored separately
+
+**Relationship to existing features:**
+- Session Log → human-readable record
+- Session File → machine-executable record
+- Analysis Summary Artifact → AI-generated narrative from the session
+- Together: complete analytical audit trail, reproducible, explainable, testable
+
+**Build estimate:** Medium. Core replay engine is the main lift. Interactive mode
+and end-to-end test integration add scope but build on the same foundation.
+
+### Component 3b — Session Library (Demo Mode + Learning + Test Suite)
+The Session Library is a curated collection of fully documented, replayable session
+files built into AW. This is a proven adoption accelerator — validated in prior
+enterprise software. The same session files serve three distinct purposes unified
+into one system.
+
+**The three-purpose system:**
+
+**Purpose 1 — Demo Mode (sales and evaluation)**
+- User opens AW, navigates to Demo Library from within the tool
+- Browses sessions organized by domain: healthcare policy, pharmaceutical, finance,
+  operations, consulting
+- Selects a demo that matches their problem — most prospects find one that applies
+- Runs it: steps through a complete, documented engagement on included sample data
+- Sees their problem solved before writing a single query
+- This is the fastest path from "evaluating the tool" to "I need this tool"
+- Key requirement: demos must be domain-relevant enough that a prospect sees
+  themselves in them immediately — not generic examples, real workflows
+
+**Purpose 2 — Tutorial / Learning Mode (onboarding)**
+- Same session files, same library — tutorial narration layer added
+- Every step explains what's happening, why this approach was chosen, what the
+  analyst should be thinking
+- New user learns by doing on a real workflow, not reading documentation
+- Three sessions in an afternoon → analyst is productive
+- Proven pattern: dramatically accelerates adoption vs. traditional documentation
+
+**Purpose 3 — Regression Suite (software quality)**
+- Same session files run automatically on every code change
+- Each session has recorded baseline outputs (row counts, column values, key results)
+- If any session produces a different result after a code change, the build fails
+- The demo library IS the end-to-end test suite — same artifact, three purposes
+- Every new feature gets a new or updated session file — documentation and test
+  in one step
+- Validated pattern from prior company: full library run on every commit
+
+**UI Specification (decided March 2026):**
+- "Example Cases" button in sidebar, positioned just below Saved Queries
+- Click opens a dialog showing browsable list of available cases by category
+- User selects a case — step-by-step view opens
+- Each step shows:
+  - Pre-step narration: what is about to happen
+  - Action executes live in the AW environment (query runs, data loads, JOIN fires —
+    user sees real results on screen in real time, not a video or simulation)
+  - Post-step explanation: what just happened and why this step matters
+- User controls pace — Next Step button, moves through at their own speed
+- Everything happens in the live tool — the actual AW interface responds at each step
+
+**Phase 2 — User-generated examples:**
+- "Save as Example Case" option at session end (or on demand)
+- User adds: title, category, per-step annotations
+- Saved to local library first
+- Future: submit to curated library or share with colleagues
+- This is how the library grows organically beyond the built-in cases
+- Organized by vertical/domain, not by feature
+- Each session: sample dataset included, full step sequence, narration, baseline outputs
+- v1 sessions (healthcare policy pack):
+  - "Medicare Part D Drug Spending Analysis" — the Compass workflow end-to-end
+  - "IRA Drug Exclusion with Reference Table JOIN" — policy filtering workflow
+  - "Therapeutic Category Classification" — USP mapping and CASE logic
+  - "High-Spend Concentration Analysis" — outlier identification
+  - "Export and Audit Trail Generation" — full passport workflow
+
+**Library grows through real work:**
+- Every validated client engagement is a candidate library session
+- Compass → healthcare policy pack
+- Casey's healthcare org engagement → Demo #2 in healthcare pack
+- Each vertical requires its own pack to be immediately recognizable to prospects
+- Consulting engagements produce custom sessions — billable work that also builds
+  the library
+- Maintenance contract value: new sessions released on cadence
+
+**Example Cases and the end-to-end test suite are the same thing:**
+- Every Example Case is automatically part of the end-to-end test suite
+- No separate test files to maintain — the demo library IS the test suite
+- Add a case to the library → it is immediately a test
+- Automatic replay mode runs every Example Case and confirms outputs match baseline
+- A case failing = something broke in that workflow
+- New feature added → new or updated Example Case → immediately tested
+- Demos and tests are permanently in sync — they cannot drift apart
+- Claude Code runs the full Example Case suite on every commit, alongside the
+  existing 508-test unit suite — two levels, both enforced
+
+**Schema mismatch handling (critical build requirement):**
+- Sessions recorded on one dataset may not match prospect's column names
+- Replay engine must detect mismatches gracefully before running
+- Auto-map by name similarity or prompt analyst to confirm mappings
+- A broken demo is worse than no demo — reliability is non-negotiable here
+
+**Build estimate:** Medium-large. Depends on Session File engine (Component 3a).
+Library browser UI, sample data packaging, baseline output recording, and schema
+mismatch handling are the main additions beyond the core replay engine.
+
+### Component 4 — In-App Analyst Chat
 Full collaboration loop inside AW. Result Passport as context bridge.
 **Build estimate:** 2-3 weeks. After Local AI Mode.
-### Component 4 — Reference Table Library (M4 v1 COMPLETE — M5 expansion planned)
+
+### Component 5 — Reference Table Library (M4 v1 COMPLETE — M5 expansion planned)
 Additional files: orphan drugs, biosimilar tracker, USP categories, MFN status.
 
 ---
@@ -246,6 +447,33 @@ without your data ever leaving your machine."
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-19] [CODE] — Session Log (M5 Component 3) built: service module with 14 event types,
+  singleton pattern, auto-save every 10 events, crash recovery. 14 endpoints instrumented
+  (11 main.py + 3 AI routes). 3 new endpoints (/api/session, export, summary). Shutdown
+  auto-exports full session. Claude Code permissions configured (allow/ask/deny). dontAsk
+  mode enabled. .env denied. 523 tests. v1.5.6.
+[2026-03-18] [BD] — Example Cases explicitly linked to end-to-end test suite:
+  demo library IS the test suite. Add a case = add a test. Run suite = run all demos.
+  Two-level testing: 508 unit tests + full Example Case suite, both on every commit.
+[2026-03-18] [BD] — Example Cases UI specced: sidebar button below Saved Queries,
+  dialog with browsable library, step-by-step execution in live AW environment,
+  per-step narration and explanation. Phase 2: user-generated cases saved locally.
+[2026-03-18] [BD] — Terminology clarified: Session File tests = end-to-end tests
+  (workflow tests), distinct from unit tests. Three levels: unit → integration →
+  end-to-end. Session Library = end-to-end test suite + demo library + tutorial system.
+[2026-03-18] [BD] — Session Library fully specced: three-purpose system — Demo Mode
+  (sales/evaluation), Tutorial Mode (onboarding), Regression Suite (engineering).
+  Same session files serve all three. Proven pattern from prior company. Every client
+  engagement is a library candidate. Compass = healthcare policy pack v1 session #1.
+[2026-03-18] [BD] — Tutorial Mode added to Session File spec: narrated step-by-step
+  replay for onboarding and sales demos. Three standard tutorials defined. Compass
+  analysis = Tutorial #1. AI-generated narration + analyst annotations.
+[2026-03-18] [BD] — Session File specced: machine-executable replay of session steps.
+  Dual use — reproducible analysis AND software test harness for regression testing.
+  Automatic and interactive replay modes. Compass analysis = first regression session.
+[2026-03-18] [BD] — M5 spec updated: AI Mode Switch (session-level lock, Local/Cloud)
+  and Session Log component specced. Mode selected once at session start, locked for
+  duration, written to audit trail. Session Log feeds Analysis Summary Artifact.
 [2026-03-18] [CODE] — Packaged build observability: startup log + /api/health now show all dir paths
   including reference_library_dir. BUILD_RELEASE.bat adds explicit library sync step. New
   SYNC_LIBRARY.bat for post-build CSV sync without full rebuild. 508 tests. v1.5.5.
@@ -292,6 +520,9 @@ without your data ever leaving your machine."
 
 ## OPEN DECISIONS
 
+- [ ] Session File tutorial narration — AI-generated only, or analyst-annotated first?
+- [ ] Session File replay — automatic vs interactive as default mode?
+- [ ] Session File format — JSON, SQL script, or proprietary? Needs to be readable and portable.
 - [ ] Demo build timeline — M4 complete, mechanics passed. Formal cold-start needed
       before demo, or is current validation sufficient?
 - [ ] Healthcare meeting pricing — $3k/seat or higher given compliance angle?
@@ -317,12 +548,26 @@ without your data ever leaving your machine."
 - Draft proposal and contract template skeleton
 
 **Product / code (Claude Code):**
-- Build additional Reference Table Library files (orphan drugs, biosimilar tracker,
-  USP categories, MFN deal status)
+- Build additional Reference Table Library files (MFN deal status, biosimilar tracker)
+- Spot-check usp_globe_categories, usp_guard_categories, orphan_drug_status CSVs
+  against FDA OOPD and USP MMG before adding to production library
 - Spec Generic Name Pattern Classifier
 - Spec Human-in-the-Loop Classification Workflow
 - Spec Analysis Summary Artifact
-- Spec Milestone 5 Local AI Mode (Ollama)
+- ~~Build Session Log (Component 3) — append-only record of session activity~~ COMPLETE v1.5.6
+- Build Session File (Component 3a) — machine-executable replay + end-to-end test suite
+  - Automatic replay mode (end-to-end / workflow testing)
+  - Interactive replay mode (analyst step-through)
+  - Tutorial replay mode (narrated, step-by-step learning)
+  - Schema mismatch detection and handling
+  - Record Compass Part D analysis as Tutorial #1 and first end-to-end test session
+  - Define three standard tutorial session files (core query, reference JOIN, export)
+- Build Session Library (Component 3b) — in-app browsable library of session files
+  - Library browser UI inside AW
+  - Package sample data with initial sessions
+  - v1 library: 4 sessions (Medicare spending, IRA exclusion, concentration, export)
+- Build AI Mode Switch (Component 2 addition) — session-level Local/Cloud toggle
+- Spec Milestone 5 Local AI Mode (Ollama) — provider_ollama.py
 - Spec Milestone 5 In-App Analyst Chat
 - ~~Fix Bug #8 (case mismatch in Reference Library JOIN)~~ COMPLETE v1.5.1
 - ~~Add regression test for Bug #7 (Reference Library DuckDB registration)~~ COMPLETE v1.5.1

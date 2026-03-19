@@ -159,6 +159,9 @@ String functions:
 Aggregation and window functions:
   - QUALIFY clause is supported for filtering window functions
   - PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY col) for median
+  - QUANTILE_CONT(col, 0.5) is an alternative percentile syntax
+  - MEDIAN(col) is shorthand for the 50th percentile
+  - Do NOT use APPROX_PERCENTILE_CONT — it does not exist in DuckDB
 
 Type casting:
   - Use col::INTEGER, col::FLOAT, col::VARCHAR (DuckDB cast syntax)
@@ -579,6 +582,10 @@ DUCKDB SYNTAX REMINDERS:
 - col::INTEGER for type casting
 - ILIKE for case-insensitive string matching
 - No semicolons at end of SQL
+- Do NOT use APPROX_PERCENTILE_CONT — it does not exist in DuckDB
+- For percentiles: PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY col)
+- Alternative percentile syntax: QUANTILE_CONT(col, 0.5)
+- For median specifically: MEDIAN(col) is the simplest option
 
 For chart_type: use "bar" when the SQL returns exactly 2 columns where one is
 categorical and one is numeric (2–50 rows). Use "line" when one column is a

@@ -312,10 +312,12 @@ DATASET_CONTEXT_FILENAME = "dataset_context.json"
 
 REFERENCES_DIR = Path(os.getenv("AW_REFERENCES_DIR", str(DATA_DIR / "references"))).resolve()
 REFERENCE_LIBRARY_DIR = Path(os.getenv("AW_REFERENCE_LIBRARY_DIR", str(DATA_DIR / "reference_library"))).resolve()
+SESSIONS_DIR = Path(os.getenv("AW_SESSIONS_DIR", str(DATA_DIR / "sessions"))).resolve()
 
 DATASETS_DIR.mkdir(parents=True, exist_ok=True)
 EXPORTS_DIR.mkdir(parents=True, exist_ok=True)
 REFERENCES_DIR.mkdir(parents=True, exist_ok=True)
+SESSIONS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 # ============================================================
@@ -338,14 +340,19 @@ _CONTEXT_SAMPLE_ROWS = int(os.getenv("AW_CONTEXT_SAMPLE_ROWS", "100000"))
 # STARTUP LOGGING
 # ============================================================
 
+from app.services.session_log import start_session, set_sessions_dir, log_event, end_session, export_session, get_current_session, session_summary, SessionEventType
+set_sessions_dir(SESSIONS_DIR)
+start_session()
+
 logger.info(
-    "app started | mode=%s | base_dir=%s | datasets_dir=%s | exports_dir=%s | references_dir=%s | reference_library_dir=%s",
+    "app started | mode=%s | base_dir=%s | datasets_dir=%s | exports_dir=%s | references_dir=%s | reference_library_dir=%s | sessions_dir=%s",
     "packaged" if getattr(sys, "frozen", False) else "dev",
     BASE_DIR,
     DATASETS_DIR,
     EXPORTS_DIR,
     REFERENCES_DIR,
     REFERENCE_LIBRARY_DIR,
+    SESSIONS_DIR,
 )
 
 
@@ -2048,6 +2055,10 @@ def api_health():
                 "ok": REFERENCE_LIBRARY_DIR.exists(),
                 "path": str(REFERENCE_LIBRARY_DIR),
             },
+            "sessions_dir": {
+                "ok": SESSIONS_DIR.exists(),
+                "path": str(SESSIONS_DIR),
+            },
         },
         "runtime": {
             "pid": os.getpid(),
@@ -2319,6 +2330,11 @@ def api_dataset_passport(name: str):
     )
     _audit_log({"event": "passport", "status": "success", "dataset": name})
 
+    try:
+        log_event(SessionEventType.PASSPORT_EXPORT, {"dataset": name})
+    except Exception:
+        logger.warning("Failed to log session event", exc_info=True)
+
     return {
         "identity": identity,
         "schema": schema,
@@ -2353,6 +2369,10 @@ def api_dataset_delete(name: str):
         _rmtree_robust(ds_dir)
         logger.info("dataset deleted | dataset=%s | path=%s", name, ds_dir)
         _audit_log({"event": "dataset_delete", "status": "success", "dataset": name})
+        try:
+            log_event(SessionEventType.DATASET_DELETE, {"dataset": name})
+        except Exception:
+            logger.warning("Failed to log session event", exc_info=True)
         return {"ok": True, "deleted": name}
     except Exception as e:
         logger.exception("dataset delete failed | dataset=%s", name)
@@ -2437,6 +2457,11 @@ def api_queries_save(req: SaveQueryRequest):
             "query_type": record["type"],
         }
     )
+
+    try:
+        log_event(SessionEventType.QUERY_SAVE, {"name": name, "dataset": req.dataset})
+    except Exception:
+        logger.warning("Failed to log session event", exc_info=True)
 
     return {"ok": True, "saved_query": record, "replaced": replaced}
 
@@ -2672,6 +2697,16 @@ def api_sql(req: SqlRequest):
                     "result_rows": rowcount,
                 }
 
+        try:
+            log_event(SessionEventType.QUERY_RUN, {
+                "dataset": req.dataset,
+                "sql": req.sql,
+                "row_count": rowcount,
+                "elapsed_seconds": elapsed,
+            })
+        except Exception:
+            logger.warning("Failed to log session event", exc_info=True)
+
         return response
 
     except HTTPException as e:
@@ -2863,6 +2898,15 @@ def api_sql_export(req: SqlExportRequest):
                 "elapsed_seconds": elapsed,
             }
         )
+
+        try:
+            log_event(SessionEventType.EXPORT, {
+                "dataset": req.dataset,
+                "format": export_format,
+                "row_count": rowcount,
+            })
+        except Exception:
+            logger.warning("Failed to log session event", exc_info=True)
 
         return FileResponse(
             path=str(out_path),
@@ -3338,6 +3382,16 @@ async def import_uploaded_dataset(
 
     metadata = result.metadata
 
+    try:
+        log_event(SessionEventType.DATASET_IMPORT, {
+            "dataset": metadata.registered_name,
+            "row_count": metadata.row_count,
+            "column_count": metadata.column_count,
+            "source_filename": metadata.original_filename,
+        })
+    except Exception:
+        logger.warning("Failed to log session event", exc_info=True)
+
     return {
         "dataset": metadata.registered_name,
         "dataset_id": metadata.dataset_id,
@@ -3466,6 +3520,14 @@ def result_passport(req: ResultPassportRequest):
             f"reflect the displayed sample, not the full result set."
         )
 
+    try:
+        log_event(SessionEventType.RESULT_PASSPORT, {
+            "row_count": row_count,
+            "column_count": len(columns),
+        })
+    except Exception:
+        logger.warning("Failed to log session event", exc_info=True)
+
     return result
 
 
@@ -3508,6 +3570,15 @@ async def import_reference_endpoint(
             detail=f"Reference table import failed: {exc}",
         ) from exc
 
+    try:
+        log_event(SessionEventType.REFERENCE_LOAD, {
+            "reference_name": result.reference_name,
+            "row_count": result.row_count,
+            "columns": len(result.columns),
+        })
+    except Exception:
+        logger.warning("Failed to log session event", exc_info=True)
+
     return {
         "reference": result.reference_name,
         "parquet_path": result.parquet_path,
@@ -3540,6 +3611,10 @@ def delete_reference_table(name: str):
     ref_dir = (REFERENCES_DIR / name).resolve()
     if ref_dir.exists():
         _rmtree_robust(ref_dir)
+    try:
+        log_event(SessionEventType.REFERENCE_DELETE, {"reference_name": name})
+    except Exception:
+        logger.warning("Failed to log session event", exc_info=True)
     return {"deleted": name}
 
 
@@ -3624,6 +3699,15 @@ def load_library_reference(filename: str):
             )
     except DatasetImportError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    try:
+        log_event(SessionEventType.REFERENCE_LOAD, {
+            "reference_name": result.reference_name,
+            "row_count": result.row_count,
+            "source": filename,
+        })
+    except Exception:
+        logger.warning("Failed to log session event", exc_info=True)
 
     return {
         "reference": result.reference_name,
@@ -3892,6 +3976,33 @@ def register_dataset(req: RegisterRequest):
     return {"dataset": ds_name, "storage": storage, "context_built": context_built}
 
 
+@app.get("/api/session")
+def api_session():
+    """Return current session log."""
+    session = get_current_session()
+    if session is None:
+        return {"error": "No active session"}
+    from dataclasses import asdict
+    return asdict(session)
+
+
+@app.get("/api/session/export")
+def api_session_export():
+    """Export current session log to disk and return it."""
+    path = export_session(SESSIONS_DIR)
+    session = get_current_session()
+    if session is None:
+        return {"error": "No active session"}
+    from dataclasses import asdict
+    return {"exported_to": str(path), "session": asdict(session)}
+
+
+@app.get("/api/session/summary")
+def api_session_summary():
+    """Return session summary (counts, duration, datasets)."""
+    return session_summary()
+
+
 @app.post("/api/shutdown")
 def api_shutdown(bg: BackgroundTasks):
     """
@@ -3902,6 +4013,12 @@ def api_shutdown(bg: BackgroundTasks):
     no-console packaging can be unreliable with soft exits.
     """
     logger.info("shutdown requested")
+
+    try:
+        end_session()
+        export_session(SESSIONS_DIR)
+    except Exception:
+        logger.warning("Failed to export session on shutdown", exc_info=True)
 
     def _stop():
         time.sleep(0.25)

@@ -103,6 +103,8 @@ from .sql_validator import (
     validate_sql_with_duckdb,
 )
 
+from app.services.session_log import log_event, SessionEventType
+
 # ============================================================
 # ROUTER INITIALIZATION
 # ------------------------------------------------------------
@@ -144,10 +146,10 @@ def _get_dataset_source_path(dataset: str):
     return dataset_source_path(dataset)
 
 
-def _build_reference_context_if_loaded(reference_name: str | None) -> dict | None:
+def _resolve_reference_parquet_path(reference_name: str | None) -> str | None:
     """
-    Build reference table context for AI prompts if a reference table is loaded.
-    Returns None if no reference table is specified or found.
+    Resolve the reference table's Parquet path on disk.
+    Returns None if no reference is specified or the file doesn't exist.
     """
     if not reference_name:
         return None
@@ -159,9 +161,25 @@ def _build_reference_context_if_loaded(reference_name: str | None) -> dict | Non
         ref_pq = (REFERENCES_DIR / reference_name / "source.parquet").resolve()
         if not ref_pq.exists():
             return None
+        return str(ref_pq)
+    except Exception:
+        return None
+
+
+def _build_reference_context_if_loaded(reference_name: str | None) -> dict | None:
+    """
+    Build reference table context for AI prompts if a reference table is loaded.
+    Returns None if no reference table is specified or found.
+    """
+    if not reference_name:
+        return None
+    try:
+        ref_pq_path = _resolve_reference_parquet_path(reference_name)
+        if not ref_pq_path:
+            return None
         return build_reference_context(
             reference_name=reference_name,
-            reference_source_path=str(ref_pq),
+            reference_source_path=ref_pq_path,
         )
     except Exception:
         logger.warning("Failed to build reference context for %s", reference_name)
@@ -367,6 +385,10 @@ def suggest_questions(
             cached = _read_suggestions_cache(dataset)
             if cached is not None:
                 logger.info("suggest_questions cache hit | dataset=%s", dataset)
+                try:
+                    log_event(SessionEventType.SUGGESTIONS_GENERATED, {"dataset": dataset, "cached": True})
+                except Exception:
+                    logger.warning("Failed to log session event", exc_info=True)
                 return {"dataset": dataset, "questions": cached, "cached": True}
 
         # ----------------------------------------------------
@@ -392,6 +414,11 @@ def suggest_questions(
         # ----------------------------------------------------
         # STEP 4 — Return structured response
         # ----------------------------------------------------
+        try:
+            log_event(SessionEventType.SUGGESTIONS_GENERATED, {"dataset": dataset, "cached": False})
+        except Exception:
+            logger.warning("Failed to log session event", exc_info=True)
+
         return {
             "dataset": dataset,
             "questions": questions,
@@ -458,6 +485,14 @@ def get_insights(
             cached = _read_insights_cache(dataset)
             if cached is not None:
                 logger.info("insights cache hit | dataset=%s", dataset)
+                try:
+                    log_event(SessionEventType.INSIGHTS_GENERATED, {
+                        "dataset": dataset,
+                        "insight_count": len(cached["insights"]),
+                        "cached": True,
+                    })
+                except Exception:
+                    logger.warning("Failed to log session event", exc_info=True)
                 return InsightsResponse(
                     dataset=dataset,
                     synopsis=cached["synopsis"],
@@ -491,6 +526,15 @@ def get_insights(
         # ----------------------------------------------------
         # STEP 4 — Return structured response
         # ----------------------------------------------------
+        try:
+            log_event(SessionEventType.INSIGHTS_GENERATED, {
+                "dataset": dataset,
+                "insight_count": len(raw_insights),
+                "cached": False,
+            })
+        except Exception:
+            logger.warning("Failed to log session event", exc_info=True)
+
         return InsightsResponse(
             dataset=dataset,
             synopsis=synopsis,
@@ -643,6 +687,9 @@ def generate_sql(payload: GenerateSQLRequest) -> GenerateSQLResponse:
                 sql=parsed["sql"],
                 dataset_name=payload.dataset,
                 dataset_source_path_fn=_get_dataset_source_path,
+                reference_parquet_path=_resolve_reference_parquet_path(
+                    getattr(payload, "reference", None)
+                ),
             )
 
             if not duck_ok:
@@ -658,6 +705,14 @@ def generate_sql(payload: GenerateSQLRequest) -> GenerateSQLResponse:
         # ----------------------------------------------------
         # STEP 5 — Return final structured response
         # ----------------------------------------------------
+        try:
+            log_event(SessionEventType.AI_SQL_GENERATED, {
+                "dataset": payload.dataset,
+                "question": question,
+            })
+        except Exception:
+            logger.warning("Failed to log session event", exc_info=True)
+
         return GenerateSQLResponse(
             status=parsed["status"],
             dataset=payload.dataset,
