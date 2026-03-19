@@ -78,6 +78,10 @@ Milestone 4 is COMPLETE. Pending cold-start validation before healthcare demo.
 │           ├── metadata.json
 │           ├── _meta.json
 │           └── dataset_context.json  # AI context + cached suggestions + cached insights
+├── data/
+│   ├── datasets/               # Imported datasets (Parquet + metadata)
+│   ├── references/             # Active reference tables (Parquet + _meta.json)
+│   └── reference_library/      # Pre-built library CSVs + _library.json manifest
 ├── exports/
 ├── .env                        # OPENAI_API_KEY (not committed)
 ├── CLAUDE.md                   # This file
@@ -491,13 +495,10 @@ and therapeutic category classification.
 ### Bug 1: Silent SQL failure on invalid DuckDB syntax — FIXED
 ### Bug 2: Long NOT LIKE / NOT IN chains (~26 conditions) — FIXED
 ### Bug 3: ORDER BY DESC parser error when AW wraps query — FIXED
-### Bug 4: Suggestions button caching — FIXED (renamed from old #4)
+### Bug 4: Suggestions button caching — FIXED
+### Bug 5: Result Passport display-cap — FIXED
 
 ## KNOWN BUGS — ACTIVE
-
-### Bug 5: Result Passport display-cap — FIXED
-Frontend now passes lastRun.rowcount (full count) as total_rowcount. Backend
-uses it for row_count. Sampling note added when stats come from capped display.
 
 ### Bug 6: Refresh Datasets — Windows file lock issue
 **Symptom:** shutil.rmtree() in /api/datasets/{name}/delete may fail silently
@@ -672,9 +673,14 @@ data/datasets/<registered_name>/
   dataset_context.json — AI context (columns, stats, sample rows,
                          suggested_questions, insights)
 
-data/references/<registered_name>/   [MILESTONE 4 — NEW]
+data/references/<registered_name>/   [MILESTONE 4]
   source.parquet       — reference table file
   _meta.json           — column names and types only (no profiling)
+
+data/reference_library/              [MILESTONE 4]
+  _library.json        — manifest listing available library CSVs
+  ira_negotiated_drugs.csv — IRA Rounds 1-3 drug list (35 drugs)
+  (future: fda_orphan_drugs.csv, biosimilar_tracker.csv, usp_categories.csv)
 ```
 
 ---
@@ -735,12 +741,12 @@ AW_MAX_EXPORT_ROWS=200000
 ## WHEN CONTRIBUTING
 1. Always read CONTEXT.md at session start — it has current status, backlog, and next actions
 2. Always read the actual file before editing — never assume current state
-2. Preserve frozen UI decisions unless explicitly told to change them
-3. Distinguish frontend vs backend problems clearly
-4. Prefer targeted fixes over rewrites
-5. Use /plan in Claude Code for any change touching multiple files
-6. Always .resolve() file paths to absolute
-7. Test that imports still work after any main.py change
-8. Never leave bare except: pass blocks — always log the error
-9. For any new AI endpoint, follow the suggest_questions caching pattern exactly
-10. When in doubt about DuckDB syntax, test with EXPLAIN before executing
+3. Preserve frozen UI decisions unless explicitly told to change them
+4. Distinguish frontend vs backend problems clearly
+5. Prefer targeted fixes over rewrites
+6. Use /plan in Claude Code for any change touching multiple files
+7. Always .resolve() file paths to absolute
+8. Test that imports still work after any main.py change
+9. Never leave bare except: pass blocks — always log the error
+10. For any new AI endpoint, follow the suggest_questions caching pattern exactly
+11. When in doubt about DuckDB syntax, test with EXPLAIN before executing
