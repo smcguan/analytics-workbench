@@ -26,6 +26,11 @@
   in UI but were not queryable. Fix applied in Claude Code session same day.
 - Bug #8 (Reference Library case mismatch) — FIXED v1.5.1. Reference table string
   columns now title-cased on import. JOINs match CMS data without LOWER() wrappers.
+- Bug #10 (Reference table not queryable after load/restart) — FIXED v1.5.6. Two causes:
+  (1) EXPLAIN validation missing reference view, (2) frontend not sending reference name
+  after restart. Backend now auto-detects loaded reference tables from REFERENCES_DIR.
+- Bug #11 (AI using APPROX_PERCENTILE_CONT) — FIXED v1.5.6. Function doesn't exist in
+  DuckDB. Prompt updated to use PERCENTILE_CONT/QUANTILE_CONT/MEDIAN.
 
 **Reference Table JOIN validation:**
 - Mechanics test: PASSED (Part B, March 2026)
@@ -35,7 +40,7 @@
 
 **Validated at scale:** 220M rows, DuckDB local execution, sub-second import.
 
-**Test suite:** 523 automated tests (+ 3 xfail), all passing, runs under 10 seconds.
+**Test suite:** 534 automated tests (+ 3 xfail), all passing, runs under 10 seconds.
 Pre-commit and pre-push git hooks enforce green suite on every commit and push.
 
 ---
@@ -447,11 +452,11 @@ without your data ever leaving your machine."
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
-[2026-03-19] [CODE] — Session Log (M5 Component 3) built: service module with 14 event types,
-  singleton pattern, auto-save every 10 events, crash recovery. 14 endpoints instrumented
-  (11 main.py + 3 AI routes). 3 new endpoints (/api/session, export, summary). Shutdown
-  auto-exports full session. Claude Code permissions configured (allow/ask/deny). dontAsk
-  mode enabled. .env denied. 523 tests. v1.5.6.
+[2026-03-19] [CODE] — Bug #10 real fix: backend auto-detects reference tables from REFERENCES_DIR
+  when frontend doesn't pass reference name (e.g. after restart). Bug #11: AI percentile prompt
+  fixed. Session Log built (M5 Component 3): 14 event types, 14 endpoints instrumented, 3 new
+  endpoints, auto-save + shutdown export. 108 commercial tests added earlier. Packaged build
+  rebuilt twice. Claude Code permissions configured. 534 tests. v1.5.6.
 [2026-03-18] [BD] — Example Cases explicitly linked to end-to-end test suite:
   demo library IS the test suite. Add a case = add a test. Run suite = run all demos.
   Two-level testing: 508 unit tests + full Example Case suite, both on every commit.

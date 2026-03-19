@@ -1047,6 +1047,39 @@ def _strip_trailing_semicolon(sql: str) -> str:
     return cleaned
 
 
+def _resolve_reference_for_sql(
+    explicit_reference: str | None,
+) -> tuple[str | None, str | None]:
+    """
+    Resolve the reference table for SQL rewriting.
+
+    If the caller provides an explicit reference name, use it.
+    Otherwise, auto-detect a loaded reference table from REFERENCES_DIR.
+    This handles the case where the frontend doesn't pass 'reference'
+    (e.g. after app restart when currentReference is reset).
+
+    Returns (reference_parquet_sql, reference_name) or (None, None).
+    """
+    ref_name = explicit_reference
+
+    # Auto-detect if not explicitly provided
+    if not ref_name and REFERENCES_DIR.exists():
+        for d in REFERENCES_DIR.iterdir():
+            if d.is_dir() and (d / "source.parquet").exists():
+                ref_name = d.name
+                break  # One reference at a time
+
+    if not ref_name:
+        return None, None
+
+    ref_pq = (REFERENCES_DIR / ref_name / "source.parquet").resolve()
+    if not ref_pq.exists():
+        return None, None
+
+    ref_esc = _sql_escape_path(str(ref_pq))
+    return f"read_parquet('{ref_esc}')", ref_name
+
+
 def _rewrite_sql_dataset_reference(
     sql: str,
     dataset_name: str,
@@ -2601,23 +2634,16 @@ def api_sql(req: SqlRequest):
         # clauses to the actual parquet source.
         # Also rewrites "reference" if a reference table is loaded.
         # ----------------------------------------------------
-        reference_parquet_sql = None
-        if req.reference:
-            ref_pq = (REFERENCES_DIR / req.reference / "source.parquet").resolve()
-            if not ref_pq.exists():
-                raise HTTPException(
-                    status_code=404,
-                    detail=f"Reference table not found: {req.reference}",
-                )
-            ref_esc = _sql_escape_path(str(ref_pq))
-            reference_parquet_sql = f"read_parquet('{ref_esc}')"
+        reference_parquet_sql, reference_name = _resolve_reference_for_sql(
+            req.reference
+        )
 
         sql = _rewrite_sql_dataset_reference(
             sql=cleaned_sql,
             dataset_name=req.dataset,
             parquet_sql=parquet_sql,
             reference_parquet_sql=reference_parquet_sql,
-            reference_name=req.reference,
+            reference_name=reference_name,
         )
 
         # ----------------------------------------------------
@@ -2813,23 +2839,16 @@ def api_sql_export(req: SqlExportRequest):
         esc = _sql_escape_path(src)
         parquet_sql = f"read_parquet('{esc}')"
 
-        reference_parquet_sql = None
-        if req.reference:
-            ref_pq = (REFERENCES_DIR / req.reference / "source.parquet").resolve()
-            if not ref_pq.exists():
-                raise HTTPException(
-                    status_code=404,
-                    detail=f"Reference table not found: {req.reference}",
-                )
-            ref_esc = _sql_escape_path(str(ref_pq))
-            reference_parquet_sql = f"read_parquet('{ref_esc}')"
+        reference_parquet_sql, reference_name = _resolve_reference_for_sql(
+            req.reference
+        )
 
         sql = _rewrite_sql_dataset_reference(
             sql=cleaned_sql,
             dataset_name=req.dataset,
             parquet_sql=parquet_sql,
             reference_parquet_sql=reference_parquet_sql,
-            reference_name=req.reference,
+            reference_name=reference_name,
         )
 
         # ----------------------------------------------------

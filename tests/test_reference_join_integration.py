@@ -505,3 +505,70 @@ def test_load_library_overwrites_existing_reference(client, env_dirs):
     # Verify it is B's data
     groups = {r["group"] for r in rows}
     assert groups == {"B"}
+
+
+# ===========================================================================
+# Bug #10 regression — reference auto-detected when not passed in request
+# ===========================================================================
+
+def test_reference_auto_detected_when_not_in_request(client, env_dirs):
+    """
+    Bug #10 regression: after app restart, frontend may not send 'reference'
+    in the SQL request body, but the reference table is still on disk.
+    The backend should auto-detect it.
+    """
+    ref_dir = env_dirs["ref_dir"]
+
+    # Import a reference table
+    ref_csv = _make_csv_bytes([
+        {"drug_name": "Keytruda", "category": "Oncology"},
+        {"drug_name": "Opdivo", "category": "Oncology"},
+    ])
+    import_reference_table(
+        uploaded_file=io.BytesIO(ref_csv),
+        original_filename="categories.csv",
+        registered_root=ref_dir,
+        overwrite=True,
+    )
+
+    # Run SQL with reference=None — simulates frontend after restart
+    resp = _run_sql(
+        client,
+        "SELECT d.drug_name, r.category "
+        "FROM dataset d INNER JOIN reference r ON d.drug_name = r.drug_name",
+        reference=None,  # NOT passed — auto-detect should kick in
+    )
+    assert resp.status_code == 200, f"Expected 200, got {resp.status_code}: {resp.text}"
+    rows = resp.json()["rows"]
+    assert len(rows) == 2
+
+
+def test_reference_auto_detected_by_table_name(client, env_dirs):
+    """
+    Bug #10 regression: SQL uses the actual reference table name
+    (e.g. JOIN usp_guard_categories) without frontend passing reference.
+    The backend should still resolve it.
+    """
+    ref_dir = env_dirs["ref_dir"]
+
+    ref_csv = _make_csv_bytes([
+        {"drug_name": "Keytruda", "category": "Oncology"},
+    ])
+    import_reference_table(
+        uploaded_file=io.BytesIO(ref_csv),
+        original_filename="my_categories.csv",
+        registered_root=ref_dir,
+        overwrite=True,
+    )
+
+    # Use the actual registered name in SQL, not "reference"
+    resp = _run_sql(
+        client,
+        "SELECT d.drug_name, r.category "
+        "FROM dataset d INNER JOIN my_categories r ON d.drug_name = r.drug_name",
+        reference=None,  # NOT passed
+    )
+    assert resp.status_code == 200, f"Expected 200, got {resp.status_code}: {resp.text}"
+    rows = resp.json()["rows"]
+    assert len(rows) == 1
+    assert rows[0]["drug_name"] == "Keytruda"

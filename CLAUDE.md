@@ -502,6 +502,14 @@ and therapeutic category classification.
 Reference table string columns now title-cased on import so JOINs match
 CMS data without LOWER() wrappers. Fix in dataset_import.py
 `_title_case_string_columns()`. 3 regression tests added.
+### Bug 10: Reference table not queryable after load/restart — FIXED
+Two causes: (1) validate_sql_with_duckdb() missing reference view for
+EXPLAIN validation, (2) frontend not sending reference name after restart.
+Fix: backend auto-detects loaded reference tables from REFERENCES_DIR via
+`_resolve_reference_for_sql()`. Applied to /api/sql and /api/sql/export.
+### Bug 11: AI using APPROX_PERCENTILE_CONT — FIXED
+Function doesn't exist in DuckDB. Insights and SQL generation prompts
+updated to use PERCENTILE_CONT/QUANTILE_CONT/MEDIAN.
 
 ## KNOWN BUGS — ACTIVE
 
@@ -647,6 +655,9 @@ GET  /api/references                     (list reference tables) [MILESTONE 4]
 POST /api/references/{name}/delete       (delete reference table) [MILESTONE 4]
 GET  /api/reference_library              (list library CSV files) [MILESTONE 4]
 POST /api/reference_library/{name}/load  (load library CSV as reference) [MILESTONE 4]
+GET  /api/session                        (current session log) [MILESTONE 5]
+GET  /api/session/export                 (export session to disk + return) [MILESTONE 5]
+GET  /api/session/summary                (session event counts + duration) [MILESTONE 5]
 POST /api/shutdown
 ```
 
