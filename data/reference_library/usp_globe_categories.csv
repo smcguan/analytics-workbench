@@ -1,0 +1,79 @@
+generic_name,usp_category,usp_category_code,notes
+Abatacept,Immunomodulatory Drugs,IMM,Biologic DMARD
+Adalimumab,Immunomodulatory Drugs,IMM,TNF inhibitor biologic
+Aflibercept,Ophthalmic Drugs,OPH,VEGF inhibitor
+Agalsidase Beta,Metabolic/Endocrine Drugs,MET,Enzyme replacement
+Alglucosidase Alfa,Metabolic/Endocrine Drugs,MET,Enzyme replacement
+Antihemophilic Factor,Immunomodulatory Drugs,IMM,Coagulation factor
+Aripiprazole,Central Nervous System Drugs,CNS,Atypical antipsychotic
+Aripiprazole Lauroxil,Central Nervous System Drugs,CNS,Atypical antipsychotic LAI
+Atezolizumab,Antineoplastics and Adjunctive Therapies,ONC,PD-L1 inhibitor
+Avelumab,Antineoplastics and Adjunctive Therapies,ONC,PD-L1 inhibitor
+Axicabtagene Ciloleucel,Antineoplastics and Adjunctive Therapies,ONC,CAR-T therapy
+Azacitidine,Antineoplastics and Adjunctive Therapies,ONC,Hypomethylating agent
+Belimumab,Immunomodulatory Drugs,IMM,BLyS inhibitor
+Benralizumab,Immunomodulatory Drugs,IMM,Anti-IL-5 biologic
+Bevacizumab,Antineoplastics and Adjunctive Therapies,ONC,VEGF inhibitor
+Blinatumomab,Antineoplastics and Adjunctive Therapies,ONC,BiTE antibody
+Bortezomib,Antineoplastics and Adjunctive Therapies,ONC,Proteasome inhibitor
+Brentuximab Vedotin,Antineoplastics and Adjunctive Therapies,ONC,ADC
+Cabozantinib,Antineoplastics and Adjunctive Therapies,ONC,Kinase inhibitor
+Carfilzomib,Antineoplastics and Adjunctive Therapies,ONC,Proteasome inhibitor
+Cemiplimab-Rwlc,Antineoplastics and Adjunctive Therapies,ONC,PD-1 inhibitor
+Cetuximab,Antineoplastics and Adjunctive Therapies,ONC,EGFR inhibitor
+Daratumumab,Antineoplastics and Adjunctive Therapies,ONC,CD38 monoclonal antibody
+Denosumab,Metabolic/Endocrine Drugs,MET,RANK ligand inhibitor
+Dupilumab,Immunomodulatory Drugs,IMM,IL-4/IL-13 inhibitor
+Durvalumab,Antineoplastics and Adjunctive Therapies,ONC,PD-L1 inhibitor
+Eculizumab,Immunomodulatory Drugs,IMM,Complement inhibitor
+Elotuzumab,Antineoplastics and Adjunctive Therapies,ONC,SLAMF7 antibody
+Emicizumab-Kxwh,Immunomodulatory Drugs,IMM,Coagulation factor mimic
+Enfortumab Vedotin-Ejfv,Antineoplastics and Adjunctive Therapies,ONC,ADC
+Erenumab-Aooe,Central Nervous System Drugs,CNS,CGRP inhibitor
+Ertugliflozin,Metabolic/Endocrine Drugs,MET,SGLT2 inhibitor
+Etanercept,Immunomodulatory Drugs,IMM,TNF inhibitor biologic
+Evolocumab,Cardiovascular Drugs,CVD,PCSK9 inhibitor
+Gemtuzumab Ozogamicin,Antineoplastics and Adjunctive Therapies,ONC,ADC
+Golimumab,Immunomodulatory Drugs,IMM,TNF inhibitor biologic
+Guselkumab,Immunomodulatory Drugs,IMM,IL-23 inhibitor
+Ibritumomab Tiuxetan,Antineoplastics and Adjunctive Therapies,ONC,Radioimmunotherapy
+Ibrutinib,Antineoplastics and Adjunctive Therapies,ONC,BTK inhibitor
+Idecabtagene Vicleucel,Antineoplastics and Adjunctive Therapies,ONC,CAR-T therapy
+Inotuzumab Ozogamicin,Antineoplastics and Adjunctive Therapies,ONC,ADC
+Ipilimumab,Antineoplastics and Adjunctive Therapies,ONC,CTLA-4 inhibitor
+Ixekizumab,Immunomodulatory Drugs,IMM,IL-17A inhibitor
+Larotrectinib,Antineoplastics and Adjunctive Therapies,ONC,TRK inhibitor
+Lecanemab-Irmb,Central Nervous System Drugs,CNS,Amyloid-targeting antibody
+Lenalidomide,Antineoplastics and Adjunctive Therapies,ONC,IMiD
+Lisocabtagene Maraleucel,Antineoplastics and Adjunctive Therapies,ONC,CAR-T therapy
+Mepolizumab,Immunomodulatory Drugs,IMM,Anti-IL-5 biologic
+Natalizumab,Central Nervous System Drugs,CNS,Integrin inhibitor MS therapy
+Necitumumab,Antineoplastics and Adjunctive Therapies,ONC,EGFR antibody
+Nivolumab,Antineoplastics and Adjunctive Therapies,ONC,PD-1 inhibitor
+Obinutuzumab,Antineoplastics and Adjunctive Therapies,ONC,CD20 antibody
+Ocrelizumab,Central Nervous System Drugs,CNS,CD20 antibody MS therapy
+Ofatumumab,Antineoplastics and Adjunctive Therapies,ONC,CD20 antibody
+Olaratumab,Antineoplastics and Adjunctive Therapies,ONC,PDGFR-alpha antibody
+Omalizumab,Immunomodulatory Drugs,IMM,Anti-IgE biologic
+Palivizumab,Anti-infectives,INF,RSV prophylaxis
+Panitumumab,Antineoplastics and Adjunctive Therapies,ONC,EGFR antibody
+Pembrolizumab,Antineoplastics and Adjunctive Therapies,ONC,PD-1 inhibitor
+Pertuzumab,Antineoplastics and Adjunctive Therapies,ONC,HER2 antibody
+Polatuzumab Vedotin-Piiq,Antineoplastics and Adjunctive Therapies,ONC,ADC
+Pomalidomide,Antineoplastics and Adjunctive Therapies,ONC,IMiD
+Ramucirumab,Antineoplastics and Adjunctive Therapies,ONC,VEGFR-2 antibody
+Ranibizumab,Ophthalmic Drugs,OPH,VEGF inhibitor
+Ravulizumab-Cwvz,Immunomodulatory Drugs,IMM,Complement inhibitor
+Rituximab,Antineoplastics and Adjunctive Therapies,ONC,CD20 antibody
+Romosozumab-Aqqg,Metabolic/Endocrine Drugs,MET,Sclerostin inhibitor
+Sacituzumab Govitecan-Hziy,Antineoplastics and Adjunctive Therapies,ONC,ADC
+Secukinumab,Immunomodulatory Drugs,IMM,IL-17A inhibitor
+Siltuximab,Antineoplastics and Adjunctive Therapies,ONC,IL-6 antibody
+Talimogene Laherparepvec,Antineoplastics and Adjunctive Therapies,ONC,Oncolytic virus
+Trastuzumab,Antineoplastics and Adjunctive Therapies,ONC,HER2 antibody
+Trastuzumab Emtansine,Antineoplastics and Adjunctive Therapies,ONC,ADC
+Trastuzumab-Dkst,Antineoplastics and Adjunctive Therapies,ONC,HER2 antibody biosimilar
+Trastuzumab-Dttb,Antineoplastics and Adjunctive Therapies,ONC,HER2 antibody biosimilar
+Ustekinumab,Immunomodulatory Drugs,IMM,IL-12/23 inhibitor
+Vedolizumab,Immunomodulatory Drugs,IMM,Integrin inhibitor GI
+Ziv-Aflibercept,Antineoplastics and Adjunctive Therapies,ONC,VEGF inhibitor oncology

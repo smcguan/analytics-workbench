@@ -1,0 +1,66 @@
+generic_name,brand_name,orphan_designation,orphan_indication,fda_designation_date,notes
+Afamelanotide,Scenesse,Yes,Erythropoietic protoporphyria,2019-10-08,Sole orphan
+Agalsidase Beta,Fabrazyme,Yes,Fabry disease,2003-04-24,Enzyme replacement therapy
+Alglucosidase Alfa,Lumizyme,Yes,Pompe disease,2006-08-18,Enzyme replacement therapy
+Asfotase Alfa,Strensiq,Yes,Hypophosphatasia,2015-10-23,Enzyme replacement therapy
+Atidarsagene Autotemcel,Libmeldy,Yes,Metachromatic leukodystrophy,2021-06-02,Gene therapy
+Axicabtagene Ciloleucel,Yescarta,Yes,Large B-cell lymphoma,2017-10-18,CAR-T therapy
+Belantamab Mafodotin-Blmf,Blenrep,Yes,Multiple myeloma,2020-08-05,ADC
+Blinatumomab,Blincyto,Yes,Acute lymphoblastic leukemia,2014-12-03,BiTE antibody
+Bosutinib,Bosulif,Yes,Chronic myelogenous leukemia,2012-09-04,BCR-ABL inhibitor
+Brentuximab Vedotin,Adcetris,Yes,Hodgkin lymphoma / ALCL,2011-08-19,ADC
+Brineura,Brineura,Yes,Neuronal ceroid lipofuscinosis type 2,2017-04-27,Enzyme replacement
+Carfilzomib,Kyprolis,Yes,Multiple myeloma,2012-07-20,Proteasome inhibitor
+Cerliponase Alfa,Brineura,Yes,CLN2 Batten disease,2017-04-27,Enzyme replacement
+Cinryze,Cinryze,Yes,Hereditary angioedema,2008-10-10,C1-INH replacement
+Crizotinib,Xalkori,Yes,ALK-positive NSCLC / ROS1,2021-03-01,Kinase inhibitor
+Daratumumab,Darzalex,Yes,Multiple myeloma,2015-11-16,CD38 monoclonal antibody
+Defibrotide Sodium,Defitelio,Yes,Hepatic veno-occlusive disease,2016-03-30,Sole orphan
+Dostarlimab-Gxly,Jemperli,Yes,Mismatch repair deficient endometrial cancer,2021-04-22,PD-1 inhibitor
+Eculizumab,Soliris,Yes,Paroxysmal nocturnal hemoglobinuria / aHUS,2007-03-16,Complement inhibitor
+Elotuzumab,Empliciti,Yes,Multiple myeloma,2015-11-30,SLAMF7 antibody
+Emicizumab-Kxwh,Hemlibra,Yes,Hemophilia A,2017-11-16,Factor VIII mimetic
+Erdafitinib,Balversa,Yes,Urothelial carcinoma with FGFR alterations,2019-04-12,FGFR inhibitor
+Erenumab-Aooe,Aimovig,No,,, Not orphan — migraine prevention
+Gilteritinib Fumarate,Xospata,Yes,AML with FLT3 mutation,2018-11-28,FLT3 inhibitor
+Glasdegib Maleate,Daurismo,Yes,Acute myeloid leukemia,2018-11-21,Hedgehog inhibitor
+Idecabtagene Vicleucel,Abecma,Yes,Multiple myeloma,2021-03-26,CAR-T therapy
+Imatinib Mesylate,Gleevec,Yes,CML / GIST / rare leukemias,2001-05-10,BCR-ABL inhibitor
+Inotuzumab Ozogamicin,Besylance,Yes,Relapsed/refractory ALL,2017-08-17,ADC
+Isatuximab-Irfc,Sarclisa,Yes,Multiple myeloma,2020-03-02,CD38 antibody
+Ixazomib Citrate,Ninlaro,Yes,Multiple myeloma,2015-11-20,Oral proteasome inhibitor
+Larotrectinib,Vitrakvi,Yes,TRK fusion cancer,2018-11-26,TRK inhibitor
+Lenalidomide,Revlimid,Yes,Multiple myeloma / MDS del5q,2005-12-27,IMiD
+Lisocabtagene Maraleucel,Breyanzi,Yes,Large B-cell lymphoma,2021-02-05,CAR-T therapy
+Lorlatinib,Lorbrena,Yes,ALK-positive NSCLC,2018-11-02,ALK inhibitor
+Luspatercept-Aamt,Reblozyl,Yes,Beta-thalassemia / MDS,2019-11-08,Erythroid maturation agent
+Mifamurtide,Mepact,Yes,Osteosarcoma,2012-10-06,Sole orphan — not approved US
+Midostaurin,Rydapt,Yes,AML with FLT3 / systemic mastocytosis,2017-04-28,FLT3 inhibitor
+Nusinersen,Spinraza,Yes,Spinal muscular atrophy,2016-12-23,Sole orphan antisense oligonucleotide
+Obinutuzumab,Gazyva,Yes,CLL / follicular lymphoma,2013-11-01,CD20 antibody
+Ofatumumab,Arzerra,Yes,CLL,2009-10-26,CD20 antibody
+Onasemnogene Abeparvovec-Xioi,Zolgensma,Yes,Spinal muscular atrophy type 1,2019-05-24,Sole orphan gene therapy
+Oritavancin Diphosphate,Orbactiv,No,,,Not orphan
+Panobinostat Lactate,Farydak,Yes,Multiple myeloma,2015-02-23,HDAC inhibitor
+Pegvaliase-Pqpz,Palynziq,Yes,Phenylketonuria,2018-05-24,Sole orphan PAL enzyme
+Pexidartinib,Turalio,Yes,Tenosynovial giant cell tumor,2019-08-02,CSF1R inhibitor
+Polatuzumab Vedotin-Piiq,Polivy,Yes,Diffuse large B-cell lymphoma,2019-06-10,ADC
+Pomalidomide,Pomalyst,Yes,Multiple myeloma / KS,2013-02-08,IMiD
+Ponatinib Hcl,Iclusig,Yes,CML / ALL with T315I,2012-12-14,BCR-ABL inhibitor
+Ravulizumab-Cwvz,Ultomiris,Yes,PNH / aHUS,2018-12-21,Long-acting complement inhibitor
+Rucaparib Camsylate,Rubraca,Yes,Ovarian cancer BRCA,2016-12-19,PARP inhibitor
+Ruxolitinib Phosphate,Jakafi,Yes,Myelofibrosis / PV / aGVHD,2011-11-16,JAK1/2 inhibitor
+Selinexor,Xpovio,Yes,Multiple myeloma / DLBCL,2019-07-03,XPO1 inhibitor
+Siltuximab,Sylvant,Yes,Multicentric Castleman disease,2014-04-23,Sole orphan IL-6 antibody
+Siponimod Fumarate,Mayzent,No,,,Not orphan — SPMS
+Tagraxofusp-Erzs,Elzonris,Yes,Blastic plasmacytoid dendritic cell neoplasm,2018-12-21,Sole orphan CD123-targeted
+Talazoparib Tosylate,Talzenna,Yes,BRCA-mutated breast cancer,2018-10-16,PARP inhibitor
+Talimogene Laherparepvec,Imlygic,No,,,Not orphan — melanoma
+Tazemetostat Hydrobromide,Tazverik,Yes,Epithelioid sarcoma / follicular lymphoma,2020-01-23,EZH2 inhibitor
+Tisagenlecleucel,Kymriah,Yes,ALL / DLBCL,2017-08-30,CAR-T therapy
+Tolvaptan,Jynarque,Yes,ADPKD,2018-04-23,Sole orphan vasopressin antagonist
+Tucatinib,Tukysa,No,,,Not orphan — HER2+ breast cancer
+Venetoclax,Venclexta,Yes,CLL / AML,2016-04-11,BCL-2 inhibitor
+Vismodegib,Erivedge,No,,,Not orphan — basal cell carcinoma
+Zanubrutinib,Brukinsa,Yes,Mantle cell lymphoma / Waldenstrom,2019-11-14,BTK inhibitor
+Zoledronic Acid,Zometa/Reclast,No,,,Not orphan — bone metastases/osteoporosis

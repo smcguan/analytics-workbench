@@ -245,11 +245,18 @@ without your data ever leaving your machine."
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-18] [CODE] — Diagnosed Reference Library file-not-showing bug: packaged build reads from
+  dist/data/reference_library/, not source data/. Synced files to dist. No code change needed. 400 tests. v1.5.3.
 [2026-03-18] [CODE] — Reference Library auto-discover: CSVs dropped into library dir appear
   without manifest editing. GLOBE exclusions + 4 new library CSVs added. Pattern classifier
   specced. 400 tests. v1.5.2.
 [2026-03-18] [CODE] — Bug #8 fix: reference table string columns title-cased on import.
   3 new tests (Bug #7 regression + Bug #8 unit + end-to-end JOIN). 397 tests. v1.5.1.
+[2026-03-18] [BD] — Bug #8 validated in AW: INNER JOIN returns matches with no LOWER()
+  needed. Reference Library fully functional end-to-end. New CSV files pending load test.
+[2026-03-18] [BD] — Reference Table Library CSV drafts built: usp_globe_categories (78 drugs,
+  7 categories), usp_guard_categories (102 drugs, 17 categories), orphan_drug_status (65 drugs).
+  From training knowledge — needs spot-check vs FDA OOPD / USP MMG before production use.
 [2026-03-18] [BD] — Healthcare meeting materials built: 8-slide deck, one-page leave-behind,
   full talking points with demo script. Privacy/air-gap angle. Tier 3 audience (VP + new analyst).
   Compass CMS analysis used as proof of concept throughout.

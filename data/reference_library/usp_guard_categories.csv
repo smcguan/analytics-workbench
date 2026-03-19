@@ -1,0 +1,103 @@
+generic_name,usp_category,usp_category_code,notes
+Abacavir Sulfate,Anti-infectives,INF,NRTI antiretroviral
+Abacavir Sulfate/Lamivudine,Anti-infectives,INF,NRTI combination antiretroviral
+Abemaciclib,Antineoplastics,ONC,CDK4/6 inhibitor
+Acalabrutinib,Antineoplastics,ONC,BTK inhibitor
+Afatinib Dimaleate,Antineoplastics,ONC,EGFR inhibitor
+Amlodipine Besylate,Cardiovascular,CVD,Calcium channel blocker
+Apixaban,Cardiovascular,CVD,Factor Xa anticoagulant
+Apremilast,Immunologic Agents,IMM,PDE4 inhibitor
+Aripiprazole,Central Nervous System,CNS,Atypical antipsychotic
+Atazanavir Sulfate,Anti-infectives,INF,PI antiretroviral
+Atorvastatin Calcium,Cardiovascular,CVD,HMG-CoA reductase inhibitor
+Avelumab,Antineoplastics,ONC,PD-L1 inhibitor
+Axitinib,Antineoplastics,ONC,VEGFR inhibitor
+Bictegrav/Emtricit/Tenofov Ala,Anti-infectives,INF,Integrase/NRTI combination antiretroviral
+Brigatinib,Antineoplastics,ONC,ALK inhibitor
+Budesonide/Formoterol Fumarate,Respiratory,RESP,ICS/LABA combination
+Cabozantinib,Antineoplastics,ONC,Kinase inhibitor
+Capecitabine,Antineoplastics,ONC,Oral fluoropyrimidine
+Carvedilol,Cardiovascular,CVD,Beta blocker
+Ceritinib,Antineoplastics,ONC,ALK inhibitor
+Crizotinib,Antineoplastics,ONC,ALK/ROS1/MET inhibitor
+Dabigatran Etexilate Mesylate,Cardiovascular,CVD,Direct thrombin inhibitor
+Dapagliflozin Propanediol,Metabolic/Endocrine,MET,SGLT2 inhibitor
+Dasatinib,Antineoplastics,ONC,BCR-ABL inhibitor
+Deutetrabenazine,Central Nervous System,CNS,VMAT2 inhibitor
+Dolutegravir Sodium,Anti-infectives,INF,Integrase inhibitor antiretroviral
+Dulaglutide,Metabolic/Endocrine,MET,GLP-1 receptor agonist
+Duloxetine Hcl,Central Nervous System,CNS,SNRI antidepressant
+Empagliflozin,Metabolic/Endocrine,MET,SGLT2 inhibitor
+Emtricitab/Rilpivirin/Tenofov Df,Anti-infectives,INF,NRTI/NNRTI combination antiretroviral
+Emtricitabine/Tenofovir Df,Anti-infectives,INF,NRTI combination antiretroviral
+Enzalutamide,Antineoplastics,ONC,Androgen receptor inhibitor
+Erlotinib Hcl,Antineoplastics,ONC,EGFR inhibitor
+Esomeprazole Magnesium,Gastrointestinal,GI,Proton pump inhibitor
+Etoposide,Antineoplastics,ONC,Topoisomerase inhibitor
+Everolimus,Antineoplastics,ONC,mTOR inhibitor
+Fingolimod Hcl,Central Nervous System,CNS,Sphingosine-1-phosphate modulator MS
+Fluticasone/Umeclidin/Vilanter,Respiratory,RESP,ICS/LAMA/LABA triple therapy
+Fluticasone/Vilanterol,Respiratory,RESP,ICS/LABA combination
+Formoterol/Mometasone,Respiratory,RESP,ICS/LABA combination
+Gefitinib,Antineoplastics,ONC,EGFR inhibitor
+Guselkumab,Immunologic Agents,IMM,IL-23 inhibitor
+Ibrutinib,Antineoplastics,ONC,BTK inhibitor
+Idelalisib,Antineoplastics,ONC,PI3K-delta inhibitor
+Imatinib Mesylate,Antineoplastics,ONC,BCR-ABL inhibitor
+Insulin Aspart,Metabolic/Endocrine,MET,Rapid-acting insulin
+Insulin Detemir,Metabolic/Endocrine,MET,Long-acting insulin
+Insulin Glargine,Metabolic/Endocrine,MET,Long-acting insulin analog
+Insulin Glargine,Metabolic/Endocrine,MET,Long-acting insulin
+Insulin Glargine,Metabolic/Endocrine,MET,Long-acting insulin
+Insulin Glargine/Lixisenatide,Metabolic/Endocrine,MET,Insulin/GLP-1 combination
+Insulin Lispro,Metabolic/Endocrine,MET,Rapid-acting insulin
+Ixekizumab,Immunologic Agents,IMM,IL-17A inhibitor
+Lapatinib Ditosylate,Antineoplastics,ONC,HER2/EGFR inhibitor
+Lenalidomide,Antineoplastics,ONC,IMiD
+Linaclotide,Gastrointestinal,GI,Guanylate cyclase agonist
+Linagliptin,Metabolic/Endocrine,MET,DPP-4 inhibitor
+Lorlatinib,Antineoplastics,ONC,ALK/ROS1 inhibitor
+Lurasidone Hcl,Central Nervous System,CNS,Atypical antipsychotic
+Mepolizumab,Immunologic Agents,IMM,Anti-IL-5 biologic
+Metformin Hcl,Metabolic/Endocrine,MET,Biguanide antidiabetic
+Mirabegron,Genitourinary,GU,Beta-3 adrenergic agonist
+Nabilone,Central Nervous System,CNS,Synthetic cannabinoid antiemetic
+Nintedanib Esylate,Respiratory,RESP,Tyrosine kinase inhibitor pulmonary fibrosis
+Nivolumab,Antineoplastics,ONC,PD-1 inhibitor
+Olaparib,Antineoplastics,ONC,PARP inhibitor
+Osimertinib Mesylate,Antineoplastics,ONC,EGFR inhibitor
+Palbociclib,Antineoplastics,ONC,CDK4/6 inhibitor
+Paliperidone Palmitate,Central Nervous System,CNS,Atypical antipsychotic LAI
+Pazopanib Hcl,Antineoplastics,ONC,VEGFR inhibitor
+Pembrolizumab,Antineoplastics,ONC,PD-1 inhibitor
+Pimavanserin,Central Nervous System,CNS,Serotonin inverse agonist
+Pirfenidone,Respiratory,RESP,Antifibrotic
+Pomalidomide,Antineoplastics,ONC,IMiD
+Ponatinib Hcl,Antineoplastics,ONC,BCR-ABL inhibitor
+Regorafenib,Antineoplastics,ONC,Multi-kinase inhibitor
+Ribociclib,Antineoplastics,ONC,CDK4/6 inhibitor
+Riociguat,Cardiovascular,CVD,Soluble guanylate cyclase stimulator PAH
+Rivaroxaban,Cardiovascular,CVD,Factor Xa anticoagulant
+Rucaparib Camsylate,Antineoplastics,ONC,PARP inhibitor
+Ruxolitinib Phosphate,Antineoplastics,ONC,JAK1/2 inhibitor
+Sacubitril/Valsartan,Cardiovascular,CVD,ARNi heart failure
+Saxagliptin,Metabolic/Endocrine,MET,DPP-4 inhibitor
+Secukinumab,Immunologic Agents,IMM,IL-17A inhibitor
+Semaglutide,Metabolic/Endocrine,MET,GLP-1 receptor agonist
+Sitagliptin Phosphate,Metabolic/Endocrine,MET,DPP-4 inhibitor
+Sorafenib Tosylate,Antineoplastics,ONC,Multi-kinase inhibitor
+Sunitinib Malate,Antineoplastics,ONC,Multi-kinase inhibitor
+Talazoparib Tosylate,Antineoplastics,ONC,PARP inhibitor
+Teriflunomide,Central Nervous System,CNS,Dihydroorotate dehydrogenase inhibitor MS
+Thalidomide,Antineoplastics,ONC,IMiD
+Tiotropium Bromide,Respiratory,RESP,LAMA bronchodilator
+Tofacitinib Citrate,Immunologic Agents,IMM,JAK inhibitor
+Tolvaptan,Metabolic/Endocrine,MET,Vasopressin receptor antagonist
+Trametinib Dimethyl Sulfoxide,Antineoplastics,ONC,MEK inhibitor
+Tucatinib,Antineoplastics,ONC,HER2 inhibitor
+Upadacitinib,Immunologic Agents,IMM,JAK1 inhibitor
+Ustekinumab,Immunologic Agents,IMM,IL-12/23 inhibitor
+Vandetanib,Antineoplastics,ONC,RET/VEGFR inhibitor
+Vemurafenib,Antineoplastics,ONC,BRAF inhibitor
+Venetoclax,Antineoplastics,ONC,BCL-2 inhibitor
+Vismodegib,Antineoplastics,ONC,Hedgehog pathway inhibitor
