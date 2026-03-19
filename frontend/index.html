@@ -488,11 +488,36 @@
             margin-top:4px;
         }
 
+        .sidebar-btn-row{
+            display:flex;
+            gap:6px;
+            margin-bottom:6px;
+        }
+        .sidebar-btn-row .import-btn{
+            flex:1;
+            width:auto;
+        }
+        .sidebar-btn-secondary{
+            font-size:0.8em;
+            padding:4px 10px;
+            background:transparent;
+            border:1px solid var(--bg2);
+            color:var(--fg2);
+            cursor:pointer;
+            border-radius:4px;
+            white-space:nowrap;
+        }
+        .sidebar-btn-secondary:hover{
+            background:var(--bg2);
+            color:var(--fg0);
+        }
+
         /* Import in-progress state:
            Applied to both the Import label-button and the Refresh button
            while an upload is active. Prevents double-import and signals
            to the user that the system is working. */
-        .import-btn.busy{
+        .import-btn.busy,
+        .sidebar-btn-secondary.busy{
             opacity:.55;
             cursor:not-allowed;
             pointer-events:none;
@@ -994,6 +1019,219 @@
             .main{ grid-template-columns:1fr; }
             .sidebar{ min-height:auto; }
         }
+
+        /* ---- Get Started sidebar section ---- */
+        .get-started-section{
+            padding-bottom:14px;
+            margin-bottom:4px;
+            border-bottom:1px solid var(--stroke);
+        }
+        .get-started-hint{
+            font-size:11px;
+            color:var(--muted2);
+            margin-top:4px;
+            padding-left:12px;
+            line-height:1.4;
+        }
+
+        /* ---- Welcome view ---- */
+        .welcome-shell{
+            padding:18px;
+            display:flex;
+            justify-content:center;
+        }
+        .welcome-card{
+            max-width:700px;
+            width:100%;
+        }
+        .welcome-card h2{
+            margin:0 0 6px 0;
+            font-size:22px;
+            color:var(--text);
+        }
+        .welcome-card .subtitle{
+            color:var(--muted);
+            font-size:14px;
+            margin:0 0 24px 0;
+            line-height:1.5;
+        }
+        .welcome-card h3{
+            margin:0 0 12px 0;
+            font-size:15px;
+            color:var(--text);
+        }
+        .welcome-card ol{
+            margin:0 0 24px 0;
+            padding-left:20px;
+            line-height:1.8;
+            color:var(--text);
+            font-size:14px;
+        }
+        .welcome-card ol li{
+            margin-bottom:6px;
+        }
+        .welcome-card ol li strong{
+            color:var(--text);
+        }
+        .welcome-card .privacy-badge{
+            background:rgba(79,140,255,.08);
+            border:1px solid var(--accent-border);
+            border-radius:12px;
+            padding:14px 18px;
+            font-size:13px;
+            color:var(--text);
+            line-height:1.6;
+        }
+        .welcome-card hr{
+            border:none;
+            border-top:1px solid var(--stroke);
+            margin:24px 0;
+        }
+        .welcome-actions{
+            display:flex;
+            flex-direction:column;
+            gap:10px;
+        }
+        .welcome-link{
+            color:var(--accent);
+            font-size:14px;
+            cursor:pointer;
+            text-decoration:none;
+            padding:6px 0;
+            transition:color .12s ease;
+        }
+        .welcome-link:hover{
+            color:#7fb2ff;
+            text-decoration:underline;
+            text-underline-offset:3px;
+        }
+
+        /* ---- Example Cases overlay ---- */
+        .ec-overlay{
+            display:none;
+            position:fixed;
+            inset:0;
+            z-index:100;
+            background:rgba(0,0,0,.55);
+            backdrop-filter:blur(6px);
+            overflow-y:auto;
+            padding:40px 20px;
+        }
+        .ec-overlay.visible{ display:flex; justify-content:center; align-items:flex-start; }
+        .ec-panel{
+            background:linear-gradient(180deg, rgba(24,36,54,.98), rgba(20,31,48,.98));
+            border:1px solid var(--stroke-strong);
+            border-radius:var(--radius);
+            box-shadow:var(--shadow);
+            width:min(860px, 95vw);
+            padding:24px 28px;
+        }
+        .ec-header{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            margin-bottom:16px;
+        }
+        .ec-header h2{ margin:0; font-size:18px; color:var(--text); }
+        .ec-close{
+            background:none; border:none; color:var(--muted); font-size:22px;
+            cursor:pointer; padding:4px 8px; line-height:1;
+        }
+        .ec-close:hover{ color:var(--text); }
+        .ec-file-list{ display:flex; flex-direction:column; gap:8px; }
+        .ec-file-item{
+            background:rgba(255,255,255,.03);
+            border:1px solid var(--stroke);
+            border-radius:10px;
+            padding:12px 16px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+        }
+        .ec-file-info{ flex:1; min-width:0; }
+        .ec-file-date{ font-size:13px; font-weight:600; color:var(--text); }
+        .ec-file-meta{ font-size:11px; color:var(--muted2); margin-top:2px; }
+        .ec-open-btn{
+            padding:6px 14px; font-size:12px; border-radius:6px;
+            background:var(--accent); color:#fff; border:none; cursor:pointer;
+            white-space:nowrap;
+        }
+        .ec-open-btn:hover{ filter:brightness(1.15); }
+
+        /* Step-through view */
+        .ec-session-meta{
+            display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px;
+            font-size:12px; color:var(--muted);
+        }
+        .ec-session-meta span{
+            background:rgba(255,255,255,.05); padding:4px 10px;
+            border-radius:6px; border:1px solid var(--stroke);
+        }
+        .ec-status-bar{
+            display:flex; gap:12px; margin-bottom:16px;
+            font-size:13px; font-weight:600;
+        }
+        .ec-status-bar .ec-pass{ color:var(--success); }
+        .ec-status-bar .ec-fail{ color:var(--danger); }
+        .ec-status-bar .ec-skip{ color:var(--muted2); }
+        .ec-status-bar .ec-error{ color:var(--warning); }
+        .ec-toolbar{
+            display:flex; gap:10px; align-items:center; margin-bottom:16px;
+        }
+        .ec-run-btn{
+            padding:7px 16px; font-size:12px; border-radius:6px;
+            background:var(--success); color:#fff; border:none; cursor:pointer;
+        }
+        .ec-run-btn:hover{ filter:brightness(1.1); }
+        .ec-run-btn:disabled{ opacity:.5; cursor:not-allowed; }
+        .ec-back-btn{
+            padding:7px 16px; font-size:12px; border-radius:6px;
+            background:rgba(255,255,255,.08); color:var(--text); border:1px solid var(--stroke);
+            cursor:pointer;
+        }
+        .ec-back-btn:hover{ background:rgba(255,255,255,.12); }
+        .ec-steps{ display:flex; flex-direction:column; gap:8px; }
+        .ec-step{
+            background:rgba(255,255,255,.03);
+            border:1px solid var(--stroke);
+            border-radius:10px;
+            padding:10px 14px;
+            display:flex;
+            flex-wrap:wrap;
+            align-items:center;
+            gap:8px;
+        }
+        .ec-step-num{
+            font-size:11px; font-weight:700; color:var(--muted2);
+            min-width:28px;
+        }
+        .ec-step-badge{
+            font-size:10px; font-weight:600; text-transform:uppercase;
+            letter-spacing:.5px; padding:2px 8px; border-radius:4px;
+            background:rgba(79,140,255,.15); color:var(--accent);
+        }
+        .ec-step-desc{
+            flex:1; min-width:140px;
+            font-size:12px; color:var(--text);
+            overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+        }
+        .ec-step-status{
+            font-size:11px; font-weight:700; padding:2px 8px;
+            border-radius:4px;
+        }
+        .ec-step-status.pass{ background:rgba(69,195,111,.15); color:var(--success); }
+        .ec-step-status.fail{ background:rgba(239,107,107,.15); color:var(--danger); }
+        .ec-step-status.skip{ background:rgba(255,255,255,.06); color:var(--muted2); }
+        .ec-step-status.error{ background:rgba(240,191,90,.15); color:var(--warning); }
+        .ec-step-status.pending{ background:rgba(255,255,255,.04); color:var(--muted2); }
+        .ec-step-detail{
+            width:100%; font-size:11px; color:var(--muted);
+            margin-top:2px; padding-left:36px;
+        }
+        .ec-step-elapsed{
+            font-size:11px; color:var(--muted2); white-space:nowrap;
+        }
     </style>
 </head>
 
@@ -1021,6 +1259,15 @@
 
         <main class="main">
             <aside class="panel sidebar">
+                <section class="get-started-section">
+                    <h3 class="section-title">Get Started</h3>
+                    <div class="nav-list">
+                        <button class="nav-item" id="navWelcome">Welcome</button>
+                        <button class="nav-item" id="exampleCasesBtn">Example Cases</button>
+                    </div>
+                    <div class="get-started-hint" id="getStartedHint" style="display:none;">New here? Try this first</div>
+                </section>
+
                 <section>
                     <h3 class="section-title">Workspace</h3>
                     <!-- Nav order: Insights → Query → Saved Queries
@@ -1034,25 +1281,17 @@
                 </section>
 
                 <section>
-                    <h3 class="section-title">Datasets</h3>
+                    <h3 class="section-title">Data</h3>
                     <div class="dataset-list" id="datasetList"></div>
 
-                    <label for="importDatasetFile" class="btn primary import-btn" id="importDatasetBtn">
-                        + Import Dataset
-                    </label>
-
-                    <!--
-                        Refresh Datasets button:
-                        Clears the current session dataset list from the UI and
-                        resets selection. Does NOT fetch from the backend —
-                        this intentionally returns the sidebar to the empty
-                        startup state so the user controls what is visible.
-                        Per Milestone 3 spec: dataset list starts empty and
-                        is populated only by explicit imports this session.
-                    -->
-                    <button class="btn import-btn" id="refreshDatasetsBtn" style="margin-top:8px;">
-                        ↺ Refresh Datasets
-                    </button>
+                    <div class="sidebar-btn-row">
+                        <label for="importDatasetFile" class="btn primary import-btn" id="importDatasetBtn">
+                            + Import Dataset
+                        </label>
+                        <button class="btn sidebar-btn-secondary" id="refreshDatasetsBtn">
+                            Refresh
+                        </button>
+                    </div>
 
                     <!--
                         Import status bar:
@@ -1069,18 +1308,20 @@
                         accept=".csv,.tsv,.xlsx,.xls,.parquet"
                     />
 
-                    <label for="importReferenceFile" class="btn import-btn" id="importReferenceBtn" style="margin-top:8px;">
-                        + Reference Table
-                    </label>
+                    <div class="sidebar-btn-row">
+                        <label for="importReferenceFile" class="btn import-btn" id="importReferenceBtn">
+                            + Reference Table
+                        </label>
+                        <button class="btn sidebar-btn-secondary" id="refLibraryBtn">
+                            Library
+                        </button>
+                    </div>
                     <input
                         id="importReferenceFile"
                         type="file"
                         class="visually-hidden-file"
                         accept=".csv,.tsv,.xlsx,.xls"
                     />
-                    <button class="btn import-btn" id="refLibraryBtn" style="margin-top:4px;">
-                        Reference Library
-                    </button>
                     <div id="refLibraryPopover" style="display:none; margin-top:4px; padding:8px; border:1px solid var(--bg2); border-radius:4px; font-size:0.85em; max-height:200px; overflow-y:auto;">
                         <div id="refLibraryList">Loading...</div>
                     </div>
@@ -1335,8 +1576,51 @@ LIMIT 100</textarea>
                         <div id="insightsGrid" class="insights-grid"></div>
                     </section>
                 </section>
+
+                <section id="welcomeView" class="hidden">
+                    <section class="panel welcome-shell">
+                        <div class="welcome-card">
+                            <h2>Analytics Workbench</h2>
+                            <p class="subtitle">Local-first AI analytics for analysts who work with sensitive data.</p>
+
+                            <h3>How It Works</h3>
+                            <ol>
+                                <li><strong>Import your dataset</strong> — CSV, Excel, Parquet. Loads locally, nothing uploaded.</li>
+                                <li><strong>Get instant insights</strong> — concentration, outliers, and patterns surface automatically.</li>
+                                <li><strong>Query with natural language or SQL</strong> — AI generates instructions that run on your machine.</li>
+                                <li><strong>Export with a full audit trail</strong> — every result carries a structured summary.</li>
+                            </ol>
+
+                            <div class="privacy-badge">
+                                Your data never leaves your machine.<br>
+                                AI generates analysis instructions that run on your computer.
+                            </div>
+
+                            <hr>
+
+                            <h3>Ready to start?</h3>
+                            <div class="welcome-actions">
+                                <a class="welcome-link" id="welcomeImportLink">&#8594; Import a dataset to begin your own analysis</a>
+                                <a class="welcome-link" id="welcomeExampleLink">&#8594; Open Example Cases to see the tool in action first</a>
+                            </div>
+                        </div>
+                    </section>
+                </section>
             </section>
         </main>
+    </div>
+
+    <!-- Example Cases overlay -->
+    <div class="ec-overlay" id="ecOverlay">
+        <div class="ec-panel">
+            <div class="ec-header">
+                <h2 id="ecTitle">Example Cases</h2>
+                <button class="ec-close" id="ecCloseBtn">&times;</button>
+            </div>
+            <div id="ecContent">
+                <div style="color:var(--muted); font-size:13px;">Loading...</div>
+            </div>
+        </div>
     </div>
 
     <div class="toast" id="toast"></div>
@@ -1408,7 +1692,7 @@ LIMIT 100</textarea>
         }
 
         function setActiveNav(buttonId) {
-            ["navInsights","navQuery","navSavedQueries"].forEach((id) => {
+            ["navWelcome","navInsights","navQuery","navSavedQueries"].forEach((id) => {
                 $(id).classList.toggle("active", id === buttonId);
             });
         }
@@ -1419,9 +1703,11 @@ LIMIT 100</textarea>
             $("queryView").classList.toggle("hidden", viewName !== "query");
             $("savedQueriesView").classList.toggle("hidden", viewName !== "saved");
             $("insightsView").classList.toggle("hidden", viewName !== "insights");
+            $("welcomeView").classList.toggle("hidden", viewName !== "welcome");
 
             if (viewName === "query") setActiveNav("navQuery");
             if (viewName === "saved") setActiveNav("navSavedQueries");
+            if (viewName === "welcome") setActiveNav("navWelcome");
             if (viewName === "insights") {
                 setActiveNav("navInsights");
                 // Auto-fetch insights when navigating here with a dataset loaded
@@ -1789,6 +2075,13 @@ LIMIT 100</textarea>
                 clearStatus();
                 toast(`Imported: ${returnedName}`);
 
+                // Hide Welcome view after first import — switch to Insights
+                if (currentView === "welcome") {
+                    switchView("insights");
+                }
+                // Hide the "New here?" hint once a dataset exists
+                $("getStartedHint").style.display = "none";
+
                 // Per-dataset AI consent — one-time disclosure on import
                 const aiConsent = window.confirm(
                     "AI features will use column names and statistics to generate insights " +
@@ -1869,6 +2162,252 @@ LIMIT 100</textarea>
             $("referenceIndicator").style.display = "none";
             $("referenceName").textContent = "";
             toast("Reference table removed.");
+        }
+
+        // ---------------------------------------------------------------
+        // Example Cases
+        // ---------------------------------------------------------------
+
+        let _ecCurrentFile = null;  // filename of the currently open session
+
+        function _ecFormatDate(isoStr) {
+            if (!isoStr) return "Unknown date";
+            try {
+                const d = new Date(isoStr);
+                return d.toLocaleDateString(undefined, { year:"numeric", month:"short", day:"numeric" })
+                     + " " + d.toLocaleTimeString(undefined, { hour:"2-digit", minute:"2-digit" });
+            } catch { return isoStr; }
+        }
+
+        async function toggleExampleCases() {
+            const overlay = $("ecOverlay");
+            if (overlay.classList.contains("visible")) {
+                closeExampleCases();
+                return;
+            }
+            overlay.classList.add("visible");
+            _ecCurrentFile = null;
+            $("ecTitle").textContent = "Example Cases";
+            $("ecContent").innerHTML = '<div style="color:var(--muted); font-size:13px;">Loading...</div>';
+
+            try {
+                const data = await apiJson("/api/session/files");
+                const files = data.files || [];
+                if (files.length === 0) {
+                    $("ecContent").innerHTML = '<div style="color:var(--muted); font-size:13px;">No session files found.</div>';
+                    return;
+                }
+                const container = document.createElement("div");
+                container.className = "ec-file-list";
+                for (const f of files) {
+                    const item = document.createElement("div");
+                    item.className = "ec-file-item";
+
+                    const info = document.createElement("div");
+                    info.className = "ec-file-info";
+
+                    const dateEl = document.createElement("div");
+                    dateEl.className = "ec-file-date";
+                    dateEl.textContent = _ecFormatDate(f.started_at);
+
+                    const metaEl = document.createElement("div");
+                    metaEl.className = "ec-file-meta";
+                    metaEl.textContent = `${f.event_count} events`;
+
+                    info.appendChild(dateEl);
+                    info.appendChild(metaEl);
+
+                    const btn = document.createElement("button");
+                    btn.className = "ec-open-btn";
+                    btn.textContent = "Open";
+                    btn.addEventListener("click", () => openSession(f.filename));
+
+                    item.appendChild(info);
+                    item.appendChild(btn);
+                    container.appendChild(item);
+                }
+                $("ecContent").innerHTML = "";
+                $("ecContent").appendChild(container);
+            } catch (e) {
+                $("ecContent").innerHTML = '<div style="color:var(--danger); font-size:13px;">Failed to load session files.</div>';
+            }
+        }
+
+        async function openSession(filename) {
+            _ecCurrentFile = filename;
+            $("ecTitle").textContent = "Session Details";
+            $("ecContent").innerHTML = '<div style="color:var(--muted); font-size:13px;">Loading session...</div>';
+
+            try {
+                // Load the full session JSON via the session files endpoint
+                // We need to fetch session details — use the replay endpoint info
+                // First, let's load the session file list to get metadata
+                const listData = await apiJson("/api/session/files");
+                const fileMeta = (listData.files || []).find(f => f.filename === filename);
+
+                // Build the step-through view
+                const content = document.createElement("div");
+
+                // Session metadata bar
+                const meta = document.createElement("div");
+                meta.className = "ec-session-meta";
+                if (fileMeta) {
+                    meta.innerHTML = `
+                        <span>Session: ${fileMeta.session_id ? fileMeta.session_id.substring(0,8) + '...' : 'N/A'}</span>
+                        <span>Date: ${_ecFormatDate(fileMeta.started_at)}</span>
+                        <span>Events: ${fileMeta.event_count}</span>
+                    `;
+                }
+                content.appendChild(meta);
+
+                // Status bar placeholder
+                const statusBar = document.createElement("div");
+                statusBar.className = "ec-status-bar";
+                statusBar.id = "ecStatusBar";
+                statusBar.innerHTML = '<span style="color:var(--muted2);">Not yet replayed</span>';
+                content.appendChild(statusBar);
+
+                // Toolbar
+                const toolbar = document.createElement("div");
+                toolbar.className = "ec-toolbar";
+
+                const runBtn = document.createElement("button");
+                runBtn.className = "ec-run-btn";
+                runBtn.textContent = "Run All";
+                runBtn.id = "ecRunAllBtn";
+                runBtn.addEventListener("click", () => runReplay(filename));
+
+                const backBtn = document.createElement("button");
+                backBtn.className = "ec-back-btn";
+                backBtn.textContent = "Back to List";
+                backBtn.addEventListener("click", () => toggleExampleCases());
+
+                toolbar.appendChild(runBtn);
+                toolbar.appendChild(backBtn);
+                content.appendChild(toolbar);
+
+                // Steps container — show placeholder steps based on event count
+                const stepsContainer = document.createElement("div");
+                stepsContainer.className = "ec-steps";
+                stepsContainer.id = "ecSteps";
+
+                const eventCount = fileMeta ? fileMeta.event_count : 0;
+                for (let i = 0; i < eventCount; i++) {
+                    const step = document.createElement("div");
+                    step.className = "ec-step";
+                    step.innerHTML = `
+                        <span class="ec-step-num">#${i + 1}</span>
+                        <span class="ec-step-badge">event</span>
+                        <span class="ec-step-desc">Pending replay...</span>
+                        <span class="ec-step-status pending">pending</span>
+                    `;
+                    stepsContainer.appendChild(step);
+                }
+
+                content.appendChild(stepsContainer);
+                $("ecContent").innerHTML = "";
+                $("ecContent").appendChild(content);
+            } catch (e) {
+                $("ecContent").innerHTML = '<div style="color:var(--danger); font-size:13px;">Failed to load session.</div>';
+            }
+        }
+
+        function _ecStepDescription(step) {
+            // Build a useful description from the step data
+            const msg = step.message || "";
+            if (step.event_type === "query_run") {
+                // Show truncated message
+                return msg.length > 80 ? msg.substring(0, 80) + "..." : msg;
+            }
+            if (step.event_type === "reference_load" || step.event_type === "reference_delete") {
+                return msg;
+            }
+            // For skipped events, show the skip message
+            return msg.length > 80 ? msg.substring(0, 80) + "..." : (msg || step.event_type);
+        }
+
+        function _ecRenderSteps(report) {
+            const stepsContainer = $("ecSteps");
+            if (!stepsContainer) return;
+            stepsContainer.innerHTML = "";
+
+            for (const step of report.steps) {
+                const el = document.createElement("div");
+                el.className = "ec-step";
+
+                const statusClass = step.status || "pending";
+
+                // Row count detail
+                let detailHtml = "";
+                if (step.expected_row_count !== null && step.expected_row_count !== undefined) {
+                    detailHtml += `Expected: ${num(step.expected_row_count)} rows`;
+                    if (step.actual_row_count !== null && step.actual_row_count !== undefined) {
+                        detailHtml += ` | Actual: ${num(step.actual_row_count)} rows`;
+                    }
+                } else if (step.actual_row_count !== null && step.actual_row_count !== undefined) {
+                    detailHtml += `Rows: ${num(step.actual_row_count)}`;
+                }
+                if (step.error_detail) {
+                    detailHtml += (detailHtml ? " | " : "") + `Error: ${step.error_detail}`;
+                }
+
+                const elapsedStr = step.elapsed_seconds ? `${step.elapsed_seconds.toFixed(3)}s` : "";
+
+                el.innerHTML = `
+                    <span class="ec-step-num">#${step.event_index + 1}</span>
+                    <span class="ec-step-badge">${step.event_type}</span>
+                    <span class="ec-step-desc" title="${(step.message || '').replace(/"/g, '&quot;')}">${_ecStepDescription(step)}</span>
+                    <span class="ec-step-status ${statusClass}">${step.status}</span>
+                    ${elapsedStr ? `<span class="ec-step-elapsed">${elapsedStr}</span>` : ""}
+                    ${detailHtml ? `<div class="ec-step-detail">${detailHtml}</div>` : ""}
+                `;
+                stepsContainer.appendChild(el);
+            }
+        }
+
+        async function runReplay(filename) {
+            const runBtn = $("ecRunAllBtn");
+            if (runBtn) {
+                runBtn.disabled = true;
+                runBtn.textContent = "Running...";
+            }
+
+            try {
+                const report = await apiJson("/api/session/replay", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ filename: filename, stop_on_failure: false }),
+                });
+
+                // Update status bar
+                const statusBar = $("ecStatusBar");
+                if (statusBar) {
+                    statusBar.innerHTML = `
+                        <span class="ec-pass">${report.passed} passed</span>
+                        <span class="ec-fail">${report.failed} failed</span>
+                        <span class="ec-skip">${report.skipped} skipped</span>
+                        <span class="ec-error">${report.errors} errors</span>
+                    `;
+                }
+
+                // Render step results
+                _ecRenderSteps(report);
+
+                const statusMsg = report.overall_status === "pass" ? "All steps passed." : "Some steps failed.";
+                toast(statusMsg);
+            } catch (e) {
+                toast("Replay failed: " + (e.message || "Unknown error"), 6000);
+            } finally {
+                if (runBtn) {
+                    runBtn.disabled = false;
+                    runBtn.textContent = "Run All";
+                }
+            }
+        }
+
+        function closeExampleCases() {
+            $("ecOverlay").classList.remove("visible");
+            _ecCurrentFile = null;
         }
 
         // ---------------------------------------------------------------
@@ -3091,6 +3630,14 @@ LIMIT 100</textarea>
         });
         $("clearReferenceBtn").addEventListener("click", clearReference);
         $("refLibraryBtn").addEventListener("click", toggleRefLibrary);
+        $("navWelcome").addEventListener("click", () => switchView("welcome"));
+        $("exampleCasesBtn").addEventListener("click", toggleExampleCases);
+        $("welcomeImportLink").addEventListener("click", () => {
+            // Trigger the file input via its label
+            $("importDatasetFile").click();
+        });
+        $("welcomeExampleLink").addEventListener("click", () => toggleExampleCases());
+        $("ecCloseBtn").addEventListener("click", closeExampleCases);
 
         $("infoBtn").addEventListener("click", toggleInfoPopover);
         $("suggestionsBtn").addEventListener("click", () => fetchSuggestions());
@@ -3190,7 +3737,14 @@ LIMIT 100</textarea>
             updateSelectedDatasetSummary();
 
             setActiveTab("table");
-            switchView("insights");  // Insights is the default landing view
+            // Show Welcome card when no datasets are loaded (first launch);
+            // otherwise default to Insights view per frozen UI decisions.
+            if (!datasets.length) {
+                switchView("welcome");
+                $("getStartedHint").style.display = "block";
+            } else {
+                switchView("insights");
+            }
             resetInspectState();
         })();
     </script>

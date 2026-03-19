@@ -282,7 +282,9 @@ modes pending (need frontend UI).
 **Build estimate:** Medium. Core replay engine is the main lift. Interactive mode
 and end-to-end test integration add scope but build on the same foundation.
 
-### Component 3b — Session Library (Demo Mode + Learning + Test Suite)
+### Component 3b — Session Library (Demo Mode + Learning + Test Suite) — UI COMPLETE (v1.6.0)
+**Status:** Example Cases button + browser + step-through + Run All replay built.
+Pending: sample data packaging, v1 library sessions, per-step execution, tutorial narration.
 The Session Library is a curated collection of fully documented, replayable session
 files built into AW. This is a proven adoption accelerator — validated in prior
 enterprise software. The same session files serve three distinct purposes unified
@@ -456,6 +458,11 @@ without your data ever leaving your machine."
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-19] [CODE] — Sidebar redesign: Get Started section (Welcome + Example Cases) at top,
+  Workspace (nav), Data (datasets + references). Welcome card with onboarding content, auto-opens
+  on first launch (no datasets). Compact DATA buttons (2 rows instead of 4). Example Cases UI
+  with step-through + Run All replay. Session File engine + Session Log. Bug #10 + #11 fixed.
+  108 commercial tests. /wrap auto-pushes. Permissions configured. 557 tests. v1.6.1.
 [2026-03-19] [BD] — Session Log validated end-to-end: session JSON confirmed capturing
   session_start, dataset_import, insights_generated, query_run, reference_load, export
   events with SQL, row counts, elapsed times, user, machine, AI mode. All correct.
@@ -575,11 +582,11 @@ without your data ever leaving your machine."
   - Tutorial replay mode (needs frontend + AI narration)
   - Record Compass Part D analysis as Tutorial #1 and first end-to-end test session
   - Define three standard tutorial session files (core query, reference JOIN, export)
-- Build Session Library (Component 3b) — in-app browsable Example Cases library
-  - "Example Cases" button in sidebar below Saved Queries
-  - Library browser UI inside AW
+- ~~Session Library (Component 3b) — Example Cases button + browser UI~~ COMPLETE v1.6.0
+- Session Library remaining work:
   - Package sample data with initial sessions
   - v1 library: 4 sessions (Medicare spending, IRA exclusion, concentration, export)
+  - Per-step "Run Step" button (v1 has "Run All" only)
   - Every Example Case automatically included in end-to-end test suite
 - UX improvement: auto-load previously active reference tables on session start
   (currently requires manual load each session)

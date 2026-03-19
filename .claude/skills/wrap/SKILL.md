@@ -16,3 +16,5 @@ Increment the version in backend/app/version.py (patch bump unless told otherwis
 Stage all changed files and commit with a descriptive message.
 
 Update the test count in CONTEXT.md to reflect current pytest results.
+
+Push to remote (git push) after successful commit.
