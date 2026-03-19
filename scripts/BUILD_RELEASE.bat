@@ -114,6 +114,19 @@ if exist data (
     xcopy data dist\AnalyticsWorkbench\data /E /I /Y
 )
 
+echo Syncing reference library...
+
+if exist data\reference_library (
+    if not exist dist\AnalyticsWorkbench\data\reference_library (
+        mkdir dist\AnalyticsWorkbench\data\reference_library
+    )
+    xcopy data\reference_library\*.csv dist\AnalyticsWorkbench\data\reference_library /Y
+    if exist data\reference_library\_library.json (
+        copy /Y data\reference_library\_library.json dist\AnalyticsWorkbench\data\reference_library\
+    )
+    echo Reference library synced.
+)
+
 echo Copying START_HERE.bat...
 
 if exist START_HERE.bat (

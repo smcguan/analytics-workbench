@@ -339,9 +339,13 @@ _CONTEXT_SAMPLE_ROWS = int(os.getenv("AW_CONTEXT_SAMPLE_ROWS", "100000"))
 # ============================================================
 
 logger.info(
-    "app started | mode=%s | exports_dir=%s",
+    "app started | mode=%s | base_dir=%s | datasets_dir=%s | exports_dir=%s | references_dir=%s | reference_library_dir=%s",
     "packaged" if getattr(sys, "frozen", False) else "dev",
+    BASE_DIR,
+    DATASETS_DIR,
     EXPORTS_DIR,
+    REFERENCES_DIR,
+    REFERENCE_LIBRARY_DIR,
 )
 
 
@@ -2035,6 +2039,14 @@ def api_health():
                 "ok": frontend_ok,
                 "path": str(FRONTEND_DIR),
                 "error": frontend_err,
+            },
+            "references_dir": {
+                "ok": REFERENCES_DIR.exists(),
+                "path": str(REFERENCES_DIR),
+            },
+            "reference_library_dir": {
+                "ok": REFERENCE_LIBRARY_DIR.exists(),
+                "path": str(REFERENCE_LIBRARY_DIR),
             },
         },
         "runtime": {

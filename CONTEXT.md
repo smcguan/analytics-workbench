@@ -246,6 +246,9 @@ without your data ever leaving your machine."
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-18] [CODE] — Packaged build observability: startup log + /api/health now show all dir paths
+  including reference_library_dir. BUILD_RELEASE.bat adds explicit library sync step. New
+  SYNC_LIBRARY.bat for post-build CSV sync without full rebuild. 508 tests. v1.5.5.
 [2026-03-18] [CODE] — Commercial test hardening: 108 new tests across 5 files (import pipeline,
   context builder, AI parsers, reference JOIN integration, export correctness, audit log, profile
   depth, scan/register, robustness). Pre-commit + pre-push hooks added. 3 xfail findings:
