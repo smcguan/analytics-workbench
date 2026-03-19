@@ -1,0 +1,11 @@
+[
+  {
+    "filename": "ira_negotiated_drugs.csv",
+    "name": "IRA Negotiated Drugs",
+    "description": "Drugs selected for Medicare price negotiation under the Inflation Reduction Act. Rounds 1 (2026), 2 (2027), and 3 (2028).",
+    "columns": ["drug_name", "generic_name", "ira_round", "effective_date", "manufacturer", "indication_category"],
+    "row_count": 35,
+    "version": "2026-03",
+    "join_hint": "JOIN reference ON dataset.Brnd_Name LIKE reference.drug_name || '%'"
+  }
+]

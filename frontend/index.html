@@ -1078,6 +1078,13 @@
                         class="visually-hidden-file"
                         accept=".csv,.tsv,.xlsx,.xls"
                     />
+                    <button class="btn import-btn" id="refLibraryBtn" style="margin-top:4px;">
+                        Reference Library
+                    </button>
+                    <div id="refLibraryPopover" style="display:none; margin-top:4px; padding:8px; border:1px solid var(--bg2); border-radius:4px; font-size:0.85em; max-height:200px; overflow-y:auto;">
+                        <div id="refLibraryList">Loading...</div>
+                    </div>
+
                     <div id="referenceIndicator" style="display:none; margin-top:8px; font-size:0.85em; color:var(--fg2);">
                         Reference: <strong id="referenceName"></strong>
                         <button class="btn-link" id="clearReferenceBtn" style="margin-left:8px; font-size:0.85em;">✕ Remove</button>
@@ -1862,6 +1869,64 @@ LIMIT 100</textarea>
             $("referenceIndicator").style.display = "none";
             $("referenceName").textContent = "";
             toast("Reference table removed.");
+        }
+
+        // ---------------------------------------------------------------
+        // Reference Library
+        // ---------------------------------------------------------------
+        async function toggleRefLibrary() {
+            const popover = $("refLibraryPopover");
+            if (popover.style.display === "block") {
+                popover.style.display = "none";
+                return;
+            }
+            popover.style.display = "block";
+            $("refLibraryList").textContent = "Loading...";
+            try {
+                const data = await apiJson("/api/reference_library");
+                const items = data.library || [];
+                if (items.length === 0) {
+                    $("refLibraryList").textContent = "No library files available.";
+                    return;
+                }
+                const list = $("refLibraryList");
+                list.innerHTML = "";
+                for (const item of items) {
+                    const row = document.createElement("div");
+                    row.style.cssText = "margin-bottom:6px; padding:4px 0; border-bottom:1px solid var(--bg2);";
+                    const btn = document.createElement("button");
+                    btn.className = "btn-link";
+                    btn.style.cssText = "font-weight:bold; font-size:0.9em;";
+                    btn.textContent = item.name;
+                    btn.addEventListener("click", () => loadLibraryRef(item.filename));
+                    const desc = document.createElement("div");
+                    desc.style.cssText = "font-size:0.8em; color:var(--fg2); margin-top:2px;";
+                    desc.textContent = `${item.description} (${item.row_count} rows, v${item.version})`;
+                    row.appendChild(btn);
+                    row.appendChild(desc);
+                    list.appendChild(row);
+                }
+            } catch (e) {
+                $("refLibraryList").textContent = "Failed to load library.";
+            }
+        }
+
+        async function loadLibraryRef(filename) {
+            try {
+                $("refLibraryBtn").classList.add("busy");
+                const data = await apiJson(`/api/reference_library/${encodeURIComponent(filename)}/load`, {
+                    method: "POST",
+                });
+                currentReference = data.reference;
+                $("referenceName").textContent = `${data.reference} (${num(data.row_count)} rows, ${data.columns.length} cols)`;
+                $("referenceIndicator").style.display = "block";
+                $("refLibraryPopover").style.display = "none";
+                toast(`Library reference loaded: ${data.reference}`);
+            } catch (e) {
+                toast("Failed to load library reference: " + (e.message || "Unknown error"), 8000);
+            } finally {
+                $("refLibraryBtn").classList.remove("busy");
+            }
         }
 
         function toggleInfoPopover() {
@@ -3025,6 +3090,7 @@ LIMIT 100</textarea>
             if (file) importReferenceFile(file);
         });
         $("clearReferenceBtn").addEventListener("click", clearReference);
+        $("refLibraryBtn").addEventListener("click", toggleRefLibrary);
 
         $("infoBtn").addEventListener("click", toggleInfoPopover);
         $("suggestionsBtn").addEventListener("click", () => fetchSuggestions());

@@ -311,6 +311,7 @@ QUERIES_PATH = Path(os.getenv("AW_QUERIES_PATH", str(DATA_DIR / "queries.json"))
 DATASET_CONTEXT_FILENAME = "dataset_context.json"
 
 REFERENCES_DIR = Path(os.getenv("AW_REFERENCES_DIR", str(DATA_DIR / "references"))).resolve()
+REFERENCE_LIBRARY_DIR = Path(os.getenv("AW_REFERENCE_LIBRARY_DIR", str(DATA_DIR / "reference_library"))).resolve()
 
 DATASETS_DIR.mkdir(parents=True, exist_ok=True)
 EXPORTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -3492,6 +3493,64 @@ def delete_reference_table(name: str):
     if ref_dir.exists():
         _rmtree_robust(ref_dir)
     return {"deleted": name}
+
+
+# ============================================================
+# REFERENCE LIBRARY ENDPOINTS
+# ============================================================
+
+
+@app.get("/api/reference_library")
+def list_reference_library():
+    """
+    List pre-built reference CSV files available in the library.
+
+    Returns metadata from _library.json manifest including name,
+    description, column list, and join hints.
+    """
+    manifest_path = REFERENCE_LIBRARY_DIR / "_library.json"
+    if not manifest_path.exists():
+        return {"library": []}
+    try:
+        items = json.loads(manifest_path.read_text(encoding="utf-8"))
+        return {"library": items}
+    except Exception as exc:
+        logger.warning("Failed to read reference library manifest: %s", exc)
+        return {"library": []}
+
+
+@app.post("/api/reference_library/{filename}/load")
+def load_library_reference(filename: str):
+    """
+    Load a pre-built library CSV as the active reference table.
+
+    Copies the library file through the reference table import pipeline
+    so it becomes available as 'reference' in SQL queries.
+    """
+    csv_path = REFERENCE_LIBRARY_DIR / filename
+    if not csv_path.exists():
+        raise HTTPException(
+            status_code=404,
+            detail=f"Library file not found: {filename}",
+        )
+
+    try:
+        with csv_path.open("rb") as f:
+            result = import_reference_table(
+                uploaded_file=f,
+                original_filename=filename,
+                registered_root=REFERENCES_DIR,
+                overwrite=True,
+            )
+    except DatasetImportError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    return {
+        "reference": result.reference_name,
+        "parquet_path": result.parquet_path,
+        "row_count": result.row_count,
+        "columns": [{"name": c.name, "type": c.type} for c in result.columns],
+    }
 
 
 class SqlGenerateRequest(BaseModel):
