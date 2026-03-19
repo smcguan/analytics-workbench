@@ -1077,26 +1077,43 @@ def _rewrite_sql_dataset_reference(
 
     identifiers_to_match = ["dataset", dataset_name]
 
+    # SQL keywords that can follow a table name — must NOT be mistaken
+    # for an alias when deciding whether to add AS <name>.
+    _SQL_KW = (
+        r'on|where|join|left|right|inner|outer|cross|full|natural|'
+        r'group|order|limit|having|union|using|select|from|set|into|'
+        r'intersect|except|window|qualify|fetch|offset|returning|when'
+    )
+
     for ident in identifiers_to_match:
         if not ident:
             continue
 
         # Match:
-        #   FROM dataset
-        #   JOIN dataset
-        #   FROM "dataset"
-        #   JOIN "sample"
+        #   FROM dataset          — no alias
+        #   FROM dataset d        — explicit alias (d)
+        #   FROM dataset AS d     — explicit alias with AS keyword
+        #   JOIN "dataset"        — quoted identifier
         #
-        # We replace only the relation token following FROM/JOIN.
+        # The optional alias group captures an existing alias so we
+        # can preserve it. If no alias exists, we add the original
+        # table name as an alias so qualified column references
+        # (e.g. dataset.col_name) survive the rewrite.
         pattern = re.compile(
             rf'(?i)\b(from|join)\s+(")?{re.escape(ident)}(")?\b'
+            rf'(\s+as\s+\w+|\s+(?!{_SQL_KW}\b)\w+)?'
         )
 
-        def _repl(match: re.Match[str]) -> str:
+        def _repl(match: re.Match[str], _ident=ident) -> str:
             nonlocal replaced_any
             replaced_any = True
             keyword = match.group(1)
-            return f"{keyword} {parquet_sql}"
+            existing_alias = match.group(4)
+            if existing_alias:
+                alias = existing_alias.strip().split()[-1]
+            else:
+                alias = _ident
+            return f"{keyword} {parquet_sql} AS {alias}"
 
         rewritten = pattern.sub(_repl, rewritten)
 
@@ -1118,13 +1135,12 @@ def _rewrite_sql_dataset_reference(
     if reference_name and reference_name != "reference":
         ref_identifiers.append(reference_name)
 
-    ref_found = False
     for ref_ident in ref_identifiers:
         ref_pattern = re.compile(
             rf'(?i)\b(from|join)\s+(")?{re.escape(ref_ident)}(")?\b'
+            rf'(\s+as\s+\w+|\s+(?!{_SQL_KW}\b)\w+)?'
         )
         if ref_pattern.search(rewritten):
-            ref_found = True
             if not reference_parquet_sql:
                 raise HTTPException(
                     status_code=400,
@@ -1133,10 +1149,17 @@ def _rewrite_sql_dataset_reference(
                         "table is loaded. Import a reference table first."
                     ),
                 )
-            rewritten = ref_pattern.sub(
-                lambda m: f"{m.group(1)} {reference_parquet_sql}",
-                rewritten,
-            )
+
+            def _ref_repl(m: re.Match[str], _ri=ref_ident) -> str:
+                keyword = m.group(1)
+                existing_alias = m.group(4)
+                if existing_alias:
+                    alias = existing_alias.strip().split()[-1]
+                else:
+                    alias = _ri
+                return f"{keyword} {reference_parquet_sql} AS {alias}"
+
+            rewritten = ref_pattern.sub(_ref_repl, rewritten)
 
     return rewritten
 
