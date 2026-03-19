@@ -2593,13 +2593,38 @@ def api_sql(req: SqlRequest):
             }
         )
 
-        return {
+        response = {
             "columns": cols,
             "rows": preview,
             "rowcount": rowcount,
             "elapsed_seconds": elapsed,
             "visualization": visualization,
         }
+
+        # Reference table diagnostic: when a reference table was used,
+        # count its rows so the analyst can verify the JOIN effect.
+        if req.reference and reference_parquet_sql:
+            try:
+                ref_con = _connect()
+                try:
+                    ref_count = int(ref_con.execute(
+                        f"SELECT COUNT(*) FROM {reference_parquet_sql}"
+                    ).fetchone()[0])
+                finally:
+                    ref_con.close()
+                response["reference_info"] = {
+                    "name": req.reference,
+                    "ref_rows": ref_count,
+                    "result_rows": rowcount,
+                }
+            except Exception:
+                response["reference_info"] = {
+                    "name": req.reference,
+                    "ref_rows": None,
+                    "result_rows": rowcount,
+                }
+
+        return response
 
     except HTTPException as e:
         _audit_log(

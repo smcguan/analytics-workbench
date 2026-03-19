@@ -2615,7 +2615,14 @@ LIMIT 100</textarea>
                 renderResults(lastRun.columns, lastRun.rows);
                 $("resultsCount").textContent = `${num(lastRun.rowcount)} rows`;
                 $("copyResultSummaryBtn").disabled = false;
-                $("resultsMeta").textContent = `executed in ${lastRun.elapsed}s • DuckDB local`;
+                let metaText = `executed in ${lastRun.elapsed}s • DuckDB local`;
+                // Reference table diagnostic
+                if (data.reference_info) {
+                    const ri = data.reference_info;
+                    const refRows = ri.ref_rows !== null ? num(ri.ref_rows) : "?";
+                    metaText += ` • Reference: ${ri.name} (${refRows} rows) → ${num(ri.result_rows)} results`;
+                }
+                $("resultsMeta").textContent = metaText;
                 toast("SQL executed.");
             } catch (e) {
                 const errMsg = e.message || "Unknown error";
