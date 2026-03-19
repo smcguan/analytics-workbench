@@ -831,3 +831,111 @@ def test_single_row_service_year_is_year_column(single_row_passport):
     assert nr["is_year_column"] is True, (
         f"service_year=2023 should have is_year_column=True; got: {nr}"
     )
+
+
+# ===========================================================================
+# FIXTURE 4 — ROLLUP ROWS (1000 rows, has 'Overall' rollup values)
+# ===========================================================================
+
+ROLLUP_FIXTURE_NAME = "aw_test_passport_rollup"
+ROLLUP_GRAIN = (
+    "Each row represents one manufacturer's annual drug spending. "
+    "Contains rollup rows where Mftr_Name = 'Overall'."
+)
+
+
+def _build_rollup_rows() -> list[dict]:
+    """
+    Mftr_Name  VARCHAR — 'Overall' appears in ~50% of rows (rollup/subtotal)
+                         Other manufacturers appear ~3% each
+    Drug       VARCHAR — drug names, no rollup
+    Spending   DOUBLE  — spending amounts
+    """
+    rng = random.Random(77)
+    manufacturers = ["Pfizer", "Roche", "Novartis", "AbbVie", "Merck",
+                     "Lilly", "AstraZeneca", "BMS", "Amgen", "Sanofi"]
+    drugs = ["DrugA", "DrugB", "DrugC", "DrugD", "DrugE"]
+    rows = []
+    for i in range(1000):
+        # 500 rows = 'Overall' (rollup), 500 rows = real manufacturers
+        if i < 500:
+            mftr = "Overall"
+        else:
+            mftr = manufacturers[i % len(manufacturers)]
+        rows.append({
+            "Mftr_Name": mftr,
+            "Drug": drugs[i % len(drugs)],
+            "Spending": round(1000 + rng.random() * 50000, 2),
+        })
+    return rows
+
+
+def _create_rollup_dataset(ds_dir: Path) -> None:
+    rows = _build_rollup_rows()
+    df = pd.DataFrame(rows)
+    df["Spending"] = df["Spending"].astype("float64")
+    df.to_parquet(str(ds_dir / "source.parquet"), index=False)
+    meta = {
+        "row_count": len(rows), "column_count": len(df.columns),
+        "columns": list(df.columns), "original_type": "csv",
+        "created_at": datetime.now().isoformat(),
+    }
+    (ds_dir / "metadata.json").write_text(json.dumps(meta), encoding="utf-8")
+    (ds_dir / "_meta.json").write_text(json.dumps(meta), encoding="utf-8")
+    ctx = {"grain_description": ROLLUP_GRAIN,
+           "grain_description_generated_at": datetime.now().isoformat()}
+    (ds_dir / "dataset_context.json").write_text(json.dumps(ctx), encoding="utf-8")
+
+
+@pytest.fixture(scope="module")
+def rollup_passport(datasets_tmp):
+    d = datasets_tmp / ROLLUP_FIXTURE_NAME
+    d.mkdir(exist_ok=True)
+    _create_rollup_dataset(d)
+    with TestClient(main_module.app) as c:
+        resp = c.get(f"/api/datasets/{ROLLUP_FIXTURE_NAME}/passport")
+        assert resp.status_code == 200
+        return resp.json()
+
+
+# ===========================================================================
+# ROLLUP DETECTION TESTS
+# ===========================================================================
+
+
+def test_rollup_flag_detected(rollup_passport):
+    """Mftr_Name = 'Overall' in 50% of rows should trigger possible_rollup_rows."""
+    flags = rollup_passport.get("data_quality_flags", [])
+    rollup_flags = [f for f in flags if f["flag"] == "possible_rollup_rows"]
+    assert len(rollup_flags) >= 1, (
+        f"Expected possible_rollup_rows flag for Mftr_Name='Overall'; "
+        f"got flags: {[f['flag'] for f in flags]}"
+    )
+
+
+def test_rollup_flag_on_correct_column(rollup_passport):
+    flags = rollup_passport.get("data_quality_flags", [])
+    rollup_flags = [f for f in flags if f["flag"] == "possible_rollup_rows"]
+    columns = [f["column"] for f in rollup_flags]
+    assert "Mftr_Name" in columns
+
+
+def test_rollup_flag_detail_mentions_value(rollup_passport):
+    flags = rollup_passport.get("data_quality_flags", [])
+    rollup_flags = [f for f in flags if f["flag"] == "possible_rollup_rows"]
+    assert any("Overall" in f["detail"] for f in rollup_flags)
+
+
+def test_no_rollup_flag_on_normal_column(rollup_passport):
+    """Drug column has no rollup terms — should NOT be flagged."""
+    flags = rollup_passport.get("data_quality_flags", [])
+    rollup_flags = [f for f in flags
+                    if f["flag"] == "possible_rollup_rows" and f["column"] == "Drug"]
+    assert len(rollup_flags) == 0
+
+
+def test_no_rollup_on_main_fixture(passport):
+    """Main fixture has no rollup rows — should not have the flag."""
+    flags = passport.get("data_quality_flags", [])
+    rollup_flags = [f for f in flags if f["flag"] == "possible_rollup_rows"]
+    assert len(rollup_flags) == 0

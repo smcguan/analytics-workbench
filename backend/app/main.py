@@ -1549,6 +1549,39 @@ def _passport_duckdb_analysis(
                     "detail": f"{dc_val} distinct values in {effective_rows:,} sampled rows",
                 })
 
+            # Quality flag: rollup/subtotal rows
+            # CMS and government datasets often contain aggregation rows
+            # (e.g. Mftr_Name = 'Overall') mixed with detail rows. These
+            # cause silent double-counting if not filtered out.
+            _ROLLUP_TERMS = {
+                "overall", "total", "all", "summary", "subtotal", "sub-total",
+                "grand total", "aggregate", "combined", "all manufacturers",
+                "all drugs", "all providers", "all states", "nationwide",
+            }
+            top_vals_list = dist.get("top_values", [])
+            if len(top_vals_list) >= 2:
+                top_val = top_vals_list[0]
+                second_val = top_vals_list[1]
+                top_str = (top_val.get("value") or "").strip().lower()
+                top_count = top_val.get("count", 0)
+                second_count = second_val.get("count", 0)
+                # Flag if the top value is a rollup term AND appears
+                # disproportionately often (>= 3x the second value)
+                if (top_str in _ROLLUP_TERMS
+                        and second_count > 0
+                        and top_count >= 3 * second_count):
+                    pct = round(top_count / sampled_total * 100, 1) if sampled_total > 0 else 0
+                    quality_flags.append({
+                        "flag": "possible_rollup_rows",
+                        "column": col_name,
+                        "detail": (
+                            f"Value '{top_vals_list[0]['value']}' appears in "
+                            f"{pct}% of rows — likely a rollup/subtotal row. "
+                            f"Filter to a specific value before applying "
+                            f"spending thresholds or aggregating."
+                        ),
+                    })
+
             # Quality flag: looks numeric but stored as text
             try:
                 total_nn = int(con.execute(
