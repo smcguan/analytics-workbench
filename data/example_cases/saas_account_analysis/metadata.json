@@ -1,0 +1,13 @@
+{
+  "id": "saas_account_analysis",
+  "name": "SaaS Account Health Analysis",
+  "description": "Analyzes SaaS account metrics: ARR by plan tier, churn risk segmentation, seat utilization, and expansion opportunity identification across 10,000 accounts.",
+  "category": "SaaS & Technology",
+  "difficulty": "Beginner",
+  "estimated_minutes": 10,
+  "dataset_file": "saas_accounts_sample.csv",
+  "dataset_display_name": "SaaS Accounts (10,000-account sample)",
+  "reference_tables": [],
+  "has_session": true,
+  "version": "1.0"
+}

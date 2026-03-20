@@ -1,0 +1,13 @@
+{
+  "id": "retail_order_analysis",
+  "name": "Retail Order Analysis",
+  "description": "Analyzes retail order performance: revenue by category and region, sales rep rankings, return rates, and discount impact across 10,000 orders.",
+  "category": "Retail & E-Commerce",
+  "difficulty": "Beginner",
+  "estimated_minutes": 10,
+  "dataset_file": "retail_orders_sample.csv",
+  "dataset_display_name": "Retail Orders (10,000-order sample)",
+  "reference_tables": [],
+  "has_session": true,
+  "version": "1.0"
+}

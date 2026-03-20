@@ -1,0 +1,13 @@
+{
+  "id": "logistics_shipment_analysis",
+  "name": "Logistics Shipment Analysis",
+  "description": "Analyzes shipment performance: on-time rates by transport mode, top routes, cost drivers, and delay outliers across 10,000 shipments.",
+  "category": "Supply Chain & Logistics",
+  "difficulty": "Beginner",
+  "estimated_minutes": 10,
+  "dataset_file": "logistics_shipments_sample.csv",
+  "dataset_display_name": "Logistics Shipments (10,000-shipment sample)",
+  "reference_tables": [],
+  "has_session": true,
+  "version": "1.0"
+}
