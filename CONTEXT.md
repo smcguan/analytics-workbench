@@ -286,9 +286,9 @@ modes pending (need frontend UI).
 **Build estimate:** Medium. Core replay engine is the main lift. Interactive mode
 and end-to-end test integration add scope but build on the same foundation.
 
-### Component 3b — Session Library (Demo Mode + Learning + Test Suite) — UI COMPLETE (v1.6.0)
-**Status:** Example Cases button + browser + step-through + Run All replay built.
-Pending: sample data packaging, v1 library sessions, per-step execution, tutorial narration.
+### Component 3b — Session Library (Demo Mode + Learning + Test Suite) — COMPLETE (v1.9.0)
+**Status:** Full tutorial system built. 7 example cases across 4 domains with sample data,
+narrated session files, baseline row counts, collapsible category groups.
 The Session Library is a curated collection of fully documented, replayable session
 files built into AW. This is a proven adoption accelerator — validated in prior
 enterprise software. The same session files serve three distinct purposes unified
@@ -609,9 +609,9 @@ without your data ever leaving your machine."
 
 ## OPEN DECISIONS
 
-- [ ] Session File tutorial narration — AI-generated only, or analyst-annotated first?
-- [ ] Session File replay — automatic vs interactive as default mode?
-- [ ] Session File format — JSON, SQL script, or proprietary? Needs to be readable and portable.
+- [x] Session File tutorial narration — AI-generated narration built into session.json (v1.7.2+)
+- [x] Session File replay — Tutorial mode default (step-by-step with narration); Run All for regression
+- [x] Session File format — JSON with events array, narration, baselines. Readable and portable.
 - [ ] Demo build timeline — M4 complete, mechanics passed. Formal cold-start needed
       before demo, or is current validation sufficient?
 - [ ] Healthcare meeting pricing — $3k/seat or higher given compliance angle?
@@ -639,13 +639,17 @@ without your data ever leaving your machine."
 **Product / code (Claude Code):**
 - Standardize example case dataset naming: 'part_d_spending_sample' →
   'part_d_spending_by_drug_sample' across all three example case packages for consistency
-- ~~Add recorded session JSONs to example case packages~~ Tutorial #1 COMPLETE v1.7.2
-- Record Tutorial #2 (Part B GLOBE Candidates) and Tutorial #3 (USP Classification)
+- ~~Add recorded session JSONs to example case packages~~ Tutorials #1-3 COMPLETE v1.9.0
+- ~~Record Tutorial #2 (Part B GLOBE Candidates) and Tutorial #3 (USP Classification)~~ COMPLETE v1.9.0
+- 7 example cases across 4 domains (Medicare, Transportation, Supply Chain, Retail, SaaS)
 - ~~Session File (Component 3a) — automatic replay mode~~ COMPLETE v1.6.0
 - ~~Session Library (Component 3b) — Example Cases button + browser UI~~ COMPLETE v1.7.0
 - ~~Tutorial narration + baseline validation~~ COMPLETE v1.7.2
 - Session Library remaining work:
   - Every Example Case automatically included in end-to-end test suite
+- ~~Workspace Snapshot (M5 Component 6)~~ COMPLETE v1.8.0 — auto-save/restore on shutdown/launch
+- ~~Named Snapshots~~ COMPLETE v1.9.0 — save/list/restore/delete named workspace states
+- ~~Collapsible Example Cases groups~~ COMPLETE v1.9.0 — toggle arrows + case counts
 - UX improvement: auto-load previously active reference tables on session start
 - Build AI Mode Switch (Component 2 addition) — session-level Local/Cloud toggle
 - Build additional Reference Table Library files (MFN deal status, biosimilar tracker)

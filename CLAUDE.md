@@ -81,7 +81,16 @@ Milestone 4 is COMPLETE. M5 planning in progress.
 ├── data/
 │   ├── datasets/               # Imported datasets (Parquet + metadata)
 │   ├── references/             # Active reference tables (Parquet + _meta.json)
-│   └── reference_library/      # Pre-built library CSVs + _library.json manifest
+│   ├── reference_library/      # Pre-built library CSVs + _library.json manifest
+│   ├── sessions/               # Saved session JSONs (analyst's own sessions)
+│   ├── snapshots/              # Named workspace snapshots
+│   ├── example_cases/          # Curated tutorial/demo cases with sample data
+│   │   └── <case_id>/
+│   │       ├── metadata.json   # Case name, category, difficulty, has_session
+│   │       ├── session.json    # Tutorial session with narration + baselines
+│   │       ├── data/           # Sample dataset CSV
+│   │       └── reference/      # Reference table CSVs (if any)
+│   └── workspace.json          # Auto-snapshot on shutdown for resume
 ├── exports/
 ├── .env                        # OPENAI_API_KEY (not committed)
 ├── CLAUDE.md                   # This file
@@ -523,6 +532,21 @@ captured as table aliases during FROM/JOIN rewriting. Fix: expanded _SQL_KW
 to include desc, asc, nulls, first, last, case, end, as, and, or, not, in,
 is, between, like, exists, distinct, top, over, partition, by. 6 regression
 tests added to test_sql_rewrite.py.
+### Bug 14: Tutorial mode pre-loading state instead of replaying live — FIXED v1.7.2
+Tutorial was pre-importing datasets and references before opening the panel.
+Fix: Tutorial now starts from clean state. Each step (dataset_import,
+reference_load, query_run, export) executes live. New backend endpoints
+import_dataset and import_reference per example case for step-by-step replay.
+### Bug 15: Tutorial query steps not executing — FIXED v1.8.0
+Tutorial query_run handler duplicated SQL execution logic using dataset name
+from the session JSON, which didn't match the actual registered name after
+import. Fix: replaced with `await runSqlQuery()` — the same function the
+Run SQL button calls. Reads selectedDataset and editor content directly.
+### Bug 16: Tutorial importing multiple datasets — FIXED v1.8.0
+Tutorial dataset_import step called `loadDatasets()` which fetched ALL
+datasets from backend, showing pre-existing datasets alongside the
+tutorial one. Fix: set `datasets` array directly with only the imported
+dataset, then call `loadDatasetMeta()` for full metadata.
 
 ## KNOWN BUGS — ACTIVE
 
@@ -687,6 +711,10 @@ GET  /api/workspace                     (read workspace snapshot) [MILESTONE 5]
 POST /api/workspace                     (write workspace snapshot) [MILESTONE 5]
 POST /api/workspace/restore             (validate + return workspace for restore) [MILESTONE 5]
 DELETE /api/workspace                   (clear workspace — Start Fresh) [MILESTONE 5]
+GET  /api/snapshots                    (list named snapshots) [MILESTONE 5]
+POST /api/snapshots                    (save named snapshot) [MILESTONE 5]
+POST /api/snapshots/{filename}/restore (restore named snapshot) [MILESTONE 5]
+DELETE /api/snapshots/{filename}       (delete named snapshot) [MILESTONE 5]
 POST /api/shutdown
 ```
 
@@ -767,6 +795,21 @@ data/reference_library/              [MILESTONE 4]
   _library.json        — manifest listing available library CSVs
   ira_negotiated_drugs.csv — IRA Rounds 1-3 drug list (35 drugs)
   (future: fda_orphan_drugs.csv, biosimilar_tracker.csv, usp_categories.csv)
+
+data/sessions/                       [MILESTONE 5]
+  session_{uuid}_{date}.json — saved session files (analyst's own)
+
+data/snapshots/                      [MILESTONE 5]
+  snapshot_{timestamp}.json  — named workspace snapshots
+
+data/workspace.json                  [MILESTONE 5]
+  auto-snapshot written on shutdown, read on launch for resume prompt
+
+data/example_cases/<case_id>/        [MILESTONE 5]
+  metadata.json              — case name, category, difficulty, has_session
+  session.json               — tutorial session with narration + baselines
+  data/<dataset>.csv         — sample dataset (trimmed from full source)
+  reference/<ref>.csv        — reference table CSVs (if needed)
 ```
 
 ---
