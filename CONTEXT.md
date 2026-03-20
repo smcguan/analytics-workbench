@@ -462,6 +462,12 @@ without your data ever leaving your machine."
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-20] [CODE] — UI redesign batch: Reference Guide (full product documentation in-app covering
+  all features with code examples + troubleshooting table). SESSIONS restructured to 4 buttons in
+  2 rows (Retrieve Session + Save / Retrieve Snapshot + Save). Current Session button removed.
+  Exit button below SESSIONS with 3-step save prompts (session → snapshot → shutdown). Quit button
+  removed from header. Collapsible sidebar sections + Example Cases groups collapsed by default.
+  /wrap skill updated to 9-step procedure. /sync skill added (start-of-session orientation). 607 tests.
 [2026-03-20] [CODE] — Large feature batch: Tutorial #3 (USP Classification, 68 classified drugs,
   9 categories). 3 new example cases from stress parquets — Logistics (Supply Chain), Retail
   (E-Commerce), SaaS (Technology) — each 10K-row sample with 5 queries + narration. Named
