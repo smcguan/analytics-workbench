@@ -462,6 +462,14 @@ without your data ever leaving your machine."
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-20] [BD] — Tutorial #1 validated end-to-end in live AW: clean state entry, live dataset
+  import (single dataset in sidebar), live reference load, all 5 queries execute with results
+  visible, narration at each step. Bug #15/#16 confirmed fixed. Button heights confirmed
+  matching. Ready for Tutorial #2 (Part B GLOBE Candidates).
+[2026-03-20] [CODE] — Bug #15 real fix: query_run steps now call runSqlQuery() directly instead
+  of duplicating logic. Bug #16 fix: dataset_import sets datasets array directly instead of
+  calling loadDatasets() which fetched all backend datasets. Button rows use explicit height:36px
+  with align-items:stretch so both buttons match. 598 tests.
 [2026-03-20] [CODE] — Bug #14/#15: Tutorial mode rewritten as true live replay from clean state.
   No pre-loading — each step (dataset_import, reference_load, query_run, export) executes live.
   Two-click flow: execute + show post-narration, then advance. 2 new backend endpoints

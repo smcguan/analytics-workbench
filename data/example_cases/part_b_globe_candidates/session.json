@@ -1,0 +1,177 @@
+{
+  "session_id": "tutorial-02-part-b-globe-candidates",
+  "started_at": "2026-03-20T18:00:00.000000+00:00",
+  "ended_at": "2026-03-20T18:25:00.000000+00:00",
+  "ai_mode": "cloud",
+  "app_version": "1.7.2",
+  "user": "tutorial",
+  "machine": "analytics-workbench",
+  "name": "Tutorial 2: Part B GLOBE Candidate Analysis",
+  "description": "Filters Medicare Part B drugs by spending threshold and IRA exclusion to identify GLOBE payment model candidates. Demonstrates spending analysis, reference table JOIN for IRA filtering, and high-spend candidate identification.",
+  "events": [
+    {
+      "event_type": "session_start",
+      "timestamp": "2026-03-20T18:00:00.000000+00:00",
+      "details": {},
+      "narration": {
+        "pre": "Starting a new analysis session. We will analyze Medicare Part B drug spending data to identify GLOBE payment model candidates — high-spend drugs that are not subject to IRA price negotiation.",
+        "post": "Session initialized. Part B data differs from Part D: drugs are identified by HCPCS code, and there is no manufacturer column. Let's import the dataset."
+      }
+    },
+    {
+      "event_type": "dataset_import",
+      "timestamp": "2026-03-20T18:00:05.000000+00:00",
+      "details": {
+        "dataset": "part_b_spending_sample",
+        "row_count": 500,
+        "column_count": 47,
+        "source_file": "part_b_spending_sample.csv"
+      },
+      "narration": {
+        "pre": "Importing the CMS Medicare Part B Drug Spending dataset. This is a 500-row sample containing HCPCS codes, brand names, generic names, and spending data across 5 years (2019-2023). Each row represents one drug identified by its HCPCS billing code.",
+        "post": "Dataset loaded: 500 rows, 47 columns. Part B data includes HCPCS_Cd (billing code), HCPCS_Desc (procedure description), brand and generic names, and per-year spending metrics. Note: unlike Part D, there is no manufacturer name column — drug identification is by HCPCS code + brand name."
+      }
+    },
+    {
+      "event_type": "insights_generated",
+      "timestamp": "2026-03-20T18:00:12.000000+00:00",
+      "details": {
+        "dataset": "part_b_spending_sample",
+        "insight_count": 5
+      },
+      "narration": {
+        "pre": "AI is analyzing the dataset structure to generate automatic insights.",
+        "post": "Insights generated. Now let's explore the spending distribution before applying GLOBE criteria."
+      }
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-03-20T18:01:00.000000+00:00",
+      "details": {
+        "dataset": "part_b_spending_sample",
+        "sql": "SELECT COUNT(DISTINCT Brnd_Name) AS total_drugs FROM dataset",
+        "row_count": 500,
+        "elapsed_seconds": 0.015
+      },
+      "narration": {
+        "pre": "First, let's count how many distinct drugs are in the Part B dataset. Unlike Part D which had duplicate rows per manufacturer, Part B has one row per drug (HCPCS code).",
+        "post": "500 distinct brand-name drugs in the dataset. This is our full universe of Part B drugs. Next we'll see which ones have the highest Medicare spending."
+      },
+      "baseline": {
+        "expected_row_count": 500
+      }
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-03-20T18:02:00.000000+00:00",
+      "details": {
+        "dataset": "part_b_spending_sample",
+        "sql": "SELECT Brnd_Name, Gnrc_Name, HCPCS_Cd, Tot_Spndng_2023, Tot_Benes_2023 FROM dataset ORDER BY Tot_Spndng_2023 DESC LIMIT 10",
+        "row_count": 10,
+        "elapsed_seconds": 0.014
+      },
+      "narration": {
+        "pre": "Let's see the top 10 Part B drugs by 2023 spending. Part B covers physician-administered drugs — primarily infusions and injections given in clinical settings.",
+        "post": "Top 10 spenders identified. Keytruda (pembrolizumab) leads with over $5B in Part B spending. Eylea, Prolia, and Darzalex Faspro follow. These are primarily oncology and specialty drugs administered in hospitals and clinics."
+      },
+      "baseline": {
+        "expected_row_count": 10
+      }
+    },
+    {
+      "event_type": "reference_load",
+      "timestamp": "2026-03-20T18:03:00.000000+00:00",
+      "details": {
+        "reference_name": "ira_negotiated_drugs",
+        "row_count": 35,
+        "columns": 6,
+        "source": "ira_negotiated_drugs.csv"
+      },
+      "narration": {
+        "pre": "Loading the IRA Negotiated Drugs reference table. We'll use this to identify which Part B drugs are already subject to IRA price negotiation — these must be excluded from GLOBE candidate lists.",
+        "post": "Reference table loaded: 35 IRA drugs. Note that most IRA-negotiated drugs are Part D (oral/retail) drugs. Only a handful appear in Part B (physician-administered). The JOIN will tell us exactly how many."
+      }
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-03-20T18:04:00.000000+00:00",
+      "details": {
+        "dataset": "part_b_spending_sample",
+        "sql": "SELECT DISTINCT d.Brnd_Name, d.Gnrc_Name, d.HCPCS_Cd, r.ira_round FROM dataset d INNER JOIN reference r ON d.Brnd_Name = r.drug_name ORDER BY r.ira_round, d.Brnd_Name",
+        "row_count": 6,
+        "elapsed_seconds": 0.018
+      },
+      "narration": {
+        "pre": "Now let's see which Part B drugs match the IRA negotiated list. We expect fewer matches than Part D since most IRA drugs are oral medications dispensed at pharmacies, not physician-administered injections.",
+        "post": "Only 6 Part B drugs match the IRA list. This is expected — the IRA primarily targets high-cost retail drugs. These 6 will be excluded from our GLOBE candidate list."
+      },
+      "baseline": {
+        "expected_row_count": 6
+      }
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-03-20T18:06:00.000000+00:00",
+      "details": {
+        "dataset": "part_b_spending_sample",
+        "sql": "SELECT COUNT(DISTINCT d.Brnd_Name) AS high_spend_non_ira FROM dataset d LEFT JOIN reference r ON d.Brnd_Name = r.drug_name WHERE r.drug_name IS NULL AND d.Tot_Spndng_2023 > 100000000",
+        "row_count": 89,
+        "elapsed_seconds": 0.019
+      },
+      "narration": {
+        "pre": "Now the key GLOBE filter: how many non-IRA Part B drugs have spending above $100 million? The GLOBE model targets high-spend single-source drugs, so a spending threshold is the first filter.",
+        "post": "89 non-IRA Part B drugs exceed $100M in 2023 spending. These are the initial GLOBE candidate pool. The next step would be to apply single-source criteria and therapeutic category classification, but this spending filter alone narrows the field significantly."
+      },
+      "baseline": {
+        "expected_row_count": 89
+      }
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-03-20T18:08:00.000000+00:00",
+      "details": {
+        "dataset": "part_b_spending_sample",
+        "sql": "SELECT d.Brnd_Name, d.Gnrc_Name, d.HCPCS_Cd, d.Tot_Spndng_2023, d.Tot_Benes_2023, d.Avg_Spndng_Per_Bene_2023 FROM dataset d LEFT JOIN reference r ON d.Brnd_Name = r.drug_name WHERE r.drug_name IS NULL AND d.Tot_Spndng_2023 > 100000000 ORDER BY d.Tot_Spndng_2023 DESC LIMIT 20",
+        "row_count": 20,
+        "elapsed_seconds": 0.021
+      },
+      "narration": {
+        "pre": "Finally, let's see the top 20 GLOBE candidates ranked by spending. These are the highest-value non-IRA Part B drugs — the most likely targets for the GLOBE payment model.",
+        "post": "Top 20 GLOBE candidates identified. These represent the highest-spend physician-administered drugs not subject to IRA negotiation. In a full analysis, the next steps would be: apply single-source criteria (no biosimilar competition), verify orphan drug exclusions, and classify by USP therapeutic category."
+      },
+      "baseline": {
+        "expected_row_count": 20
+      }
+    },
+    {
+      "event_type": "export",
+      "timestamp": "2026-03-20T18:10:00.000000+00:00",
+      "details": {
+        "format": "xlsx",
+        "dataset": "part_b_spending_sample",
+        "row_count": 20
+      },
+      "narration": {
+        "pre": "Exporting the top 20 GLOBE candidates to Excel for further analysis.",
+        "post": "Export complete. The Excel file contains the ranked candidate list ready for policy review and additional filtering (orphan drug status, biosimilar availability, USP category classification)."
+      }
+    },
+    {
+      "event_type": "session_end",
+      "timestamp": "2026-03-20T18:25:00.000000+00:00",
+      "details": {},
+      "narration": {
+        "pre": "Analysis complete.",
+        "post": "Session summary: Started with 500 Part B drugs, identified 6 IRA-negotiated drugs via reference table JOIN, found 89 non-IRA drugs exceeding $100M in spending, and exported the top 20 candidates. Part B analysis is simpler than Part D (no manufacturer filtering needed) but the workflow pattern is identical: import, reference JOIN, threshold filter, export."
+      }
+    }
+  ],
+  "resume_state": {
+    "dataset": "part_b_spending_sample",
+    "last_sql": "SELECT d.Brnd_Name, d.Gnrc_Name, d.HCPCS_Cd, d.Tot_Spndng_2023, d.Tot_Benes_2023, d.Avg_Spndng_Per_Bene_2023 FROM dataset d LEFT JOIN reference r ON d.Brnd_Name = r.drug_name WHERE r.drug_name IS NULL AND d.Tot_Spndng_2023 > 100000000 ORDER BY d.Tot_Spndng_2023 DESC LIMIT 20",
+    "reference": {
+      "name": "ira_negotiated_drugs",
+      "library_source": "ira_negotiated_drugs.csv"
+    }
+  }
+}
