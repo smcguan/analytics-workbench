@@ -1,0 +1,177 @@
+{
+  "session_id": "tutorial-03-usp-category-classification",
+  "started_at": "2026-03-20T20:00:00.000000+00:00",
+  "ended_at": "2026-03-20T20:25:00.000000+00:00",
+  "ai_mode": "cloud",
+  "app_version": "1.8.1",
+  "user": "tutorial",
+  "machine": "analytics-workbench",
+  "name": "Tutorial 3: USP Therapeutic Category Classification",
+  "description": "Classifies Medicare Part D drugs into USP therapeutic categories using a reference table JOIN. Demonstrates how to add analytical structure to raw spending data — the foundation for GUARD payment model analysis.",
+  "events": [
+    {
+      "event_type": "session_start",
+      "timestamp": "2026-03-20T20:00:00.000000+00:00",
+      "details": {},
+      "narration": {
+        "pre": "Starting a classification workflow. The goal: take raw Part D drug spending data and classify each drug into a USP therapeutic category using a reference table JOIN. This transforms a flat spending list into a structured analytical dataset.",
+        "post": "Session initialized. Let's import the dataset and the USP category mapping."
+      }
+    },
+    {
+      "event_type": "dataset_import",
+      "timestamp": "2026-03-20T20:00:05.000000+00:00",
+      "details": {
+        "dataset": "part_d_spending_sample",
+        "row_count": 500,
+        "column_count": 46,
+        "source_file": "part_d_spending_sample.csv"
+      },
+      "narration": {
+        "pre": "Importing the CMS Medicare Part D Drug Spending dataset — the same 500-row sample used in Tutorial 1. This time we'll focus on classification rather than exclusion.",
+        "post": "Dataset loaded: 500 rows, 46 columns. Each row is a drug-manufacturer combination. We filter to Mftr_Name='Overall' rows for unique drug counts. Next: load the USP category reference table."
+      }
+    },
+    {
+      "event_type": "insights_generated",
+      "timestamp": "2026-03-20T20:00:12.000000+00:00",
+      "details": {
+        "dataset": "part_d_spending_sample",
+        "insight_count": 5
+      },
+      "narration": {
+        "pre": "AI generating automatic insights.",
+        "post": "Insights generated. Now let's load the classification reference table."
+      }
+    },
+    {
+      "event_type": "reference_load",
+      "timestamp": "2026-03-20T20:01:00.000000+00:00",
+      "details": {
+        "reference_name": "usp_guard_categories",
+        "row_count": 102,
+        "columns": 4,
+        "source": "usp_guard_categories.csv"
+      },
+      "narration": {
+        "pre": "Loading the USP GUARD Categories reference table. This maps 102 generic drug names to one of 17 USP therapeutic categories (e.g., Cardiovascular, Antineoplastics, Metabolic/Endocrine). The USP Model Guidelines for Medicare categorize drugs for the GUARD payment model.",
+        "post": "Reference table loaded: 102 drugs mapped to therapeutic categories. Columns: generic_name, usp_category, usp_category_code, notes. We'll JOIN this against the spending dataset on generic name to classify each drug."
+      }
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-03-20T20:02:00.000000+00:00",
+      "details": {
+        "dataset": "part_d_spending_sample",
+        "sql": "SELECT COUNT(DISTINCT Brnd_Name) AS total_drugs FROM dataset WHERE Mftr_Name = 'Overall'",
+        "row_count": 272,
+        "elapsed_seconds": 0.015
+      },
+      "narration": {
+        "pre": "First, establish the universe: how many unique drugs are in the Part D dataset? We filter to 'Overall' manufacturer rows to avoid counting the same drug multiple times across manufacturers.",
+        "post": "272 unique drugs. This is our full universe — same as Tutorial 1. The classification question is: how many of these 272 can we map to a USP therapeutic category?"
+      },
+      "baseline": {
+        "expected_row_count": 272
+      }
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-03-20T20:03:00.000000+00:00",
+      "details": {
+        "dataset": "part_d_spending_sample",
+        "sql": "SELECT Brnd_Name, Gnrc_Name, Tot_Spndng_2023 FROM dataset WHERE Mftr_Name = 'Overall' ORDER BY Tot_Spndng_2023 DESC LIMIT 10",
+        "row_count": 10,
+        "elapsed_seconds": 0.014
+      },
+      "narration": {
+        "pre": "Before classifying, let's see the top 10 spenders. Knowing which drugs dominate spending helps us understand whether our classification coverage matters — if the top spenders are classified, we capture most of the spending even if coverage is incomplete.",
+        "post": "Top 10 includes Eliquis, Ozempic, Humira, Keytruda, Revlimid. These span multiple therapeutic categories — cardiovascular, metabolic, immunologic, oncology. Good classification coverage of the top spenders is critical."
+      },
+      "baseline": {
+        "expected_row_count": 10
+      }
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-03-20T20:05:00.000000+00:00",
+      "details": {
+        "dataset": "part_d_spending_sample",
+        "sql": "SELECT COUNT(DISTINCT p.Brnd_Name) AS classified_count FROM dataset p INNER JOIN reference u ON p.Gnrc_Name = u.generic_name WHERE p.Mftr_Name = 'Overall'",
+        "row_count": 68,
+        "elapsed_seconds": 0.018
+      },
+      "narration": {
+        "pre": "Now the key classification query: how many of our 272 drugs match the USP reference table? The INNER JOIN matches on generic name — only drugs with an exact generic name match will be classified.",
+        "post": "68 out of 272 drugs classified — about 25% coverage by drug count. The unclassified 204 drugs are the 'residual' that would need manual classification or an expanded reference table. But these 68 drugs likely account for a much larger share of total spending."
+      },
+      "baseline": {
+        "expected_row_count": 68
+      }
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-03-20T20:07:00.000000+00:00",
+      "details": {
+        "dataset": "part_d_spending_sample",
+        "sql": "SELECT u.usp_category, ROUND(SUM(p.Tot_Spndng_2023)) AS total_spending, COUNT(*) AS drug_count FROM dataset p INNER JOIN reference u ON p.Gnrc_Name = u.generic_name WHERE p.Mftr_Name = 'Overall' GROUP BY u.usp_category ORDER BY total_spending DESC",
+        "row_count": 9,
+        "elapsed_seconds": 0.019
+      },
+      "narration": {
+        "pre": "Now the analytical payoff: spending by USP therapeutic category. This is the query that transforms flat drug spending data into a structured view — exactly what the GUARD payment model needs for category-level analysis.",
+        "post": "9 therapeutic categories represented. Metabolic/Endocrine leads (includes GLP-1 drugs like Ozempic), followed by Cardiovascular (Eliquis) and Antineoplastics (oncology drugs). This category-level view is the foundation for GUARD payment model rate-setting — each category gets its own spending benchmark."
+      },
+      "baseline": {
+        "expected_row_count": 9
+      }
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-03-20T20:09:00.000000+00:00",
+      "details": {
+        "dataset": "part_d_spending_sample",
+        "sql": "SELECT u.usp_category, p.Brnd_Name, p.Gnrc_Name, p.Tot_Spndng_2023 FROM dataset p INNER JOIN reference u ON p.Gnrc_Name = u.generic_name WHERE p.Mftr_Name = 'Overall' ORDER BY u.usp_category, p.Tot_Spndng_2023 DESC LIMIT 50",
+        "row_count": 50,
+        "elapsed_seconds": 0.017
+      },
+      "narration": {
+        "pre": "Finally, let's see the classified drugs listed by category with their spending. This is the detailed view that an analyst would export for policy review — each drug with its therapeutic classification and spending level.",
+        "post": "50 classified drugs with their USP categories. This is the deliverable: a structured, categorized drug spending list ready for GUARD analysis. In a full workflow, you'd expand the reference table to classify the remaining 204 drugs, either by adding more entries or using the Generic Name Pattern Classifier (a planned AW feature)."
+      },
+      "baseline": {
+        "expected_row_count": 50
+      }
+    },
+    {
+      "event_type": "export",
+      "timestamp": "2026-03-20T20:11:00.000000+00:00",
+      "details": {
+        "format": "xlsx",
+        "dataset": "part_d_spending_sample",
+        "row_count": 50
+      },
+      "narration": {
+        "pre": "Exporting the classified drug list for policy review.",
+        "post": "Export complete. The Excel file contains drugs categorized by USP therapeutic class, ready for GUARD payment model analysis."
+      }
+    },
+    {
+      "event_type": "session_end",
+      "timestamp": "2026-03-20T20:25:00.000000+00:00",
+      "details": {},
+      "narration": {
+        "pre": "Analysis complete.",
+        "post": "Session summary: Classified 68 of 272 Part D drugs into 9 USP therapeutic categories via reference table JOIN. Metabolic/Endocrine and Cardiovascular categories dominate spending. The classification workflow — import, reference JOIN, GROUP BY category — is the foundation for GUARD payment model rate-setting. Next step: expand the reference table to improve coverage beyond 25%."
+      }
+    }
+  ],
+  "resume_state": {
+    "dataset": "part_d_spending_sample",
+    "last_sql": "SELECT u.usp_category, p.Brnd_Name, p.Gnrc_Name, p.Tot_Spndng_2023 FROM dataset p INNER JOIN reference u ON p.Gnrc_Name = u.generic_name WHERE p.Mftr_Name = 'Overall' ORDER BY u.usp_category, p.Tot_Spndng_2023 DESC LIMIT 50",
+    "reference": {
+      "name": "usp_guard_categories",
+      "library_source": "usp_guard_categories.csv"
+    }
+  }
+}

@@ -8,5 +8,6 @@
   "dataset_file": "part_d_spending_sample.csv",
   "dataset_display_name": "CMS Medicare Part D Drug Spending (500-row sample)",
   "reference_tables": ["usp_guard_categories"],
+  "has_session": true,
   "version": "1.0"
 }
