@@ -44,7 +44,7 @@
 
 **Validated at scale:** 220M rows, DuckDB local execution, sub-second import.
 
-**Test suite:** 598 automated tests, all passing (zero xfail), runs under 10 seconds.
+**Test suite:** 607 automated tests, all passing (zero xfail), runs under 10 seconds.
 Pre-commit and pre-push git hooks enforce green suite on every commit and push.
 
 ---
@@ -462,6 +462,12 @@ without your data ever leaving your machine."
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-20] [CODE] — Large feature batch: Tutorial #3 (USP Classification, 68 classified drugs,
+  9 categories). 3 new example cases from stress parquets — Logistics (Supply Chain), Retail
+  (E-Commerce), SaaS (Technology) — each 10K-row sample with 5 queries + narration. Named
+  Snapshots (save/list/restore/delete named workspace states). Collapsible Example Cases groups
+  with toggle arrows + case counts. 7 example cases across 4 domains. 9 new tests (snapshot
+  CRUD, workspace CRUD, example case validation). 607 tests. v1.9.0.
 [2026-03-20] [CODE] — Post-v1.8.0 fixes: taxi tutorial EXTRACT(HOUR) cast (CSV imports datetime
   as VARCHAR, needs ::TIMESTAMP), tutorial dataset import now shows file size + source in summary
   cards (calls loadDatasetMeta after import). Both pushed.

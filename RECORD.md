@@ -124,11 +124,17 @@ Building toward reproducible, auditable, shareable analytical sessions:
 | v1.7.2 | 2026-03-20 | Tutorial #1 session JSON, tutorial/Run All wiring, Save flush-to-disk, button sizing |
 | v1.8.0 | 2026-03-20 | Bug #15/#16 fixes, Tutorial #2, Workspace Snapshot, NYC Taxi case, category groups |
 | v1.8.1 | 2026-03-20 | Taxi TIMESTAMP cast fix, tutorial summary cards show file size + source |
+| v1.9.0 | 2026-03-20 | Tutorial #3, 3 new example cases, Named Snapshots, collapsible groups, 607 tests |
 
 ---
 
 ## Wrap Records
 <!-- Each /wrap appends a 3-line summary below. Most recent at top. -->
+
+**v1.9.0** | 2026-03-20
+Large feature batch: Tutorial #3 (USP Classification). 3 new example cases (Logistics, Retail,
+SaaS) from stress parquets. Named Snapshots (save/restore/delete). Collapsible Example Cases
+groups. 7 cases across 4 domains. 9 new tests. 607 tests.
 
 **v1.8.1** | 2026-03-20
 Taxi tutorial EXTRACT(HOUR) fix — CSV imports datetime as VARCHAR, needs ::TIMESTAMP cast.
