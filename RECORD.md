@@ -123,11 +123,17 @@ Building toward reproducible, auditable, shareable analytical sessions:
 | v1.7.1 | 2026-03-20 | UI polish, Bug #12 ORDER BY DESC, reference cols fix, tutorial step-through, 598 tests |
 | v1.7.2 | 2026-03-20 | Tutorial #1 session JSON, tutorial/Run All wiring, Save flush-to-disk, button sizing |
 | v1.8.0 | 2026-03-20 | Bug #15/#16 fixes, Tutorial #2, Workspace Snapshot, NYC Taxi case, category groups |
+| v1.8.1 | 2026-03-20 | Taxi TIMESTAMP cast fix, tutorial summary cards show file size + source |
 
 ---
 
 ## Wrap Records
 <!-- Each /wrap appends a 3-line summary below. Most recent at top. -->
+
+**v1.8.1** | 2026-03-20
+Taxi tutorial EXTRACT(HOUR) fix — CSV imports datetime as VARCHAR, needs ::TIMESTAMP cast.
+Tutorial dataset import now calls loadDatasetMeta() so summary cards show file size and source.
+git push permission moved from ask to allow for automatic /wrap pushes. 598 tests.
 
 **v1.8.0** | 2026-03-20
 Bug #15/#16 final fixes (tutorial runs queries live, clean state). Tutorial #2 (Part B GLOBE).
