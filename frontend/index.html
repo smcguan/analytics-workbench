@@ -255,6 +255,29 @@
             font-size:11px;
             text-transform:uppercase;
             letter-spacing:.9px;
+            cursor:pointer;
+            user-select:none;
+            display:flex;
+            align-items:center;
+            gap:5px;
+        }
+        .section-title:hover{
+            color:var(--fg2);
+        }
+        .section-toggle{
+            font-size:8px;
+            transition:transform .15s ease;
+            display:inline-block;
+        }
+        .section-title.collapsed .section-toggle{
+            transform:rotate(-90deg);
+        }
+        .section-body{
+            overflow:hidden;
+            transition:max-height .2s ease;
+        }
+        .section-body.collapsed{
+            display:none;
         }
 
         .nav-list,
@@ -1504,28 +1527,30 @@
 
         <main class="main">
             <aside class="panel sidebar">
-                <section class="get-started-section">
-                    <h3 class="section-title">Get Started</h3>
+                <section>
+                    <h3 class="section-title" id="sidebarGetStartedTitle"><span class="section-toggle">&#9660;</span> Get Started</h3>
+                    <div class="section-body" id="sidebarGetStartedBody">
                     <div class="nav-list">
                         <button class="nav-item" id="navWelcome">Welcome</button>
                         <button class="nav-item" id="exampleCasesBtn">Example Cases</button>
                     </div>
+                    </div>
                 </section>
 
                 <section>
-                    <h3 class="section-title">Workspace</h3>
-                    <!-- Nav order: Insights → Query → Saved Queries
-                         Insights is first so users can explore AI-generated
-                         observations before diving into manual querying. -->
+                    <h3 class="section-title collapsed" id="sidebarWorkspaceTitle"><span class="section-toggle">&#9660;</span> Workspace</h3>
+                    <div class="section-body collapsed" id="sidebarWorkspaceBody">
                     <div class="nav-list">
                         <button class="nav-item" id="navInsights">Insights</button>
                         <button class="nav-item" id="navQuery">Query</button>
                         <button class="nav-item" id="navSavedQueries">Saved Queries</button>
                     </div>
+                    </div>
                 </section>
 
                 <section>
-                    <h3 class="section-title">Data</h3>
+                    <h3 class="section-title collapsed" id="sidebarDataTitle"><span class="section-toggle">&#9660;</span> Data</h3>
+                    <div class="section-body collapsed" id="sidebarDataBody">
                     <div class="dataset-list" id="datasetList"></div>
 
                     <div class="sidebar-btn-row">
@@ -1574,10 +1599,12 @@
                         Reference: <strong id="referenceName"></strong>
                         <button class="btn-link" id="clearReferenceBtn" style="margin-left:8px; font-size:0.85em;">✕ Remove</button>
                     </div>
+                    </div>
                 </section>
 
                 <section>
-                    <h3 class="section-title">Sessions</h3>
+                    <h3 class="section-title collapsed" id="sidebarSessionsTitle"><span class="section-toggle">&#9660;</span> Sessions</h3>
+                    <div class="section-body collapsed" id="sidebarSessionsBody">
                     <div class="sidebar-btn-row">
                         <button class="btn primary import-btn" id="navSessionLog">Current Session</button>
                         <button class="btn sidebar-btn-secondary" id="saveSessionBtn">Save</button>
@@ -1585,6 +1612,7 @@
                     <div class="sidebar-btn-row" style="margin-top:2px;">
                         <button class="btn import-btn" id="retrieveSessionBtn">Retrieve Session</button>
                         <button class="btn sidebar-btn-secondary" id="snapshotsBtn">Snapshots</button>
+                    </div>
                     </div>
                 </section>
             </aside>
@@ -2436,6 +2464,7 @@ LIMIT 100</textarea>
 
                 clearStatus();
                 toast(`Imported: ${returnedName}`);
+                _onDatasetImported();
 
                 // Hide Welcome view after first import — switch to Insights
                 if (currentView === "welcome") {
@@ -2580,9 +2609,10 @@ LIMIT 100</textarea>
                     groupHeader.appendChild(label);
                     container.appendChild(groupHeader);
 
-                    // Collapsible body wrapper
+                    // Collapsible body wrapper — collapsed by default
+                    groupHeader.classList.add("collapsed");
                     const groupBody = document.createElement("div");
-                    groupBody.className = "ec-group-body";
+                    groupBody.className = "ec-group-body collapsed";
                     groupHeader.addEventListener("click", () => {
                         groupHeader.classList.toggle("collapsed");
                         groupBody.classList.toggle("collapsed");
@@ -3601,6 +3631,7 @@ LIMIT 100</textarea>
                     await loadDatasetMeta(result.dataset);
                 }
                 toast(`Dataset imported: ${result.dataset} (${num(result.row_count)} rows)`);
+                _onDatasetImported();
                 return;
             }
 
@@ -4580,6 +4611,7 @@ LIMIT 100</textarea>
                 }
                 $("resultsMeta").textContent = metaText;
                 toast("SQL executed.");
+                _onQueryExecuted();
             } catch (e) {
                 const errMsg = e.message || "Unknown error";
                 $("resultsMeta").textContent = "ERROR: " + errMsg;
@@ -5195,6 +5227,40 @@ LIMIT 100</textarea>
 
         $("resumeWorkspaceBtn").addEventListener("click", _restoreWorkspace);
         $("startFreshBtn").addEventListener("click", _startFresh);
+
+        // ---------------------------------------------------------------
+        // Sidebar collapsible sections
+        // ---------------------------------------------------------------
+        function _toggleSidebarSection(titleId, bodyId) {
+            $(titleId).classList.toggle("collapsed");
+            $(bodyId).classList.toggle("collapsed");
+        }
+
+        function _expandSidebarSection(titleId, bodyId) {
+            $(titleId).classList.remove("collapsed");
+            $(bodyId).classList.remove("collapsed");
+        }
+
+        function _collapseSidebarSection(titleId, bodyId) {
+            $(titleId).classList.add("collapsed");
+            $(bodyId).classList.add("collapsed");
+        }
+
+        $("sidebarGetStartedTitle").addEventListener("click", () => _toggleSidebarSection("sidebarGetStartedTitle", "sidebarGetStartedBody"));
+        $("sidebarWorkspaceTitle").addEventListener("click", () => _toggleSidebarSection("sidebarWorkspaceTitle", "sidebarWorkspaceBody"));
+        $("sidebarDataTitle").addEventListener("click", () => _toggleSidebarSection("sidebarDataTitle", "sidebarDataBody"));
+        $("sidebarSessionsTitle").addEventListener("click", () => _toggleSidebarSection("sidebarSessionsTitle", "sidebarSessionsBody"));
+
+        // Smart auto-expand: called after dataset import
+        function _onDatasetImported() {
+            _expandSidebarSection("sidebarDataTitle", "sidebarDataBody");
+            _collapseSidebarSection("sidebarGetStartedTitle", "sidebarGetStartedBody");
+        }
+
+        // Smart auto-expand: called after query execution
+        function _onQueryExecuted() {
+            _expandSidebarSection("sidebarWorkspaceTitle", "sidebarWorkspaceBody");
+        }
 
         // ---------------------------------------------------------------
         // Init
