@@ -488,28 +488,37 @@
             margin-top:4px;
         }
 
+        /* ── Sidebar button rows ──────────────────────────────
+           Each row: one primary (flex) + one secondary (fixed width).
+           Both buttons forced to exactly the same height via the row. */
         .sidebar-btn-row{
             display:flex;
             gap:6px;
             margin-bottom:6px;
+            align-items:stretch;   /* both children same height */
+            height:36px;           /* explicit row height = button height */
         }
         .sidebar-btn-row .import-btn{
             flex:1;
             width:auto;
-            height:38px;
+            height:auto;           /* stretch fills it */
+            padding-top:0;
+            padding-bottom:0;
+            margin-top:0;
             box-sizing:border-box;
+            font-size:12.5px;
         }
         .sidebar-btn-row .sidebar-btn-secondary{
+            width:68px;
+            height:auto;           /* stretch fills it */
+            box-sizing:border-box;
             display:inline-flex;
             align-items:center;
             justify-content:center;
-            width:68px;
-            height:38px;
-            box-sizing:border-box;
+            padding:0;
+            font-size:12px;
         }
         .sidebar-btn-secondary{
-            font-size:0.82em;
-            padding:0 10px;
             background:rgba(255,255,255,.04);
             border:1px solid var(--stroke-strong);
             color:var(--fg1);
@@ -3332,9 +3341,15 @@ LIMIT 100</textarea>
                     method: "POST",
                 });
 
-                // Refresh sidebar so analyst sees dataset appear
-                await loadDatasets();
+                // Show ONLY the imported dataset — do NOT call loadDatasets()
+                // which would fetch all datasets from the backend including
+                // pre-existing ones from prior sessions (Bug #16).
                 if (result.dataset) {
+                    datasets = [{
+                        name: result.dataset,
+                        row_count: result.row_count,
+                        column_count: result.column_count,
+                    }];
                     selectedDataset = result.dataset;
                     renderDatasets();
                     updateSelectedDatasetSummary();
