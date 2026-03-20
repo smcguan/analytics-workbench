@@ -3387,7 +3387,9 @@ LIMIT 100</textarea>
                     }];
                     selectedDataset = result.dataset;
                     renderDatasets();
-                    updateSelectedDatasetSummary();
+                    // Fetch full metadata (file_size_bytes, meta_source) so
+                    // the summary cards show size and source, not just "—".
+                    await loadDatasetMeta(result.dataset);
                 }
                 toast(`Dataset imported: ${result.dataset} (${num(result.row_count)} rows)`);
                 return;
