@@ -1810,7 +1810,24 @@ LIMIT 100</textarea>
 
                 <section id="welcomeView" class="hidden">
                     <section class="panel welcome-shell">
-                        <div class="welcome-card">
+                        <!-- Resume prompt — shown when workspace.json has a dataset -->
+                        <div class="welcome-card" id="welcomeResumeCard" style="display:none;">
+                            <h2>Welcome back.</h2>
+                            <p class="subtitle" id="resumeSessionLabel">You were last working on:</p>
+                            <div id="resumeDetails" style="margin:12px 0; padding:12px; border-radius:8px; background:rgba(79,140,255,.08); border:1px solid rgba(79,140,255,.18); font-size:13px; line-height:1.6;">
+                                <strong id="resumeDatasetName"></strong><br>
+                                <span id="resumeDatasetMeta" style="color:var(--fg2);"></span><br>
+                                <span id="resumeRefMeta" style="color:var(--fg2);"></span>
+                            </div>
+                            <p style="margin-bottom:14px; color:var(--fg2);">Resume where you left off?</p>
+                            <div class="welcome-actions" style="display:flex; gap:10px;">
+                                <button class="btn primary" id="resumeWorkspaceBtn">Resume Session</button>
+                                <button class="btn" id="startFreshBtn">Start Fresh</button>
+                            </div>
+                        </div>
+
+                        <!-- Default welcome — shown on first launch or after Start Fresh -->
+                        <div class="welcome-card" id="welcomeDefaultCard">
                             <h2>Analytics Workbench</h2>
                             <p class="subtitle">Local-first AI analytics for analysts who work with sensitive data.</p>
 
@@ -4706,11 +4723,10 @@ LIMIT 100</textarea>
             // Check if session has meaningful activity and is unnamed
             try {
                 const summary = await apiJson("/api/session/summary");
-                const hasActivity = (summary.event_count || 0) > 1; // more than just session_start
+                const hasActivity = (summary.event_count || 0) > 1;
                 const isUnnamed = !summary.name;
 
                 if (hasActivity && isUnnamed) {
-                    // Show naming prompt before shutdown
                     const sessionName = window.prompt(
                         "Name this session before closing? (Leave blank to skip)",
                         ""
@@ -4722,14 +4738,26 @@ LIMIT 100</textarea>
                                 headers: { "Content-Type": "application/json" },
                                 body: JSON.stringify({ name: sessionName.trim(), description: "" }),
                             });
-                        } catch (_) {
-                            // Non-fatal — proceed with shutdown
-                        }
+                        } catch (_) {}
                     }
                 }
-            } catch (_) {
-                // Non-fatal — proceed with shutdown
-            }
+            } catch (_) {}
+
+            // Write workspace snapshot before shutdown
+            try {
+                const refList = currentReference ? [{ name: currentReference }] : [];
+                await apiJson("/api/workspace", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        dataset: selectedDataset || null,
+                        references: refList.length ? refList : null,
+                        last_query: $("sqlEditor").value.trim(),
+                        last_tab: document.querySelector(".nav-item.active")?.id === "navInsights" ? "insights" : "query",
+                        session_name: "",
+                    }),
+                });
+            } catch (_) {}
 
             try { await fetch("/api/shutdown", { method: "POST" }); } catch (e) {}
             toast("Shutting down...");
@@ -4869,25 +4897,109 @@ LIMIT 100</textarea>
             }
         });
 
+        // ---------------------------------------------------------------
+        // Workspace restore handlers
+        // ---------------------------------------------------------------
+        async function _restoreWorkspace() {
+            try {
+                $("resumeWorkspaceBtn").disabled = true;
+                $("resumeWorkspaceBtn").textContent = "Restoring...";
+
+                const result = await apiJson("/api/workspace/restore", { method: "POST" });
+
+                // Load dataset
+                if (result.dataset) {
+                    await loadDatasets();
+                    selectedDataset = result.dataset;
+                    renderDatasets();
+                    updateSelectedDatasetSummary();
+                }
+
+                // Load references
+                if (result.references && result.references.length > 0) {
+                    const ref = result.references[0];
+                    currentReference = ref.name;
+                    const colCount = ref.column_count || "?";
+                    const refDisplay = ref.row_count
+                        ? `${ref.name} (${num(ref.row_count)} rows, ${colCount} cols)`
+                        : ref.name;
+                    $("referenceName").textContent = refDisplay;
+                    $("referenceIndicator").style.display = "block";
+                }
+
+                // Restore last query
+                if (result.last_query) {
+                    $("sqlEditor").value = result.last_query;
+                }
+
+                // Show warnings
+                for (const w of (result.warnings || [])) {
+                    toast(w, 6000);
+                }
+
+                // Delete workspace.json — will be rewritten on next shutdown
+                try { await apiJson("/api/workspace", { method: "DELETE" }); } catch (_) {}
+
+                // Switch to saved tab
+                switchView(result.last_tab === "insights" ? "insights" : "query");
+                toast("Session restored.");
+            } catch (e) {
+                toast("Restore failed: " + (e.message || "Unknown error") + ". Starting fresh.", 6000);
+                try { await apiJson("/api/workspace", { method: "DELETE" }); } catch (_) {}
+                switchView("welcome");
+            } finally {
+                $("resumeWorkspaceBtn").disabled = false;
+                $("resumeWorkspaceBtn").textContent = "Resume Session";
+            }
+        }
+
+        async function _startFresh() {
+            try { await apiJson("/api/workspace", { method: "DELETE" }); } catch (_) {}
+            $("welcomeResumeCard").style.display = "none";
+            $("welcomeDefaultCard").style.display = "";
+        }
+
+        $("resumeWorkspaceBtn").addEventListener("click", _restoreWorkspace);
+        $("startFreshBtn").addEventListener("click", _startFresh);
+
+        // ---------------------------------------------------------------
+        // Init
+        // ---------------------------------------------------------------
         (async function init() {
             await loadVersion();
             await loadSavedQueries();
 
-            // Start with an intentionally empty dataset list in the UI.
-            // Datasets appear only after the user imports one during the session.
             datasets = [];
             selectedDataset = "";
             renderDatasets();
             updateSelectedDatasetSummary();
-
             setActiveTab("table");
-            // Show Welcome card when no datasets are loaded (first launch);
-            // otherwise default to Insights view per frozen UI decisions.
-            if (!datasets.length) {
+
+            // Check for workspace snapshot — offer resume if present
+            try {
+                const ws = await apiJson("/api/workspace");
+                if (ws.workspace && ws.workspace.dataset && ws.workspace.dataset.name
+                    && !ws.workspace.dataset.file_missing) {
+                    // Show resume prompt
+                    const ds = ws.workspace.dataset;
+                    $("resumeDatasetName").textContent = ws.workspace.session_name || ds.name;
+                    const metaParts = ["Dataset: " + ds.name];
+                    if (ds.row_count) metaParts[0] += " \u2022 " + num(ds.row_count) + " rows";
+                    $("resumeDatasetMeta").textContent = metaParts[0];
+                    const refs = ws.workspace.references || [];
+                    $("resumeRefMeta").textContent = refs.length
+                        ? "Reference tables: " + refs.map(r => r.name).join(", ")
+                        : "";
+                    $("welcomeResumeCard").style.display = "";
+                    $("welcomeDefaultCard").style.display = "none";
+                    switchView("welcome");
+                } else {
+                    switchView("welcome");
+                }
+            } catch (_) {
                 switchView("welcome");
-            } else {
-                switchView("insights");
             }
+
             resetInspectState();
         })();
     </script>

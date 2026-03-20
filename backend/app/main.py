@@ -4458,6 +4458,189 @@ def api_sessions_saved():
     return {"sessions": saved}
 
 
+# ============================================================
+# WORKSPACE SNAPSHOT — M5 Component 6
+# ============================================================
+# Persists workspace state across app restarts so the analyst
+# can resume exactly where they left off.
+
+WORKSPACE_PATH = (DATA_DIR / "workspace.json").resolve()
+
+
+def _write_workspace(snapshot: dict) -> None:
+    """Write workspace.json with explicit flush."""
+    import os as _os
+    WORKSPACE_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with open(WORKSPACE_PATH, "w", encoding="utf-8") as f:
+        json.dump(snapshot, f, indent=2)
+        f.flush()
+        _os.fsync(f.fileno())
+    logger.info("Workspace snapshot written to %s", WORKSPACE_PATH)
+
+
+def _build_workspace_snapshot(
+    dataset: str | None = None,
+    references: list[dict] | None = None,
+    last_query: str = "",
+    last_tab: str = "query",
+    session_name: str = "",
+) -> dict:
+    """Build a workspace snapshot dict from current state."""
+    snapshot: dict = {
+        "saved_at": datetime.now(timezone.utc).isoformat(),
+        "dataset": None,
+        "references": [],
+        "last_query": last_query,
+        "last_tab": last_tab,
+        "session_name": session_name,
+        "ai_mode": "cloud",
+    }
+
+    if dataset:
+        ds_dir = (DATASETS_DIR / dataset).resolve()
+        src = ds_dir / "source.parquet"
+        meta_path = ds_dir / "_meta.json"
+        row_count = None
+        if meta_path.exists():
+            try:
+                meta = json.loads(meta_path.read_text(encoding="utf-8"))
+                row_count = meta.get("row_count")
+            except Exception:
+                pass
+        snapshot["dataset"] = {
+            "name": dataset,
+            "source_path": str(src) if src.exists() else None,
+            "row_count": row_count,
+        }
+
+    if references:
+        snapshot["references"] = references
+    elif REFERENCES_DIR.exists():
+        for d in REFERENCES_DIR.iterdir():
+            if d.is_dir() and (d / "source.parquet").exists():
+                ref_entry = {"name": d.name, "source_path": str((d / "source.parquet").resolve())}
+                ref_meta_path = d / "_meta.json"
+                if ref_meta_path.exists():
+                    try:
+                        rm = json.loads(ref_meta_path.read_text(encoding="utf-8"))
+                        ref_entry["row_count"] = rm.get("row_count")
+                        ref_entry["column_count"] = rm.get("column_count")
+                    except Exception:
+                        pass
+                snapshot["references"].append(ref_entry)
+
+    session = get_current_session()
+    if session and session.name:
+        snapshot["session_name"] = session.name
+    if session:
+        snapshot["ai_mode"] = session.ai_mode
+
+    return snapshot
+
+
+class WorkspaceSnapshotRequest(BaseModel):
+    dataset: str | None = None
+    references: list[dict] | None = None
+    last_query: str = ""
+    last_tab: str = "query"
+    session_name: str = ""
+
+
+@app.get("/api/workspace")
+def api_workspace_get():
+    """Return current workspace.json contents, or null if none exists."""
+    if not WORKSPACE_PATH.exists():
+        return {"workspace": None}
+    try:
+        data = json.loads(WORKSPACE_PATH.read_text(encoding="utf-8"))
+        # Verify dataset file still exists
+        if data.get("dataset") and data["dataset"].get("source_path"):
+            if not Path(data["dataset"]["source_path"]).exists():
+                data["dataset"]["file_missing"] = True
+        return {"workspace": data}
+    except Exception as exc:
+        logger.warning("Failed to read workspace.json: %s", exc)
+        return {"workspace": None}
+
+
+@app.post("/api/workspace")
+def api_workspace_save(req: WorkspaceSnapshotRequest):
+    """Write workspace.json from frontend state."""
+    snapshot = _build_workspace_snapshot(
+        dataset=req.dataset,
+        references=req.references,
+        last_query=req.last_query,
+        last_tab=req.last_tab,
+        session_name=req.session_name,
+    )
+    _write_workspace(snapshot)
+    return {"status": "saved", "path": str(WORKSPACE_PATH)}
+
+
+@app.post("/api/workspace/restore")
+def api_workspace_restore():
+    """Restore workspace from workspace.json.
+
+    Re-validates that dataset and reference files exist.
+    Returns the workspace data for the frontend to act on.
+    """
+    if not WORKSPACE_PATH.exists():
+        raise HTTPException(status_code=404, detail="No workspace snapshot found")
+
+    try:
+        data = json.loads(WORKSPACE_PATH.read_text(encoding="utf-8"))
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=f"Corrupted workspace.json: {exc}") from exc
+
+    result: dict = {"status": "ok", "warnings": []}
+
+    # Validate dataset
+    ds = data.get("dataset")
+    if ds and ds.get("name"):
+        ds_dir = (DATASETS_DIR / ds["name"]).resolve()
+        if (ds_dir / "source.parquet").exists():
+            result["dataset"] = ds["name"]
+        else:
+            result["warnings"].append(f"Dataset '{ds['name']}' not found in datasets directory.")
+            result["dataset"] = None
+    else:
+        result["dataset"] = None
+
+    # Validate references
+    result["references"] = []
+    for ref in data.get("references", []):
+        ref_name = ref.get("name", "")
+        ref_dir = (REFERENCES_DIR / ref_name).resolve()
+        if ref_dir.exists() and (ref_dir / "source.parquet").exists():
+            meta_path = ref_dir / "_meta.json"
+            ref_info = {"name": ref_name, "loaded": True}
+            if meta_path.exists():
+                try:
+                    rm = json.loads(meta_path.read_text(encoding="utf-8"))
+                    ref_info["row_count"] = rm.get("row_count")
+                    ref_info["column_count"] = rm.get("column_count")
+                except Exception:
+                    pass
+            result["references"].append(ref_info)
+        else:
+            result["warnings"].append(f"Reference '{ref_name}' not found.")
+
+    result["last_query"] = data.get("last_query", "")
+    result["last_tab"] = data.get("last_tab", "query")
+    result["session_name"] = data.get("session_name", "")
+
+    return result
+
+
+@app.delete("/api/workspace")
+def api_workspace_delete():
+    """Delete workspace.json (Start Fresh)."""
+    if WORKSPACE_PATH.exists():
+        WORKSPACE_PATH.unlink()
+        logger.info("Workspace snapshot deleted")
+    return {"status": "deleted"}
+
+
 @app.post("/api/shutdown")
 def api_shutdown(bg: BackgroundTasks):
     """
