@@ -2532,8 +2532,10 @@ LIMIT 100</textarea>
                     runAllBtn.addEventListener("click", () => loadAndRunAll(caseId));
 
                     btnGroup.appendChild(resumeBtn);
-                    btnGroup.appendChild(tutorialBtn);
-                    btnGroup.appendChild(runAllBtn);
+                    if (c.has_session) {
+                        btnGroup.appendChild(tutorialBtn);
+                        btnGroup.appendChild(runAllBtn);
+                    }
                     item.appendChild(btnGroup);
 
                     container.appendChild(item);
@@ -2584,6 +2586,7 @@ LIMIT 100</textarea>
         async function loadAndTutorial(caseId) {
             try {
                 toast("Loading example case...");
+                // Step 1: Import dataset + reference tables
                 const result = await apiJson("/api/example_cases/" + encodeURIComponent(caseId) + "/load", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -2611,7 +2614,14 @@ LIMIT 100</textarea>
                 }
 
                 switchView("query");
-                toast("Tutorial mode coming soon");
+
+                // Step 2: Load the session file and open tutorial panel
+                try {
+                    const sessionData = await apiJson("/api/example_cases/" + encodeURIComponent(caseId) + "/session");
+                    _openTutorialFromData(sessionData);
+                } catch (sessErr) {
+                    toast("Example case loaded but no tutorial session available: " + (sessErr.message || ""), 6000);
+                }
             } catch (e) {
                 toast("Failed to load example case: " + (e.message || ""), 8000);
             }
@@ -2647,7 +2657,16 @@ LIMIT 100</textarea>
                 }
 
                 switchView("query");
-                toast("Run All mode coming soon \u2014 use Resume to explore");
+
+                // Load session and auto-run all replayable steps
+                try {
+                    const sessionData = await apiJson("/api/example_cases/" + encodeURIComponent(caseId) + "/session");
+                    _openTutorialFromData(sessionData);
+                    // Auto-trigger Run All after panel opens
+                    setTimeout(() => tutorialRunAll(), 300);
+                } catch (sessErr) {
+                    toast("Example case loaded but no session to replay: " + (sessErr.message || ""), 6000);
+                }
             } catch (e) {
                 toast("Failed to load example case: " + (e.message || ""), 8000);
             }
@@ -3198,6 +3217,20 @@ LIMIT 100</textarea>
             }
         }
 
+        function _openTutorialFromData(sessionData) {
+            tutorialSession = sessionData;
+            tutorialSteps = sessionData.events || [];
+            tutorialCurrentStep = 0;
+            tutorialResults = {};
+            _tutorialFilename = sessionData.name || sessionData.session_id || "";
+
+            // Show the tutorial panel
+            $("tutorialPanel").style.display = "flex";
+            document.querySelector(".main").style.paddingBottom = "70px";
+
+            tutorialUpdateDisplay();
+        }
+
         function tutorialUpdateDisplay() {
             if (!tutorialSteps.length) {
                 $("tutorialStepNum").textContent = "No steps";
@@ -3210,13 +3243,24 @@ LIMIT 100</textarea>
             $("tutorialStepType").textContent = (step.event_type || "").replace(/_/g, " ").toUpperCase();
             $("tutorialStepDesc").textContent = _tutorialStepDesc(step);
 
-            // Update status with result if available
+            // Update status: show narration if available, otherwise default text
+            const narration = step.narration || {};
             const result = tutorialResults[tutorialCurrentStep];
             if (result) {
-                $("tutorialStatus").textContent = result;
+                // Step has been executed — show post-narration or result
+                const postText = narration.post || "";
+                $("tutorialStatus").textContent = postText
+                    ? `${result} — ${postText}`
+                    : result;
             } else {
-                $("tutorialStatus").textContent = _isReplayableStep(step.event_type)
-                    ? "Click Next to execute this step" : "Non-replayable step (will be skipped)";
+                // Step not yet executed — show pre-narration or default
+                const preText = narration.pre || "";
+                if (preText) {
+                    $("tutorialStatus").textContent = preText;
+                } else {
+                    $("tutorialStatus").textContent = _isReplayableStep(step.event_type)
+                        ? "Click Next to execute this step" : "Non-replayable step (will be skipped)";
+                }
             }
 
             // Button states
@@ -3230,10 +3274,25 @@ LIMIT 100</textarea>
             const step = tutorialSteps[tutorialCurrentStep];
 
             if (_isReplayableStep(step.event_type)) {
-                $("tutorialStatus").textContent = "Executing...";
+                const preNarration = (step.narration || {}).pre || "";
+                if (preNarration) {
+                    $("tutorialStatus").textContent = preNarration;
+                } else {
+                    $("tutorialStatus").textContent = "Executing...";
+                }
                 try {
                     await _executeTutorialStep(step);
-                    tutorialResults[tutorialCurrentStep] = "Passed";
+                    // Check baseline row count if present
+                    const baseline = step.baseline || {};
+                    if (baseline.expected_row_count !== undefined && lastRun) {
+                        const actual = lastRun.rowcount;
+                        const expected = baseline.expected_row_count;
+                        tutorialResults[tutorialCurrentStep] = actual === expected
+                            ? `Passed (${num(actual)} rows)`
+                            : `Row count mismatch: expected ${num(expected)}, got ${num(actual)}`;
+                    } else {
+                        tutorialResults[tutorialCurrentStep] = "Passed";
+                    }
                 } catch (e) {
                     tutorialResults[tutorialCurrentStep] = "Failed: " + (e.message || "Unknown error");
                 }
@@ -3242,7 +3301,7 @@ LIMIT 100</textarea>
                 // Skip non-replayable steps automatically until we reach
                 // the next replayable step or the end of the session.
                 while (tutorialCurrentStep < tutorialSteps.length - 1) {
-                    tutorialResults[tutorialCurrentStep] = "Skipped (non-replayable)";
+                    tutorialResults[tutorialCurrentStep] = "Skipped";
                     tutorialCurrentStep++;
                     if (_isReplayableStep(tutorialSteps[tutorialCurrentStep].event_type)) {
                         break;
@@ -3251,7 +3310,7 @@ LIMIT 100</textarea>
                 // If we landed on the last step and it's non-replayable, mark it too
                 if (tutorialCurrentStep === tutorialSteps.length - 1
                     && !_isReplayableStep(tutorialSteps[tutorialCurrentStep].event_type)) {
-                    tutorialResults[tutorialCurrentStep] = "Skipped (non-replayable)";
+                    tutorialResults[tutorialCurrentStep] = "Skipped";
                 }
             }
 
@@ -3344,33 +3403,61 @@ LIMIT 100</textarea>
 
         async function tutorialRunAll() {
             $("tutorialRunAllBtn").disabled = true;
+            $("tutorialNextBtn").disabled = true;
+            $("tutorialPrevBtn").disabled = true;
             $("tutorialRunAllBtn").textContent = "Running...";
             $("tutorialStatus").textContent = "Running full replay...";
 
-            try {
-                const report = await apiJson("/api/session/replay", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ filename: _tutorialFilename, stop_on_failure: false }),
-                });
+            let passed = 0, failed = 0, skipped = 0;
 
-                // Record results for all steps
-                for (const step of (report.steps || [])) {
-                    tutorialResults[step.event_index] = step.status === "pass" ? "Passed"
-                        : step.status === "skip" ? "Skipped"
-                        : step.status === "fail" ? "Failed: " + step.message
-                        : "Error: " + step.message;
+            try {
+                for (let i = 0; i < tutorialSteps.length; i++) {
+                    tutorialCurrentStep = i;
+                    const step = tutorialSteps[i];
+
+                    if (_isReplayableStep(step.event_type)) {
+                        $("tutorialStatus").textContent = `Executing step ${i + 1} of ${tutorialSteps.length}...`;
+                        tutorialUpdateDisplay();
+                        try {
+                            await _executeTutorialStep(step);
+                            // Check baseline
+                            const baseline = step.baseline || {};
+                            if (baseline.expected_row_count !== undefined && lastRun) {
+                                const actual = lastRun.rowcount;
+                                const expected = baseline.expected_row_count;
+                                if (actual === expected) {
+                                    tutorialResults[i] = `Passed (${num(actual)} rows)`;
+                                    passed++;
+                                } else {
+                                    tutorialResults[i] = `Row count mismatch: expected ${num(expected)}, got ${num(actual)}`;
+                                    failed++;
+                                }
+                            } else {
+                                tutorialResults[i] = "Passed";
+                                passed++;
+                            }
+                        } catch (e) {
+                            tutorialResults[i] = "Failed: " + (e.message || "Unknown error");
+                            failed++;
+                        }
+                    } else {
+                        tutorialResults[i] = "Skipped";
+                        skipped++;
+                    }
                 }
 
-                const summary = `Replay complete: ${report.passed} passed, ${report.failed} failed, ${report.skipped} skipped, ${report.errors} errors`;
+                const summary = `Replay complete: ${passed} passed, ${failed} failed, ${skipped} skipped`;
                 $("tutorialStatus").textContent = summary;
-                toast(report.overall_status === "pass" ? "All steps passed." : "Some steps failed.");
+                toast(failed === 0 ? "All steps passed." : `${failed} step(s) failed.`);
             } catch (e) {
                 $("tutorialStatus").textContent = "Replay failed: " + (e.message || "Unknown error");
                 toast("Replay failed: " + (e.message || ""), 6000);
             } finally {
                 $("tutorialRunAllBtn").disabled = false;
+                $("tutorialNextBtn").disabled = false;
+                $("tutorialPrevBtn").disabled = false;
                 $("tutorialRunAllBtn").textContent = "Run All";
+                tutorialUpdateDisplay();
             }
         }
 

@@ -4327,6 +4327,22 @@ def api_load_example_case(case_id: str, req: LoadCaseRequest):
     }
 
 
+@app.get("/api/example_cases/{case_id}/session")
+def api_example_case_session(case_id: str):
+    """Return the session JSON for an example case (for tutorial step-through)."""
+    case_dir = (EXAMPLE_CASES_DIR / case_id).resolve()
+    session_path = case_dir / "session.json"
+    if not session_path.exists():
+        raise HTTPException(status_code=404, detail=f"No session file for example case: {case_id}")
+    try:
+        data = json.loads(session_path.read_text(encoding="utf-8"))
+        return data
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to read session file: {exc}"
+        ) from exc
+
+
 # ============================================================
 # SAVED SESSIONS
 # ============================================================

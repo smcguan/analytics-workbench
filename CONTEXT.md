@@ -460,6 +460,10 @@ without your data ever leaving your machine."
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-20] [BD] — Recording Tutorial #1 (Part D IRA Exclusion) against packaged sample
+  data in example_cases directory. Dataset loads as 'part_d_spending_sample' — naming
+  convention to standardize across all three packages. Five queries validated against
+  500-row sample. v1.7.1 fixes confirmed: buttons styled, DESC fixed, cols fixed.
 [2026-03-20] [CODE] — UI polish + bug fixes: sidebar button styling (Refresh/Library/Save now proper
   buttons), Bug #12 fix (ORDER BY DESC — expanded _SQL_KW keyword list + 6 regression tests),
   Bug #13 tests (suggestions don't log query_run), reference "undefined cols" fix (column_count
@@ -596,20 +600,15 @@ without your data ever leaving your machine."
 - Draft proposal and contract template skeleton
 
 **Product / code (Claude Code):**
+- Standardize example case dataset naming: 'part_d_spending_sample' →
+  'part_d_spending_by_drug_sample' across all three example case packages for consistency
+- Add recorded session JSONs to example case packages once Tutorial #1-3 are recorded
 - ~~Session File (Component 3a) — automatic replay mode~~ COMPLETE v1.6.0
-- Session File remaining work:
-  - Interactive replay mode (needs frontend step-through UI)
-  - Tutorial replay mode (needs frontend + AI narration)
-  - Record Compass Part D analysis as Tutorial #1 and first end-to-end test session
-  - Define three standard tutorial session files (core query, reference JOIN, export)
-- ~~Session Library (Component 3b) — Example Cases button + browser UI~~ COMPLETE v1.6.0
+- ~~Session Library (Component 3b) — Example Cases button + browser UI~~ COMPLETE v1.7.0
 - Session Library remaining work:
-  - Package sample data with initial sessions
-  - v1 library: 4 sessions (Medicare spending, IRA exclusion, concentration, export)
-  - Per-step "Run Step" button (v1 has "Run All" only)
+  - Tutorial narration — AI-generated step descriptions
   - Every Example Case automatically included in end-to-end test suite
 - UX improvement: auto-load previously active reference tables on session start
-  (currently requires manual load each session)
 - Build AI Mode Switch (Component 2 addition) — session-level Local/Cloud toggle
 - Build additional Reference Table Library files (MFN deal status, biosimilar tracker)
 - Spot-check usp_globe_categories, usp_guard_categories, orphan_drug_status CSVs

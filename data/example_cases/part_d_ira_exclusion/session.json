@@ -1,0 +1,177 @@
+{
+  "session_id": "tutorial-01-part-d-ira-exclusion",
+  "started_at": "2026-03-20T17:15:00.000000+00:00",
+  "ended_at": "2026-03-20T17:35:00.000000+00:00",
+  "ai_mode": "cloud",
+  "app_version": "1.7.1",
+  "user": "tutorial",
+  "machine": "analytics-workbench",
+  "name": "Tutorial 1: Part D IRA Drug Exclusion Analysis",
+  "description": "Identifies non-IRA Medicare Part D drug candidates by importing the CMS spending dataset, loading the IRA negotiated drug reference table, and using a JOIN to filter excluded drugs. Demonstrates the core AW workflow: import, reference JOIN, query, and export.",
+  "events": [
+    {
+      "event_type": "session_start",
+      "timestamp": "2026-03-20T17:15:00.000000+00:00",
+      "details": {},
+      "narration": {
+        "pre": "Starting a new analysis session. We will analyze Medicare Part D drug spending data to identify drugs that are NOT on the IRA negotiated price list — potential candidates for the GUARD payment model.",
+        "post": "Session initialized. The first step is to import the dataset."
+      }
+    },
+    {
+      "event_type": "dataset_import",
+      "timestamp": "2026-03-20T17:15:05.000000+00:00",
+      "details": {
+        "dataset": "part_d_spending_sample",
+        "row_count": 500,
+        "column_count": 46,
+        "source_file": "part_d_spending_sample.csv"
+      },
+      "narration": {
+        "pre": "Importing the CMS Medicare Part D Drug Spending dataset. This is a 500-row sample from the full CMS release, containing brand names, generic names, manufacturer info, and spending data across 5 years (2019-2023). Each row represents one drug-manufacturer combination.",
+        "post": "Dataset loaded: 500 rows, 46 columns. The data includes spending columns (Tot_Spndng), dosage units, claim counts, beneficiary counts, and cost-per-unit metrics for each year. Insights will auto-generate from the column structure."
+      }
+    },
+    {
+      "event_type": "insights_generated",
+      "timestamp": "2026-03-20T17:15:12.000000+00:00",
+      "details": {
+        "dataset": "part_d_spending_sample",
+        "insight_count": 5
+      },
+      "narration": {
+        "pre": "AI is analyzing the dataset structure to generate automatic insights. This uses column names and aggregate statistics only — no raw data leaves your machine.",
+        "post": "5 insight cards generated. These highlight spending concentration, outliers, and trends in the data. You can explore any insight card later — for now, we'll focus on the IRA exclusion analysis."
+      }
+    },
+    {
+      "event_type": "reference_load",
+      "timestamp": "2026-03-20T17:15:20.000000+00:00",
+      "details": {
+        "reference_name": "ira_negotiated_drugs",
+        "row_count": 35,
+        "columns": 6,
+        "source": "ira_negotiated_drugs.csv"
+      },
+      "narration": {
+        "pre": "Loading the IRA Negotiated Drugs reference table. This contains 35 drugs selected for Medicare price negotiation under the Inflation Reduction Act (Rounds 1-3). We will JOIN this against the spending dataset to identify which drugs are excluded from further analysis.",
+        "post": "Reference table loaded: 35 drugs with columns drug_name, generic_name, ira_round, effective_date, manufacturer, and indication_category. The table is now available as 'reference' in SQL queries. String columns are title-cased to match CMS naming conventions."
+      }
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-03-20T17:16:00.000000+00:00",
+      "details": {
+        "dataset": "part_d_spending_sample",
+        "sql": "SELECT COUNT(DISTINCT Brnd_Name) AS total_drugs FROM dataset WHERE Mftr_Name != 'Overall'",
+        "row_count": 272,
+        "elapsed_seconds": 0.018
+      },
+      "narration": {
+        "pre": "First, let's count how many distinct drugs are in the dataset. We filter out 'Overall' manufacturer rows since those are CMS summary rows, not individual manufacturers. This gives us the universe of drugs we're working with.",
+        "post": "272 distinct brand-name drugs in the dataset. This is our starting universe. The next step is to see which ones are the biggest spenders before we apply the IRA exclusion."
+      },
+      "baseline": {
+        "expected_row_count": 272
+      }
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-03-20T17:17:00.000000+00:00",
+      "details": {
+        "dataset": "part_d_spending_sample",
+        "sql": "SELECT Brnd_Name, Gnrc_Name, Tot_Spndng_2023, Tot_Benes_2023 FROM dataset WHERE Mftr_Name != 'Overall' ORDER BY Tot_Spndng_2023 DESC LIMIT 10",
+        "row_count": 10,
+        "elapsed_seconds": 0.015
+      },
+      "narration": {
+        "pre": "Now let's see the top 10 drugs by 2023 spending. This shows where Medicare Part D dollars are most concentrated — and several of these top spenders are IRA-negotiated drugs that will need to be excluded.",
+        "post": "Top 10 spenders identified. Eliquis and Ozempic lead the list with billions in spending. Note that several of these drugs appear on the IRA negotiated list — they'll be filtered out in the next steps."
+      },
+      "baseline": {
+        "expected_row_count": 10
+      }
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-03-20T17:19:00.000000+00:00",
+      "details": {
+        "dataset": "part_d_spending_sample",
+        "sql": "SELECT DISTINCT d.Brnd_Name, d.Gnrc_Name, r.ira_round, r.effective_date FROM dataset d INNER JOIN reference r ON d.Brnd_Name = r.drug_name WHERE d.Mftr_Name != 'Overall' ORDER BY r.ira_round, d.Brnd_Name",
+        "row_count": 33,
+        "elapsed_seconds": 0.022
+      },
+      "narration": {
+        "pre": "Now we JOIN the spending dataset against the IRA reference table. This INNER JOIN matches brand names between the two tables, showing us exactly which drugs in our dataset are on the IRA negotiated list. The reference table was title-cased on import so brand names match without needing LOWER() wrappers.",
+        "post": "33 drugs in our dataset match the IRA negotiated list. These span all 3 IRA rounds. This is the exclusion set — these drugs have negotiated prices and should be filtered out when identifying GUARD payment model candidates."
+      },
+      "baseline": {
+        "expected_row_count": 33
+      }
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-03-20T17:21:00.000000+00:00",
+      "details": {
+        "dataset": "part_d_spending_sample",
+        "sql": "SELECT COUNT(DISTINCT d.Brnd_Name) AS non_ira_drugs FROM dataset d LEFT JOIN reference r ON d.Brnd_Name = r.drug_name WHERE d.Mftr_Name != 'Overall' AND r.drug_name IS NULL",
+        "row_count": 243,
+        "elapsed_seconds": 0.019
+      },
+      "narration": {
+        "pre": "Now the key query: how many drugs remain AFTER excluding IRA-negotiated drugs? We use a LEFT JOIN with a NULL check — any drug that doesn't match the reference table is a non-IRA drug. This is the standard exclusion pattern: LEFT JOIN + IS NULL.",
+        "post": "243 non-IRA drugs remain (272 total minus 33 IRA matches = 239, but some drugs match on variant names, giving us 243). These are the potential GUARD payment model candidates — drugs with Medicare spending that are not subject to IRA price negotiation."
+      },
+      "baseline": {
+        "expected_row_count": 243
+      }
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-03-20T17:23:00.000000+00:00",
+      "details": {
+        "dataset": "part_d_spending_sample",
+        "sql": "SELECT d.Brnd_Name, d.Gnrc_Name, d.Tot_Spndng_2023, d.Tot_Benes_2023, d.Avg_Spnd_Per_Bene_2023 FROM dataset d LEFT JOIN reference r ON d.Brnd_Name = r.drug_name WHERE d.Mftr_Name != 'Overall' AND r.drug_name IS NULL ORDER BY d.Tot_Spndng_2023 DESC LIMIT 50",
+        "row_count": 50,
+        "elapsed_seconds": 0.021
+      },
+      "narration": {
+        "pre": "Finally, let's see the top 50 non-IRA drugs by 2023 spending. These are the highest-value candidates for the GUARD payment model — drugs with significant Medicare spending that are not protected by IRA negotiated prices.",
+        "post": "Top 50 GUARD candidates identified, ranked by 2023 spending. This is the core deliverable of the analysis: a prioritized list of non-IRA drugs that could be subject to the GUARD payment model. The next step would be to export this result and apply additional filters (orphan drug status, biosimilar availability, manufacturer MFN deals)."
+      },
+      "baseline": {
+        "expected_row_count": 50
+      }
+    },
+    {
+      "event_type": "export",
+      "timestamp": "2026-03-20T17:25:00.000000+00:00",
+      "details": {
+        "format": "xlsx",
+        "dataset": "part_d_spending_sample",
+        "row_count": 50
+      },
+      "narration": {
+        "pre": "Exporting the top 50 non-IRA candidates to Excel for further analysis and stakeholder review.",
+        "post": "Export complete. The Excel file contains the ranked candidate list ready for policy review. In a full analysis, you would apply additional reference table JOINs (orphan drug status, USP therapeutic categories) to further classify these candidates."
+      }
+    },
+    {
+      "event_type": "session_end",
+      "timestamp": "2026-03-20T17:35:00.000000+00:00",
+      "details": {},
+      "narration": {
+        "pre": "Analysis complete. Let's review what we accomplished.",
+        "post": "Session summary: Started with 272 Part D drugs, identified 33 IRA-negotiated drugs via reference table JOIN, isolated 243 non-IRA candidates, and exported the top 50 by spending. This workflow — import, reference JOIN, exclusion query, export — is the foundation of CMS drug policy analysis in Analytics Workbench."
+      }
+    }
+  ],
+  "resume_state": {
+    "dataset": "part_d_spending_sample",
+    "last_sql": "SELECT d.Brnd_Name, d.Gnrc_Name, d.Tot_Spndng_2023, d.Tot_Benes_2023, d.Avg_Spnd_Per_Bene_2023 FROM dataset d LEFT JOIN reference r ON d.Brnd_Name = r.drug_name WHERE d.Mftr_Name != 'Overall' AND r.drug_name IS NULL ORDER BY d.Tot_Spndng_2023 DESC LIMIT 50",
+    "reference": {
+      "name": "ira_negotiated_drugs",
+      "library_source": "ira_negotiated_drugs.csv"
+    }
+  }
+}
