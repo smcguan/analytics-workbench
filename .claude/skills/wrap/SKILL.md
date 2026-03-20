@@ -36,17 +36,24 @@ memory alone.
 - Update coding conventions if new patterns were established.
 - Do NOT just append — read the relevant sections and update them.
 
-**6. Update RECORD.md**
+**6. Update Reference Guide (in frontend/index.html)**
+- If any user-facing features changed this session, update the Reference
+  Guide content in the `referenceGuideView` section of index.html.
+- Check: sidebar layout, import flow, sessions/snapshots, privacy model,
+  example cases, troubleshooting — update any section that was affected.
+- The Reference Guide is the in-app documentation. It must stay accurate.
+
+**7. Update RECORD.md**
 - Add a row to the Version History table.
 - Append a 3-line wrap record under "Wrap Records" (most recent at top):
   Format: version number, date, and what was built/changed/fixed.
 
-**7. Check for uncommitted changes**
+**8. Check for uncommitted changes**
 Run `git status` and warn if there are unstaged changes that would be
 left behind. Stage all relevant changed files.
 
-**8. Commit with descriptive message**
+**9. Commit with descriptive message**
 Stage all updated files and commit. Message should summarize the session.
 
-**9. Push to remote**
+**10. Push to remote**
 Run `git push` after successful commit.
