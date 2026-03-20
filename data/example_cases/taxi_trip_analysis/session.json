@@ -100,7 +100,7 @@
       "timestamp": "2026-03-20T19:07:00.000000+00:00",
       "details": {
         "dataset": "nyc_taxi_2023_03_sample",
-        "sql": "SELECT EXTRACT(HOUR FROM tpep_pickup_datetime) AS pickup_hour, COUNT(*) AS trips, ROUND(AVG(fare_amount), 2) AS avg_fare FROM dataset GROUP BY pickup_hour ORDER BY pickup_hour",
+        "sql": "SELECT EXTRACT(HOUR FROM tpep_pickup_datetime::TIMESTAMP) AS pickup_hour, COUNT(*) AS trips, ROUND(AVG(fare_amount), 2) AS avg_fare FROM dataset GROUP BY pickup_hour ORDER BY pickup_hour",
         "row_count": 24,
         "elapsed_seconds": 0.017
       },
@@ -117,7 +117,7 @@
       "timestamp": "2026-03-20T19:09:00.000000+00:00",
       "details": {
         "dataset": "nyc_taxi_2023_03_sample",
-        "sql": "SELECT tpep_pickup_datetime, PULocationID, DOLocationID, trip_distance, fare_amount, tip_amount, total_amount FROM dataset WHERE fare_amount > 100 ORDER BY fare_amount DESC",
+        "sql": "SELECT tpep_pickup_datetime::TIMESTAMP AS pickup_time, PULocationID, DOLocationID, trip_distance, fare_amount, tip_amount, total_amount FROM dataset WHERE fare_amount > 100 ORDER BY fare_amount DESC",
         "row_count": 24,
         "elapsed_seconds": 0.014
       },
@@ -154,6 +154,6 @@
   ],
   "resume_state": {
     "dataset": "nyc_taxi_2023_03_sample",
-    "last_sql": "SELECT tpep_pickup_datetime, PULocationID, DOLocationID, trip_distance, fare_amount, tip_amount, total_amount FROM dataset WHERE fare_amount > 100 ORDER BY fare_amount DESC"
+    "last_sql": "SELECT tpep_pickup_datetime::TIMESTAMP AS pickup_time, PULocationID, DOLocationID, trip_distance, fare_amount, tip_amount, total_amount FROM dataset WHERE fare_amount > 100 ORDER BY fare_amount DESC"
   }
 }
