@@ -1929,6 +1929,14 @@ LIMIT 100</textarea>
 <li><strong>Query</strong> — ask questions in natural language or write SQL</li>
 <li><strong>Export</strong> — download results as Excel, TSV, or structured passport</li>
 </ol>
+<p><strong>Sidebar layout:</strong> The left sidebar has four collapsible sections. Click any section header to expand or collapse it.</p>
+<ul>
+<li><strong>GET STARTED</strong> — Welcome, Reference Guide, Example Cases</li>
+<li><strong>WORKSPACE</strong> — Insights, Query, Saved Queries (auto-expands on first query)</li>
+<li><strong>DATA</strong> — Imported datasets, reference tables, library (auto-expands on first import)</li>
+<li><strong>SESSIONS</strong> — Retrieve/Save sessions and snapshots</li>
+</ul>
+<p>Below the sidebar sections: <strong>Exit</strong> (close immediately) and <strong>Save</strong> (save session + snapshot, then close).</p>
 
 <hr>
 <h3>Importing Data</h3>
@@ -2009,12 +2017,15 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 
 <hr>
 <h3>Sessions</h3>
-<p><strong>Session Log:</strong> AW automatically records every action — imports, queries, reference loads, exports — with timestamps and details.</p>
-<p><strong>Save Session:</strong> Name and save the current session for future retrieval. Saved sessions include the full event log.</p>
-<p><strong>Retrieve Session:</strong> Browse previously saved sessions by name and date. Resume restores full session state.</p>
-<p><strong>Save Snapshot:</strong> Save current workspace state (dataset, reference tables, last query) as a named snapshot.</p>
-<p><strong>Retrieve Snapshot:</strong> Browse and restore named snapshots. Each snapshot captures exactly where you left off.</p>
-<p><strong>Auto-snapshot:</strong> AW saves workspace state automatically when you exit. On next launch, you'll see a resume prompt.</p>
+<p>The SESSIONS section in the sidebar provides four buttons in two rows:</p>
+<ul>
+<li><strong>Retrieve Session + Save</strong> — browse and restore saved sessions, or save the current session with a name. Session files are saved to <code>data/sessions/</code> using your chosen name as the filename.</li>
+<li><strong>Retrieve Snapshot + Save</strong> — browse and restore workspace snapshots, or save the current workspace state. Snapshot files are saved to <code>data/snapshots/</code> using your chosen name.</li>
+</ul>
+<p><strong>Sessions vs. Snapshots:</strong> A session captures the full event log (every query, import, export). A snapshot captures the current workspace state (which dataset is loaded, which reference table, last SQL query). Use sessions for audit trails. Use snapshots for quick resume.</p>
+<p><strong>Auto-snapshot:</strong> AW automatically saves workspace state when you exit. On next launch, you'll see a resume prompt offering to restore where you left off.</p>
+<p><strong>Exit &amp; Save:</strong> The Exit button at the bottom of the sidebar closes AW immediately. The Save button next to it prompts for a name and saves both session and snapshot before closing.</p>
+<p><strong>Session Log:</strong> AW automatically records every action — imports, queries, reference loads, exports — with timestamps and details. This happens silently in the background.</p>
 
 <hr>
 <h3>Exporting</h3>
@@ -2027,7 +2038,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 <p><strong>Schema-only AI:</strong> When AW calls OpenAI, it sends only column names, data types, and aggregate statistics (min, max, mean). Sample rows and raw values are never sent.</p>
 <p><strong>What gets sent:</strong> Column names, data types, numeric ranges, null rates.</p>
 <p><strong>What never leaves your machine:</strong> Row data, query results, exported files, Reference Table contents.</p>
-<p><strong>Per-dataset consent:</strong> On import, you choose whether to enable AI features. Declining disables Insights and Suggestions but SQL and manual queries still work normally.</p>
+<p><strong>Data cleaning:</strong> Trailing special characters (asterisks, footnote symbols) are automatically stripped from string values on import, so SQL filters work correctly without manual cleanup.</p>
 
 <hr>
 <h3>Troubleshooting</h3>
