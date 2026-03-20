@@ -492,22 +492,24 @@
             display:flex;
             gap:6px;
             margin-bottom:6px;
-            align-items:stretch;
         }
         .sidebar-btn-row .import-btn{
             flex:1;
             width:auto;
+            height:38px;
+            box-sizing:border-box;
         }
         .sidebar-btn-row .sidebar-btn-secondary{
             display:inline-flex;
             align-items:center;
             justify-content:center;
-            min-width:62px;
+            width:68px;
+            height:38px;
             box-sizing:border-box;
         }
         .sidebar-btn-secondary{
             font-size:0.82em;
-            padding:7px 12px;
+            padding:0 10px;
             background:rgba(255,255,255,.04);
             border:1px solid var(--stroke-strong);
             color:var(--fg1);
@@ -2593,6 +2595,31 @@ LIMIT 100</textarea>
                 const sessionData = await apiJson("/api/example_cases/" + encodeURIComponent(caseId) + "/session");
 
                 closeExampleCases();
+
+                // Bug #16: Wipe workspace clean before tutorial begins.
+                // Clear reference table
+                if (currentReference) {
+                    try {
+                        await apiJson(`/api/references/${currentReference}/delete`, { method: "POST" });
+                    } catch (_) {}
+                    currentReference = "";
+                    $("referenceIndicator").style.display = "none";
+                    $("referenceName").textContent = "";
+                }
+                // Clear dataset selection and sidebar
+                selectedDataset = "";
+                datasets = [];
+                renderDatasets();
+                updateSelectedDatasetSummary();
+                // Clear SQL editor and results
+                $("sqlEditor").value = "SELECT *\nFROM dataset\nLIMIT 100";
+                $("resultsCount").textContent = "";
+                $("resultsMeta").textContent = "";
+                lastRun = { columns: [], rows: [], rowcount: 0, elapsed: 0, sql: "", visualization: null };
+                renderResults([], []);
+                clearChart();
+                clearInsights();
+
                 switchView("query");
 
                 // Store the case ID so step execution can import from the right place
@@ -3334,23 +3361,22 @@ LIMIT 100</textarea>
                 const sql = d.sql || "";
                 if (!sql) throw new Error("No SQL in step");
 
-                // Set the dataset selector if needed
+                // Ensure the dataset is selected
                 if (dataset && dataset !== selectedDataset) {
-                    const dsMatch = datasets.find(ds => (ds.name || "") === dataset);
-                    if (dsMatch) {
-                        selectedDataset = dataset;
-                        renderDatasets();
-                        updateSelectedDatasetSummary();
-                    }
+                    selectedDataset = dataset;
+                    renderDatasets();
+                    updateSelectedDatasetSummary();
                 }
 
-                // Put SQL in editor
+                // Put SQL in editor so analyst sees it
                 $("sqlEditor").value = sql;
 
-                // Switch to query view to show results
+                // Switch to query view and activate the table tab
                 switchView("query");
+                setActiveTab("table");
+                $("resultsMeta").textContent = "Running SQL...";
 
-                // Execute via existing API
+                // Execute the query — results appear live in the results panel
                 const sqlBody = { dataset, sql };
                 if (currentReference) sqlBody.reference = currentReference;
                 const data = await apiJson("/api/sql", {
@@ -3371,6 +3397,7 @@ LIMIT 100</textarea>
                 renderResults(lastRun.columns, lastRun.rows);
                 $("resultsCount").textContent = `${num(lastRun.rowcount)} rows`;
                 $("resultsMeta").textContent = `executed in ${lastRun.elapsed}s`;
+                $("copyResultSummaryBtn").disabled = false;
                 return;
             }
 
