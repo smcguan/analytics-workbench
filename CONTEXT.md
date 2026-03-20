@@ -31,6 +31,8 @@
   after restart. Backend now auto-detects loaded reference tables from REFERENCES_DIR.
 - Bug #11 (AI using APPROX_PERCENTILE_CONT) — FIXED v1.5.6. Function doesn't exist in
   DuckDB. Prompt updated to use PERCENTILE_CONT/QUANTILE_CONT/MEDIAN.
+- Bug #12 (ORDER BY DESC regression) — FIXED v1.7.1. Expanded _SQL_KW keyword list.
+  6 regression tests.
 - Bug #13 (Session Log recording insight previews as query_run) — FIXED v1.6.2. Insight
   card mini-previews marked internal + double-fetchInsights race condition guard added.
 
@@ -460,6 +462,11 @@ without your data ever leaving your machine."
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-20] [CODE] — Tutorial #1 wired end-to-end: session JSON with narration + baselines for
+  Part D IRA Exclusion (11 events, 5 queries with row count baselines: 272/10/33/243/50).
+  New endpoint GET /api/example_cases/{id}/session. Tutorial/Run All buttons execute client-side
+  with baseline validation. Save Session flush-to-disk fix (fsync). Consistent sidebar button
+  sizing (min-width on secondary buttons). 598 tests. v1.7.2.
 [2026-03-20] [BD] — Recording Tutorial #1 (Part D IRA Exclusion) against packaged sample
   data in example_cases directory. Dataset loads as 'part_d_spending_sample' — naming
   convention to standardize across all three packages. Five queries validated against
@@ -602,11 +609,12 @@ without your data ever leaving your machine."
 **Product / code (Claude Code):**
 - Standardize example case dataset naming: 'part_d_spending_sample' →
   'part_d_spending_by_drug_sample' across all three example case packages for consistency
-- Add recorded session JSONs to example case packages once Tutorial #1-3 are recorded
+- ~~Add recorded session JSONs to example case packages~~ Tutorial #1 COMPLETE v1.7.2
+- Record Tutorial #2 (Part B GLOBE Candidates) and Tutorial #3 (USP Classification)
 - ~~Session File (Component 3a) — automatic replay mode~~ COMPLETE v1.6.0
 - ~~Session Library (Component 3b) — Example Cases button + browser UI~~ COMPLETE v1.7.0
+- ~~Tutorial narration + baseline validation~~ COMPLETE v1.7.2
 - Session Library remaining work:
-  - Tutorial narration — AI-generated step descriptions
   - Every Example Case automatically included in end-to-end test suite
 - UX improvement: auto-load previously active reference tables on session start
 - Build AI Mode Switch (Component 2 addition) — session-level Local/Cloud toggle

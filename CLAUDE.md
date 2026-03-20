@@ -680,6 +680,7 @@ GET  /api/session/load/{filename}        (load full session file content) [MILES
 GET  /api/example_cases                  (list curated example cases) [MILESTONE 5]
 POST /api/example_cases/{id}/load        (load example case: import data + refs) [MILESTONE 5]
 GET  /api/sessions/saved                 (list analyst's named saved sessions) [MILESTONE 5]
+GET  /api/example_cases/{id}/session     (example case session JSON for tutorial) [MILESTONE 5]
 POST /api/shutdown
 ```
 

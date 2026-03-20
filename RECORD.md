@@ -10,7 +10,7 @@ stays on the analyst's machine — AI generates analysis instructions, not data 
 **Tech stack:** FastAPI backend, DuckDB query engine, OpenAI GPT-4.1-mini for AI,
 vanilla HTML/JS/CSS frontend, PyInstaller packaging for Windows desktop.
 
-**Current version:** v1.6.1 | **Total commits:** 94 | **Test suite:** 567 tests (+3 xfail)
+**Current version:** v1.7.2 | **Total commits:** 100+ | **Test suite:** 598 tests (zero xfail)
 
 ---
 
@@ -72,7 +72,7 @@ Building toward reproducible, auditable, shareable analytical sessions:
 
 ---
 
-## Bugs Fixed (11 resolved, 1 active)
+## Bugs Fixed (12 resolved, 1 active)
 
 | Bug | Issue | Fix | Version |
 |-----|-------|-----|---------|
@@ -85,6 +85,7 @@ Building toward reproducible, auditable, shareable analytical sessions:
 | #8 | Reference Library case mismatch on JOIN | Title-case string columns on import | v1.5.1 |
 | #10 | Reference table not queryable after restart | Auto-detect from REFERENCES_DIR + EXPLAIN reference view | v1.5.6 |
 | #11 | AI using APPROX_PERCENTILE_CONT | Prompt updated for correct DuckDB syntax | v1.5.6 |
+| #12 | ORDER BY DESC regression — keywords captured as aliases | Expanded _SQL_KW list with 20+ SQL keywords | v1.7.1 |
 | #13 | Session Log recording all suggestions as query_run | Insight previews marked internal, double-fetch guard | v1.6.1 |
 | #6 | Windows file lock on Refresh Datasets | Partially addressed — retry logic, needs more testing | ACTIVE |
 
@@ -116,11 +117,21 @@ Building toward reproducible, auditable, shareable analytical sessions:
 | v1.5.6 | 2026-03-19 | Session Log, Bug #10/#11 fixes, 534 tests |
 | v1.6.0 | 2026-03-19 | Session File replay engine, Example Cases UI, 557 tests |
 | v1.6.1 | 2026-03-19 | Sidebar redesign, Welcome card, compact buttons, Bug #13 fix, 567 tests |
+| v1.6.2 | 2026-03-20 | Sessions section, Resume mode, Bug #13 fix, RECORD.md, 567 tests |
+| v1.6.3 | 2026-03-20 | 3 xfail fixes, zero xfails, 576 tests |
+| v1.7.0 | 2026-03-20 | Example Cases with real CMS sample data, sidebar reorg, 590 tests |
+| v1.7.1 | 2026-03-20 | UI polish, Bug #12 ORDER BY DESC, reference cols fix, tutorial step-through, 598 tests |
+| v1.7.2 | 2026-03-20 | Tutorial #1 session JSON, tutorial/Run All wiring, Save flush-to-disk, button sizing |
 
 ---
 
 ## Wrap Records
 <!-- Each /wrap appends a 3-line summary below. Most recent at top. -->
+
+**v1.7.2** | 2026-03-20
+UI polish + Bug #12 ORDER BY DESC fix + Tutorial #1 wired end-to-end. Session JSON
+with narration and baseline row counts (272/10/33/243/50). Save flush-to-disk (fsync).
+New endpoint for example case sessions. Consistent sidebar button sizing. 598 tests.
 
 **v1.7.0** | 2026-03-20
 Example Cases with real CMS sample data: 3 curated cases (Part D IRA, Part B GLOBE,
