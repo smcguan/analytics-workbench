@@ -3357,47 +3357,15 @@ LIMIT 100</textarea>
             }
 
             if (step.event_type === "query_run") {
-                const dataset = d.dataset || selectedDataset;
                 const sql = d.sql || "";
                 if (!sql) throw new Error("No SQL in step");
 
-                // Ensure the dataset is selected
-                if (dataset && dataset !== selectedDataset) {
-                    selectedDataset = dataset;
-                    renderDatasets();
-                    updateSelectedDatasetSummary();
-                }
-
-                // Put SQL in editor so analyst sees it
+                // Put SQL in editor — then call the exact same function
+                // that the Run SQL button triggers. This guarantees results
+                // appear in the results panel identically to a manual run.
                 $("sqlEditor").value = sql;
-
-                // Switch to query view and activate the table tab
                 switchView("query");
-                setActiveTab("table");
-                $("resultsMeta").textContent = "Running SQL...";
-
-                // Execute the query — results appear live in the results panel
-                const sqlBody = { dataset, sql };
-                if (currentReference) sqlBody.reference = currentReference;
-                const data = await apiJson("/api/sql", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(sqlBody)
-                });
-
-                lastRun = {
-                    columns: data.columns || [],
-                    rows: data.rows || [],
-                    rowcount: data.rowcount || 0,
-                    elapsed: data.elapsed_seconds || 0,
-                    sql,
-                    visualization: data.visualization || null
-                };
-                clearChart();
-                renderResults(lastRun.columns, lastRun.rows);
-                $("resultsCount").textContent = `${num(lastRun.rowcount)} rows`;
-                $("resultsMeta").textContent = `executed in ${lastRun.elapsed}s`;
-                $("copyResultSummaryBtn").disabled = false;
+                await runSqlQuery();
                 return;
             }
 
