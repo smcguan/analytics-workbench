@@ -1352,6 +1352,14 @@
         .ec-tutorial-btn:hover{ background:var(--warning); color:var(--bg0); }
         .ec-runall-btn{ border-color:var(--success); color:var(--success); }
         .ec-runall-btn:hover{ background:var(--success); color:var(--bg0); }
+        .ec-group-header{
+            font-size:11px; font-weight:700; text-transform:uppercase;
+            letter-spacing:.6px; color:var(--fg2); padding:10px 0 6px 0;
+            border-bottom:1px solid var(--bg2); margin-bottom:6px;
+        }
+        .ec-group-header:not(:first-child){
+            margin-top:14px;
+        }
         .ec-case-header{
             display:flex; align-items:center; gap:8px; margin-bottom:4px;
         }
@@ -2503,72 +2511,82 @@ LIMIT 100</textarea>
                     $("ecContent").innerHTML = '<div style="color:var(--muted); font-size:13px;">No example cases found.</div>';
                     return;
                 }
+                // Group cases by category
+                const groups = {};
+                for (const c of cases) {
+                    const cat = c.category || "Other";
+                    if (!groups[cat]) groups[cat] = [];
+                    groups[cat].push(c);
+                }
+
                 const container = document.createElement("div");
                 container.className = "ec-file-list";
-                for (const c of cases) {
-                    const item = document.createElement("div");
-                    item.className = "ec-file-item";
-                    item.style.flexDirection = "column";
-                    item.style.alignItems = "stretch";
 
-                    const header = document.createElement("div");
-                    header.className = "ec-case-header";
-                    const nameEl = document.createElement("strong");
-                    nameEl.textContent = c.name || c.id || "Untitled";
-                    header.appendChild(nameEl);
-                    if (c.category) {
-                        const badge = document.createElement("span");
-                        badge.className = "ec-category-badge";
-                        badge.textContent = c.category;
-                        header.appendChild(badge);
+                for (const [category, groupCases] of Object.entries(groups)) {
+                    // Category header
+                    const groupHeader = document.createElement("div");
+                    groupHeader.className = "ec-group-header";
+                    groupHeader.textContent = category;
+                    container.appendChild(groupHeader);
+
+                    for (const c of groupCases) {
+                        const item = document.createElement("div");
+                        item.className = "ec-file-item";
+                        item.style.flexDirection = "column";
+                        item.style.alignItems = "stretch";
+
+                        const header = document.createElement("div");
+                        header.className = "ec-case-header";
+                        const nameEl = document.createElement("strong");
+                        nameEl.textContent = c.name || c.id || "Untitled";
+                        header.appendChild(nameEl);
+                        item.appendChild(header);
+
+                        if (c.description) {
+                            const desc = document.createElement("div");
+                            desc.className = "ec-case-desc";
+                            desc.textContent = c.description;
+                            item.appendChild(desc);
+                        }
+
+                        const metaParts = [];
+                        if (c.difficulty) metaParts.push(c.difficulty);
+                        if (c.estimated_minutes) metaParts.push("~" + c.estimated_minutes + " min");
+                        if (metaParts.length) {
+                            const metaEl = document.createElement("div");
+                            metaEl.className = "ec-case-meta";
+                            metaEl.textContent = metaParts.join(" \u2022 ");
+                            item.appendChild(metaEl);
+                        }
+
+                        const btnGroup = document.createElement("div");
+                        btnGroup.className = "ec-action-btns";
+                        const caseId = c.id || c.name || "";
+
+                        const resumeBtn = document.createElement("button");
+                        resumeBtn.className = "ec-action-btn ec-resume-btn";
+                        resumeBtn.textContent = "Resume";
+                        resumeBtn.addEventListener("click", () => loadAndResume(caseId));
+
+                        const tutorialBtn = document.createElement("button");
+                        tutorialBtn.className = "ec-action-btn ec-tutorial-btn";
+                        tutorialBtn.textContent = "Tutorial";
+                        tutorialBtn.addEventListener("click", () => loadAndTutorial(caseId));
+
+                        const runAllBtn = document.createElement("button");
+                        runAllBtn.className = "ec-action-btn ec-runall-btn";
+                        runAllBtn.textContent = "Run All";
+                        runAllBtn.addEventListener("click", () => loadAndRunAll(caseId));
+
+                        btnGroup.appendChild(resumeBtn);
+                        if (c.has_session) {
+                            btnGroup.appendChild(tutorialBtn);
+                            btnGroup.appendChild(runAllBtn);
+                        }
+                        item.appendChild(btnGroup);
+
+                        container.appendChild(item);
                     }
-                    item.appendChild(header);
-
-                    if (c.description) {
-                        const desc = document.createElement("div");
-                        desc.className = "ec-case-desc";
-                        desc.textContent = c.description;
-                        item.appendChild(desc);
-                    }
-
-                    const metaParts = [];
-                    if (c.difficulty) metaParts.push(c.difficulty);
-                    if (c.estimated_minutes) metaParts.push("~" + c.estimated_minutes + " min");
-                    if (metaParts.length) {
-                        const metaEl = document.createElement("div");
-                        metaEl.className = "ec-case-meta";
-                        metaEl.textContent = metaParts.join(" \u2022 ");
-                        item.appendChild(metaEl);
-                    }
-
-                    const btnGroup = document.createElement("div");
-                    btnGroup.className = "ec-action-btns";
-
-                    const caseId = c.id || c.name || "";
-
-                    const resumeBtn = document.createElement("button");
-                    resumeBtn.className = "ec-action-btn ec-resume-btn";
-                    resumeBtn.textContent = "Resume";
-                    resumeBtn.addEventListener("click", () => loadAndResume(caseId));
-
-                    const tutorialBtn = document.createElement("button");
-                    tutorialBtn.className = "ec-action-btn ec-tutorial-btn";
-                    tutorialBtn.textContent = "Tutorial";
-                    tutorialBtn.addEventListener("click", () => loadAndTutorial(caseId));
-
-                    const runAllBtn = document.createElement("button");
-                    runAllBtn.className = "ec-action-btn ec-runall-btn";
-                    runAllBtn.textContent = "Run All";
-                    runAllBtn.addEventListener("click", () => loadAndRunAll(caseId));
-
-                    btnGroup.appendChild(resumeBtn);
-                    if (c.has_session) {
-                        btnGroup.appendChild(tutorialBtn);
-                        btnGroup.appendChild(runAllBtn);
-                    }
-                    item.appendChild(btnGroup);
-
-                    container.appendChild(item);
                 }
                 $("ecContent").innerHTML = "";
                 $("ecContent").appendChild(container);

@@ -1,0 +1,13 @@
+{
+  "id": "taxi_trip_analysis",
+  "name": "NYC Taxi Trip Analysis",
+  "description": "Analyzes March 2023 NYC yellow cab trip data: fare distribution, pickup concentration, tipping patterns, and time-of-day trends.",
+  "category": "Transportation & Operations",
+  "difficulty": "Beginner",
+  "estimated_minutes": 10,
+  "dataset_file": "nyc_taxi_2023_03_sample.csv",
+  "dataset_display_name": "NYC Yellow Taxi Trips — March 2023 (10,000-trip sample)",
+  "reference_tables": [],
+  "has_session": true,
+  "version": "1.0"
+}

@@ -1,0 +1,159 @@
+{
+  "session_id": "tutorial-04-taxi-trip-analysis",
+  "started_at": "2026-03-20T19:00:00.000000+00:00",
+  "ended_at": "2026-03-20T19:20:00.000000+00:00",
+  "ai_mode": "cloud",
+  "app_version": "1.7.2",
+  "user": "tutorial",
+  "machine": "analytics-workbench",
+  "name": "Tutorial: NYC Taxi Trip Analysis",
+  "description": "Explores NYC yellow cab trip data with aggregation, concentration analysis, segmentation by payment type, hourly time patterns, and outlier identification. Demonstrates core AW analytical capabilities on a non-healthcare dataset.",
+  "events": [
+    {
+      "event_type": "session_start",
+      "timestamp": "2026-03-20T19:00:00.000000+00:00",
+      "details": {},
+      "narration": {
+        "pre": "Starting a new analysis session. We'll explore NYC yellow cab trip data from March 2023 — a 10,000-trip random sample from 3.4 million total rides that month.",
+        "post": "Session initialized. Let's import the dataset."
+      }
+    },
+    {
+      "event_type": "dataset_import",
+      "timestamp": "2026-03-20T19:00:05.000000+00:00",
+      "details": {
+        "dataset": "nyc_taxi_2023_03_sample",
+        "row_count": 10000,
+        "column_count": 19,
+        "source_file": "nyc_taxi_2023_03_sample.csv"
+      },
+      "narration": {
+        "pre": "Importing NYC Yellow Taxi trip data. Each row is one taxi ride with pickup/dropoff times, locations (by zone ID), distance, fare breakdown, payment type, and tip amount. This is the standard TLC dataset format used by NYC transportation analysts.",
+        "post": "Dataset loaded: 10,000 trips, 19 columns. Key columns: tpep_pickup_datetime, tpep_dropoff_datetime, PULocationID (pickup zone), DOLocationID (dropoff zone), fare_amount, tip_amount, total_amount, payment_type. Let's start exploring."
+      }
+    },
+    {
+      "event_type": "insights_generated",
+      "timestamp": "2026-03-20T19:00:12.000000+00:00",
+      "details": {
+        "dataset": "nyc_taxi_2023_03_sample",
+        "insight_count": 5
+      },
+      "narration": {
+        "pre": "AI is analyzing the dataset structure.",
+        "post": "Insights generated. Let's run our own queries to explore the data systematically."
+      }
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-03-20T19:01:00.000000+00:00",
+      "details": {
+        "dataset": "nyc_taxi_2023_03_sample",
+        "sql": "SELECT COUNT(*) AS total_trips, ROUND(AVG(fare_amount), 2) AS avg_fare, ROUND(AVG(trip_distance), 2) AS avg_distance, ROUND(AVG(tip_amount), 2) AS avg_tip FROM dataset WHERE fare_amount > 0",
+        "row_count": 1,
+        "elapsed_seconds": 0.018
+      },
+      "narration": {
+        "pre": "First, basic aggregation: how many trips, average fare, average distance, and average tip? We filter out zero-fare trips (voided rides or data errors) to get clean averages.",
+        "post": "The average March 2023 yellow cab ride costs about $19, covers roughly 3 miles, and generates a $3-4 tip. These baselines help us spot outliers later."
+      },
+      "baseline": {
+        "expected_row_count": 1
+      }
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-03-20T19:03:00.000000+00:00",
+      "details": {
+        "dataset": "nyc_taxi_2023_03_sample",
+        "sql": "SELECT PULocationID AS pickup_zone, COUNT(*) AS trips, ROUND(AVG(fare_amount), 2) AS avg_fare FROM dataset GROUP BY PULocationID ORDER BY trips DESC LIMIT 10",
+        "row_count": 10,
+        "elapsed_seconds": 0.015
+      },
+      "narration": {
+        "pre": "Concentration analysis: which pickup zones generate the most trips? NYC taxi demand is heavily concentrated in Manhattan — a small number of zones account for a disproportionate share of all rides.",
+        "post": "Top 10 pickup zones identified. Zone IDs map to NYC neighborhoods — the highest-volume zones are typically Midtown Manhattan, Penn Station, and the airports (JFK zone 132, LaGuardia zone 138). This concentration pattern is a classic Pareto distribution."
+      },
+      "baseline": {
+        "expected_row_count": 10
+      }
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-03-20T19:05:00.000000+00:00",
+      "details": {
+        "dataset": "nyc_taxi_2023_03_sample",
+        "sql": "SELECT payment_type, COUNT(*) AS trips, ROUND(AVG(CASE WHEN fare_amount > 0 THEN tip_amount / fare_amount * 100 END), 1) AS avg_tip_pct FROM dataset GROUP BY payment_type ORDER BY trips DESC",
+        "row_count": 5,
+        "elapsed_seconds": 0.016
+      },
+      "narration": {
+        "pre": "Segmentation by payment type: do credit card riders tip differently than cash riders? Payment type codes: 1=Credit card, 2=Cash, 3=No charge, 4=Dispute, 0=Unknown. This is a classic segmentation question — behavior varies dramatically by payment method.",
+        "post": "Clear pattern: credit card riders (type 1) tip ~25% on average, while cash riders (type 2) show 0% tip in the data. This isn't because cash riders don't tip — it's because cash tips aren't recorded electronically. This is a critical data quality insight that affects any tip-based analysis."
+      },
+      "baseline": {
+        "expected_row_count": 5
+      }
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-03-20T19:07:00.000000+00:00",
+      "details": {
+        "dataset": "nyc_taxi_2023_03_sample",
+        "sql": "SELECT EXTRACT(HOUR FROM tpep_pickup_datetime) AS pickup_hour, COUNT(*) AS trips, ROUND(AVG(fare_amount), 2) AS avg_fare FROM dataset GROUP BY pickup_hour ORDER BY pickup_hour",
+        "row_count": 24,
+        "elapsed_seconds": 0.017
+      },
+      "narration": {
+        "pre": "Time-of-day analysis: when do people take cabs, and do fares vary by hour? This reveals the daily rhythm of the city — morning commutes, lunch rush, evening entertainment, late-night bar traffic.",
+        "post": "24 hourly bins showing the full daily cycle. Peak trip volume typically hits 6-7 PM (evening commute + dinner), with a secondary morning peak. Average fares tend to be higher in early morning hours (longer airport runs) and lower during midday (shorter local trips). This time pattern is valuable for fleet planning and surge pricing analysis."
+      },
+      "baseline": {
+        "expected_row_count": 24
+      }
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-03-20T19:09:00.000000+00:00",
+      "details": {
+        "dataset": "nyc_taxi_2023_03_sample",
+        "sql": "SELECT tpep_pickup_datetime, PULocationID, DOLocationID, trip_distance, fare_amount, tip_amount, total_amount FROM dataset WHERE fare_amount > 100 ORDER BY fare_amount DESC",
+        "row_count": 24,
+        "elapsed_seconds": 0.014
+      },
+      "narration": {
+        "pre": "Outlier identification: which trips had fares over $100? High-fare trips are typically airport runs, long-distance trips to the suburbs, or flat-rate fares. Identifying outliers helps distinguish normal patterns from exceptional cases.",
+        "post": "24 high-fare trips found. These include JFK airport flat rates (~$70 fare + tolls + surcharges pushing over $100), long-distance trips, and a few unusually expensive rides worth investigating. In a real analysis, you'd cross-reference these with distance to flag potential fare errors."
+      },
+      "baseline": {
+        "expected_row_count": 24
+      }
+    },
+    {
+      "event_type": "export",
+      "timestamp": "2026-03-20T19:11:00.000000+00:00",
+      "details": {
+        "format": "xlsx",
+        "dataset": "nyc_taxi_2023_03_sample",
+        "row_count": 24
+      },
+      "narration": {
+        "pre": "Exporting the high-fare outlier list for further review.",
+        "post": "Export complete. In a full analysis, next steps would include mapping zone IDs to neighborhood names (using a reference table JOIN), analyzing weekend vs weekday patterns, and building a fare prediction model."
+      }
+    },
+    {
+      "event_type": "session_end",
+      "timestamp": "2026-03-20T19:20:00.000000+00:00",
+      "details": {},
+      "narration": {
+        "pre": "Analysis complete.",
+        "post": "Session summary: Explored 10,000 NYC taxi trips across 5 analytical dimensions — basic aggregation ($19 avg fare), pickup concentration (top 10 zones), payment segmentation (credit vs cash tipping), hourly patterns (24-hour cycle), and fare outliers (24 trips over $100). This demonstrates that AW handles any structured dataset, not just healthcare data."
+      }
+    }
+  ],
+  "resume_state": {
+    "dataset": "nyc_taxi_2023_03_sample",
+    "last_sql": "SELECT tpep_pickup_datetime, PULocationID, DOLocationID, trip_distance, fare_amount, tip_amount, total_amount FROM dataset WHERE fare_amount > 100 ORDER BY fare_amount DESC"
+  }
+}
