@@ -201,10 +201,35 @@ def get_current_session() -> SessionLog | None:
     return _current_session
 
 
+def _sanitize_filename(name: str) -> str:
+    """Sanitize a user-provided name for use as a filename."""
+    import re
+    clean = name.strip()
+    clean = re.sub(r'[<>:"/\\|?*]', '', clean)  # remove filesystem-unsafe chars
+    clean = re.sub(r'\s+', '_', clean)  # spaces to underscores
+    clean = re.sub(r'_+', '_', clean).strip('_')  # collapse multiple underscores
+    return clean[:100] if clean else ""  # cap length
+
+
+def _unique_filepath(directory: Path, base_name: str, ext: str = ".json") -> Path:
+    """Return a unique filepath, appending _2, _3 etc. if file exists."""
+    candidate = directory / f"{base_name}{ext}"
+    if not candidate.exists():
+        return candidate
+    counter = 2
+    while True:
+        candidate = directory / f"{base_name}_{counter}{ext}"
+        if not candidate.exists():
+            return candidate
+        counter += 1
+
+
 def export_session(sessions_dir: Path) -> Path | None:
     """Write the current session to a JSON file on disk.
 
     Returns the path to the written file, or None if no session exists.
+    If the session has a name, uses it as the filename (sanitized).
+    Otherwise falls back to session_<uuid>_<date>.json.
     """
     if _current_session is None:
         logger.warning("export_session called but no session is active")
@@ -216,9 +241,14 @@ def export_session(sessions_dir: Path) -> Path | None:
     # Build resume state before serializing
     _current_session.resume_state = _build_resume_state(_current_session)
 
-    date_str = datetime.now(timezone.utc).strftime("%Y%m%d")
-    filename = f"session_{_current_session.session_id}_{date_str}.json"
-    filepath = sessions_dir / filename
+    # Use session name as filename if available
+    sanitized = _sanitize_filename(_current_session.name) if _current_session.name else ""
+    if sanitized:
+        filepath = _unique_filepath(sessions_dir, sanitized)
+    else:
+        date_str = datetime.now(timezone.utc).strftime("%Y%m%d")
+        filename = f"session_{_current_session.session_id}_{date_str}.json"
+        filepath = sessions_dir / filename
 
     data = asdict(_current_session)
     # Write with explicit flush + fsync to guarantee file is on disk

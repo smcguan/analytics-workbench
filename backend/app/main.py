@@ -4442,12 +4442,10 @@ def api_sessions_saved():
         try:
             data = json.loads(f.read_text(encoding="utf-8"))
             name = data.get("name", "")
-            if not name:  # Only show named sessions
-                continue
             saved.append({
                 "filename": f.name,
                 "session_id": data.get("session_id", ""),
-                "name": name,
+                "name": name or f"Session {f.stem.split('_')[1][:8] if '_' in f.stem else f.stem}",
                 "description": data.get("description", ""),
                 "started_at": data.get("started_at", ""),
                 "event_count": len(data.get("events", [])),
@@ -4663,7 +4661,7 @@ def api_snapshots_list():
     snapshots: list[dict] = []
     if SNAPSHOTS_DIR.exists():
         for f in sorted(SNAPSHOTS_DIR.iterdir(), reverse=True):
-            if f.suffix == ".json" and f.name.startswith("snapshot_"):
+            if f.suffix == ".json":
                 try:
                     data = json.loads(f.read_text(encoding="utf-8"))
                     data["_filename"] = f.name
@@ -4685,9 +4683,14 @@ def api_snapshots_save(req: NamedSnapshotRequest):
     snapshot["name"] = req.name
     snapshot["description"] = req.description
 
-    ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
-    filename = f"snapshot_{ts}.json"
-    filepath = SNAPSHOTS_DIR / filename
+    from app.services.session_log import _sanitize_filename, _unique_filepath
+    sanitized = _sanitize_filename(req.name) if req.name else ""
+    if sanitized:
+        filepath = _unique_filepath(SNAPSHOTS_DIR, sanitized)
+    else:
+        ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+        filepath = SNAPSHOTS_DIR / f"snapshot_{ts}.json"
+    filename = filepath.name
 
     import os as _os
     with open(filepath, "w", encoding="utf-8") as f:

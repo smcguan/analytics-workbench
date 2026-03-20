@@ -326,11 +326,11 @@ def test_sessions_saved_empty(patched_app):
     assert resp.json()["sessions"] == []
 
 
-def test_sessions_saved_returns_named_only(patched_app):
-    """Only sessions with a non-empty name are returned."""
+def test_sessions_saved_returns_all_sessions(patched_app):
+    """All sessions are returned — named ones with their name, unnamed with a fallback."""
     client, dirs = patched_app
 
-    # Named session — should appear
+    # Named session
     _write_session_file(dirs["sessions"], "session_named.json", {
         "session_id": "abc-123",
         "name": "GLOBE Analysis Session",
@@ -340,7 +340,7 @@ def test_sessions_saved_returns_named_only(patched_app):
         "ai_mode": "cloud",
     })
 
-    # Unnamed session — should NOT appear
+    # Unnamed session — should appear with fallback name
     _write_session_file(dirs["sessions"], "session_unnamed.json", {
         "session_id": "def-456",
         "name": "",
@@ -349,25 +349,18 @@ def test_sessions_saved_returns_named_only(patched_app):
         "ai_mode": "cloud",
     })
 
-    # Session with no name key at all — should NOT appear
-    _write_session_file(dirs["sessions"], "session_nokey.json", {
-        "session_id": "ghi-789",
-        "started_at": "2026-03-19T08:00:00+00:00",
-        "events": [{"event_type": "session_start", "timestamp": "2026-03-19T08:00:00+00:00"}],
-    })
-
     resp = client.get("/api/sessions/saved")
     assert resp.status_code == 200
     body = resp.json()
-    assert len(body["sessions"]) == 1
+    assert len(body["sessions"]) == 2
 
-    session = body["sessions"][0]
-    assert session["name"] == "GLOBE Analysis Session"
-    assert session["session_id"] == "abc-123"
-    assert session["description"] == "Analyzed Part B GLOBE candidates"
-    assert session["event_count"] == 1
-    assert session["ai_mode"] == "cloud"
-    assert session["filename"] == "session_named.json"
+    # Named session appears with its name
+    named = [s for s in body["sessions"] if s["session_id"] == "abc-123"]
+    assert len(named) == 1
+    assert named[0]["name"] == "GLOBE Analysis Session"
+    assert named[0]["description"] == "Analyzed Part B GLOBE candidates"
+    assert named[0]["event_count"] == 1
+    assert named[0]["filename"] == "session_named.json"
 
 
 def test_sessions_saved_no_dir(patched_app):

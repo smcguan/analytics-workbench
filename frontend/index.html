@@ -1616,8 +1616,9 @@
                     </div>
                 </section>
 
-                <div style="margin-top:12px; padding-top:10px; border-top:1px solid var(--bg2);">
+                <div class="sidebar-btn-row" style="margin-top:12px; padding-top:10px; border-top:1px solid var(--bg2);">
                     <button class="btn import-btn" id="exitBtn" style="background:rgba(239,107,107,.08); border-color:rgba(239,107,107,.20); color:var(--fg2);">Exit</button>
+                    <button class="btn sidebar-btn-secondary" id="saveExitBtn">Save</button>
                 </div>
             </aside>
 
@@ -2422,19 +2423,9 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             const ext = (file.name.split(".").pop() || "").toLowerCase();
             const fileTypeHint = { csv: "csv", tsv: "tsv", txt: "csv", xlsx: "excel", xls: "excel", parquet: "parquet" }[ext] || ext;
 
-            // CMS and government datasets often append asterisks or other footnote
-            // markers to values (e.g. "Stelara*", "12,345†").  These trailing
-            // characters cause exact-match SQL filters to miss rows silently.
-            // Only applies to CSV / TSV / Excel — Parquet files are copied as-is.
-            const stripChars = window.confirm(
-                "Strip trailing special characters from string values?\n\n" +
-                "Example: \"Stelara*\" → \"Stelara\", \"Denosumab†\" → \"Denosumab\"\n\n" +
-                "Enable this for CMS or government datasets that append asterisks or\n" +
-                "footnote symbols to values. Leave disabled for most other datasets.\n\n" +
-                "Note: applies to CSV / TSV / Excel only. Parquet files are unchanged."
-            );
-
-            await _doImport(file, inferredName, fileTypeHint, false, stripChars);
+            // Strip trailing special chars automatically on every import.
+            // No user prompt needed — this silently handles CMS asterisks etc.
+            await _doImport(file, inferredName, fileTypeHint, false, true);
         }
 
         async function _doImport(file, datasetName, fileTypeHint, overwrite = false, stripChars = false) {
@@ -2606,23 +2597,16 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 if (currentView === "welcome") {
                     switchView("insights");
                 }
-                // Per-dataset AI consent — one-time disclosure on import
-                const aiConsent = window.confirm(
-                    "AI features will use column names and statistics to generate insights " +
-                    "and suggested questions. No raw data is sent.\n\n" +
-                    "Enable AI features for this dataset?\n\n" +
-                    "Click OK to enable, or Cancel to use manual queries only."
-                );
-                // Store consent decision via backend
+                // AI consent auto-enabled — no user prompt needed.
+                // AI only sees column names and statistics, never raw data.
                 try {
                     await apiJson(`/api/datasets/${returnedName}/ai_consent`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ ai_consent: aiConsent })
+                        body: JSON.stringify({ ai_consent: true })
                     });
-                } catch (_) {
-                    // non-fatal — default to enabled
-                }
+                } catch (_) {}
+
 
                 // If consent granted and on Insights view, auto-fetch
                 if (aiConsent && currentView === "insights") {
@@ -5116,47 +5100,11 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             }
         }
 
-        async function exitApp() {
-            // Step 1: Offer to save session
-            const saveSession = confirm("Save this session before exiting?");
-            if (saveSession) {
-                const sessionName = window.prompt("Session name:", "");
-                if (sessionName && sessionName.trim()) {
-                    try {
-                        await apiJson("/api/session/name", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ name: sessionName.trim(), description: "" }),
-                        });
-                        await apiJson("/api/session/export", { method: "POST" });
-                    } catch (_) {}
-                }
-            }
+        function _currentTab() {
+            return document.querySelector(".nav-item.active")?.id === "navInsights" ? "insights" : "query";
+        }
 
-            // Step 2: Offer to save snapshot
-            const saveSnap = confirm("Save a workspace snapshot before exiting?");
-            if (saveSnap) {
-                const snapName = window.prompt("Snapshot name:", "");
-                if (snapName && snapName.trim()) {
-                    try {
-                        const refList = currentReference ? [{ name: currentReference }] : [];
-                        await apiJson("/api/snapshots", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({
-                                name: snapName.trim(),
-                                description: "",
-                                dataset: selectedDataset || null,
-                                references: refList.length ? refList : null,
-                                last_query: $("sqlEditor").value.trim(),
-                                last_tab: document.querySelector(".nav-item.active")?.id === "navInsights" ? "insights" : "query",
-                            }),
-                        });
-                    } catch (_) {}
-                }
-            }
-
-            // Step 3: Write auto-snapshot + shutdown
+        async function _writeAutoSnapshotAndShutdown() {
             try {
                 const refList = currentReference ? [{ name: currentReference }] : [];
                 await apiJson("/api/workspace", {
@@ -5166,15 +5114,59 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                         dataset: selectedDataset || null,
                         references: refList.length ? refList : null,
                         last_query: $("sqlEditor").value.trim(),
-                        last_tab: document.querySelector(".nav-item.active")?.id === "navInsights" ? "insights" : "query",
+                        last_tab: _currentTab(),
                         session_name: "",
                     }),
                 });
             } catch (_) {}
-
-            try { await fetch("/api/shutdown", { method: "POST" }); } catch (e) {}
+            try { await fetch("/api/shutdown", { method: "POST" }); } catch (_) {}
             toast("Shutting down...");
-            setTimeout(() => { try { window.close(); } catch(e) {} }, 250);
+            setTimeout(() => { try { window.close(); } catch(_) {} }, 250);
+        }
+
+        async function exitApp() {
+            // Exit immediately — no saving, no prompts
+            await _writeAutoSnapshotAndShutdown();
+        }
+
+        async function saveAndExit() {
+            // Step 1: Save session
+            const sessionName = window.prompt("Save this session? Enter a name (or leave blank to skip):", "");
+            if (sessionName && sessionName.trim()) {
+                try {
+                    await apiJson("/api/session/name", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ name: sessionName.trim(), description: "" }),
+                    });
+                    await apiJson("/api/session/export", { method: "POST" });
+                    toast("Session saved: " + sessionName.trim());
+                } catch (_) {}
+            }
+
+            // Step 2: Save snapshot
+            const snapName = window.prompt("Save a workspace snapshot? Enter a name (or leave blank to skip):", "");
+            if (snapName && snapName.trim()) {
+                try {
+                    const refList = currentReference ? [{ name: currentReference }] : [];
+                    await apiJson("/api/snapshots", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            name: snapName.trim(),
+                            description: "",
+                            dataset: selectedDataset || null,
+                            references: refList.length ? refList : null,
+                            last_query: $("sqlEditor").value.trim(),
+                            last_tab: _currentTab(),
+                        }),
+                    });
+                    toast("Snapshot saved: " + snapName.trim());
+                } catch (_) {}
+            }
+
+            // Step 3: Auto-snapshot + shutdown
+            await _writeAutoSnapshotAndShutdown();
         }
 
         $("navInsights").addEventListener("click", () => switchView("insights"));
@@ -5255,6 +5247,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         $("saveQueryBtn").addEventListener("click", saveCurrentQuery);
         $("refreshQueriesBtn").addEventListener("click", loadSavedQueries);
         $("exitBtn").addEventListener("click", exitApp);
+        $("saveExitBtn").addEventListener("click", saveAndExit);
         $("saveSnapshotSidebarBtn").addEventListener("click", openSaveSnapshotDialog);
 
         // Refresh Datasets button.
