@@ -2080,6 +2080,31 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         </div>
     </div>
 
+    <!-- Generic prompt modal — replaces all native browser dialogs -->
+    <div class="save-session-overlay" id="awPromptOverlay">
+        <div class="save-session-panel">
+            <h3 id="awPromptTitle">Enter value</h3>
+            <p id="awPromptMessage" style="font-size:12px; color:var(--fg2); margin:0 0 10px 0; display:none;"></p>
+            <input type="text" id="awPromptInput" placeholder="" />
+            <div class="save-session-btns">
+                <button class="btn sidebar-btn-secondary" id="awPromptCancel">Cancel</button>
+                <button class="btn primary" id="awPromptConfirm">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generic confirm modal — replaces native confirm() -->
+    <div class="save-session-overlay" id="awConfirmOverlay">
+        <div class="save-session-panel">
+            <h3 id="awConfirmTitle">Confirm</h3>
+            <p id="awConfirmMessage" style="font-size:13px; color:var(--fg1); margin:0 0 14px 0;"></p>
+            <div class="save-session-btns">
+                <button class="btn sidebar-btn-secondary" id="awConfirmCancel">Cancel</button>
+                <button class="btn primary" id="awConfirmOk">OK</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Retrieve Session overlay -->
     <div class="rs-overlay" id="rsOverlay">
         <div class="ec-panel">
@@ -2190,6 +2215,58 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 
             if (contentType.includes("application/json")) return res.json();
             return res.text();
+        }
+
+        // ---------------------------------------------------------------
+        // Generic AW modals — replace all native browser dialogs
+        // ---------------------------------------------------------------
+        function awPrompt(title, placeholder, defaultValue, message) {
+            return new Promise((resolve) => {
+                $("awPromptTitle").textContent = title;
+                $("awPromptInput").placeholder = placeholder || "";
+                $("awPromptInput").value = defaultValue || "";
+                if (message) {
+                    $("awPromptMessage").textContent = message;
+                    $("awPromptMessage").style.display = "";
+                } else {
+                    $("awPromptMessage").style.display = "none";
+                }
+                $("awPromptOverlay").classList.add("visible");
+                $("awPromptInput").focus();
+
+                function cleanup() {
+                    $("awPromptOverlay").classList.remove("visible");
+                    $("awPromptCancel").removeEventListener("click", onCancel);
+                    $("awPromptConfirm").removeEventListener("click", onOk);
+                    $("awPromptInput").removeEventListener("keydown", onKey);
+                }
+                function onCancel() { cleanup(); resolve(null); }
+                function onOk() { cleanup(); resolve($("awPromptInput").value); }
+                function onKey(e) { if (e.key === "Enter") { e.preventDefault(); onOk(); } if (e.key === "Escape") { onCancel(); } }
+
+                $("awPromptCancel").addEventListener("click", onCancel);
+                $("awPromptConfirm").addEventListener("click", onOk);
+                $("awPromptInput").addEventListener("keydown", onKey);
+            });
+        }
+
+        function awConfirm(title, message) {
+            return new Promise((resolve) => {
+                $("awConfirmTitle").textContent = title;
+                $("awConfirmMessage").textContent = message;
+                $("awConfirmOverlay").classList.add("visible");
+
+                function cleanup() {
+                    $("awConfirmOverlay").classList.remove("visible");
+                    $("awConfirmCancel").removeEventListener("click", onCancel);
+                    $("awConfirmOk").removeEventListener("click", onOk);
+                }
+                function onCancel() { cleanup(); resolve(false); }
+                function onOk() { cleanup(); resolve(true); }
+
+                $("awConfirmCancel").addEventListener("click", onCancel);
+                $("awConfirmOk").addEventListener("click", onOk);
+            });
         }
 
         let lastRun = { columns: [], rows: [], rowcount: 0, elapsed: 0, sql: "", visualization: null };
@@ -2405,9 +2482,11 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         async function importDatasetFile(file) {
             if (!file) return;
 
-            const maybeName = window.prompt(
-                "Dataset name (optional). Leave blank to use the filename:",
-                ""
+            const maybeName = await awPrompt(
+                "Import Dataset",
+                "Dataset name...",
+                "",
+                "Enter a name for this dataset, or leave blank to use the filename."
             );
 
             // User cancelled the prompt — abort silently
@@ -2490,12 +2569,11 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                     if (response.status === 409 || msg.toLowerCase().includes("already exists")) {
                         clearStatus();
                         unlockUi();
-                        const newName = window.prompt(
-                            `"${datasetName}" already exists.\n\n` +
-                            `• Press OK to overwrite it with this file\n` +
-                            `• Or type a new name to import separately\n` +
-                            `• Or press Cancel to abort`,
-                            datasetName
+                        const newName = await awPrompt(
+                            "Dataset Already Exists",
+                            "New name or same to overwrite...",
+                            datasetName,
+                            `"${datasetName}" already exists. Keep the same name to overwrite, enter a new name, or cancel.`
                         );
                         if (newName === null) {
                             toast("Import cancelled.");
@@ -2627,9 +2705,11 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         async function importReferenceFile(file) {
             if (!file) return;
 
-            const maybeName = window.prompt(
-                "Reference table name (optional). Leave blank to use the filename:",
-                ""
+            const maybeName = await awPrompt(
+                "Import Reference Table",
+                "Reference table name...",
+                "",
+                "Enter a name for this reference table, or leave blank to use the filename."
             );
             if (maybeName === null) return; // cancelled
 
@@ -3427,7 +3507,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                     delBtn.className = "ec-action-btn ec-runall-btn";
                     delBtn.textContent = "Delete";
                     delBtn.addEventListener("click", async () => {
-                        if (!confirm("Delete snapshot '" + (s.name || "") + "'?")) return;
+                        if (!(await awConfirm("Delete Snapshot", "Delete snapshot '" + (s.name || "") + "'?"))) return;
                         try {
                             await apiJson("/api/snapshots/" + encodeURIComponent(s._filename), { method: "DELETE" });
                             await _loadSnapshotsList();
@@ -5008,7 +5088,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 delBtn.textContent = "Delete";
                 delBtn.style.marginLeft = "8px";
                 delBtn.addEventListener("click", async () => {
-                    if (!confirm(`Delete saved query "${q.name}"?`)) return;
+                    if (!(await awConfirm("Delete Query", `Delete saved query "${q.name}"?`))) return;
                     try {
                         await apiJson("/api/queries/delete", {
                             method: "POST",
@@ -5081,7 +5161,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             if (!sql) { toast("Enter a SQL query first."); return; }
 
             const suggested = `sql - ${dataset}`;
-            const name = window.prompt("Save query as:", suggested);
+            const name = await awPrompt("Save Query", "Query name...", suggested);
             if (name === null) return;
 
             const trimmed = String(name).trim();
@@ -5131,7 +5211,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 
         async function saveAndExit() {
             // Step 1: Save session
-            const sessionName = window.prompt("Save this session? Enter a name (or leave blank to skip):", "");
+            const sessionName = await awPrompt("Save Session", "Session name...", "", "Enter a name to save this session, or leave blank to skip.");
             if (sessionName && sessionName.trim()) {
                 try {
                     await apiJson("/api/session/name", {
@@ -5145,7 +5225,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             }
 
             // Step 2: Save snapshot
-            const snapName = window.prompt("Save a workspace snapshot? Enter a name (or leave blank to skip):", "");
+            const snapName = await awPrompt("Save Snapshot", "Snapshot name...", "", "Enter a name to save a workspace snapshot, or leave blank to skip.");
             if (snapName && snapName.trim()) {
                 try {
                     const refList = currentReference ? [{ name: currentReference }] : [];
