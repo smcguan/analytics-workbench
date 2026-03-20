@@ -3253,21 +3253,24 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                     body: JSON.stringify({ filename })
                 });
 
-                if (result.status === "dataset_missing") {
-                    toast(result.message, 8000);
-                    return;
-                }
-
                 // Close all overlays
                 closeExampleCases();
                 $("rsOverlay").classList.remove("visible");
                 $("snapshotsOverlay").classList.remove("visible");
 
-                // Select the dataset
+                if (result.status === "dataset_missing") {
+                    toast(result.message, 6000);
+                }
+
+                // Load available datasets — even if the saved one is missing,
+                // show what's available so the user can pick or re-import
+                await loadDatasets();
                 if (result.dataset) {
-                    await loadDatasets();
-                    selectedDataset = result.dataset;
-                    renderDatasets();
+                    const found = datasets.some(d => d.name === result.dataset);
+                    if (found) {
+                        selectedDataset = result.dataset;
+                        renderDatasets();
+                    }
                 }
 
                 // Update reference indicator
@@ -3546,11 +3549,15 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 const result = await apiJson("/api/snapshots/" + encodeURIComponent(filename) + "/restore", { method: "POST" });
                 $("snapshotsOverlay").classList.remove("visible");
 
+                // Load available datasets — proceed even if saved dataset is missing
+                await loadDatasets();
                 if (result.dataset) {
-                    await loadDatasets();
-                    selectedDataset = result.dataset;
-                    renderDatasets();
-                    updateSelectedDatasetSummary();
+                    const found = datasets.some(d => d.name === result.dataset);
+                    if (found) {
+                        selectedDataset = result.dataset;
+                        renderDatasets();
+                        updateSelectedDatasetSummary();
+                    }
                 }
                 if (result.references && result.references.length > 0) {
                     const ref = result.references[0];
@@ -5422,12 +5429,17 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 
                 const result = await apiJson("/api/workspace/restore", { method: "POST" });
 
-                // Load dataset
+                // Load available datasets — proceed even if saved dataset is gone
+                await loadDatasets();
                 if (result.dataset) {
-                    await loadDatasets();
-                    selectedDataset = result.dataset;
-                    renderDatasets();
-                    updateSelectedDatasetSummary();
+                    const found = datasets.some(d => d.name === result.dataset);
+                    if (found) {
+                        selectedDataset = result.dataset;
+                        renderDatasets();
+                        updateSelectedDatasetSummary();
+                    } else {
+                        toast("Dataset '" + result.dataset + "' not found — re-import it to continue.", 6000);
+                    }
                 }
 
                 // Load references
