@@ -462,6 +462,14 @@ without your data ever leaving your machine."
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-20] [CODE] — Bug #14/#15: Tutorial mode rewritten as true live replay from clean state.
+  No pre-loading — each step (dataset_import, reference_load, query_run, export) executes live.
+  Two-click flow: execute + show post-narration, then advance. 2 new backend endpoints
+  (import_dataset, import_reference per example case). Run All also replays from clean. 598 tests.
+[2026-03-20] [BD] — Tutorial #1 recorded live and validated: Part D IRA Exclusion,
+  5 queries, baseline row counts confirmed (272/10/33/243/50). Session wired to
+  Example Cases package by Claude Code in v1.7.2. CLAUDE.md reviewed — needs update
+  after sprint settles to reflect M5 repo structure and storage changes.
 [2026-03-20] [CODE] — Tutorial #1 wired end-to-end: session JSON with narration + baselines for
   Part D IRA Exclusion (11 events, 5 queries with row count baselines: 272/10/33/243/50).
   New endpoint GET /api/example_cases/{id}/session. Tutorial/Run All buttons execute client-side
