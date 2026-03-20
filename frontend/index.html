@@ -1356,9 +1356,23 @@
             font-size:11px; font-weight:700; text-transform:uppercase;
             letter-spacing:.6px; color:var(--fg2); padding:10px 0 6px 0;
             border-bottom:1px solid var(--bg2); margin-bottom:6px;
+            cursor:pointer; user-select:none;
+            display:flex; align-items:center; gap:6px;
         }
         .ec-group-header:not(:first-child){
             margin-top:14px;
+        }
+        .ec-group-header:hover{
+            color:var(--fg0);
+        }
+        .ec-group-toggle{
+            font-size:9px; transition:transform .15s ease;
+        }
+        .ec-group-header.collapsed .ec-group-toggle{
+            transform:rotate(-90deg);
+        }
+        .ec-group-body.collapsed{
+            display:none;
         }
         .ec-case-header{
             display:flex; align-items:center; gap:8px; margin-bottom:4px;
@@ -1568,7 +1582,10 @@
                         <button class="btn primary import-btn" id="navSessionLog">Current Session</button>
                         <button class="btn sidebar-btn-secondary" id="saveSessionBtn">Save</button>
                     </div>
-                    <button class="btn import-btn" id="retrieveSessionBtn" style="margin-top:2px;">Retrieve Session</button>
+                    <div class="sidebar-btn-row" style="margin-top:2px;">
+                        <button class="btn import-btn" id="retrieveSessionBtn">Retrieve Session</button>
+                        <button class="btn sidebar-btn-secondary" id="snapshotsBtn">Snapshots</button>
+                    </div>
                 </section>
             </aside>
 
@@ -1909,6 +1926,35 @@ LIMIT 100</textarea>
             </div>
             <div id="rsContent">
                 <div style="color:var(--muted); font-size:13px;">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Snapshots overlay -->
+    <div class="rs-overlay" id="snapshotsOverlay">
+        <div class="ec-panel">
+            <div class="ec-header">
+                <h2>Snapshots</h2>
+                <button class="ec-close" id="snapshotsCloseBtn">&times;</button>
+            </div>
+            <div id="snapshotsContent">
+                <div style="color:var(--muted); font-size:13px;">Loading...</div>
+            </div>
+            <div style="padding:10px 16px; border-top:1px solid var(--bg2);">
+                <button class="btn primary" id="saveSnapshotBtn" style="width:100%;">Save New Snapshot...</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Save Snapshot dialog -->
+    <div class="save-session-overlay" id="saveSnapshotOverlay">
+        <div class="save-session-panel">
+            <h3>Save Snapshot</h3>
+            <input type="text" id="saveSnapshotName" placeholder="Snapshot name..." />
+            <textarea id="saveSnapshotDesc" placeholder="Brief description (optional)..."></textarea>
+            <div class="save-session-btns">
+                <button class="btn sidebar-btn-secondary" id="saveSnapshotCancel">Cancel</button>
+                <button class="btn primary" id="saveSnapshotConfirm">Save Snapshot</button>
             </div>
         </div>
     </div>
@@ -2523,11 +2569,24 @@ LIMIT 100</textarea>
                 container.className = "ec-file-list";
 
                 for (const [category, groupCases] of Object.entries(groups)) {
-                    // Category header
+                    // Collapsible category header
                     const groupHeader = document.createElement("div");
                     groupHeader.className = "ec-group-header";
-                    groupHeader.textContent = category;
+                    const toggle = document.createElement("span");
+                    toggle.className = "ec-group-toggle";
+                    toggle.textContent = "\u25BC"; // ▼
+                    groupHeader.appendChild(toggle);
+                    const label = document.createTextNode(` ${category} (${groupCases.length})`);
+                    groupHeader.appendChild(label);
                     container.appendChild(groupHeader);
+
+                    // Collapsible body wrapper
+                    const groupBody = document.createElement("div");
+                    groupBody.className = "ec-group-body";
+                    groupHeader.addEventListener("click", () => {
+                        groupHeader.classList.toggle("collapsed");
+                        groupBody.classList.toggle("collapsed");
+                    });
 
                     for (const c of groupCases) {
                         const item = document.createElement("div");
@@ -2585,8 +2644,9 @@ LIMIT 100</textarea>
                         }
                         item.appendChild(btnGroup);
 
-                        container.appendChild(item);
+                        groupBody.appendChild(item);
                     }
+                    container.appendChild(groupBody);
                 }
                 $("ecContent").innerHTML = "";
                 $("ecContent").appendChild(container);
@@ -3152,6 +3212,155 @@ LIMIT 100</textarea>
             } finally {
                 $("saveSessionConfirm").disabled = false;
                 $("saveSessionConfirm").textContent = "Save to Library";
+            }
+        }
+
+        // ---------------------------------------------------------------
+        // Named Snapshots
+        // ---------------------------------------------------------------
+        async function toggleSnapshots() {
+            const overlay = $("snapshotsOverlay");
+            if (overlay.classList.contains("visible")) {
+                overlay.classList.remove("visible");
+                return;
+            }
+            overlay.classList.add("visible");
+            await _loadSnapshotsList();
+        }
+
+        async function _loadSnapshotsList() {
+            $("snapshotsContent").innerHTML = '<div style="color:var(--muted); font-size:13px;">Loading...</div>';
+            try {
+                const data = await apiJson("/api/snapshots");
+                const snapshots = data.snapshots || [];
+                if (snapshots.length === 0) {
+                    $("snapshotsContent").innerHTML = '<div style="color:var(--muted); font-size:13px;">No saved snapshots. Click below to save one.</div>';
+                    return;
+                }
+                const container = document.createElement("div");
+                container.className = "ec-file-list";
+                for (const s of snapshots) {
+                    const item = document.createElement("div");
+                    item.className = "ec-file-item";
+                    item.style.cssText = "flex-direction:column; align-items:stretch;";
+
+                    const nameEl = document.createElement("strong");
+                    nameEl.textContent = s.name || "Unnamed snapshot";
+                    item.appendChild(nameEl);
+
+                    const meta = document.createElement("div");
+                    meta.style.cssText = "font-size:0.85em; color:var(--fg2); margin:4px 0;";
+                    const parts = [];
+                    if (s.dataset && s.dataset.name) parts.push("Dataset: " + s.dataset.name);
+                    const refCount = (s.references || []).length;
+                    if (refCount) parts.push(refCount + " reference" + (refCount > 1 ? "s" : ""));
+                    if (s.saved_at) {
+                        try { parts.push(new Date(s.saved_at).toLocaleDateString()); } catch(_) {}
+                    }
+                    meta.textContent = parts.join(" \u2022 ");
+                    item.appendChild(meta);
+
+                    if (s.description) {
+                        const desc = document.createElement("div");
+                        desc.className = "ec-case-desc";
+                        desc.textContent = s.description;
+                        item.appendChild(desc);
+                    }
+
+                    const btns = document.createElement("div");
+                    btns.className = "ec-action-btns";
+                    const restoreBtn = document.createElement("button");
+                    restoreBtn.className = "ec-action-btn ec-resume-btn";
+                    restoreBtn.textContent = "Restore";
+                    restoreBtn.addEventListener("click", () => _restoreSnapshot(s._filename));
+                    const delBtn = document.createElement("button");
+                    delBtn.className = "ec-action-btn ec-runall-btn";
+                    delBtn.textContent = "Delete";
+                    delBtn.addEventListener("click", async () => {
+                        if (!confirm("Delete snapshot '" + (s.name || "") + "'?")) return;
+                        try {
+                            await apiJson("/api/snapshots/" + encodeURIComponent(s._filename), { method: "DELETE" });
+                            await _loadSnapshotsList();
+                            toast("Snapshot deleted.");
+                        } catch (e) { toast("Delete failed: " + e.message); }
+                    });
+                    btns.appendChild(restoreBtn);
+                    btns.appendChild(delBtn);
+                    item.appendChild(btns);
+                    container.appendChild(item);
+                }
+                $("snapshotsContent").innerHTML = "";
+                $("snapshotsContent").appendChild(container);
+            } catch (e) {
+                $("snapshotsContent").innerHTML = '<div style="color:var(--danger);">Failed to load snapshots.</div>';
+            }
+        }
+
+        async function _restoreSnapshot(filename) {
+            try {
+                const result = await apiJson("/api/snapshots/" + encodeURIComponent(filename) + "/restore", { method: "POST" });
+                $("snapshotsOverlay").classList.remove("visible");
+
+                if (result.dataset) {
+                    await loadDatasets();
+                    selectedDataset = result.dataset;
+                    renderDatasets();
+                    updateSelectedDatasetSummary();
+                }
+                if (result.references && result.references.length > 0) {
+                    const ref = result.references[0];
+                    currentReference = ref.name;
+                    const colCount = ref.column_count || "?";
+                    $("referenceName").textContent = ref.row_count
+                        ? `${ref.name} (${num(ref.row_count)} rows, ${colCount} cols)` : ref.name;
+                    $("referenceIndicator").style.display = "block";
+                }
+                if (result.last_query) $("sqlEditor").value = result.last_query;
+                for (const w of (result.warnings || [])) toast(w, 6000);
+                switchView(result.last_tab === "insights" ? "insights" : "query");
+                toast("Snapshot restored: " + (result.name || ""));
+            } catch (e) {
+                toast("Restore failed: " + (e.message || ""), 6000);
+            }
+        }
+
+        function openSaveSnapshotDialog() {
+            $("saveSnapshotName").value = "";
+            $("saveSnapshotDesc").value = "";
+            $("saveSnapshotOverlay").classList.add("visible");
+        }
+
+        async function saveSnapshot() {
+            const name = $("saveSnapshotName").value.trim();
+            if (!name) { toast("Enter a snapshot name."); return; }
+            const description = $("saveSnapshotDesc").value.trim();
+
+            try {
+                $("saveSnapshotConfirm").disabled = true;
+                $("saveSnapshotConfirm").textContent = "Saving...";
+
+                const refList = currentReference ? [{ name: currentReference }] : [];
+                await apiJson("/api/snapshots", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        name,
+                        description,
+                        dataset: selectedDataset || null,
+                        references: refList.length ? refList : null,
+                        last_query: $("sqlEditor").value.trim(),
+                        last_tab: document.querySelector(".nav-item.active")?.id === "navInsights" ? "insights" : "query",
+                    }),
+                });
+
+                $("saveSnapshotOverlay").classList.remove("visible");
+                toast("Snapshot saved: " + name);
+                await _loadSnapshotsList();
+            } catch (e) {
+                toast("Snapshot save failed: " + (e.message || ""), 6000);
+            } finally {
+                $("saveSnapshotConfirm").disabled = false;
+                $("saveSnapshotConfirm").textContent = "Save Snapshot";
             }
         }
 
@@ -4830,6 +5039,11 @@ LIMIT 100</textarea>
         $("ecCloseBtn").addEventListener("click", closeExampleCases);
         $("retrieveSessionBtn").addEventListener("click", toggleRetrieveSession);
         $("rsCloseBtn").addEventListener("click", () => $("rsOverlay").classList.remove("visible"));
+        $("snapshotsBtn").addEventListener("click", toggleSnapshots);
+        $("snapshotsCloseBtn").addEventListener("click", () => $("snapshotsOverlay").classList.remove("visible"));
+        $("saveSnapshotBtn").addEventListener("click", openSaveSnapshotDialog);
+        $("saveSnapshotCancel").addEventListener("click", () => $("saveSnapshotOverlay").classList.remove("visible"));
+        $("saveSnapshotConfirm").addEventListener("click", saveSnapshot);
 
         $("infoBtn").addEventListener("click", toggleInfoPopover);
         $("suggestionsBtn").addEventListener("click", () => fetchSuggestions());

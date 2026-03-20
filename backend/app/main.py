@@ -4465,6 +4465,8 @@ def api_sessions_saved():
 # can resume exactly where they left off.
 
 WORKSPACE_PATH = (DATA_DIR / "workspace.json").resolve()
+SNAPSHOTS_DIR = (DATA_DIR / "snapshots").resolve()
+SNAPSHOTS_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def _write_workspace(snapshot: dict) -> None:
@@ -4638,6 +4640,121 @@ def api_workspace_delete():
     if WORKSPACE_PATH.exists():
         WORKSPACE_PATH.unlink()
         logger.info("Workspace snapshot deleted")
+    return {"status": "deleted"}
+
+
+# ============================================================
+# NAMED SNAPSHOTS
+# ============================================================
+
+
+class NamedSnapshotRequest(BaseModel):
+    name: str
+    description: str = ""
+    dataset: str | None = None
+    references: list[dict] | None = None
+    last_query: str = ""
+    last_tab: str = "query"
+
+
+@app.get("/api/snapshots")
+def api_snapshots_list():
+    """List all named snapshots."""
+    snapshots: list[dict] = []
+    if SNAPSHOTS_DIR.exists():
+        for f in sorted(SNAPSHOTS_DIR.iterdir(), reverse=True):
+            if f.suffix == ".json" and f.name.startswith("snapshot_"):
+                try:
+                    data = json.loads(f.read_text(encoding="utf-8"))
+                    data["_filename"] = f.name
+                    snapshots.append(data)
+                except Exception:
+                    pass
+    return {"snapshots": snapshots}
+
+
+@app.post("/api/snapshots")
+def api_snapshots_save(req: NamedSnapshotRequest):
+    """Save a named snapshot."""
+    snapshot = _build_workspace_snapshot(
+        dataset=req.dataset,
+        references=req.references,
+        last_query=req.last_query,
+        last_tab=req.last_tab,
+    )
+    snapshot["name"] = req.name
+    snapshot["description"] = req.description
+
+    ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
+    filename = f"snapshot_{ts}.json"
+    filepath = SNAPSHOTS_DIR / filename
+
+    import os as _os
+    with open(filepath, "w", encoding="utf-8") as f:
+        json.dump(snapshot, f, indent=2)
+        f.flush()
+        _os.fsync(f.fileno())
+
+    logger.info("Named snapshot saved: %s -> %s", req.name, filepath)
+    return {"status": "saved", "filename": filename, "name": req.name}
+
+
+@app.post("/api/snapshots/{filename}/restore")
+def api_snapshots_restore(filename: str):
+    """Restore a named snapshot. Same logic as workspace restore."""
+    filepath = SNAPSHOTS_DIR / filename
+    if not filepath.exists():
+        raise HTTPException(status_code=404, detail=f"Snapshot not found: {filename}")
+
+    try:
+        data = json.loads(filepath.read_text(encoding="utf-8"))
+    except Exception as exc:
+        raise HTTPException(status_code=400, detail=f"Corrupted snapshot: {exc}") from exc
+
+    result: dict = {"status": "ok", "warnings": [], "name": data.get("name", "")}
+
+    ds = data.get("dataset")
+    if ds and ds.get("name"):
+        ds_dir = (DATASETS_DIR / ds["name"]).resolve()
+        if (ds_dir / "source.parquet").exists():
+            result["dataset"] = ds["name"]
+        else:
+            result["warnings"].append(f"Dataset '{ds['name']}' not found.")
+            result["dataset"] = None
+    else:
+        result["dataset"] = None
+
+    result["references"] = []
+    for ref in data.get("references", []):
+        ref_name = ref.get("name", "")
+        ref_dir = (REFERENCES_DIR / ref_name).resolve()
+        if ref_dir.exists() and (ref_dir / "source.parquet").exists():
+            ref_info = {"name": ref_name, "loaded": True}
+            ref_meta_path = ref_dir / "_meta.json"
+            if ref_meta_path.exists():
+                try:
+                    rm = json.loads(ref_meta_path.read_text(encoding="utf-8"))
+                    ref_info["row_count"] = rm.get("row_count")
+                    ref_info["column_count"] = rm.get("column_count")
+                except Exception:
+                    pass
+            result["references"].append(ref_info)
+        else:
+            result["warnings"].append(f"Reference '{ref_name}' not found.")
+
+    result["last_query"] = data.get("last_query", "")
+    result["last_tab"] = data.get("last_tab", "query")
+
+    return result
+
+
+@app.delete("/api/snapshots/{filename}")
+def api_snapshots_delete(filename: str):
+    """Delete a named snapshot."""
+    filepath = SNAPSHOTS_DIR / filename
+    if filepath.exists():
+        filepath.unlink()
+        logger.info("Snapshot deleted: %s", filename)
     return {"status": "deleted"}
 
 
