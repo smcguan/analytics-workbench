@@ -462,6 +462,14 @@ without your data ever leaving your machine."
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-20] [BD] — UI redesign batch validated in CONTEXT.md: Reference Guide built,
+  SESSIONS restructured (4 buttons, 2 rows), Exit button with save prompts, Quit removed,
+  collapsible sidebar, Example Cases groups collapsed by default. CLAUDE.md + CONTEXT.md
+  updated with Parameterized Sessions spec and M5 feature documentation.
+[2026-03-20] [BD] — UI redesign batch validated: Reference Guide built, SESSIONS
+  restructured (Retrieve Session+Save / Retrieve Snapshot+Save), Exit button,
+  collapsible sidebar, Example Cases collapsed by default. CLAUDE.md update
+  sent to Claude Code with full M5 additions and Parameterized Sessions spec.
 [2026-03-20] [CODE] — UI redesign batch: Reference Guide (full product documentation in-app covering
   all features with code examples + troubleshooting table). SESSIONS restructured to 4 buttons in
   2 rows (Retrieve Session + Save / Retrieve Snapshot + Save). Current Session button removed.
@@ -656,6 +664,10 @@ without your data ever leaving your machine."
 - ~~Workspace Snapshot (M5 Component 6)~~ COMPLETE v1.8.0 — auto-save/restore on shutdown/launch
 - ~~Named Snapshots~~ COMPLETE v1.9.0 — save/list/restore/delete named workspace states
 - ~~Collapsible Example Cases groups~~ COMPLETE v1.9.0 — toggle arrows + case counts
+- ~~Reference Guide~~ COMPLETE v1.10.0 — full in-app product documentation
+- ~~Collapsible sidebar sections~~ COMPLETE v1.10.0 — smart auto-expand on import/query
+- ~~Exit button with save prompts~~ COMPLETE v1.10.0 — replaces Quit button
+- ~~SESSIONS section restructure~~ COMPLETE v1.10.0 — 4 buttons in 2 rows
 - UX improvement: auto-load previously active reference tables on session start
 - Build AI Mode Switch (Component 2 addition) — session-level Local/Cloud toggle
 - Build additional Reference Table Library files (MFN deal status, biosimilar tracker)

@@ -653,7 +653,15 @@ Manufacturer data for Part B drugs requires a supplemental source.
 
 ## UI DECISIONS (FROZEN — do not change without explicit instruction)
 - Nav order: Insights → Query → Saved Queries
-- App starts on Insights view
+- App starts on Welcome view (or resume prompt if workspace.json exists)
+- GET STARTED section: Welcome, Reference Guide, Example Cases
+- SESSIONS section: Retrieve Session + Save / Retrieve Snapshot + Save (4 buttons, 2 rows)
+- Exit button below SESSIONS (outside collapsible sections) — replaces Quit
+- Exit sequence: Save Session prompt → Save Snapshot prompt → auto-snapshot → shutdown
+- Sidebar sections collapsible with ▼/▶ toggles
+- Default: GET STARTED expanded, WORKSPACE/DATA/SESSIONS collapsed
+- Smart auto-expand: DATA on import, WORKSPACE on first query, GET STARTED collapses on import
+- Example Cases groups collapsed by default in browser dialog
 - Export Excel and Export TSV are direct toolbar buttons (no Export tab)
 - Import uses <label for="file-input"> pattern, NOT programmatic .click()
 - Prompt and SQL editor clear when switching datasets

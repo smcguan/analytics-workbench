@@ -125,11 +125,17 @@ Building toward reproducible, auditable, shareable analytical sessions:
 | v1.8.0 | 2026-03-20 | Bug #15/#16 fixes, Tutorial #2, Workspace Snapshot, NYC Taxi case, category groups |
 | v1.8.1 | 2026-03-20 | Taxi TIMESTAMP cast fix, tutorial summary cards show file size + source |
 | v1.9.0 | 2026-03-20 | Tutorial #3, 3 new example cases, Named Snapshots, collapsible groups, 607 tests |
+| v1.10.0 | 2026-03-20 | Reference Guide, SESSIONS restructure, Exit button, collapsible sidebar, /sync skill |
 
 ---
 
 ## Wrap Records
 <!-- Each /wrap appends a 3-line summary below. Most recent at top. -->
+
+**v1.10.0** | 2026-03-20
+Reference Guide (full in-app product documentation). SESSIONS restructured to 4 buttons in 2 rows.
+Exit button with 3-step save prompts replaces Quit. Collapsible sidebar sections with smart
+auto-expand. Example Cases groups collapsed by default. /wrap updated, /sync skill added. 607 tests.
 
 **v1.9.0** | 2026-03-20
 Large feature batch: Tutorial #3 (USP Classification). 3 new example cases (Logistics, Retail,
