@@ -1,0 +1,12 @@
+{
+  "id": "part_b_globe_candidates",
+  "name": "Part B GLOBE Candidate Analysis",
+  "description": "Filters Medicare Part B drugs by spending threshold and single-source criteria to identify GLOBE payment model candidates.",
+  "category": "Healthcare Policy",
+  "difficulty": "Intermediate",
+  "estimated_minutes": 15,
+  "dataset_file": "part_b_spending_sample.csv",
+  "dataset_display_name": "CMS Medicare Part B Drug Spending (500-row sample)",
+  "reference_tables": ["ira_negotiated_drugs"],
+  "version": "1.0"
+}

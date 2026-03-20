@@ -313,6 +313,7 @@ DATASET_CONTEXT_FILENAME = "dataset_context.json"
 REFERENCES_DIR = Path(os.getenv("AW_REFERENCES_DIR", str(DATA_DIR / "references"))).resolve()
 REFERENCE_LIBRARY_DIR = Path(os.getenv("AW_REFERENCE_LIBRARY_DIR", str(DATA_DIR / "reference_library"))).resolve()
 SESSIONS_DIR = Path(os.getenv("AW_SESSIONS_DIR", str(DATA_DIR / "sessions"))).resolve()
+EXAMPLE_CASES_DIR = Path(os.getenv("AW_EXAMPLE_CASES_DIR", str(DATA_DIR / "example_cases"))).resolve()
 
 DATASETS_DIR.mkdir(parents=True, exist_ok=True)
 EXPORTS_DIR.mkdir(parents=True, exist_ok=True)
@@ -345,7 +346,7 @@ set_sessions_dir(SESSIONS_DIR)
 start_session()
 
 logger.info(
-    "app started | mode=%s | base_dir=%s | datasets_dir=%s | exports_dir=%s | references_dir=%s | reference_library_dir=%s | sessions_dir=%s",
+    "app started | mode=%s | base_dir=%s | datasets_dir=%s | exports_dir=%s | references_dir=%s | reference_library_dir=%s | sessions_dir=%s | example_cases_dir=%s",
     "packaged" if getattr(sys, "frozen", False) else "dev",
     BASE_DIR,
     DATASETS_DIR,
@@ -353,6 +354,7 @@ logger.info(
     REFERENCES_DIR,
     REFERENCE_LIBRARY_DIR,
     SESSIONS_DIR,
+    EXAMPLE_CASES_DIR,
 )
 
 
@@ -2092,6 +2094,10 @@ def api_health():
             "sessions_dir": {
                 "ok": SESSIONS_DIR.exists(),
                 "path": str(SESSIONS_DIR),
+            },
+            "example_cases_dir": {
+                "ok": EXAMPLE_CASES_DIR.exists(),
+                "path": str(EXAMPLE_CASES_DIR),
             },
         },
         "runtime": {
@@ -4210,6 +4216,132 @@ def api_session_annotate(req: AnnotateRequest):
     engine = SessionReplayEngine(DATASETS_DIR, REFERENCES_DIR, REFERENCE_LIBRARY_DIR, SESSIONS_DIR)
     result = engine.annotate_baselines(req.filename)
     return {"status": "annotated", "baselines_added": len(result.get("baselines", []))}
+
+
+# ============================================================
+# EXAMPLE CASES
+# ============================================================
+
+
+@app.get("/api/example_cases")
+def api_example_cases():
+    """List available example cases from EXAMPLE_CASES_DIR."""
+    cases: list[dict] = []
+    if not EXAMPLE_CASES_DIR.exists():
+        return {"cases": []}
+    for case_dir in sorted(EXAMPLE_CASES_DIR.iterdir()):
+        if not case_dir.is_dir():
+            continue
+        meta_path = case_dir / "metadata.json"
+        if not meta_path.exists():
+            continue
+        try:
+            meta = json.loads(meta_path.read_text(encoding="utf-8"))
+            meta["has_data"] = (case_dir / "data").exists() and any((case_dir / "data").iterdir())
+            meta["has_reference"] = (case_dir / "reference").exists() and any((case_dir / "reference").iterdir())
+            cases.append(meta)
+        except Exception as exc:
+            logger.warning("Failed to read example case %s: %s", case_dir.name, exc)
+    return {"cases": cases}
+
+
+class LoadCaseRequest(BaseModel):
+    mode: str = "resume"  # "resume", "tutorial", or "runall"
+
+
+@app.post("/api/example_cases/{case_id}/load")
+def api_load_example_case(case_id: str, req: LoadCaseRequest):
+    """Load an example case: import its dataset and reference table(s)."""
+    case_dir = (EXAMPLE_CASES_DIR / case_id).resolve()
+    if not case_dir.exists():
+        raise HTTPException(status_code=404, detail=f"Example case not found: {case_id}")
+
+    meta_path = case_dir / "metadata.json"
+    if not meta_path.exists():
+        raise HTTPException(status_code=404, detail=f"Example case metadata not found: {case_id}")
+
+    meta = json.loads(meta_path.read_text(encoding="utf-8"))
+
+    # Import the sample dataset
+    dataset_name = None
+    data_dir = case_dir / "data"
+    if data_dir.exists():
+        for data_file in data_dir.iterdir():
+            if data_file.suffix.lower() in (".csv", ".tsv", ".xlsx", ".parquet"):
+                try:
+                    with data_file.open("rb") as f:
+                        result = import_dataset(
+                            uploaded_file=f,
+                            original_filename=data_file.name,
+                            display_name=meta.get("dataset_display_name", data_file.stem),
+                            registered_root=str(DATASETS_DIR),
+                            overwrite=True,
+                        )
+                    dataset_name = result.metadata.registered_name
+                except Exception as exc:
+                    logger.warning("Failed to import example case dataset: %s", exc)
+                break  # Only import the first data file
+
+    # Load reference tables
+    ref_info: list[dict] = []
+    ref_dir = case_dir / "reference"
+    if ref_dir.exists():
+        for ref_file in ref_dir.iterdir():
+            if ref_file.suffix.lower() in (".csv", ".tsv", ".xlsx"):
+                try:
+                    with ref_file.open("rb") as f:
+                        ref_result = import_reference_table(
+                            uploaded_file=f,
+                            original_filename=ref_file.name,
+                            registered_root=REFERENCES_DIR,
+                            overwrite=True,
+                        )
+                    ref_info.append({
+                        "name": ref_result.reference_name,
+                        "row_count": ref_result.row_count,
+                        "columns": len(ref_result.columns),
+                    })
+                except Exception as exc:
+                    logger.warning("Failed to import example case reference: %s", exc)
+
+    return {
+        "status": "loaded",
+        "case_id": case_id,
+        "dataset": dataset_name,
+        "references": ref_info,
+        "metadata": meta,
+    }
+
+
+# ============================================================
+# SAVED SESSIONS
+# ============================================================
+
+
+@app.get("/api/sessions/saved")
+def api_sessions_saved():
+    """List named (saved) sessions from SESSIONS_DIR."""
+    saved: list[dict] = []
+    if not SESSIONS_DIR.exists():
+        return {"sessions": []}
+    for f in sorted(SESSIONS_DIR.glob("*.json"), reverse=True):
+        try:
+            data = json.loads(f.read_text(encoding="utf-8"))
+            name = data.get("name", "")
+            if not name:  # Only show named sessions
+                continue
+            saved.append({
+                "filename": f.name,
+                "session_id": data.get("session_id", ""),
+                "name": name,
+                "description": data.get("description", ""),
+                "started_at": data.get("started_at", ""),
+                "event_count": len(data.get("events", [])),
+                "ai_mode": data.get("ai_mode", "cloud"),
+            })
+        except Exception:
+            continue
+    return {"sessions": saved}
 
 
 @app.post("/api/shutdown")

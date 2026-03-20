@@ -1324,6 +1324,39 @@
         .ec-action-btn:hover{ background:var(--bg2); }
         .ec-resume-btn{ border-color:var(--accent); color:var(--accent); }
         .ec-resume-btn:hover{ background:var(--accent); color:var(--bg0); }
+        .ec-tutorial-btn{ border-color:var(--warning); color:var(--warning); }
+        .ec-tutorial-btn:hover{ background:var(--warning); color:var(--bg0); }
+        .ec-runall-btn{ border-color:var(--success); color:var(--success); }
+        .ec-runall-btn:hover{ background:var(--success); color:var(--bg0); }
+        .ec-case-header{
+            display:flex; align-items:center; gap:8px; margin-bottom:4px;
+        }
+        .ec-category-badge{
+            display:inline-block; font-size:10px; font-weight:600;
+            text-transform:uppercase; letter-spacing:.4px;
+            padding:2px 8px; border-radius:999px;
+            background:rgba(79,140,255,.12); color:var(--accent);
+            white-space:nowrap;
+        }
+        .ec-case-desc{
+            font-size:12px; color:var(--muted); line-height:1.4;
+            margin-bottom:4px;
+        }
+        .ec-case-meta{
+            font-size:11px; color:var(--muted2); margin-bottom:6px;
+        }
+        /* Retrieve Session overlay — reuses ec-overlay patterns */
+        .rs-overlay{
+            display:none;
+            position:fixed;
+            inset:0;
+            z-index:100;
+            background:rgba(0,0,0,.55);
+            backdrop-filter:blur(6px);
+            overflow-y:auto;
+            padding:40px 20px;
+        }
+        .rs-overlay.visible{ display:flex; justify-content:center; align-items:flex-start; }
 
         /* Step-through view */
         .ec-session-meta{
@@ -1429,6 +1462,7 @@
                     <h3 class="section-title">Get Started</h3>
                     <div class="nav-list">
                         <button class="nav-item" id="navWelcome">Welcome</button>
+                        <button class="nav-item" id="exampleCasesBtn">Example Cases</button>
                     </div>
                 </section>
 
@@ -1498,11 +1532,11 @@
 
                 <section>
                     <h3 class="section-title">Sessions</h3>
-                    <div class="nav-list">
-                        <button class="nav-item" id="exampleCasesBtn">Example Cases</button>
-                        <button class="nav-item" id="saveSessionBtn">Save Session</button>
-                        <button class="nav-item" id="navSessionLog">Session Log</button>
+                    <div class="sidebar-btn-row">
+                        <button class="btn primary import-btn" id="navSessionLog">Current Session</button>
+                        <button class="btn sidebar-btn-secondary" id="saveSessionBtn">Save</button>
                     </div>
+                    <button class="btn import-btn" id="retrieveSessionBtn" style="margin-top:2px;">Retrieve Session</button>
                 </section>
             </aside>
 
@@ -1817,6 +1851,19 @@ LIMIT 100</textarea>
         </div>
     </div>
 
+    <!-- Retrieve Session overlay -->
+    <div class="rs-overlay" id="rsOverlay">
+        <div class="ec-panel">
+            <div class="ec-header">
+                <h2 id="rsTitle">Retrieve Session</h2>
+                <button class="ec-close" id="rsCloseBtn">&times;</button>
+            </div>
+            <div id="rsContent">
+                <div style="color:var(--muted); font-size:13px;">Loading...</div>
+            </div>
+        </div>
+    </div>
+
     <!-- Tutorial bottom panel -->
     <div id="tutorialPanel" style="display:none">
         <div class="tutorial-bar">
@@ -1904,7 +1951,7 @@ LIMIT 100</textarea>
         }
 
         function setActiveNav(buttonId) {
-            ["navWelcome","navInsights","navQuery","navSavedQueries","navSessionLog"].forEach((id) => {
+            ["navWelcome","exampleCasesBtn","navInsights","navQuery","navSavedQueries"].forEach((id) => {
                 $(id).classList.toggle("active", id === buttonId);
             });
         }
@@ -1921,7 +1968,7 @@ LIMIT 100</textarea>
             if (viewName === "query") setActiveNav("navQuery");
             if (viewName === "saved") setActiveNav("navSavedQueries");
             if (viewName === "welcome") setActiveNav("navWelcome");
-            if (viewName === "sessionLog") setActiveNav("navSessionLog");
+            if (viewName === "sessionLog") setActiveNav(null);
             if (viewName === "insights") {
                 setActiveNav("navInsights");
                 // Auto-fetch insights when navigating here with a dataset loaded
@@ -2408,55 +2455,238 @@ LIMIT 100</textarea>
             $("ecContent").innerHTML = '<div style="color:var(--muted); font-size:13px;">Loading...</div>';
 
             try {
-                const data = await apiJson("/api/session/files");
-                const files = data.files || [];
-                if (files.length === 0) {
-                    $("ecContent").innerHTML = '<div style="color:var(--muted); font-size:13px;">No session files found.</div>';
+                const data = await apiJson("/api/example_cases");
+                const cases = data.cases || [];
+                if (cases.length === 0) {
+                    $("ecContent").innerHTML = '<div style="color:var(--muted); font-size:13px;">No example cases found.</div>';
                     return;
                 }
-                // Sort named sessions to top
-                const sorted = [...files].sort((a, b) => {
-                    if (a.name && !b.name) return -1;
-                    if (!a.name && b.name) return 1;
-                    return 0;
-                });
                 const container = document.createElement("div");
                 container.className = "ec-file-list";
-                for (const f of sorted) {
+                for (const c of cases) {
                     const item = document.createElement("div");
                     item.className = "ec-file-item";
+                    item.style.flexDirection = "column";
+                    item.style.alignItems = "stretch";
 
-                    const info = document.createElement("div");
-                    info.className = "ec-file-info";
+                    const header = document.createElement("div");
+                    header.className = "ec-case-header";
+                    const nameEl = document.createElement("strong");
+                    nameEl.textContent = c.name || c.id || "Untitled";
+                    header.appendChild(nameEl);
+                    if (c.category) {
+                        const badge = document.createElement("span");
+                        badge.className = "ec-category-badge";
+                        badge.textContent = c.category;
+                        header.appendChild(badge);
+                    }
+                    item.appendChild(header);
 
-                    if (f.name) {
-                        const nameEl = document.createElement("div");
-                        nameEl.className = "ec-file-date";
-                        nameEl.textContent = f.name;
-                        info.appendChild(nameEl);
+                    if (c.description) {
+                        const desc = document.createElement("div");
+                        desc.className = "ec-case-desc";
+                        desc.textContent = c.description;
+                        item.appendChild(desc);
+                    }
 
-                        if (f.description) {
-                            const descEl = document.createElement("div");
-                            descEl.className = "ec-file-meta";
-                            descEl.style.color = "var(--muted)";
-                            descEl.textContent = f.description;
-                            info.appendChild(descEl);
-                        }
-
-                        const subEl = document.createElement("div");
-                        subEl.className = "ec-file-meta";
-                        subEl.textContent = `${_ecFormatDate(f.started_at)} \u2022 ${f.event_count} events`;
-                        info.appendChild(subEl);
-                    } else {
-                        const dateEl = document.createElement("div");
-                        dateEl.className = "ec-file-date";
-                        dateEl.textContent = _ecFormatDate(f.started_at);
-                        info.appendChild(dateEl);
-
+                    const metaParts = [];
+                    if (c.difficulty) metaParts.push(c.difficulty);
+                    if (c.estimated_minutes) metaParts.push("~" + c.estimated_minutes + " min");
+                    if (metaParts.length) {
                         const metaEl = document.createElement("div");
-                        metaEl.className = "ec-file-meta";
-                        metaEl.textContent = `${f.event_count} events`;
-                        info.appendChild(metaEl);
+                        metaEl.className = "ec-case-meta";
+                        metaEl.textContent = metaParts.join(" \u2022 ");
+                        item.appendChild(metaEl);
+                    }
+
+                    const btnGroup = document.createElement("div");
+                    btnGroup.className = "ec-action-btns";
+
+                    const caseId = c.id || c.name || "";
+
+                    const resumeBtn = document.createElement("button");
+                    resumeBtn.className = "ec-action-btn ec-resume-btn";
+                    resumeBtn.textContent = "Resume";
+                    resumeBtn.addEventListener("click", () => loadAndResume(caseId));
+
+                    const tutorialBtn = document.createElement("button");
+                    tutorialBtn.className = "ec-action-btn ec-tutorial-btn";
+                    tutorialBtn.textContent = "Tutorial";
+                    tutorialBtn.addEventListener("click", () => loadAndTutorial(caseId));
+
+                    const runAllBtn = document.createElement("button");
+                    runAllBtn.className = "ec-action-btn ec-runall-btn";
+                    runAllBtn.textContent = "Run All";
+                    runAllBtn.addEventListener("click", () => loadAndRunAll(caseId));
+
+                    btnGroup.appendChild(resumeBtn);
+                    btnGroup.appendChild(tutorialBtn);
+                    btnGroup.appendChild(runAllBtn);
+                    item.appendChild(btnGroup);
+
+                    container.appendChild(item);
+                }
+                $("ecContent").innerHTML = "";
+                $("ecContent").appendChild(container);
+            } catch (e) {
+                $("ecContent").innerHTML = '<div style="color:var(--danger); font-size:13px;">Failed to load example cases.</div>';
+            }
+        }
+
+        async function loadAndResume(caseId) {
+            try {
+                toast("Loading example case...");
+                const result = await apiJson("/api/example_cases/" + encodeURIComponent(caseId) + "/load", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ mode: "resume" })
+                });
+
+                closeExampleCases();
+
+                // Select the dataset
+                if (result.dataset) {
+                    await loadDatasets();
+                    selectedDataset = result.dataset;
+                    renderDatasets();
+                }
+
+                // Update reference indicator
+                if (result.references && result.references.length > 0) {
+                    const ref = result.references[0];
+                    currentReference = ref.name;
+                    const refDisplay = ref.row_count
+                        ? `${ref.name} (${num(ref.row_count)} rows, ${ref.column_count} cols)`
+                        : ref.name;
+                    $("referenceName").textContent = refDisplay;
+                    $("referenceIndicator").style.display = "block";
+                }
+
+                switchView("query");
+                toast("Example case loaded \u2014 ready to explore");
+            } catch (e) {
+                toast("Failed to load example case: " + (e.message || ""), 8000);
+            }
+        }
+
+        async function loadAndTutorial(caseId) {
+            try {
+                toast("Loading example case...");
+                const result = await apiJson("/api/example_cases/" + encodeURIComponent(caseId) + "/load", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ mode: "tutorial" })
+                });
+
+                closeExampleCases();
+
+                // Select the dataset
+                if (result.dataset) {
+                    await loadDatasets();
+                    selectedDataset = result.dataset;
+                    renderDatasets();
+                }
+
+                // Update reference indicator
+                if (result.references && result.references.length > 0) {
+                    const ref = result.references[0];
+                    currentReference = ref.name;
+                    const refDisplay = ref.row_count
+                        ? `${ref.name} (${num(ref.row_count)} rows, ${ref.column_count} cols)`
+                        : ref.name;
+                    $("referenceName").textContent = refDisplay;
+                    $("referenceIndicator").style.display = "block";
+                }
+
+                switchView("query");
+                toast("Tutorial mode coming soon");
+            } catch (e) {
+                toast("Failed to load example case: " + (e.message || ""), 8000);
+            }
+        }
+
+        async function loadAndRunAll(caseId) {
+            try {
+                toast("Loading example case...");
+                const result = await apiJson("/api/example_cases/" + encodeURIComponent(caseId) + "/load", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ mode: "runall" })
+                });
+
+                closeExampleCases();
+
+                // Select the dataset
+                if (result.dataset) {
+                    await loadDatasets();
+                    selectedDataset = result.dataset;
+                    renderDatasets();
+                }
+
+                // Update reference indicator
+                if (result.references && result.references.length > 0) {
+                    const ref = result.references[0];
+                    currentReference = ref.name;
+                    const refDisplay = ref.row_count
+                        ? `${ref.name} (${num(ref.row_count)} rows, ${ref.column_count} cols)`
+                        : ref.name;
+                    $("referenceName").textContent = refDisplay;
+                    $("referenceIndicator").style.display = "block";
+                }
+
+                switchView("query");
+                toast("Run All mode coming soon \u2014 use Resume to explore");
+            } catch (e) {
+                toast("Failed to load example case: " + (e.message || ""), 8000);
+            }
+        }
+
+        async function toggleRetrieveSession() {
+            const overlay = $("rsOverlay");
+            if (overlay.classList.contains("visible")) {
+                overlay.classList.remove("visible");
+                return;
+            }
+            overlay.classList.add("visible");
+            $("rsContent").innerHTML = '<div style="color:var(--muted); font-size:13px;">Loading...</div>';
+
+            try {
+                const data = await apiJson("/api/sessions/saved");
+                const sessions = data.sessions || [];
+                if (sessions.length === 0) {
+                    $("rsContent").innerHTML = '<div style="color:var(--muted); font-size:13px;">No saved sessions found.</div>';
+                    return;
+                }
+                const container = document.createElement("div");
+                container.className = "ec-file-list";
+                for (const s of sessions) {
+                    const item = document.createElement("div");
+                    item.className = "ec-file-item";
+                    item.style.flexDirection = "column";
+                    item.style.alignItems = "stretch";
+
+                    const header = document.createElement("div");
+                    header.className = "ec-case-header";
+                    const nameEl = document.createElement("strong");
+                    nameEl.textContent = s.name || "Untitled";
+                    header.appendChild(nameEl);
+                    item.appendChild(header);
+
+                    if (s.description) {
+                        const desc = document.createElement("div");
+                        desc.className = "ec-case-desc";
+                        desc.textContent = s.description;
+                        item.appendChild(desc);
+                    }
+
+                    const metaParts = [];
+                    if (s.started_at) metaParts.push(_ecFormatDate(s.started_at));
+                    if (s.event_count !== undefined) metaParts.push(s.event_count + " events");
+                    if (metaParts.length) {
+                        const metaEl = document.createElement("div");
+                        metaEl.className = "ec-case-meta";
+                        metaEl.textContent = metaParts.join(" \u2022 ");
+                        item.appendChild(metaEl);
                     }
 
                     const btnGroup = document.createElement("div");
@@ -2465,30 +2695,29 @@ LIMIT 100</textarea>
                     const resumeBtn = document.createElement("button");
                     resumeBtn.className = "ec-action-btn ec-resume-btn";
                     resumeBtn.textContent = "Resume";
-                    resumeBtn.addEventListener("click", () => resumeSession(f.filename));
+                    resumeBtn.addEventListener("click", () => {
+                        $("rsOverlay").classList.remove("visible");
+                        resumeSession(s.filename);
+                    });
 
                     const tutorialBtn = document.createElement("button");
                     tutorialBtn.className = "ec-action-btn ec-tutorial-btn";
                     tutorialBtn.textContent = "Tutorial";
-                    tutorialBtn.addEventListener("click", () => openTutorial(f.filename));
-
-                    const runAllBtn = document.createElement("button");
-                    runAllBtn.className = "ec-action-btn ec-runall-btn";
-                    runAllBtn.textContent = "Run All";
-                    runAllBtn.addEventListener("click", () => runReplayFromList(f.filename));
+                    tutorialBtn.addEventListener("click", () => {
+                        $("rsOverlay").classList.remove("visible");
+                        openTutorial(s.filename);
+                    });
 
                     btnGroup.appendChild(resumeBtn);
                     btnGroup.appendChild(tutorialBtn);
-                    btnGroup.appendChild(runAllBtn);
-
-                    item.appendChild(info);
                     item.appendChild(btnGroup);
+
                     container.appendChild(item);
                 }
-                $("ecContent").innerHTML = "";
-                $("ecContent").appendChild(container);
+                $("rsContent").innerHTML = "";
+                $("rsContent").appendChild(container);
             } catch (e) {
-                $("ecContent").innerHTML = '<div style="color:var(--danger); font-size:13px;">Failed to load session files.</div>';
+                $("rsContent").innerHTML = '<div style="color:var(--danger); font-size:13px;">Failed to load saved sessions.</div>';
             }
         }
 
@@ -4376,6 +4605,8 @@ LIMIT 100</textarea>
         });
         $("welcomeExampleLink").addEventListener("click", () => toggleExampleCases());
         $("ecCloseBtn").addEventListener("click", closeExampleCases);
+        $("retrieveSessionBtn").addEventListener("click", toggleRetrieveSession);
+        $("rsCloseBtn").addEventListener("click", () => $("rsOverlay").classList.remove("visible"));
 
         $("infoBtn").addEventListener("click", toggleInfoPopover);
         $("suggestionsBtn").addEventListener("click", () => fetchSuggestions());

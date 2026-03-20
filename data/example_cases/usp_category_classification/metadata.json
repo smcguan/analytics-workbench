@@ -1,0 +1,12 @@
+{
+  "id": "usp_category_classification",
+  "name": "USP Therapeutic Category Classification",
+  "description": "Classifies Medicare Part D drugs into USP therapeutic categories using a reference table JOIN for GUARD payment model analysis.",
+  "category": "Healthcare Policy",
+  "difficulty": "Intermediate",
+  "estimated_minutes": 15,
+  "dataset_file": "part_d_spending_sample.csv",
+  "dataset_display_name": "CMS Medicare Part D Drug Spending (500-row sample)",
+  "reference_tables": ["usp_guard_categories"],
+  "version": "1.0"
+}

@@ -669,6 +669,9 @@ POST /api/session/annotate               (annotate session with baselines) [MILE
 POST /api/session/resume                 (restore session state for Resume mode) [MILESTONE 5]
 POST /api/session/name                   (set name + description on current session) [MILESTONE 5]
 GET  /api/session/load/{filename}        (load full session file content) [MILESTONE 5]
+GET  /api/example_cases                  (list curated example cases) [MILESTONE 5]
+POST /api/example_cases/{id}/load        (load example case: import data + refs) [MILESTONE 5]
+GET  /api/sessions/saved                 (list analyst's named saved sessions) [MILESTONE 5]
 POST /api/shutdown
 ```
 

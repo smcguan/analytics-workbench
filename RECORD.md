@@ -122,6 +122,11 @@ Building toward reproducible, auditable, shareable analytical sessions:
 ## Wrap Records
 <!-- Each /wrap appends a 3-line summary below. Most recent at top. -->
 
+**v1.7.0** | 2026-03-20
+Example Cases with real CMS sample data: 3 curated cases (Part D IRA, Part B GLOBE,
+USP Classification) with 500-row datasets + reference CSVs. Sidebar reorganized.
+Separate example_cases/ and sessions/ directories. Retrieve Session browser. 590 tests.
+
 **v1.6.3** | 2026-03-20
 Fixed 3 xfail bugs: pandas>=2.0 string dtype, AI consent server-side enforcement.
 6 new tests for session name endpoint + internal SQL flag. Suite fully green —

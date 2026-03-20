@@ -1,0 +1,36 @@
+drug_name,generic_name,ira_round,effective_date,manufacturer,indication_category
+Eliquis,apixaban,1,2026-01-01,Bristol-Myers Squibb / Pfizer,Cardiovascular
+Jardiance,empagliflozin,1,2026-01-01,Boehringer Ingelheim / Lilly,Diabetes
+Xarelto,rivaroxaban,1,2026-01-01,Janssen (J&J),Cardiovascular
+Januvia,sitagliptin,1,2026-01-01,Merck,Diabetes
+Farxiga,dapagliflozin,1,2026-01-01,AstraZeneca,Diabetes
+Entresto,sacubitril/valsartan,1,2026-01-01,Novartis,Cardiovascular
+Enbrel,etanercept,1,2026-01-01,Amgen,Autoimmune
+Imbruvica,ibrutinib,1,2026-01-01,AbbVie / Janssen,Oncology
+Stelara,ustekinumab,1,2026-01-01,Janssen (J&J),Autoimmune
+Fiasp,insulin aspart,1,2026-01-01,Novo Nordisk,Diabetes
+NovoLog,insulin aspart,1,2026-01-01,Novo Nordisk,Diabetes
+Ozempic,semaglutide,2,2027-01-01,Novo Nordisk,Diabetes
+Keytruda,pembrolizumab,2,2027-01-01,Merck,Oncology
+Trelegy Ellipta,fluticasone/umeclidinium/vilanterol,2,2027-01-01,GSK,Respiratory
+Abbvie Rinvoq,upadacitinib,2,2027-01-01,AbbVie,Autoimmune
+Pomalyst,pomalidomide,2,2027-01-01,Bristol-Myers Squibb,Oncology
+Ibrance,palbociclib,2,2027-01-01,Pfizer,Oncology
+Calquence,acalabrutinib,2,2027-01-01,AstraZeneca,Oncology
+Taltz,ixekizumab,2,2027-01-01,Lilly,Autoimmune
+Austedo,deutetrabenazine,2,2027-01-01,Teva,Neurology
+Otezla,apremilast,2,2027-01-01,Amgen,Autoimmune
+Tremfya,guselkumab,2,2027-01-01,Janssen (J&J),Autoimmune
+Cosentyx,secukinumab,2,2027-01-01,Novartis,Autoimmune
+Verzenio,abemaciclib,2,2027-01-01,Lilly,Oncology
+Skyrizi,risankizumab,2,2027-01-01,AbbVie,Autoimmune
+Wegovy,semaglutide,3,2028-01-01,Novo Nordisk,Obesity
+Dupixent,dupilumab,3,2028-01-01,Sanofi / Regeneron,Autoimmune
+Eylea,aflibercept,3,2028-01-01,Regeneron,Ophthalmology
+Opdivo,nivolumab,3,2028-01-01,Bristol-Myers Squibb,Oncology
+Darzalex,daratumumab,3,2028-01-01,Janssen (J&J),Oncology
+Xtandi,enzalutamide,3,2028-01-01,Pfizer / Astellas,Oncology
+Vraylar,cariprazine,3,2028-01-01,AbbVie,Neurology
+Linzess,linaclotide,3,2028-01-01,AbbVie / Ironwood,GI
+Breo Ellipta,fluticasone/vilanterol,3,2028-01-01,GSK,Respiratory
+Nucala,mepolizumab,3,2028-01-01,GSK,Respiratory

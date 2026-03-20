@@ -42,7 +42,7 @@
 
 **Validated at scale:** 220M rows, DuckDB local execution, sub-second import.
 
-**Test suite:** 576 automated tests, all passing (zero xfail), runs under 6 seconds.
+**Test suite:** 590 automated tests, all passing (zero xfail), runs under 6 seconds.
 Pre-commit and pre-push git hooks enforce green suite on every commit and push.
 
 ---
@@ -460,6 +460,11 @@ without your data ever leaving your machine."
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-20] [CODE] — Example Cases with real sample data: 3 curated cases (Part D IRA Exclusion,
+  Part B GLOBE Candidates, USP Category Classification) with 500-row CMS samples + reference CSVs.
+  Sidebar reorganized: Example Cases in Get Started, Sessions has Current Session/Save/Retrieve.
+  Separate directories: data/example_cases/ (curated) vs data/sessions/ (analyst's own). 3 new
+  backend endpoints. Retrieve Session browser for saved sessions. 590 tests. v1.7.0.
 [2026-03-20] [CODE] — Fixed 3 xfail bugs: strip_trailing_special_chars pandas>=2.0 fix, AI consent
   enforced server-side for insights + suggestions. 6 new tests (session name endpoint, internal
   SQL flag). Zero xfails for first time. 576 tests. v1.6.3.
