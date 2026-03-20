@@ -502,6 +502,8 @@
             display:inline-flex;
             align-items:center;
             justify-content:center;
+            min-width:62px;
+            box-sizing:border-box;
         }
         .sidebar-btn-secondary{
             font-size:0.82em;
@@ -3116,11 +3118,19 @@ LIMIT 100</textarea>
                     });
                 }
 
-                // Export session to disk
-                await apiJson("/api/session/export");
+                // Export session to disk — POST ensures a fresh write
+                const exportResult = await apiJson("/api/session/export", {
+                    method: "POST",
+                });
 
                 closeSaveSessionDialog();
-                toast("Session saved to library.");
+
+                const savedPath = exportResult.exported_to || "";
+                if (savedPath) {
+                    toast(`Session saved: ${savedPath.split(/[\\/]/).pop()}`);
+                } else {
+                    toast("Session saved to library.");
+                }
             } catch (e) {
                 toast("Failed to save session: " + (e.message || "Unknown error"), 6000);
             } finally {

@@ -4021,9 +4021,14 @@ def api_session():
     return asdict(session)
 
 
-@app.get("/api/session/export")
+@app.api_route("/api/session/export", methods=["GET", "POST"])
 def api_session_export():
-    """Export current session log to disk and return it."""
+    """Export current session log to disk and return it.
+
+    Accepts both GET (legacy) and POST (preferred — explicit write action).
+    The export_session() call writes synchronously to disk with an explicit
+    flush so the file is guaranteed to exist when the response returns.
+    """
     path = export_session(SESSIONS_DIR)
     session = get_current_session()
     if session is None:

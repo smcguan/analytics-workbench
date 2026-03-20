@@ -221,7 +221,14 @@ def export_session(sessions_dir: Path) -> Path | None:
     filepath = sessions_dir / filename
 
     data = asdict(_current_session)
-    filepath.write_text(json.dumps(data, indent=2), encoding="utf-8")
+    # Write with explicit flush + fsync to guarantee file is on disk
+    # before we return. This prevents the "save succeeded but file
+    # doesn't exist yet" issue on Windows.
+    import os as _os
+    with open(filepath, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=2)
+        f.flush()
+        _os.fsync(f.fileno())
 
     logger.info("Session exported to %s", filepath)
     return filepath
