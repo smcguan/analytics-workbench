@@ -1521,7 +1521,6 @@
                     <span class="status-dot" id="versionDot"></span>
                     <span id="versionText">Loading version…</span>
                 </div>
-                <button class="btn danger" id="quitBtn" title="Stop the server and close">Quit</button>
             </div>
         </header>
 
@@ -1532,6 +1531,7 @@
                     <div class="section-body" id="sidebarGetStartedBody">
                     <div class="nav-list">
                         <button class="nav-item" id="navWelcome">Welcome</button>
+                        <button class="nav-item" id="navReferenceGuide">Reference Guide</button>
                         <button class="nav-item" id="exampleCasesBtn">Example Cases</button>
                     </div>
                     </div>
@@ -1606,15 +1606,19 @@
                     <h3 class="section-title collapsed" id="sidebarSessionsTitle"><span class="section-toggle">&#9660;</span> Sessions</h3>
                     <div class="section-body collapsed" id="sidebarSessionsBody">
                     <div class="sidebar-btn-row">
-                        <button class="btn primary import-btn" id="navSessionLog">Current Session</button>
+                        <button class="btn import-btn" id="retrieveSessionBtn">Retrieve Session</button>
                         <button class="btn sidebar-btn-secondary" id="saveSessionBtn">Save</button>
                     </div>
                     <div class="sidebar-btn-row" style="margin-top:2px;">
-                        <button class="btn import-btn" id="retrieveSessionBtn">Retrieve Session</button>
-                        <button class="btn sidebar-btn-secondary" id="snapshotsBtn">Snapshots</button>
+                        <button class="btn import-btn" id="snapshotsBtn">Retrieve Snapshot</button>
+                        <button class="btn sidebar-btn-secondary" id="saveSnapshotSidebarBtn">Save</button>
                     </div>
                     </div>
                 </section>
+
+                <div style="margin-top:12px; padding-top:10px; border-top:1px solid var(--bg2);">
+                    <button class="btn import-btn" id="exitBtn" style="background:rgba(239,107,107,.08); border-color:rgba(239,107,107,.20); color:var(--fg2);">Exit</button>
+                </div>
             </aside>
 
             <section class="content">
@@ -1908,6 +1912,136 @@ LIMIT 100</textarea>
                     </section>
                 </section>
 
+                <section id="referenceGuideView" class="hidden">
+                    <section class="panel welcome-shell" style="max-width:800px;">
+                        <div class="welcome-card" style="font-size:13px; line-height:1.7;">
+
+<h2 style="margin-top:0;">Analytics Workbench Reference Guide</h2>
+
+<h3>Getting Started</h3>
+<p><strong>Analytics Workbench</strong> is a local-first AI analytics tool. Import any structured dataset, get automatic insights, query with natural language or SQL, and export results with a full audit trail.</p>
+<p><strong>Privacy model:</strong> AI sees only column names and aggregate statistics. Your row data never leaves your machine. AI generates analysis <em>instructions</em> (SQL) that execute locally via DuckDB.</p>
+<p><strong>Four-step workflow:</strong></p>
+<ol>
+<li><strong>Import</strong> — load a CSV, Excel, TSV, or Parquet file</li>
+<li><strong>Insights</strong> — AI auto-generates 3-5 analytical observations</li>
+<li><strong>Query</strong> — ask questions in natural language or write SQL</li>
+<li><strong>Export</strong> — download results as Excel, TSV, or structured passport</li>
+</ol>
+
+<hr>
+<h3>Importing Data</h3>
+<p>Click <strong>+ Import Dataset</strong> in the Data section. Supported formats:</p>
+<ul>
+<li><strong>CSV</strong> — comma-separated values (most common)</li>
+<li><strong>Excel</strong> — .xlsx and .xls files</li>
+<li><strong>TSV</strong> — tab-separated values</li>
+<li><strong>Parquet</strong> — columnar format, handles files up to 200M+ rows</li>
+</ul>
+<p>All files are converted to local Parquet on import. Nothing is uploaded anywhere. Importing with the same name overwrites the previous version. Large Parquet files use a fast raw-copy path (no decompression).</p>
+
+<hr>
+<h3>Insights</h3>
+<p>When you import a dataset, AI automatically analyzes the column structure and generates 3-5 insight cards. Each card includes:</p>
+<ul>
+<li>A plain-English headline</li>
+<li>A brief explanation of why it's notable</li>
+<li>A supporting chart or summary table</li>
+<li>An <strong>Explore in Query</strong> button to load the underlying SQL</li>
+</ul>
+<p><strong>Six insight types:</strong> Concentration (Pareto), Outliers, Trends, Distribution Skew, Missing/Anomalous Data, Correlation.</p>
+<p>Click <strong>Refresh Insights</strong> to regenerate. Insights are cached — reopening a dataset is instant.</p>
+
+<hr>
+<h3>Query</h3>
+<p><strong>SQL Editor:</strong> Write DuckDB SQL directly. Always use <code>dataset</code> as the table name. Do not end queries with a semicolon.</p>
+<p><strong>Natural Language:</strong> Type a question in the prompt box and click <strong>Generate SQL</strong>. AI generates DuckDB-compatible SQL from your question.</p>
+<p><strong>Suggestions:</strong> Click the <strong>Suggestions</strong> button for AI-generated analytical questions based on your dataset's schema.</p>
+<p><strong>Saving Queries:</strong> Save frequently-used queries via the Saved Queries panel in Workspace.</p>
+<p><strong>DuckDB syntax tips:</strong></p>
+<ul>
+<li>Use <code>LIKE 'pattern%'</code> instead of <code>= 'value'</code> for string matching (handles trailing special characters in CMS data)</li>
+<li>Use <code>strftime('%Y-%m', col)</code> for date formatting (format string first)</li>
+<li>Use <code>col::INTEGER</code> for type casting</li>
+<li>Use <code>USING SAMPLE 1000 ROWS</code> for sampling large datasets</li>
+</ul>
+
+<hr>
+<h3>Reference Tables</h3>
+<p>Reference tables are small lookup/enrichment tables you JOIN against your primary dataset.</p>
+<p><strong>Loading from the Library:</strong> Click <strong>Library</strong> in the Data section to browse pre-built reference tables. Click a table name to load it.</p>
+<p><strong>Importing your own:</strong> Click <strong>+ Reference Table</strong> to import a CSV, TSV, or Excel file as a reference table. One reference table active at a time.</p>
+<p><strong>Using in SQL:</strong> Reference tables are available as <code>reference</code> in your queries:</p>
+<pre style="background:var(--bg1); padding:10px; border-radius:6px; font-size:12px; overflow-x:auto;">-- Exclude IRA drugs via LEFT JOIN
+SELECT d.Brnd_Name, d.Tot_Spndng_2023
+FROM dataset d
+LEFT JOIN reference r ON d.Brnd_Name = r.drug_name
+WHERE r.drug_name IS NULL
+ORDER BY d.Tot_Spndng_2023 DESC</pre>
+<p>String columns in reference tables are automatically title-cased on import so JOINs match without <code>LOWER()</code> wrappers.</p>
+
+<hr>
+<h3>Reference Library</h3>
+<p>Pre-built reference tables shipped with AW:</p>
+<ul>
+<li><strong>IRA Negotiated Drugs</strong> — 35 drugs, Rounds 1-3, with prices and effective dates</li>
+<li><strong>USP GUARD Categories</strong> — 102 drugs mapped to 17 USP therapeutic categories</li>
+<li><strong>USP GLOBE Categories</strong> — 78 drugs mapped to 7 GLOBE payment categories</li>
+<li><strong>Orphan Drug Status</strong> — 65 drugs with FDA orphan designation</li>
+<li><strong>GLOBE/GUARD/IRA Exclusions</strong> — various exclusion lists for policy analysis</li>
+</ul>
+<p>To add your own: drop a CSV file into <code>data/reference_library/</code>. It will appear automatically in the Library browser.</p>
+
+<hr>
+<h3>Example Cases</h3>
+<p>Curated, documented analytical workflows you can run inside AW. Browse by domain group:</p>
+<ul>
+<li><strong>Medicare &amp; Drug Policy</strong> — Part D IRA Exclusion, Part B GLOBE Candidates, USP Classification</li>
+<li><strong>Transportation &amp; Operations</strong> — NYC Taxi Trip Analysis</li>
+<li><strong>Supply Chain &amp; Logistics</strong> — Logistics Shipment Analysis</li>
+<li><strong>Retail &amp; E-Commerce</strong> — Retail Order Analysis</li>
+<li><strong>SaaS &amp; Technology</strong> — SaaS Account Health Analysis</li>
+</ul>
+<p><strong>Tutorial mode:</strong> Step-by-step live replay. Each action (import, reference load, query) executes in real time with narration explaining what's happening and why.</p>
+<p><strong>Resume mode:</strong> Loads the dataset and reference tables, restores the last query, drops you into a live working session.</p>
+<p><strong>Run All mode:</strong> Automated replay of all steps with baseline validation — used for regression testing.</p>
+
+<hr>
+<h3>Sessions</h3>
+<p><strong>Session Log:</strong> AW automatically records every action — imports, queries, reference loads, exports — with timestamps and details.</p>
+<p><strong>Save Session:</strong> Name and save the current session for future retrieval. Saved sessions include the full event log.</p>
+<p><strong>Retrieve Session:</strong> Browse previously saved sessions by name and date. Resume restores full session state.</p>
+<p><strong>Save Snapshot:</strong> Save current workspace state (dataset, reference tables, last query) as a named snapshot.</p>
+<p><strong>Retrieve Snapshot:</strong> Browse and restore named snapshots. Each snapshot captures exactly where you left off.</p>
+<p><strong>Auto-snapshot:</strong> AW saves workspace state automatically when you exit. On next launch, you'll see a resume prompt.</p>
+
+<hr>
+<h3>Exporting</h3>
+<p><strong>Export Excel / Export TSV:</strong> Direct download buttons in the results toolbar. Exports the full query result (up to 200,000 rows).</p>
+<p><strong>Result Passport:</strong> Click <strong>Copy Result Summary</strong> to copy a structured JSON profile of your query results to clipboard. Includes per-column statistics, top values, and data quality flags — but zero raw row data. Paste into Claude or any AI assistant for analysis.</p>
+<p><strong>Export Passport:</strong> Click <strong>Export Passport</strong> in the Inspect row to download a complete dataset profile JSON. Includes schema, sample values, grain description, quality flags, and starter SQL. Designed for cold-start AI collaboration.</p>
+
+<hr>
+<h3>Privacy</h3>
+<p><strong>Schema-only AI:</strong> When AW calls OpenAI, it sends only column names, data types, and aggregate statistics (min, max, mean). Sample rows and raw values are never sent.</p>
+<p><strong>What gets sent:</strong> Column names, data types, numeric ranges, null rates.</p>
+<p><strong>What never leaves your machine:</strong> Row data, query results, exported files, Reference Table contents.</p>
+<p><strong>Per-dataset consent:</strong> On import, you choose whether to enable AI features. Declining disables Insights and Suggestions but SQL and manual queries still work normally.</p>
+
+<hr>
+<h3>Troubleshooting</h3>
+<table style="width:100%; font-size:12px; border-collapse:collapse;">
+<tr style="border-bottom:1px solid var(--bg2);"><td style="padding:6px; font-weight:600; white-space:nowrap;">"Table does not exist"</td><td style="padding:6px;">Reference table not loaded. Click <strong>Library</strong> to load it.</td></tr>
+<tr style="border-bottom:1px solid var(--bg2);"><td style="padding:6px; font-weight:600; white-space:nowrap;">"SQL must reference the selected dataset"</td><td style="padding:6px;">Use <code>FROM dataset</code> in your query, not the raw filename.</td></tr>
+<tr style="border-bottom:1px solid var(--bg2);"><td style="padding:6px; font-weight:600; white-space:nowrap;">"Parser error"</td><td style="padding:6px;">Check DuckDB syntax. Remove trailing semicolons.</td></tr>
+<tr style="border-bottom:1px solid var(--bg2);"><td style="padding:6px; font-weight:600; white-space:nowrap;">Import fails</td><td style="padding:6px;">Check file format. Try saving as CSV if Excel fails.</td></tr>
+<tr><td style="padding:6px; font-weight:600; white-space:nowrap;">Insights not generating</td><td style="padding:6px;">Check that OPENAI_API_KEY is set in your .env file.</td></tr>
+</table>
+
+                        </div>
+                    </section>
+                </section>
+
                 <section id="sessionLogView" class="hidden">
                     <section class="panel session-log-shell">
                         <div class="session-log-title">Session Log</div>
@@ -2074,7 +2208,7 @@ LIMIT 100</textarea>
         }
 
         function setActiveNav(buttonId) {
-            ["navWelcome","exampleCasesBtn","navInsights","navQuery","navSavedQueries"].forEach((id) => {
+            ["navWelcome","navReferenceGuide","exampleCasesBtn","navInsights","navQuery","navSavedQueries"].forEach((id) => {
                 $(id).classList.toggle("active", id === buttonId);
             });
         }
@@ -2086,11 +2220,13 @@ LIMIT 100</textarea>
             $("savedQueriesView").classList.toggle("hidden", viewName !== "saved");
             $("insightsView").classList.toggle("hidden", viewName !== "insights");
             $("welcomeView").classList.toggle("hidden", viewName !== "welcome");
+            $("referenceGuideView").classList.toggle("hidden", viewName !== "referenceGuide");
             $("sessionLogView").classList.toggle("hidden", viewName !== "sessionLog");
 
             if (viewName === "query") setActiveNav("navQuery");
             if (viewName === "saved") setActiveNav("navSavedQueries");
             if (viewName === "welcome") setActiveNav("navWelcome");
+            if (viewName === "referenceGuide") setActiveNav("navReferenceGuide");
             if (viewName === "sessionLog") setActiveNav(null);
             if (viewName === "insights") {
                 setActiveNav("navInsights");
@@ -4980,31 +5116,47 @@ LIMIT 100</textarea>
             }
         }
 
-        async function quitApp() {
-            // Check if session has meaningful activity and is unnamed
-            try {
-                const summary = await apiJson("/api/session/summary");
-                const hasActivity = (summary.event_count || 0) > 1;
-                const isUnnamed = !summary.name;
-
-                if (hasActivity && isUnnamed) {
-                    const sessionName = window.prompt(
-                        "Name this session before closing? (Leave blank to skip)",
-                        ""
-                    );
-                    if (sessionName !== null && sessionName.trim()) {
-                        try {
-                            await apiJson("/api/session/name", {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({ name: sessionName.trim(), description: "" }),
-                            });
-                        } catch (_) {}
-                    }
+        async function exitApp() {
+            // Step 1: Offer to save session
+            const saveSession = confirm("Save this session before exiting?");
+            if (saveSession) {
+                const sessionName = window.prompt("Session name:", "");
+                if (sessionName && sessionName.trim()) {
+                    try {
+                        await apiJson("/api/session/name", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ name: sessionName.trim(), description: "" }),
+                        });
+                        await apiJson("/api/session/export", { method: "POST" });
+                    } catch (_) {}
                 }
-            } catch (_) {}
+            }
 
-            // Write workspace snapshot before shutdown
+            // Step 2: Offer to save snapshot
+            const saveSnap = confirm("Save a workspace snapshot before exiting?");
+            if (saveSnap) {
+                const snapName = window.prompt("Snapshot name:", "");
+                if (snapName && snapName.trim()) {
+                    try {
+                        const refList = currentReference ? [{ name: currentReference }] : [];
+                        await apiJson("/api/snapshots", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                name: snapName.trim(),
+                                description: "",
+                                dataset: selectedDataset || null,
+                                references: refList.length ? refList : null,
+                                last_query: $("sqlEditor").value.trim(),
+                                last_tab: document.querySelector(".nav-item.active")?.id === "navInsights" ? "insights" : "query",
+                            }),
+                        });
+                    } catch (_) {}
+                }
+            }
+
+            // Step 3: Write auto-snapshot + shutdown
             try {
                 const refList = currentReference ? [{ name: currentReference }] : [];
                 await apiJson("/api/workspace", {
@@ -5054,11 +5206,12 @@ LIMIT 100</textarea>
         $("clearReferenceBtn").addEventListener("click", clearReference);
         $("refLibraryBtn").addEventListener("click", toggleRefLibrary);
         $("navWelcome").addEventListener("click", () => switchView("welcome"));
+        $("navReferenceGuide").addEventListener("click", () => switchView("referenceGuide"));
         $("exampleCasesBtn").addEventListener("click", toggleExampleCases);
         $("saveSessionBtn").addEventListener("click", openSaveSessionDialog);
         $("saveSessionCancel").addEventListener("click", closeSaveSessionDialog);
         $("saveSessionConfirm").addEventListener("click", saveSession);
-        $("navSessionLog").addEventListener("click", showSessionLog);
+        // navSessionLog removed — session log accessible via Retrieve Session
         $("tutorialPrevBtn").addEventListener("click", tutorialPrev);
         $("tutorialNextBtn").addEventListener("click", tutorialNext);
         $("tutorialRunAllBtn").addEventListener("click", tutorialRunAll);
@@ -5101,7 +5254,8 @@ LIMIT 100</textarea>
 
         $("saveQueryBtn").addEventListener("click", saveCurrentQuery);
         $("refreshQueriesBtn").addEventListener("click", loadSavedQueries);
-        $("quitBtn").addEventListener("click", quitApp);
+        $("exitBtn").addEventListener("click", exitApp);
+        $("saveSnapshotSidebarBtn").addEventListener("click", openSaveSnapshotDialog);
 
         // Refresh Datasets button.
         // Calls DELETE on /api/datasets/<name>/delete for every known dataset
