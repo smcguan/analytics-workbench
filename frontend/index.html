@@ -3247,8 +3247,10 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                     return;
                 }
 
-                // Close Example Cases overlay
+                // Close all overlays
                 closeExampleCases();
+                $("rsOverlay").classList.remove("visible");
+                $("snapshotsOverlay").classList.remove("visible");
 
                 // Select the dataset
                 if (result.dataset) {
@@ -3298,6 +3300,8 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                     switchView("query");
                 }
 
+                _expandSidebarSection("sidebarDataTitle", "sidebarDataBody");
+                _expandSidebarSection("sidebarWorkspaceTitle", "sidebarWorkspaceBody");
                 toast("Session resumed — ready to continue.");
             } catch (e) {
                 toast("Resume failed: " + (e.message || ""), 8000);
@@ -3547,6 +3551,8 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 }
                 if (result.last_query) $("sqlEditor").value = result.last_query;
                 for (const w of (result.warnings || [])) toast(w, 6000);
+                _expandSidebarSection("sidebarDataTitle", "sidebarDataBody");
+                _expandSidebarSection("sidebarWorkspaceTitle", "sidebarWorkspaceBody");
                 switchView(result.last_tab === "insights" ? "insights" : "query");
                 toast("Snapshot restored: " + (result.name || ""));
             } catch (e) {
@@ -5210,30 +5216,34 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         }
 
         async function saveAndExit() {
-            // Step 1: Save session
-            const sessionName = await awPrompt("Save Session", "Session name...", "", "Enter a name to save this session, or leave blank to skip.");
-            if (sessionName && sessionName.trim()) {
+            // Single prompt — saves both session and snapshot with the same name
+            const saveName = await awPrompt(
+                "Save & Exit",
+                "Name for session and snapshot...",
+                "",
+                "Enter a name to save your session and workspace snapshot before exiting. Leave blank to exit without saving."
+            );
+
+            if (saveName && saveName.trim()) {
+                const name = saveName.trim();
+                // Save session
                 try {
                     await apiJson("/api/session/name", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ name: sessionName.trim(), description: "" }),
+                        body: JSON.stringify({ name, description: "" }),
                     });
                     await apiJson("/api/session/export", { method: "POST" });
-                    toast("Session saved: " + sessionName.trim());
                 } catch (_) {}
-            }
 
-            // Step 2: Save snapshot
-            const snapName = await awPrompt("Save Snapshot", "Snapshot name...", "", "Enter a name to save a workspace snapshot, or leave blank to skip.");
-            if (snapName && snapName.trim()) {
+                // Save snapshot with same name
                 try {
                     const refList = currentReference ? [{ name: currentReference }] : [];
                     await apiJson("/api/snapshots", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
-                            name: snapName.trim(),
+                            name,
                             description: "",
                             dataset: selectedDataset || null,
                             references: refList.length ? refList : null,
@@ -5241,11 +5251,12 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                             last_tab: _currentTab(),
                         }),
                     });
-                    toast("Snapshot saved: " + snapName.trim());
                 } catch (_) {}
+
+                toast("Saved: " + name);
             }
 
-            // Step 3: Auto-snapshot + shutdown
+            // Auto-snapshot + shutdown
             await _writeAutoSnapshotAndShutdown();
         }
 
