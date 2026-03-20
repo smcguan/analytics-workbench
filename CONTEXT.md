@@ -462,6 +462,9 @@ without your data ever leaving your machine."
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-20] [CODE] — Post-v1.8.0 fixes: taxi tutorial EXTRACT(HOUR) cast (CSV imports datetime
+  as VARCHAR, needs ::TIMESTAMP), tutorial dataset import now shows file size + source in summary
+  cards (calls loadDatasetMeta after import). Both pushed.
 [2026-03-20] [CODE] — Bug #15/#16 final fixes + Tutorial #2 (Part B GLOBE) + Workspace Snapshot
   (M5 Component 6) + NYC Taxi example case (10K-row sample, 5 queries) + category-grouped
   Example Cases browser. Workspace auto-saves on shutdown, resume prompt on next launch.
