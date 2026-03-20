@@ -4332,6 +4332,85 @@ def api_load_example_case(case_id: str, req: LoadCaseRequest):
     }
 
 
+@app.post("/api/example_cases/{case_id}/import_dataset")
+def api_example_case_import_dataset(case_id: str):
+    """Import only the dataset from an example case (for tutorial step-by-step replay).
+
+    Unlike /load which imports everything at once, this imports just the dataset
+    so the tutorial can show each step happening live.
+    """
+    case_dir = (EXAMPLE_CASES_DIR / case_id).resolve()
+    if not case_dir.exists():
+        raise HTTPException(status_code=404, detail=f"Example case not found: {case_id}")
+
+    meta_path = case_dir / "metadata.json"
+    meta = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {}
+
+    data_dir = case_dir / "data"
+    if not data_dir.exists():
+        raise HTTPException(status_code=404, detail="No data directory in example case")
+
+    for data_file in data_dir.iterdir():
+        if data_file.suffix.lower() in (".csv", ".tsv", ".xlsx", ".parquet"):
+            try:
+                with data_file.open("rb") as f:
+                    result = import_dataset(
+                        uploaded_file=f,
+                        original_filename=data_file.name,
+                        display_name=meta.get("dataset_display_name", data_file.stem),
+                        registered_root=str(DATASETS_DIR),
+                        overwrite=True,
+                    )
+                return {
+                    "status": "imported",
+                    "dataset": result.metadata.registered_name,
+                    "row_count": result.metadata.row_count,
+                    "column_count": result.metadata.column_count,
+                }
+            except Exception as exc:
+                raise HTTPException(
+                    status_code=500, detail=f"Dataset import failed: {exc}"
+                ) from exc
+
+    raise HTTPException(status_code=404, detail="No importable data file found in example case")
+
+
+@app.post("/api/example_cases/{case_id}/import_reference")
+def api_example_case_import_reference(case_id: str):
+    """Import only the reference table(s) from an example case."""
+    case_dir = (EXAMPLE_CASES_DIR / case_id).resolve()
+    if not case_dir.exists():
+        raise HTTPException(status_code=404, detail=f"Example case not found: {case_id}")
+
+    ref_dir = case_dir / "reference"
+    if not ref_dir.exists():
+        raise HTTPException(status_code=404, detail="No reference directory in example case")
+
+    ref_info: list[dict] = []
+    for ref_file in ref_dir.iterdir():
+        if ref_file.suffix.lower() in (".csv", ".tsv", ".xlsx"):
+            try:
+                with ref_file.open("rb") as f:
+                    ref_result = import_reference_table(
+                        uploaded_file=f,
+                        original_filename=ref_file.name,
+                        registered_root=REFERENCES_DIR,
+                        overwrite=True,
+                    )
+                ref_info.append({
+                    "name": ref_result.reference_name,
+                    "row_count": ref_result.row_count,
+                    "column_count": len(ref_result.columns),
+                })
+            except Exception as exc:
+                logger.warning("Failed to import example case reference: %s", exc)
+
+    if not ref_info:
+        raise HTTPException(status_code=404, detail="No importable reference files found")
+
+    return {"status": "imported", "references": ref_info}
+
+
 @app.get("/api/example_cases/{case_id}/session")
 def api_example_case_session(case_id: str):
     """Return the session JSON for an example case (for tutorial step-through)."""

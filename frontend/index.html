@@ -2587,88 +2587,33 @@ LIMIT 100</textarea>
 
         async function loadAndTutorial(caseId) {
             try {
-                toast("Loading example case...");
-                // Step 1: Import dataset + reference tables
-                const result = await apiJson("/api/example_cases/" + encodeURIComponent(caseId) + "/load", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ mode: "tutorial" })
-                });
+                // Tutorial starts from clean state — no pre-loading.
+                // Each step (dataset import, reference load, query) executes
+                // live so the analyst watches every action happen in real time.
+                const sessionData = await apiJson("/api/example_cases/" + encodeURIComponent(caseId) + "/session");
 
                 closeExampleCases();
-
-                // Select the dataset
-                if (result.dataset) {
-                    await loadDatasets();
-                    selectedDataset = result.dataset;
-                    renderDatasets();
-                }
-
-                // Update reference indicator
-                if (result.references && result.references.length > 0) {
-                    const ref = result.references[0];
-                    currentReference = ref.name;
-                    const refDisplay = ref.row_count
-                        ? `${ref.name} (${num(ref.row_count)} rows, ${ref.column_count} cols)`
-                        : ref.name;
-                    $("referenceName").textContent = refDisplay;
-                    $("referenceIndicator").style.display = "block";
-                }
-
                 switchView("query");
 
-                // Step 2: Load the session file and open tutorial panel
-                try {
-                    const sessionData = await apiJson("/api/example_cases/" + encodeURIComponent(caseId) + "/session");
-                    _openTutorialFromData(sessionData);
-                } catch (sessErr) {
-                    toast("Example case loaded but no tutorial session available: " + (sessErr.message || ""), 6000);
-                }
+                // Store the case ID so step execution can import from the right place
+                _openTutorialFromData(sessionData, caseId);
             } catch (e) {
-                toast("Failed to load example case: " + (e.message || ""), 8000);
+                toast("Failed to load tutorial: " + (e.message || ""), 8000);
             }
         }
 
         async function loadAndRunAll(caseId) {
             try {
-                toast("Loading example case...");
-                const result = await apiJson("/api/example_cases/" + encodeURIComponent(caseId) + "/load", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ mode: "runall" })
-                });
+                // Run All also starts from clean state — each step executes live.
+                // The only difference from Tutorial is it doesn't pause between steps.
+                const sessionData = await apiJson("/api/example_cases/" + encodeURIComponent(caseId) + "/session");
 
                 closeExampleCases();
-
-                // Select the dataset
-                if (result.dataset) {
-                    await loadDatasets();
-                    selectedDataset = result.dataset;
-                    renderDatasets();
-                }
-
-                // Update reference indicator
-                if (result.references && result.references.length > 0) {
-                    const ref = result.references[0];
-                    currentReference = ref.name;
-                    const refDisplay = ref.row_count
-                        ? `${ref.name} (${num(ref.row_count)} rows, ${ref.column_count} cols)`
-                        : ref.name;
-                    $("referenceName").textContent = refDisplay;
-                    $("referenceIndicator").style.display = "block";
-                }
-
                 switchView("query");
 
-                // Load session and auto-run all replayable steps
-                try {
-                    const sessionData = await apiJson("/api/example_cases/" + encodeURIComponent(caseId) + "/session");
-                    _openTutorialFromData(sessionData);
-                    // Auto-trigger Run All after panel opens
-                    setTimeout(() => tutorialRunAll(), 300);
-                } catch (sessErr) {
-                    toast("Example case loaded but no session to replay: " + (sessErr.message || ""), 6000);
-                }
+                _openTutorialFromData(sessionData, caseId);
+                // Auto-trigger Run All after panel opens
+                setTimeout(() => tutorialRunAll(), 300);
             } catch (e) {
                 toast("Failed to load example case: " + (e.message || ""), 8000);
             }
@@ -3168,7 +3113,7 @@ LIMIT 100</textarea>
         }
 
         function _isReplayableStep(eventType) {
-            return ["query_run", "reference_load", "reference_delete"].includes(eventType);
+            return ["dataset_import", "query_run", "reference_load", "reference_delete", "export"].includes(eventType);
         }
 
         async function openTutorial(filename) {
@@ -3227,12 +3172,15 @@ LIMIT 100</textarea>
             }
         }
 
-        function _openTutorialFromData(sessionData) {
+        let _tutorialCaseId = "";  // example case ID for live import during tutorial
+
+        function _openTutorialFromData(sessionData, caseId) {
             tutorialSession = sessionData;
             tutorialSteps = sessionData.events || [];
             tutorialCurrentStep = 0;
             tutorialResults = {};
             _tutorialFilename = sessionData.name || sessionData.session_id || "";
+            _tutorialCaseId = caseId || "";
 
             // Show the tutorial panel
             $("tutorialPanel").style.display = "flex";
@@ -3282,14 +3230,29 @@ LIMIT 100</textarea>
             if (tutorialCurrentStep >= tutorialSteps.length - 1) return;
 
             const step = tutorialSteps[tutorialCurrentStep];
+            const alreadyExecuted = tutorialResults[tutorialCurrentStep] !== undefined;
+
+            if (alreadyExecuted) {
+                // Step was already executed — advance to next step.
+                // Skip any non-replayable steps automatically.
+                tutorialCurrentStep++;
+                while (tutorialCurrentStep < tutorialSteps.length
+                       && !_isReplayableStep(tutorialSteps[tutorialCurrentStep].event_type)) {
+                    tutorialResults[tutorialCurrentStep] = "Skipped";
+                    tutorialCurrentStep++;
+                }
+                // If we went past the end, back up to last step
+                if (tutorialCurrentStep >= tutorialSteps.length) {
+                    tutorialCurrentStep = tutorialSteps.length - 1;
+                }
+                tutorialUpdateDisplay();
+                return;
+            }
 
             if (_isReplayableStep(step.event_type)) {
-                const preNarration = (step.narration || {}).pre || "";
-                if (preNarration) {
-                    $("tutorialStatus").textContent = preNarration;
-                } else {
-                    $("tutorialStatus").textContent = "Executing...";
-                }
+                // Execute this step live — then pause so analyst sees the result
+                $("tutorialNextBtn").disabled = true;
+                $("tutorialStatus").textContent = "Executing...";
                 try {
                     await _executeTutorialStep(step);
                     // Check baseline row count if present
@@ -3306,10 +3269,11 @@ LIMIT 100</textarea>
                 } catch (e) {
                     tutorialResults[tutorialCurrentStep] = "Failed: " + (e.message || "Unknown error");
                 }
-                tutorialCurrentStep++;
+                // Show post-narration and pause — analyst clicks Next again to advance
+                $("tutorialNextBtn").disabled = (tutorialCurrentStep >= tutorialSteps.length - 1);
+                tutorialUpdateDisplay();
             } else {
-                // Skip non-replayable steps automatically until we reach
-                // the next replayable step or the end of the session.
+                // Non-replayable — skip forward to next replayable step
                 while (tutorialCurrentStep < tutorialSteps.length - 1) {
                     tutorialResults[tutorialCurrentStep] = "Skipped";
                     tutorialCurrentStep++;
@@ -3317,14 +3281,12 @@ LIMIT 100</textarea>
                         break;
                     }
                 }
-                // If we landed on the last step and it's non-replayable, mark it too
                 if (tutorialCurrentStep === tutorialSteps.length - 1
                     && !_isReplayableStep(tutorialSteps[tutorialCurrentStep].event_type)) {
                     tutorialResults[tutorialCurrentStep] = "Skipped";
                 }
+                tutorialUpdateDisplay();
             }
-
-            tutorialUpdateDisplay();
         }
 
         function tutorialPrev() {
@@ -3335,6 +3297,37 @@ LIMIT 100</textarea>
 
         async function _executeTutorialStep(step) {
             const d = step.details || {};
+
+            if (step.event_type === "dataset_import") {
+                if (!_tutorialCaseId) throw new Error("No example case ID for dataset import");
+
+                const result = await apiJson("/api/example_cases/" + encodeURIComponent(_tutorialCaseId) + "/import_dataset", {
+                    method: "POST",
+                });
+
+                // Refresh sidebar so analyst sees dataset appear
+                await loadDatasets();
+                if (result.dataset) {
+                    selectedDataset = result.dataset;
+                    renderDatasets();
+                    updateSelectedDatasetSummary();
+                }
+                toast(`Dataset imported: ${result.dataset} (${num(result.row_count)} rows)`);
+                return;
+            }
+
+            if (step.event_type === "export") {
+                const format = d.format || "xlsx";
+                // Use whatever SQL is currently in the editor
+                const dataset = selectedDataset;
+                const sql = $("sqlEditor").value.trim();
+                if (!dataset || !sql) {
+                    toast("Export step: no active query to export.");
+                    return;
+                }
+                await exportSqlWorkspaceResult(format);
+                return;
+            }
 
             if (step.event_type === "query_run") {
                 const dataset = d.dataset || selectedDataset;
@@ -3384,14 +3377,33 @@ LIMIT 100</textarea>
             if (step.event_type === "reference_load") {
                 const source = d.source;
                 if (source) {
-                    const refData = await apiJson(`/api/reference_library/${encodeURIComponent(source)}/load`, {
+                    // Try library first
+                    try {
+                        const refData = await apiJson(`/api/reference_library/${encodeURIComponent(source)}/load`, {
+                            method: "POST",
+                        });
+                        currentReference = refData.reference;
+                        const tutRefCols = refData.column_count || (refData.columns && refData.columns.length) || "?";
+                        $("referenceName").textContent = `${refData.reference} (${num(refData.row_count)} rows, ${tutRefCols} cols)`;
+                        $("referenceIndicator").style.display = "block";
+                        toast(`Reference loaded: ${refData.reference}`);
+                        return;
+                    } catch (_libErr) {
+                        // Library load failed — try example case reference dir
+                    }
+                }
+                // Fallback: import from example case reference directory
+                if (_tutorialCaseId) {
+                    const refResult = await apiJson("/api/example_cases/" + encodeURIComponent(_tutorialCaseId) + "/import_reference", {
                         method: "POST",
                     });
-                    currentReference = refData.reference;
-                    const tutRefCols = refData.column_count || (refData.columns && refData.columns.length) || "?";
-                    $("referenceName").textContent = `${refData.reference} (${num(refData.row_count)} rows, ${tutRefCols} cols)`;
-                    $("referenceIndicator").style.display = "block";
-                    toast(`Reference loaded: ${refData.reference}`);
+                    if (refResult.references && refResult.references.length > 0) {
+                        const ref = refResult.references[0];
+                        currentReference = ref.name;
+                        $("referenceName").textContent = `${ref.name} (${num(ref.row_count)} rows, ${ref.column_count} cols)`;
+                        $("referenceIndicator").style.display = "block";
+                        toast(`Reference loaded: ${ref.name}`);
+                    }
                 }
                 return;
             }
@@ -3479,6 +3491,7 @@ LIMIT 100</textarea>
             tutorialCurrentStep = 0;
             tutorialResults = {};
             _tutorialFilename = "";
+            _tutorialCaseId = "";
         }
 
         // ---------------------------------------------------------------
