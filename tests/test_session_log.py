@@ -261,3 +261,177 @@ def test_export_includes_resume_state(tmp_path: Path):
     assert "resume_state" in data
     assert data["resume_state"]["dataset"] == "test_ds"
     assert data["resume_state"]["last_sql"] == "SELECT 42"
+
+
+# ---------------------------------------------------------------------------
+# ENDPOINT TESTS — POST /api/session/name
+# ---------------------------------------------------------------------------
+
+import pandas as pd
+from fastapi.testclient import TestClient
+import app.main as main_module
+import app.services.session_log as app_session_log  # same module the app uses
+
+INTERNAL_DATASET = "aw_test_internal"
+
+def _create_test_parquet(ds_dir: Path, name: str = INTERNAL_DATASET) -> None:
+    """Create a small parquet dataset for endpoint testing."""
+    d = ds_dir / name
+    d.mkdir(parents=True, exist_ok=True)
+    df = pd.DataFrame([
+        {"drug_name": "Keytruda", "amount": 8000},
+        {"drug_name": "Opdivo", "amount": 6000},
+    ])
+    df.to_parquet(str(d / "source.parquet"), index=False)
+    meta = {
+        "row_count": 2,
+        "column_count": 2,
+        "columns": ["drug_name", "amount"],
+        "original_type": "csv",
+    }
+    (d / "_meta.json").write_text(json.dumps(meta), encoding="utf-8")
+    (d / "metadata.json").write_text(json.dumps(meta), encoding="utf-8")
+
+
+@pytest.fixture()
+def endpoint_client(tmp_path):
+    """TestClient with a clean session and a small test dataset.
+
+    Uses app.services.session_log (same module instance as the running app)
+    to reset and start a fresh session so endpoint tests see clean state.
+    """
+    ds_dir = tmp_path / "datasets"
+    ds_dir.mkdir()
+    _create_test_parquet(ds_dir)
+
+    orig_ds = main_module.DATASETS_DIR
+    orig_ex = main_module.EXPORTS_DIR
+    main_module.DATASETS_DIR = ds_dir
+    main_module.EXPORTS_DIR = tmp_path / "_exports"
+    main_module.EXPORTS_DIR.mkdir(exist_ok=True)
+
+    # Reset and start a fresh session using the APP's module instance
+    app_session_log._reset_session()
+    app_session_log.start_session()
+
+    with TestClient(main_module.app) as c:
+        yield c
+
+    app_session_log._reset_session()
+    main_module.DATASETS_DIR = orig_ds
+    main_module.EXPORTS_DIR = orig_ex
+
+
+def test_session_name_sets_name_and_description(endpoint_client):
+    """POST /api/session/name with name and description sets them on the session."""
+    resp = endpoint_client.post("/api/session/name", json={
+        "name": "My Analysis",
+        "description": "Investigating Part B spending",
+    })
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["name"] == "My Analysis"
+    assert body["description"] == "Investigating Part B spending"
+
+    # Verify via GET /api/session (uses same singleton as the app)
+    session_resp = endpoint_client.get("/api/session")
+    assert session_resp.status_code == 200
+    data = session_resp.json()
+    assert data["name"] == "My Analysis"
+    assert data["description"] == "Investigating Part B spending"
+
+
+def test_session_name_empty_name_allowed(endpoint_client):
+    """POST /api/session/name with empty name is OK — clears the name."""
+    # First set a name
+    endpoint_client.post("/api/session/name", json={
+        "name": "Temp Name",
+        "description": "Temp",
+    })
+    # Now clear it
+    resp = endpoint_client.post("/api/session/name", json={
+        "name": "",
+        "description": "",
+    })
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["name"] == ""
+    assert data["description"] == ""
+
+
+def test_session_name_persists_in_export(endpoint_client):
+    """Set name, call /api/session/export, verify exported JSON contains name and description."""
+    endpoint_client.post("/api/session/name", json={
+        "name": "Export Test Session",
+        "description": "Testing export persistence",
+    })
+    resp = endpoint_client.get("/api/session/export")
+    assert resp.status_code == 200
+    data = resp.json()
+    session_data = data["session"]
+    assert session_data["name"] == "Export Test Session"
+    assert session_data["description"] == "Testing export persistence"
+
+
+def test_session_name_appears_in_session_endpoint(endpoint_client):
+    """Set name, call GET /api/session, verify name/description in response."""
+    endpoint_client.post("/api/session/name", json={
+        "name": "Visible Session",
+        "description": "Should appear in GET",
+    })
+    resp = endpoint_client.get("/api/session")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["name"] == "Visible Session"
+    assert data["description"] == "Should appear in GET"
+
+
+# ---------------------------------------------------------------------------
+# SqlRequest.internal FLAG TESTS (Bug #13 regression)
+# ---------------------------------------------------------------------------
+
+def test_internal_sql_request_skips_session_logging(endpoint_client):
+    """POST /api/sql with internal=true should NOT appear as a query_run event."""
+    # Snapshot current query_run count before the request
+    pre_resp = endpoint_client.get("/api/session")
+    pre_events = pre_resp.json()["events"]
+    pre_query_count = sum(1 for e in pre_events if e["event_type"] == "query_run")
+
+    resp = endpoint_client.post("/api/sql", json={
+        "dataset": INTERNAL_DATASET,
+        "sql": "SELECT COUNT(*) AS n FROM dataset",
+        "internal": True,
+    })
+    assert resp.status_code == 200
+
+    post_resp = endpoint_client.get("/api/session")
+    post_events = post_resp.json()["events"]
+    post_query_count = sum(1 for e in post_events if e["event_type"] == "query_run")
+
+    assert post_query_count == pre_query_count, (
+        f"Internal query should not be logged, but query_run count changed "
+        f"from {pre_query_count} to {post_query_count}"
+    )
+
+
+def test_normal_sql_request_logs_session_event(endpoint_client):
+    """POST /api/sql with internal=false (or omitted) SHOULD appear as a query_run event."""
+    # Snapshot current query_run count before the request
+    pre_resp = endpoint_client.get("/api/session")
+    pre_events = pre_resp.json()["events"]
+    pre_query_count = sum(1 for e in pre_events if e["event_type"] == "query_run")
+
+    resp = endpoint_client.post("/api/sql", json={
+        "dataset": INTERNAL_DATASET,
+        "sql": "SELECT COUNT(*) AS n FROM dataset",
+    })
+    assert resp.status_code == 200
+
+    post_resp = endpoint_client.get("/api/session")
+    post_events = post_resp.json()["events"]
+    post_query_count = sum(1 for e in post_events if e["event_type"] == "query_run")
+
+    assert post_query_count == pre_query_count + 1, (
+        f"Normal query should be logged, but query_run count changed "
+        f"from {pre_query_count} to {post_query_count} (expected {pre_query_count + 1})"
+    )

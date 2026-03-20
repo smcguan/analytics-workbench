@@ -471,7 +471,7 @@ def _strip_trailing_special_chars_from_df(df: pd.DataFrame) -> pd.DataFrame:
     """
     _trailing_special = re.compile(r"[^A-Za-z0-9]+$")
     for col in df.columns:
-        if df[col].dtype == object:
+        if pd.api.types.is_string_dtype(df[col]) or df[col].dtype == object:
             df[col] = df[col].apply(
                 lambda v: _trailing_special.sub("", v) if isinstance(v, str) else v
             )

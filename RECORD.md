@@ -122,6 +122,11 @@ Building toward reproducible, auditable, shareable analytical sessions:
 ## Wrap Records
 <!-- Each /wrap appends a 3-line summary below. Most recent at top. -->
 
+**v1.6.3** | 2026-03-20
+Fixed 3 xfail bugs: pandas>=2.0 string dtype, AI consent server-side enforcement.
+6 new tests for session name endpoint + internal SQL flag. Suite fully green —
+576 tests, zero xfails for the first time.
+
 **v1.6.2** | 2026-03-20
 Sessions section + Resume mode + Bug #13 fix. Sidebar restructured with Sessions section
 (Example Cases, Save Session, Session Log). Resume restores full session state. Tutorial

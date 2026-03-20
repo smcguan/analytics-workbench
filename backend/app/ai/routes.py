@@ -375,6 +375,27 @@ def suggest_questions(
     try:
 
         # ----------------------------------------------------
+        # STEP 0 — Check AI consent before doing anything
+        # ----------------------------------------------------
+        try:
+            try:
+                from app.main import DATASETS_DIR as _DS_DIR
+            except Exception:
+                from main import DATASETS_DIR as _DS_DIR  # type: ignore[no-redef]
+            _consent_meta_path = (_DS_DIR / dataset / "_meta.json").resolve()
+            if _consent_meta_path.exists():
+                _consent_meta = json.loads(_consent_meta_path.read_text(encoding="utf-8"))
+                if _consent_meta.get("ai_consent") is False:
+                    return {
+                        "dataset": dataset,
+                        "questions": [],
+                        "cached": False,
+                        "error": "AI features disabled for this dataset",
+                    }
+        except Exception:
+            pass  # If we can't read meta, allow suggestions (backward compat)
+
+        # ----------------------------------------------------
         # STEP 1 — Return cached questions if available
         #
         # dataset_context.json in the dataset directory holds
@@ -477,6 +498,28 @@ def get_insights(
     """
 
     try:
+
+        # ----------------------------------------------------
+        # STEP 0 — Check AI consent before doing anything
+        # ----------------------------------------------------
+        try:
+            try:
+                from app.main import DATASETS_DIR
+            except Exception:
+                from main import DATASETS_DIR  # type: ignore[no-redef]
+            _consent_meta_path = (DATASETS_DIR / dataset / "_meta.json").resolve()
+            if _consent_meta_path.exists():
+                _consent_meta = json.loads(_consent_meta_path.read_text(encoding="utf-8"))
+                if _consent_meta.get("ai_consent") is False:
+                    return InsightsResponse(
+                        dataset=dataset,
+                        insights=[],
+                        cached=False,
+                        synopsis="",
+                        error="AI features disabled for this dataset",
+                    )
+        except Exception:
+            pass  # If we can't read meta, allow insights (backward compat)
 
         # ----------------------------------------------------
         # STEP 1 — Return cached insights if available

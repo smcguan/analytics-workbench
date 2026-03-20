@@ -305,11 +305,6 @@ def test_make_registered_name_only_special_chars():
 # 11. strip_trailing_special_chars
 # ===========================================================================
 
-@pytest.mark.xfail(
-    reason="pandas >= 2.0 infers StringDtype ('str') instead of 'object' for "
-           "string columns — _strip_trailing_special_chars_from_df checks "
-           "dtype == object and skips StringDtype columns. Bug in source code."
-)
 def test_strip_trailing_special_chars_enabled(tmp_path):
     """Strip trailing special chars from string columns during CSV import.
 
@@ -474,12 +469,6 @@ def consent_client(consent_tmp):
 
 
 # --- Test 14: insights with ai_consent=false ---
-# NOTE: The insights endpoint in routes.py does NOT check ai_consent.
-# Consent enforcement is done only on the frontend. This test documents
-# that gap — it will fail if/when backend enforcement is added (remove xfail then).
-@pytest.mark.xfail(
-    reason="ai_consent not enforced by backend insights endpoint — frontend-only check"
-)
 def test_insights_blocked_when_consent_false(consent_client, consent_tmp):
     # Set consent to false
     consent_client.post(
@@ -506,10 +495,6 @@ def test_insights_returned_when_consent_true(consent_client, consent_tmp):
 
 
 # --- Test 16: suggest_questions with ai_consent=false ---
-# NOTE: Same as test 14 — suggest_questions does NOT check ai_consent on the backend.
-@pytest.mark.xfail(
-    reason="ai_consent not enforced by backend suggest_questions endpoint — frontend-only check"
-)
 def test_suggestions_blocked_when_consent_false(consent_client, consent_tmp):
     consent_client.post(
         "/api/datasets/consent_test/ai_consent",
