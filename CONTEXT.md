@@ -31,6 +31,8 @@
   after restart. Backend now auto-detects loaded reference tables from REFERENCES_DIR.
 - Bug #11 (AI using APPROX_PERCENTILE_CONT) — FIXED v1.5.6. Function doesn't exist in
   DuckDB. Prompt updated to use PERCENTILE_CONT/QUANTILE_CONT/MEDIAN.
+- Bug #13 (Session Log recording insight previews as query_run) — FIXED v1.6.2. Insight
+  card mini-previews marked internal + double-fetchInsights race condition guard added.
 
 **Reference Table JOIN validation:**
 - Mechanics test: PASSED (Part B, March 2026)
@@ -40,7 +42,7 @@
 
 **Validated at scale:** 220M rows, DuckDB local execution, sub-second import.
 
-**Test suite:** 557 automated tests (+ 3 xfail), all passing, runs under 10 seconds.
+**Test suite:** 567 automated tests (+ 3 xfail), all passing, runs under 12 seconds.
 Pre-commit and pre-push git hooks enforce green suite on every commit and push.
 
 ---
@@ -458,6 +460,11 @@ without your data ever leaving your machine."
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-20] [CODE] — Sessions section added to sidebar (Example Cases, Save Session, Session Log).
+  Resume mode: restore full session state (dataset, references, last query). Tutorial panel
+  restores state before step-through. Bug #13 fixed (insight previews logged as query_run).
+  Header tagline updated. RECORD.md created with full project summary. /wrap now appends
+  wrap records. 567 tests. v1.6.2.
 [2026-03-19] [CODE] — Sidebar redesign: Get Started section (Welcome + Example Cases) at top,
   Workspace (nav), Data (datasets + references). Welcome card with onboarding content, auto-opens
   on first launch (no datasets). Compact DATA buttons (2 rows instead of 4). Example Cases UI

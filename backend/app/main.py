@@ -473,6 +473,7 @@ class SqlRequest(BaseModel):
     dataset: str
     sql: str
     reference: str | None = None
+    internal: bool = False  # When True, skip session log (e.g. insight card previews)
 
 class SqlExportRequest(BaseModel):
     dataset: str
@@ -2723,15 +2724,20 @@ def api_sql(req: SqlRequest):
                     "result_rows": rowcount,
                 }
 
-        try:
-            log_event(SessionEventType.QUERY_RUN, {
-                "dataset": req.dataset,
-                "sql": req.sql,
-                "row_count": rowcount,
-                "elapsed_seconds": elapsed,
-            })
-        except Exception:
-            logger.warning("Failed to log session event", exc_info=True)
+        # Skip session logging for internal/preview queries (e.g. insight card
+        # mini-previews) so they don't pollute the Session Log with phantom
+        # query_run events.  Bug #13: insight card previews were logging one
+        # QUERY_RUN per card, inflating the count (e.g. 9 events for 1 user query).
+        if not req.internal:
+            try:
+                log_event(SessionEventType.QUERY_RUN, {
+                    "dataset": req.dataset,
+                    "sql": req.sql,
+                    "row_count": rowcount,
+                    "elapsed_seconds": elapsed,
+                })
+            except Exception:
+                logger.warning("Failed to log session event", exc_info=True)
 
         return response
 
@@ -4022,9 +4028,153 @@ def api_session_summary():
     return session_summary()
 
 
+class SessionNameRequest(BaseModel):
+    name: str = ""
+    description: str = ""
+
+
+@app.post("/api/session/name")
+def api_session_name(req: SessionNameRequest):
+    """Set name and description on the current session."""
+    session = get_current_session()
+    if session is None:
+        raise HTTPException(status_code=404, detail="No active session")
+    session.name = req.name
+    session.description = req.description
+    return {"status": "ok", "name": req.name, "description": req.description}
+
+
+@app.get("/api/session/load/{filename}")
+def api_session_load(filename: str):
+    """Load and return full session JSON data from a saved file."""
+    from app.services.session_replay import SessionReplayEngine
+    engine = SessionReplayEngine(DATASETS_DIR, REFERENCES_DIR, REFERENCE_LIBRARY_DIR, SESSIONS_DIR)
+    try:
+        data = engine.load_session(filename)
+        return data
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail=f"Session file not found: {filename}")
+
+
 # ---------------------------------------------------------------------------
 # Session replay endpoints
 # ---------------------------------------------------------------------------
+
+class ResumeRequest(BaseModel):
+    filename: str
+
+
+def _derive_resume_state(events: list[dict]) -> dict:
+    """Derive resume state from raw event dicts (for older session files without resume_state)."""
+    state: dict = {}
+    for event in reversed(events):
+        et = event.get("event_type", "")
+        details = event.get("details", {})
+        if et == "query_run" and "dataset" not in state:
+            state["dataset"] = details.get("dataset", "")
+            state["last_sql"] = details.get("sql", "")
+        if et == "reference_load" and "reference" not in state:
+            state["reference"] = {
+                "name": details.get("reference_name", ""),
+                "library_source": details.get("source", ""),
+            }
+        if et == "reference_delete" and "reference" not in state:
+            state["reference"] = None
+    return state
+
+
+@app.post("/api/session/resume")
+def api_session_resume(req: ResumeRequest):
+    """Restore session state for Resume mode."""
+    from app.services.session_replay import SessionReplayEngine
+
+    engine = SessionReplayEngine(DATASETS_DIR, REFERENCES_DIR, REFERENCE_LIBRARY_DIR, SESSIONS_DIR)
+    try:
+        session_data = engine.load_session(req.filename)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail=f"Session file not found: {req.filename}")
+
+    # Get resume_state (or derive from events for older sessions)
+    resume_state = session_data.get("resume_state", {})
+    if not resume_state:
+        resume_state = _derive_resume_state(session_data.get("events", []))
+
+    dataset_name = resume_state.get("dataset", "")
+    last_sql = resume_state.get("last_sql", "")
+    ref_info = resume_state.get("reference")
+
+    # Check dataset exists
+    dataset_exists = False
+    if dataset_name:
+        ds_dir = (DATASETS_DIR / dataset_name).resolve()
+        dataset_exists = ds_dir.exists() and (ds_dir / "source.parquet").exists()
+
+    if dataset_name and not dataset_exists:
+        return {
+            "status": "dataset_missing",
+            "dataset": dataset_name,
+            "dataset_exists": False,
+            "reference": None,
+            "last_sql": last_sql,
+            "message": f"Dataset '{dataset_name}' not found — import it first, then try Resume again.",
+        }
+
+    # Load reference table if needed
+    ref_response = None
+    if ref_info and ref_info.get("library_source"):
+        csv_path = REFERENCE_LIBRARY_DIR / ref_info["library_source"]
+        if csv_path.exists():
+            try:
+                with csv_path.open("rb") as f:
+                    result = import_reference_table(
+                        uploaded_file=f,
+                        original_filename=ref_info["library_source"],
+                        registered_root=REFERENCES_DIR,
+                        overwrite=True,
+                    )
+                ref_response = {
+                    "name": result.reference_name,
+                    "loaded": True,
+                    "library_source": ref_info["library_source"],
+                    "row_count": result.row_count,
+                    "column_count": len(result.columns),
+                }
+            except Exception as exc:
+                logger.warning("Failed to load reference on resume: %s", exc)
+                ref_response = {
+                    "name": ref_info.get("name", ""),
+                    "loaded": False,
+                    "library_source": ref_info["library_source"],
+                    "message": str(exc),
+                }
+        else:
+            ref_response = {
+                "name": ref_info.get("name", ""),
+                "loaded": False,
+                "library_source": ref_info["library_source"],
+                "message": f"Library CSV '{ref_info['library_source']}' not found",
+            }
+    elif ref_info and ref_info.get("name"):
+        # Check if reference already exists in references dir
+        ref_pq = (REFERENCES_DIR / ref_info["name"] / "source.parquet").resolve()
+        if ref_pq.exists():
+            ref_response = {"name": ref_info["name"], "loaded": True}
+        else:
+            ref_response = {
+                "name": ref_info["name"],
+                "loaded": False,
+                "message": f"Reference '{ref_info['name']}' not found and no library source available",
+            }
+
+    return {
+        "status": "ready",
+        "dataset": dataset_name,
+        "dataset_exists": dataset_exists,
+        "reference": ref_response,
+        "last_sql": last_sql,
+        "message": None,
+    }
+
 
 class ReplayRequest(BaseModel):
     filename: str

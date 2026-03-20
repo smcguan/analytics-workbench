@@ -693,3 +693,150 @@ def test_replay_with_baselines(tmp_path):
     assert report.passed == 1
     assert report.steps[0].expected_row_count == 5
     assert report.steps[0].actual_row_count == 5
+
+
+# ===========================================================================
+# 24. test_resume_endpoint_dataset_exists
+# ===========================================================================
+
+def test_resume_endpoint_dataset_exists(tmp_path):
+    """Resume loads successfully when dataset exists on disk."""
+    engine, dirs = _make_engine(tmp_path)
+    _create_test_dataset(dirs["ds_dir"], "test_ds")
+
+    session_data = _make_session([
+        {"event_type": "query_run", "timestamp": "T", "details": {
+            "dataset": "test_ds", "sql": "SELECT * FROM dataset", "row_count": 5,
+        }},
+    ], resume_state={
+        "dataset": "test_ds",
+        "last_sql": "SELECT * FROM dataset",
+    })
+    _write_session(dirs["sess_dir"], "resume_ok.json", session_data)
+
+    loaded = engine.load_session("resume_ok.json")
+    rs = loaded.get("resume_state", {})
+    assert rs["dataset"] == "test_ds"
+    assert rs["last_sql"] == "SELECT * FROM dataset"
+
+    # Verify dataset actually exists
+    ds_parquet = dirs["ds_dir"] / "test_ds" / "source.parquet"
+    assert ds_parquet.exists()
+
+
+# ===========================================================================
+# 25. test_resume_endpoint_dataset_missing
+# ===========================================================================
+
+def test_resume_endpoint_dataset_missing(tmp_path):
+    """Resume state references a dataset that doesn't exist on disk."""
+    engine, dirs = _make_engine(tmp_path)
+
+    session_data = _make_session([
+        {"event_type": "query_run", "timestamp": "T", "details": {
+            "dataset": "gone_ds", "sql": "SELECT 1", "row_count": 1,
+        }},
+    ], resume_state={
+        "dataset": "gone_ds",
+        "last_sql": "SELECT 1",
+    })
+    _write_session(dirs["sess_dir"], "resume_missing.json", session_data)
+
+    loaded = engine.load_session("resume_missing.json")
+    rs = loaded.get("resume_state", {})
+    ds_parquet = dirs["ds_dir"] / rs["dataset"] / "source.parquet"
+    assert not ds_parquet.exists()
+
+
+# ===========================================================================
+# 26. test_resume_endpoint_loads_library_reference
+# ===========================================================================
+
+def test_resume_endpoint_loads_library_reference(tmp_path):
+    """Resume with a library_source reference triggers library import."""
+    engine, dirs = _make_engine(tmp_path)
+    _create_library_csv(dirs["lib_dir"], "ira_list.csv", [
+        {"drug_name": "Keytruda", "round": 1},
+    ])
+
+    session_data = _make_session([
+        {"event_type": "reference_load", "timestamp": "T", "details": {
+            "reference_name": "ira_list", "source": "ira_list.csv", "row_count": 1,
+        }},
+    ], resume_state={
+        "reference": {
+            "name": "ira_list",
+            "library_source": "ira_list.csv",
+        },
+    })
+    _write_session(dirs["sess_dir"], "resume_ref.json", session_data)
+
+    # Simulate what the resume endpoint does: load the library CSV as reference
+    loaded = engine.load_session("resume_ref.json")
+    rs = loaded.get("resume_state", {})
+    ref_info = rs.get("reference")
+    assert ref_info is not None
+    assert ref_info["library_source"] == "ira_list.csv"
+
+    # Actually load it through the engine's helper
+    ref_name = engine._load_reference_from_library(ref_info["library_source"])
+    assert ref_name is not None
+    ref_pq = dirs["ref_dir"] / ref_name / "source.parquet"
+    assert ref_pq.exists()
+
+
+# ===========================================================================
+# 27. test_resume_endpoint_no_resume_state_derives_from_events
+# ===========================================================================
+
+def test_resume_endpoint_no_resume_state_derives_from_events(tmp_path):
+    """Older sessions without resume_state can derive it from events."""
+    engine, dirs = _make_engine(tmp_path)
+
+    # Session with no resume_state key
+    session_data = _make_session([
+        {"event_type": "session_start", "timestamp": "T", "details": {}},
+        {"event_type": "reference_load", "timestamp": "T", "details": {
+            "reference_name": "myref", "source": "myref.csv",
+        }},
+        {"event_type": "query_run", "timestamp": "T", "details": {
+            "dataset": "test_ds", "sql": "SELECT 1 FROM dataset", "row_count": 1,
+        }},
+        {"event_type": "query_run", "timestamp": "T", "details": {
+            "dataset": "test_ds", "sql": "SELECT 2 FROM dataset", "row_count": 1,
+        }},
+    ])
+    # Deliberately no resume_state key
+    assert "resume_state" not in session_data or session_data.get("resume_state") == {}
+    _write_session(dirs["sess_dir"], "old_session.json", session_data)
+
+    loaded = engine.load_session("old_session.json")
+    rs = loaded.get("resume_state", {})
+    # No resume_state in file — test the derive function from main.py
+    if not rs:
+        from backend.app.main import _derive_resume_state
+        rs = _derive_resume_state(loaded.get("events", []))
+
+    assert rs["dataset"] == "test_ds"
+    assert rs["last_sql"] == "SELECT 2 FROM dataset"
+    assert rs["reference"]["name"] == "myref"
+    assert rs["reference"]["library_source"] == "myref.csv"
+
+
+# ===========================================================================
+# 28. test_list_session_files_includes_resume_state
+# ===========================================================================
+
+def test_list_session_files_includes_resume_state(tmp_path):
+    """list_session_files returns resume_state from session JSON."""
+    engine, dirs = _make_engine(tmp_path)
+    session_data = _make_session([], resume_state={
+        "dataset": "my_ds",
+        "last_sql": "SELECT 1",
+    })
+    _write_session(dirs["sess_dir"], "rs.json", session_data)
+
+    files = engine.list_session_files()
+    assert len(files) == 1
+    assert files[0]["resume_state"]["dataset"] == "my_ds"
+    assert files[0]["resume_state"]["last_sql"] == "SELECT 1"

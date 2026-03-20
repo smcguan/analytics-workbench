@@ -510,6 +510,11 @@ Fix: backend auto-detects loaded reference tables from REFERENCES_DIR via
 ### Bug 11: AI using APPROX_PERCENTILE_CONT — FIXED
 Function doesn't exist in DuckDB. Insights and SQL generation prompts
 updated to use PERCENTILE_CONT/QUANTILE_CONT/MEDIAN.
+### Bug 13: Session Log recording insight previews as query_run — FIXED
+Insight card mini-previews call POST /api/sql for chart data. These were
+logged as user query_run events. Fix: `internal: true` flag on SqlRequest
+suppresses logging for preview queries. Also fixed double-fetchInsights
+race condition on import.
 
 ## KNOWN BUGS — ACTIVE
 
@@ -661,6 +666,9 @@ GET  /api/session/summary                (session event counts + duration) [MILE
 GET  /api/session/files                  (list session files for replay) [MILESTONE 5]
 POST /api/session/replay                 (replay a session file) [MILESTONE 5]
 POST /api/session/annotate               (annotate session with baselines) [MILESTONE 5]
+POST /api/session/resume                 (restore session state for Resume mode) [MILESTONE 5]
+POST /api/session/name                   (set name + description on current session) [MILESTONE 5]
+GET  /api/session/load/{filename}        (load full session file content) [MILESTONE 5]
 POST /api/shutdown
 ```
 

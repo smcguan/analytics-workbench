@@ -202,6 +202,9 @@ class SessionReplayEngine:
                     "session_id": data.get("session_id", ""),
                     "started_at": data.get("started_at", ""),
                     "event_count": len(data.get("events", [])),
+                    "name": data.get("name", ""),
+                    "description": data.get("description", ""),
+                    "resume_state": data.get("resume_state", {}),
                 })
             except Exception:
                 results.append({
@@ -209,6 +212,8 @@ class SessionReplayEngine:
                     "session_id": "",
                     "started_at": "",
                     "event_count": 0,
+                    "name": "",
+                    "description": "",
                 })
         return results
 

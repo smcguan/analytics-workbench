@@ -17,4 +17,8 @@ Stage all changed files and commit with a descriptive message.
 
 Update the test count in CONTEXT.md to reflect current pytest results.
 
+Append a 3-line wrap record to RECORD.md under the "Wrap Records" section.
+Format: version number, date, and what was built/changed/fixed in this session.
+Keep it concise — 3 lines max. Most recent at top.
+
 Push to remote (git push) after successful commit.

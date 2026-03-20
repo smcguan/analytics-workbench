@@ -1106,6 +1106,164 @@
             text-underline-offset:3px;
         }
 
+        /* ---- Tutorial panel (bottom bar) ---- */
+        #tutorialPanel{
+            position:fixed;
+            bottom:0;
+            left:0;
+            right:0;
+            background:var(--bg1);
+            border-top:2px solid var(--accent);
+            padding:12px 20px;
+            z-index:1000;
+            display:flex;
+            flex-direction:column;
+            gap:4px;
+        }
+        .tutorial-bar{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:12px;
+        }
+        .tutorial-step-info{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            flex:1;
+            min-width:0;
+        }
+        #tutorialStepNum{
+            font-size:12px;
+            font-weight:700;
+            color:var(--text);
+            white-space:nowrap;
+        }
+        #tutorialStepDesc{
+            overflow:hidden;
+            text-overflow:ellipsis;
+            white-space:nowrap;
+            color:var(--muted);
+            font-size:12px;
+        }
+        .tutorial-controls{
+            display:flex;
+            gap:6px;
+            flex-shrink:0;
+        }
+        .tutorial-status{
+            font-size:0.8em;
+            color:var(--muted2);
+        }
+
+        /* ---- Session Log view ---- */
+        .session-log-shell{
+            padding:18px;
+        }
+        .session-log-title{
+            font-size:16px;
+            font-weight:700;
+            margin-bottom:12px;
+        }
+        .session-log-events{
+            display:flex;
+            flex-direction:column;
+            gap:6px;
+            max-height:calc(100vh - 240px);
+            overflow-y:auto;
+        }
+        .session-log-event{
+            background:rgba(255,255,255,.03);
+            border:1px solid var(--stroke);
+            border-radius:10px;
+            padding:8px 14px;
+            display:flex;
+            align-items:center;
+            gap:10px;
+            font-size:12px;
+        }
+        .session-log-time{
+            font-family:var(--mono);
+            font-size:11px;
+            color:var(--muted2);
+            white-space:nowrap;
+            min-width:65px;
+        }
+        .session-log-badge{
+            font-size:10px;
+            font-weight:600;
+            text-transform:uppercase;
+            letter-spacing:.5px;
+            padding:2px 8px;
+            border-radius:4px;
+            background:rgba(79,140,255,.15);
+            color:var(--accent);
+            white-space:nowrap;
+        }
+        .session-log-desc{
+            flex:1;
+            color:var(--text);
+            overflow:hidden;
+            text-overflow:ellipsis;
+            white-space:nowrap;
+        }
+        .session-log-rows{
+            font-size:11px;
+            color:var(--muted2);
+            white-space:nowrap;
+        }
+
+        /* ---- Save Session modal ---- */
+        .save-session-overlay{
+            display:none;
+            position:fixed;
+            inset:0;
+            z-index:110;
+            background:rgba(0,0,0,.55);
+            backdrop-filter:blur(6px);
+            justify-content:center;
+            align-items:center;
+        }
+        .save-session-overlay.visible{
+            display:flex;
+        }
+        .save-session-panel{
+            background:linear-gradient(180deg, rgba(24,36,54,.98), rgba(20,31,48,.98));
+            border:1px solid var(--stroke-strong);
+            border-radius:var(--radius);
+            box-shadow:var(--shadow);
+            width:min(440px, 92vw);
+            padding:24px 28px;
+        }
+        .save-session-panel h3{
+            margin:0 0 14px 0;
+            font-size:16px;
+            color:var(--text);
+        }
+        .save-session-panel input,
+        .save-session-panel textarea{
+            width:100%;
+            box-sizing:border-box;
+            padding:10px 12px;
+            border:1px solid var(--stroke);
+            border-radius:10px;
+            background:rgba(255,255,255,.04);
+            color:var(--text);
+            font-size:13px;
+            font-family:var(--font);
+            margin-bottom:10px;
+        }
+        .save-session-panel textarea{
+            min-height:70px;
+            resize:vertical;
+        }
+        .save-session-btns{
+            display:flex;
+            gap:8px;
+            justify-content:flex-end;
+            margin-top:8px;
+        }
+
         /* ---- Example Cases overlay ---- */
         .ec-overlay{
             display:none;
@@ -1158,6 +1316,14 @@
             white-space:nowrap;
         }
         .ec-open-btn:hover{ filter:brightness(1.15); }
+        .ec-action-btns{ display:flex; gap:6px; margin-top:0; }
+        .ec-action-btn{
+            font-size:11px; padding:4px 10px; border-radius:4px; cursor:pointer;
+            border:1px solid var(--bg2); background:transparent; color:var(--fg1);
+        }
+        .ec-action-btn:hover{ background:var(--bg2); }
+        .ec-resume-btn{ border-color:var(--accent); color:var(--accent); }
+        .ec-resume-btn:hover{ background:var(--accent); color:var(--bg0); }
 
         /* Step-through view */
         .ec-session-meta{
@@ -1244,7 +1410,7 @@
                 </div>
                 <div>
                     <h1>Analytics Workbench</h1>
-                    <div class="sub">Milestone 3 analytics workspace</div>
+                    <div class="sub">Your data never leaves your machine.</div>
                 </div>
             </div>
 
@@ -1263,9 +1429,7 @@
                     <h3 class="section-title">Get Started</h3>
                     <div class="nav-list">
                         <button class="nav-item" id="navWelcome">Welcome</button>
-                        <button class="nav-item" id="exampleCasesBtn">Example Cases</button>
                     </div>
-                    <div class="get-started-hint" id="getStartedHint" style="display:none;">New here? Try this first</div>
                 </section>
 
                 <section>
@@ -1329,6 +1493,15 @@
                     <div id="referenceIndicator" style="display:none; margin-top:8px; font-size:0.85em; color:var(--fg2);">
                         Reference: <strong id="referenceName"></strong>
                         <button class="btn-link" id="clearReferenceBtn" style="margin-left:8px; font-size:0.85em;">✕ Remove</button>
+                    </div>
+                </section>
+
+                <section>
+                    <h3 class="section-title">Sessions</h3>
+                    <div class="nav-list">
+                        <button class="nav-item" id="exampleCasesBtn">Example Cases</button>
+                        <button class="nav-item" id="saveSessionBtn">Save Session</button>
+                        <button class="nav-item" id="navSessionLog">Session Log</button>
                     </div>
                 </section>
             </aside>
@@ -1606,6 +1779,14 @@ LIMIT 100</textarea>
                         </div>
                     </section>
                 </section>
+
+                <section id="sessionLogView" class="hidden">
+                    <section class="panel session-log-shell">
+                        <div class="session-log-title">Session Log</div>
+                        <div class="help-text" id="sessionLogHelp">Events from the current session appear here.</div>
+                        <div class="session-log-events" id="sessionLogEvents"></div>
+                    </section>
+                </section>
             </section>
         </main>
     </div>
@@ -1621,6 +1802,37 @@ LIMIT 100</textarea>
                 <div style="color:var(--muted); font-size:13px;">Loading...</div>
             </div>
         </div>
+    </div>
+
+    <!-- Save Session modal -->
+    <div class="save-session-overlay" id="saveSessionOverlay">
+        <div class="save-session-panel">
+            <h3>Save Session</h3>
+            <input type="text" id="saveSessionName" placeholder="Session name..." />
+            <textarea id="saveSessionDesc" placeholder="Brief description..."></textarea>
+            <div class="save-session-btns">
+                <button class="btn sidebar-btn-secondary" id="saveSessionCancel">Cancel</button>
+                <button class="btn primary" id="saveSessionConfirm">Save to Library</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tutorial bottom panel -->
+    <div id="tutorialPanel" style="display:none">
+        <div class="tutorial-bar">
+            <span class="tutorial-step-info">
+                <span id="tutorialStepNum">Step 1 of 1</span>
+                <span id="tutorialStepType" class="ec-step-badge">EVENT</span>
+                <span id="tutorialStepDesc">Loading...</span>
+            </span>
+            <span class="tutorial-controls">
+                <button class="btn sidebar-btn-secondary" id="tutorialPrevBtn">&#9664; Prev</button>
+                <button class="btn sidebar-btn-secondary" id="tutorialNextBtn">Next &#9654;</button>
+                <button class="btn sidebar-btn-secondary" id="tutorialRunAllBtn">Run All</button>
+                <button class="btn sidebar-btn-secondary" id="tutorialCloseBtn">&#10005; Close</button>
+            </span>
+        </div>
+        <div id="tutorialStatus" class="tutorial-status"></div>
     </div>
 
     <div class="toast" id="toast"></div>
@@ -1692,7 +1904,7 @@ LIMIT 100</textarea>
         }
 
         function setActiveNav(buttonId) {
-            ["navWelcome","navInsights","navQuery","navSavedQueries"].forEach((id) => {
+            ["navWelcome","navInsights","navQuery","navSavedQueries","navSessionLog"].forEach((id) => {
                 $(id).classList.toggle("active", id === buttonId);
             });
         }
@@ -1704,16 +1916,24 @@ LIMIT 100</textarea>
             $("savedQueriesView").classList.toggle("hidden", viewName !== "saved");
             $("insightsView").classList.toggle("hidden", viewName !== "insights");
             $("welcomeView").classList.toggle("hidden", viewName !== "welcome");
+            $("sessionLogView").classList.toggle("hidden", viewName !== "sessionLog");
 
             if (viewName === "query") setActiveNav("navQuery");
             if (viewName === "saved") setActiveNav("navSavedQueries");
             if (viewName === "welcome") setActiveNav("navWelcome");
+            if (viewName === "sessionLog") setActiveNav("navSessionLog");
             if (viewName === "insights") {
                 setActiveNav("navInsights");
                 // Auto-fetch insights when navigating here with a dataset loaded
                 if (selectedDataset && !insightsCache[selectedDataset] && _hasAiConsent()) {
                     fetchInsights(false);
                 }
+            }
+
+            // Stop session log auto-refresh when leaving the view
+            if (viewName !== "sessionLog" && _sessionLogInterval) {
+                clearInterval(_sessionLogInterval);
+                _sessionLogInterval = null;
             }
         }
 
@@ -2079,9 +2299,6 @@ LIMIT 100</textarea>
                 if (currentView === "welcome") {
                     switchView("insights");
                 }
-                // Hide the "New here?" hint once a dataset exists
-                $("getStartedHint").style.display = "none";
-
                 // Per-dataset AI consent — one-time disclosure on import
                 const aiConsent = window.confirm(
                     "AI features will use column names and statistics to generate insights " +
@@ -2197,33 +2414,75 @@ LIMIT 100</textarea>
                     $("ecContent").innerHTML = '<div style="color:var(--muted); font-size:13px;">No session files found.</div>';
                     return;
                 }
+                // Sort named sessions to top
+                const sorted = [...files].sort((a, b) => {
+                    if (a.name && !b.name) return -1;
+                    if (!a.name && b.name) return 1;
+                    return 0;
+                });
                 const container = document.createElement("div");
                 container.className = "ec-file-list";
-                for (const f of files) {
+                for (const f of sorted) {
                     const item = document.createElement("div");
                     item.className = "ec-file-item";
 
                     const info = document.createElement("div");
                     info.className = "ec-file-info";
 
-                    const dateEl = document.createElement("div");
-                    dateEl.className = "ec-file-date";
-                    dateEl.textContent = _ecFormatDate(f.started_at);
+                    if (f.name) {
+                        const nameEl = document.createElement("div");
+                        nameEl.className = "ec-file-date";
+                        nameEl.textContent = f.name;
+                        info.appendChild(nameEl);
 
-                    const metaEl = document.createElement("div");
-                    metaEl.className = "ec-file-meta";
-                    metaEl.textContent = `${f.event_count} events`;
+                        if (f.description) {
+                            const descEl = document.createElement("div");
+                            descEl.className = "ec-file-meta";
+                            descEl.style.color = "var(--muted)";
+                            descEl.textContent = f.description;
+                            info.appendChild(descEl);
+                        }
 
-                    info.appendChild(dateEl);
-                    info.appendChild(metaEl);
+                        const subEl = document.createElement("div");
+                        subEl.className = "ec-file-meta";
+                        subEl.textContent = `${_ecFormatDate(f.started_at)} \u2022 ${f.event_count} events`;
+                        info.appendChild(subEl);
+                    } else {
+                        const dateEl = document.createElement("div");
+                        dateEl.className = "ec-file-date";
+                        dateEl.textContent = _ecFormatDate(f.started_at);
+                        info.appendChild(dateEl);
 
-                    const btn = document.createElement("button");
-                    btn.className = "ec-open-btn";
-                    btn.textContent = "Open";
-                    btn.addEventListener("click", () => openSession(f.filename));
+                        const metaEl = document.createElement("div");
+                        metaEl.className = "ec-file-meta";
+                        metaEl.textContent = `${f.event_count} events`;
+                        info.appendChild(metaEl);
+                    }
+
+                    const btnGroup = document.createElement("div");
+                    btnGroup.className = "ec-action-btns";
+
+                    const resumeBtn = document.createElement("button");
+                    resumeBtn.className = "ec-action-btn ec-resume-btn";
+                    resumeBtn.textContent = "Resume";
+                    resumeBtn.addEventListener("click", () => resumeSession(f.filename));
+
+                    const tutorialBtn = document.createElement("button");
+                    tutorialBtn.className = "ec-action-btn ec-tutorial-btn";
+                    tutorialBtn.textContent = "Tutorial";
+                    tutorialBtn.addEventListener("click", () => openTutorial(f.filename));
+
+                    const runAllBtn = document.createElement("button");
+                    runAllBtn.className = "ec-action-btn ec-runall-btn";
+                    runAllBtn.textContent = "Run All";
+                    runAllBtn.addEventListener("click", () => runReplayFromList(f.filename));
+
+                    btnGroup.appendChild(resumeBtn);
+                    btnGroup.appendChild(tutorialBtn);
+                    btnGroup.appendChild(runAllBtn);
 
                     item.appendChild(info);
-                    item.appendChild(btn);
+                    item.appendChild(btnGroup);
                     container.appendChild(item);
                 }
                 $("ecContent").innerHTML = "";
@@ -2405,9 +2664,469 @@ LIMIT 100</textarea>
             }
         }
 
+        async function resumeSession(filename) {
+            try {
+                toast("Resuming session...");
+
+                const result = await apiJson("/api/session/resume", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ filename })
+                });
+
+                if (result.status === "dataset_missing") {
+                    toast(result.message, 8000);
+                    return;
+                }
+
+                // Close Example Cases overlay
+                closeExampleCases();
+
+                // Select the dataset
+                if (result.dataset) {
+                    await loadDatasets();
+                    selectedDataset = result.dataset;
+                    renderDatasets();
+                }
+
+                // Update reference indicator
+                if (result.reference && result.reference.loaded) {
+                    currentReference = result.reference.name;
+                    const refDisplay = result.reference.row_count
+                        ? `${result.reference.name} (${num(result.reference.row_count)} rows, ${result.reference.column_count} cols)`
+                        : result.reference.name;
+                    $("referenceName").textContent = refDisplay;
+                    $("referenceIndicator").style.display = "block";
+                }
+
+                // Put last SQL in editor and switch to Query view
+                if (result.last_sql) {
+                    $("sqlEditor").value = result.last_sql;
+                    switchView("query");
+
+                    // Run the last query to show results
+                    const sqlBody = { dataset: result.dataset, sql: result.last_sql };
+                    if (currentReference) sqlBody.reference = currentReference;
+
+                    const data = await apiJson("/api/sql", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(sqlBody)
+                    });
+
+                    lastRun = {
+                        columns: data.columns || [],
+                        rows: data.rows || [],
+                        rowcount: data.rowcount || 0,
+                        elapsed: data.elapsed_seconds || 0,
+                        sql: result.last_sql,
+                        visualization: data.visualization || null
+                    };
+                    clearChart();
+                    renderResults(lastRun.columns, lastRun.rows);
+                    $("resultsCount").textContent = `${num(lastRun.rowcount)} rows`;
+                    $("resultsMeta").textContent = `executed in ${lastRun.elapsed}s`;
+                } else {
+                    switchView("query");
+                }
+
+                toast("Session resumed — ready to continue.");
+            } catch (e) {
+                toast("Resume failed: " + (e.message || ""), 8000);
+            }
+        }
+
+        function runReplayFromList(filename) {
+            // Open the session detail view and then trigger run
+            openSession(filename).then(() => {
+                // Small delay to let the UI render before triggering replay
+                setTimeout(() => runReplay(filename), 200);
+            });
+        }
+
         function closeExampleCases() {
             $("ecOverlay").classList.remove("visible");
             _ecCurrentFile = null;
+        }
+
+        // ---------------------------------------------------------------
+        // Session Log
+        // ---------------------------------------------------------------
+        let _sessionLogInterval = null;
+
+        function _sessionLogEventDesc(ev) {
+            const d = ev.details || {};
+            const t = ev.event_type;
+            if (t === "query_run") {
+                const sql = d.sql || "";
+                return sql.length > 80 ? sql.substring(0, 80) + "..." : (sql || "Query executed");
+            }
+            if (t === "reference_load") return "Load reference: " + (d.reference_name || d.name || "");
+            if (t === "reference_delete") return "Remove reference: " + (d.reference_name || d.name || "");
+            if (t === "dataset_import") return "Import dataset: " + (d.dataset || "");
+            if (t === "dataset_delete") return "Delete dataset: " + (d.dataset || "");
+            if (t === "session_start") return "Session started";
+            if (t === "session_end") return "Session ended";
+            if (t === "export") return "Export " + (d.format || "");
+            if (t === "passport_export") return "Export passport: " + (d.dataset || "");
+            if (t === "result_passport") return "Result passport generated";
+            if (t === "insights_generated") return "Generate insights for " + (d.dataset || "");
+            if (t === "suggestions_generated") return "Suggestions generated for " + (d.dataset || "");
+            if (t === "ai_sql_generated") return "AI SQL generated";
+            if (t === "query_save") return "Query saved";
+            return t.replace(/_/g, " ");
+        }
+
+        function _formatTime(isoStr) {
+            if (!isoStr) return "--:--:--";
+            try {
+                const d = new Date(isoStr);
+                return d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+            } catch { return isoStr; }
+        }
+
+        async function fetchSessionLog() {
+            try {
+                const data = await apiJson("/api/session");
+                if (data.error) {
+                    $("sessionLogEvents").innerHTML = '<div class="help-text">No active session.</div>';
+                    return;
+                }
+                const events = data.events || [];
+                const container = $("sessionLogEvents");
+                container.innerHTML = "";
+                if (events.length === 0) {
+                    container.innerHTML = '<div class="help-text">No events recorded yet.</div>';
+                    return;
+                }
+                for (const ev of events) {
+                    const el = document.createElement("div");
+                    el.className = "session-log-event";
+                    const rowCount = ev.details && ev.details.row_count !== undefined
+                        ? `${num(ev.details.row_count)} rows` : "";
+                    el.innerHTML = `
+                        <span class="session-log-time">${_formatTime(ev.timestamp)}</span>
+                        <span class="session-log-badge">${(ev.event_type || "").replace(/_/g, " ")}</span>
+                        <span class="session-log-desc">${_sessionLogEventDesc(ev)}</span>
+                        ${rowCount ? '<span class="session-log-rows">' + rowCount + '</span>' : ''}
+                    `;
+                    container.appendChild(el);
+                }
+                // Scroll to bottom
+                container.scrollTop = container.scrollHeight;
+            } catch (e) {
+                $("sessionLogEvents").innerHTML = '<div class="help-text" style="color:var(--danger);">Failed to load session log.</div>';
+            }
+        }
+
+        function showSessionLog() {
+            switchView("sessionLog");
+            fetchSessionLog();
+            if (_sessionLogInterval) clearInterval(_sessionLogInterval);
+            _sessionLogInterval = setInterval(fetchSessionLog, 5000);
+        }
+
+        // ---------------------------------------------------------------
+        // Save Session
+        // ---------------------------------------------------------------
+        function openSaveSessionDialog() {
+            $("saveSessionName").value = "";
+            $("saveSessionDesc").value = "";
+            $("saveSessionOverlay").classList.add("visible");
+        }
+
+        function closeSaveSessionDialog() {
+            $("saveSessionOverlay").classList.remove("visible");
+        }
+
+        async function saveSession() {
+            const name = $("saveSessionName").value.trim();
+            const description = $("saveSessionDesc").value.trim();
+
+            try {
+                $("saveSessionConfirm").disabled = true;
+                $("saveSessionConfirm").textContent = "Saving...";
+
+                // Set name/description on current session
+                if (name || description) {
+                    await apiJson("/api/session/name", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ name, description }),
+                    });
+                }
+
+                // Export session to disk
+                await apiJson("/api/session/export");
+
+                closeSaveSessionDialog();
+                toast("Session saved to library.");
+            } catch (e) {
+                toast("Failed to save session: " + (e.message || "Unknown error"), 6000);
+            } finally {
+                $("saveSessionConfirm").disabled = false;
+                $("saveSessionConfirm").textContent = "Save to Library";
+            }
+        }
+
+        // ---------------------------------------------------------------
+        // Tutorial panel (step-through replay)
+        // ---------------------------------------------------------------
+        let tutorialSession = null;    // loaded session data
+        let tutorialSteps = [];        // array of events from session
+        let tutorialCurrentStep = 0;   // current step index
+        let tutorialResults = {};      // step index -> result
+        let _tutorialFilename = "";
+
+        function _tutorialStepDesc(ev) {
+            const d = ev.details || {};
+            const t = ev.event_type;
+            if (t === "query_run") {
+                const sql = d.sql || "";
+                return sql.length > 80 ? sql.substring(0, 80) + "..." : (sql || "Run query");
+            }
+            if (t === "reference_load") return "Load reference: " + (d.reference_name || d.name || "");
+            if (t === "reference_delete") return "Remove reference: " + (d.reference_name || d.name || "");
+            if (t === "dataset_import") return "Import dataset: " + (d.dataset || "");
+            if (t === "session_start") return "Session started";
+            if (t === "session_end") return "Session ended";
+            if (t === "export") return "Export " + (d.format || "");
+            if (t === "insights_generated") return "Generate insights for " + (d.dataset || "");
+            if (t === "suggestions_generated") return "Suggestions generated";
+            if (t === "ai_sql_generated") return "AI SQL generated";
+            return t.replace(/_/g, " ");
+        }
+
+        function _isReplayableStep(eventType) {
+            return ["query_run", "reference_load", "reference_delete"].includes(eventType);
+        }
+
+        async function openTutorial(filename) {
+            try {
+                // First restore session state (dataset + references)
+                try {
+                    const resumeResult = await apiJson("/api/session/resume", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ filename })
+                    });
+
+                    if (resumeResult.status === "dataset_missing") {
+                        toast(resumeResult.message, 8000);
+                        return;
+                    }
+
+                    // Select dataset
+                    if (resumeResult.dataset) {
+                        await loadDatasets();
+                        selectedDataset = resumeResult.dataset;
+                        renderDatasets();
+                    }
+
+                    // Load reference
+                    if (resumeResult.reference && resumeResult.reference.loaded) {
+                        currentReference = resumeResult.reference.name;
+                        const refDisplay = resumeResult.reference.row_count
+                            ? `${resumeResult.reference.name} (${num(resumeResult.reference.row_count)} rows, ${resumeResult.reference.column_count} cols)`
+                            : resumeResult.reference.name;
+                        $("referenceName").textContent = refDisplay;
+                        $("referenceIndicator").style.display = "block";
+                    }
+                } catch (resumeErr) {
+                    // Continue even if resume fails — tutorial can still step through
+                    console.warn("Resume before tutorial failed:", resumeErr);
+                }
+
+                const data = await apiJson("/api/session/load/" + encodeURIComponent(filename));
+                tutorialSession = data;
+                tutorialSteps = data.events || [];
+                tutorialCurrentStep = 0;
+                tutorialResults = {};
+                _tutorialFilename = filename;
+
+                // Close the Example Cases overlay
+                closeExampleCases();
+
+                // Show the tutorial panel
+                $("tutorialPanel").style.display = "flex";
+                document.querySelector(".main").style.paddingBottom = "70px";
+
+                tutorialUpdateDisplay();
+            } catch (e) {
+                toast("Failed to load session: " + (e.message || "Unknown error"), 6000);
+            }
+        }
+
+        function tutorialUpdateDisplay() {
+            if (!tutorialSteps.length) {
+                $("tutorialStepNum").textContent = "No steps";
+                $("tutorialStepType").textContent = "";
+                $("tutorialStepDesc").textContent = "This session has no events.";
+                return;
+            }
+            const step = tutorialSteps[tutorialCurrentStep];
+            $("tutorialStepNum").textContent = `Step ${tutorialCurrentStep + 1} of ${tutorialSteps.length}`;
+            $("tutorialStepType").textContent = (step.event_type || "").replace(/_/g, " ").toUpperCase();
+            $("tutorialStepDesc").textContent = _tutorialStepDesc(step);
+
+            // Update status with result if available
+            const result = tutorialResults[tutorialCurrentStep];
+            if (result) {
+                $("tutorialStatus").textContent = result;
+            } else {
+                $("tutorialStatus").textContent = _isReplayableStep(step.event_type)
+                    ? "Click Next to execute this step" : "Non-replayable step (will be skipped)";
+            }
+
+            // Button states
+            $("tutorialPrevBtn").disabled = tutorialCurrentStep <= 0;
+            $("tutorialNextBtn").disabled = tutorialCurrentStep >= tutorialSteps.length - 1;
+        }
+
+        async function tutorialNext() {
+            if (tutorialCurrentStep >= tutorialSteps.length - 1) return;
+
+            const step = tutorialSteps[tutorialCurrentStep];
+
+            if (_isReplayableStep(step.event_type)) {
+                $("tutorialStatus").textContent = "Executing...";
+                try {
+                    await _executeTutorialStep(step);
+                    tutorialResults[tutorialCurrentStep] = "Passed";
+                } catch (e) {
+                    tutorialResults[tutorialCurrentStep] = "Failed: " + (e.message || "Unknown error");
+                }
+            } else {
+                tutorialResults[tutorialCurrentStep] = "Skipped (non-replayable)";
+            }
+
+            tutorialCurrentStep++;
+            tutorialUpdateDisplay();
+        }
+
+        function tutorialPrev() {
+            if (tutorialCurrentStep <= 0) return;
+            tutorialCurrentStep--;
+            tutorialUpdateDisplay();
+        }
+
+        async function _executeTutorialStep(step) {
+            const d = step.details || {};
+
+            if (step.event_type === "query_run") {
+                const dataset = d.dataset || selectedDataset;
+                const sql = d.sql || "";
+                if (!sql) throw new Error("No SQL in step");
+
+                // Set the dataset selector if needed
+                if (dataset && dataset !== selectedDataset) {
+                    const dsMatch = datasets.find(ds => (ds.name || "") === dataset);
+                    if (dsMatch) {
+                        selectedDataset = dataset;
+                        renderDatasets();
+                        updateSelectedDatasetSummary();
+                    }
+                }
+
+                // Put SQL in editor
+                $("sqlEditor").value = sql;
+
+                // Switch to query view to show results
+                switchView("query");
+
+                // Execute via existing API
+                const sqlBody = { dataset, sql };
+                if (currentReference) sqlBody.reference = currentReference;
+                const data = await apiJson("/api/sql", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(sqlBody)
+                });
+
+                lastRun = {
+                    columns: data.columns || [],
+                    rows: data.rows || [],
+                    rowcount: data.rowcount || 0,
+                    elapsed: data.elapsed_seconds || 0,
+                    sql,
+                    visualization: data.visualization || null
+                };
+                clearChart();
+                renderResults(lastRun.columns, lastRun.rows);
+                $("resultsCount").textContent = `${num(lastRun.rowcount)} rows`;
+                $("resultsMeta").textContent = `executed in ${lastRun.elapsed}s`;
+                return;
+            }
+
+            if (step.event_type === "reference_load") {
+                const source = d.source;
+                if (source) {
+                    const refData = await apiJson(`/api/reference_library/${encodeURIComponent(source)}/load`, {
+                        method: "POST",
+                    });
+                    currentReference = refData.reference;
+                    $("referenceName").textContent = `${refData.reference} (${num(refData.row_count)} rows, ${refData.columns.length} cols)`;
+                    $("referenceIndicator").style.display = "block";
+                    toast(`Reference loaded: ${refData.reference}`);
+                }
+                return;
+            }
+
+            if (step.event_type === "reference_delete") {
+                const refName = d.reference_name || d.name || currentReference;
+                if (refName) {
+                    await apiJson(`/api/references/${encodeURIComponent(refName)}/delete`, {
+                        method: "POST",
+                    });
+                    currentReference = "";
+                    $("referenceIndicator").style.display = "none";
+                    $("referenceName").textContent = "";
+                    toast("Reference removed.");
+                }
+                return;
+            }
+        }
+
+        async function tutorialRunAll() {
+            $("tutorialRunAllBtn").disabled = true;
+            $("tutorialRunAllBtn").textContent = "Running...";
+            $("tutorialStatus").textContent = "Running full replay...";
+
+            try {
+                const report = await apiJson("/api/session/replay", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ filename: _tutorialFilename, stop_on_failure: false }),
+                });
+
+                // Record results for all steps
+                for (const step of (report.steps || [])) {
+                    tutorialResults[step.event_index] = step.status === "pass" ? "Passed"
+                        : step.status === "skip" ? "Skipped"
+                        : step.status === "fail" ? "Failed: " + step.message
+                        : "Error: " + step.message;
+                }
+
+                const summary = `Replay complete: ${report.passed} passed, ${report.failed} failed, ${report.skipped} skipped, ${report.errors} errors`;
+                $("tutorialStatus").textContent = summary;
+                toast(report.overall_status === "pass" ? "All steps passed." : "Some steps failed.");
+            } catch (e) {
+                $("tutorialStatus").textContent = "Replay failed: " + (e.message || "Unknown error");
+                toast("Replay failed: " + (e.message || ""), 6000);
+            } finally {
+                $("tutorialRunAllBtn").disabled = false;
+                $("tutorialRunAllBtn").textContent = "Run All";
+            }
+        }
+
+        function tutorialClose() {
+            $("tutorialPanel").style.display = "none";
+            document.querySelector(".main").style.paddingBottom = "";
+            tutorialSession = null;
+            tutorialSteps = [];
+            tutorialCurrentStep = 0;
+            tutorialResults = {};
+            _tutorialFilename = "";
         }
 
         // ---------------------------------------------------------------
@@ -2716,7 +3435,7 @@ LIMIT 100</textarea>
                     const result = await apiJson("/api/sql", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ dataset, sql: insight.sql }),
+                        body: JSON.stringify({ dataset, sql: insight.sql, internal: true }),
                     });
 
                     const cols = result.columns || [];
@@ -2790,6 +3509,8 @@ LIMIT 100</textarea>
             }
         }
 
+        let _insightsFetchInProgress = false; // guard against concurrent calls (Bug #13)
+
         async function fetchInsights(force = false) {
             const dataset = selectedDataset;
 
@@ -2816,6 +3537,14 @@ LIMIT 100</textarea>
                 _renderInsightsFromData(cached.synopsis || "", cached.insights || []);
                 return;
             }
+
+            // Prevent concurrent fetches (Bug #13): if a fetch is already
+            // in progress, skip this call.  Without this guard, the import
+            // flow can fire fetchInsights twice (once from switchView and
+            // once from the post-consent block), causing double rendering
+            // and duplicate SQL preview calls for every insight card.
+            if (_insightsFetchInProgress) return;
+            _insightsFetchInProgress = true;
 
             // Show skeleton loading state
             clearInsights();
@@ -2849,6 +3578,7 @@ LIMIT 100</textarea>
                 $("insightsGrid").innerHTML =
                     '<div class="insights-empty">Could not load insights: ' + e.message + '</div>';
             } finally {
+                _insightsFetchInProgress = false;
                 $("refreshInsightsBtn").disabled = false;
                 $("refreshInsightsBtn").textContent = "↺ Refresh Insights";
             }
@@ -3632,6 +4362,14 @@ LIMIT 100</textarea>
         $("refLibraryBtn").addEventListener("click", toggleRefLibrary);
         $("navWelcome").addEventListener("click", () => switchView("welcome"));
         $("exampleCasesBtn").addEventListener("click", toggleExampleCases);
+        $("saveSessionBtn").addEventListener("click", openSaveSessionDialog);
+        $("saveSessionCancel").addEventListener("click", closeSaveSessionDialog);
+        $("saveSessionConfirm").addEventListener("click", saveSession);
+        $("navSessionLog").addEventListener("click", showSessionLog);
+        $("tutorialPrevBtn").addEventListener("click", tutorialPrev);
+        $("tutorialNextBtn").addEventListener("click", tutorialNext);
+        $("tutorialRunAllBtn").addEventListener("click", tutorialRunAll);
+        $("tutorialCloseBtn").addEventListener("click", tutorialClose);
         $("welcomeImportLink").addEventListener("click", () => {
             // Trigger the file input via its label
             $("importDatasetFile").click();
@@ -3741,7 +4479,6 @@ LIMIT 100</textarea>
             // otherwise default to Insights view per frozen UI decisions.
             if (!datasets.length) {
                 switchView("welcome");
-                $("getStartedHint").style.display = "block";
             } else {
                 switchView("insights");
             }

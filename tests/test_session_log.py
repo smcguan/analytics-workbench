@@ -19,6 +19,7 @@ import pytest
 
 from backend.app.services.session_log import (
     SessionEventType,
+    _build_resume_state,
     _reset_session,
     end_session,
     export_session,
@@ -201,3 +202,62 @@ def test_auto_save_triggers(tmp_path: Path):
     assert len(json_files) >= 1, "Auto-save did not create a file after 10 events"
     data = json.loads(json_files[0].read_text(encoding="utf-8"))
     assert data["session_id"] == get_current_session().session_id
+
+
+# ---------------------------------------------------------------------------
+# RESUME STATE TESTS
+# ---------------------------------------------------------------------------
+
+def test_build_resume_state_extracts_last_query():
+    """_build_resume_state picks dataset and SQL from the last query_run event."""
+    session = start_session()
+    log_event(SessionEventType.QUERY_RUN, {"dataset": "ds_old", "sql": "SELECT 1"})
+    log_event(SessionEventType.QUERY_RUN, {"dataset": "ds_new", "sql": "SELECT 2"})
+    state = _build_resume_state(session)
+    assert state["dataset"] == "ds_new"
+    assert state["last_sql"] == "SELECT 2"
+
+
+def test_build_resume_state_extracts_reference():
+    """_build_resume_state finds the last active reference load."""
+    session = start_session()
+    log_event(SessionEventType.REFERENCE_LOAD, {
+        "reference_name": "ira_list",
+        "source": "ira_list.csv",
+    })
+    state = _build_resume_state(session)
+    assert state["reference"]["name"] == "ira_list"
+    assert state["reference"]["library_source"] == "ira_list.csv"
+
+
+def test_build_resume_state_no_queries_returns_empty():
+    """_build_resume_state returns empty dict when no query_run events exist."""
+    session = start_session()
+    log_event(SessionEventType.EXPORT, {"format": "xlsx"})
+    state = _build_resume_state(session)
+    assert "dataset" not in state
+    assert "last_sql" not in state
+
+
+def test_build_resume_state_deleted_reference_returns_none():
+    """If a reference was loaded then deleted, resume_state.reference is None."""
+    session = start_session()
+    log_event(SessionEventType.REFERENCE_LOAD, {
+        "reference_name": "myref",
+        "source": "myref.csv",
+    })
+    log_event(SessionEventType.REFERENCE_DELETE, {"reference_name": "myref"})
+    state = _build_resume_state(session)
+    assert state["reference"] is None
+
+
+def test_export_includes_resume_state(tmp_path: Path):
+    """Exported session JSON includes a resume_state key with dataset info."""
+    start_session()
+    log_event(SessionEventType.QUERY_RUN, {"dataset": "test_ds", "sql": "SELECT 42"})
+    filepath = export_session(tmp_path)
+    assert filepath is not None
+    data = json.loads(filepath.read_text(encoding="utf-8"))
+    assert "resume_state" in data
+    assert data["resume_state"]["dataset"] == "test_ds"
+    assert data["resume_state"]["last_sql"] == "SELECT 42"

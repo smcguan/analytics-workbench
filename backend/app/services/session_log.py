@@ -81,7 +81,10 @@ class SessionLog:
     app_version: str = ""
     user: str = ""
     machine: str = ""
+    name: str = ""               # User-assigned session name
+    description: str = ""        # User-assigned session description
     events: list[SessionEvent] = field(default_factory=list)
+    resume_state: dict = field(default_factory=dict)
 
 
 # -----------------------------------------------------------------------------
@@ -145,6 +148,30 @@ def log_event(event_type: SessionEventType, details: dict | None = None) -> None
         _auto_save()
 
 
+def _build_resume_state(session: SessionLog) -> dict:
+    """Derive resume state by scanning events in reverse.
+
+    Finds the last dataset/SQL from query_run events, and the last
+    active reference table (a load not followed by a delete).
+    """
+    state: dict[str, Any] = {}
+
+    for event in reversed(session.events):
+        if event.event_type == SessionEventType.QUERY_RUN and "dataset" not in state:
+            state["dataset"] = event.details.get("dataset", "")
+            state["last_sql"] = event.details.get("sql", "")
+        if event.event_type == SessionEventType.REFERENCE_LOAD and "reference" not in state:
+            state["reference"] = {
+                "name": event.details.get("reference_name", ""),
+                "library_source": event.details.get("source", ""),
+            }
+        if event.event_type == SessionEventType.REFERENCE_DELETE:
+            if "reference" not in state:
+                state["reference"] = None  # was deleted, no active reference
+
+    return state
+
+
 def end_session() -> SessionLog | None:
     """End the current session, add a summary event, and return the log."""
     global _current_session
@@ -154,6 +181,9 @@ def end_session() -> SessionLog | None:
         return None
 
     _current_session.ended_at = datetime.now(timezone.utc).isoformat()
+
+    # Build resume state before adding the SESSION_END event
+    _current_session.resume_state = _build_resume_state(_current_session)
 
     summary = session_summary()
     log_event(SessionEventType.SESSION_END, details={
@@ -182,6 +212,9 @@ def export_session(sessions_dir: Path) -> Path | None:
 
     sessions_dir = sessions_dir.resolve()
     sessions_dir.mkdir(parents=True, exist_ok=True)
+
+    # Build resume state before serializing
+    _current_session.resume_state = _build_resume_state(_current_session)
 
     date_str = datetime.now(timezone.utc).strftime("%Y%m%d")
     filename = f"session_{_current_session.session_id}_{date_str}.json"
