@@ -516,6 +516,14 @@ logged as user query_run events. Fix: `internal: true` flag on SqlRequest
 suppresses logging for preview queries. Also fixed double-fetchInsights
 race condition on import.
 
+### Bug 12: ORDER BY DESC regression — FIXED v1.7.1
+The _SQL_KW keyword list in _rewrite_sql_dataset_reference was missing
+`desc`, `asc`, and other SQL keywords, allowing them to potentially be
+captured as table aliases during FROM/JOIN rewriting. Fix: expanded _SQL_KW
+to include desc, asc, nulls, first, last, case, end, as, and, or, not, in,
+is, between, like, exists, distinct, top, over, partition, by. 6 regression
+tests added to test_sql_rewrite.py.
+
 ## KNOWN BUGS — ACTIVE
 
 ### Bug 6: Refresh Datasets — Windows file lock issue

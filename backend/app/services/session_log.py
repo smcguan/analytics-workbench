@@ -269,6 +269,8 @@ def session_summary() -> dict:
         "started_at": _current_session.started_at,
         "ended_at": _current_session.ended_at,
         "ai_mode": _current_session.ai_mode,
+        "name": _current_session.name,
+        "description": _current_session.description,
         "event_count": len(_current_session.events),
         "events_by_type": events_by_type,
         "datasets_used": sorted(datasets_used),

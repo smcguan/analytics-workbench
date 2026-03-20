@@ -435,3 +435,49 @@ def test_normal_sql_request_logs_session_event(endpoint_client):
         f"Normal query should be logged, but query_run count changed "
         f"from {pre_query_count} to {post_query_count} (expected {pre_query_count + 1})"
     )
+
+
+def test_bug13_suggestions_do_not_log_query_run(endpoint_client):
+    """Bug #13: opening suggestions should log suggestions_generated, not query_run.
+
+    When analyst opens Suggestions, only 1 suggestions_generated event should
+    appear — not a query_run for each suggestion in the list.
+    """
+    pre_resp = endpoint_client.get("/api/session")
+    pre_events = pre_resp.json()["events"]
+    pre_query_count = sum(1 for e in pre_events if e["event_type"] == "query_run")
+
+    # Call suggestions endpoint (may fail if no OpenAI key, but the session
+    # event is logged before the AI call returns)
+    endpoint_client.get(f"/api/ai/suggest_questions?dataset={INTERNAL_DATASET}")
+
+    post_resp = endpoint_client.get("/api/session")
+    post_events = post_resp.json()["events"]
+    post_query_count = sum(1 for e in post_events if e["event_type"] == "query_run")
+
+    assert post_query_count == pre_query_count, (
+        f"Suggestions fetch should not log query_run events, but count changed "
+        f"from {pre_query_count} to {post_query_count}"
+    )
+
+
+def test_bug13_one_query_run_per_explicit_execution(endpoint_client):
+    """Bug #13: running one SQL query should log exactly 1 query_run event."""
+    pre_resp = endpoint_client.get("/api/session")
+    pre_events = pre_resp.json()["events"]
+    pre_query_count = sum(1 for e in pre_events if e["event_type"] == "query_run")
+
+    # Run a single query — this simulates clicking Run SQL once
+    endpoint_client.post("/api/sql", json={
+        "dataset": INTERNAL_DATASET,
+        "sql": "SELECT * FROM dataset LIMIT 5",
+    })
+
+    post_resp = endpoint_client.get("/api/session")
+    post_events = post_resp.json()["events"]
+    post_query_count = sum(1 for e in post_events if e["event_type"] == "query_run")
+
+    assert post_query_count == pre_query_count + 1, (
+        f"Expected exactly 1 new query_run, but count changed "
+        f"from {pre_query_count} to {post_query_count}"
+    )

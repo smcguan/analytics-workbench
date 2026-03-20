@@ -492,24 +492,35 @@
             display:flex;
             gap:6px;
             margin-bottom:6px;
+            align-items:stretch;
         }
         .sidebar-btn-row .import-btn{
             flex:1;
             width:auto;
         }
+        .sidebar-btn-row .sidebar-btn-secondary{
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+        }
         .sidebar-btn-secondary{
-            font-size:0.8em;
-            padding:4px 10px;
-            background:transparent;
-            border:1px solid var(--bg2);
-            color:var(--fg2);
+            font-size:0.82em;
+            padding:7px 12px;
+            background:rgba(255,255,255,.04);
+            border:1px solid var(--stroke-strong);
+            color:var(--fg1);
             cursor:pointer;
-            border-radius:4px;
+            border-radius:10px;
             white-space:nowrap;
+            font-weight:600;
+            transition:transform .06s ease, background .12s ease, border-color .12s ease;
         }
         .sidebar-btn-secondary:hover{
-            background:var(--bg2);
+            background:rgba(255,255,255,.08);
             color:var(--fg0);
+        }
+        .sidebar-btn-secondary:active{
+            transform:translateY(1px);
         }
 
         /* Import in-progress state:
@@ -2403,7 +2414,8 @@ LIMIT 100</textarea>
                 });
 
                 currentReference = data.reference;
-                $("referenceName").textContent = `${data.reference} (${num(data.row_count)} rows, ${data.columns.length} cols)`;
+                const colCount = data.column_count || (data.columns && data.columns.length) || "?";
+                $("referenceName").textContent = `${data.reference} (${num(data.row_count)} rows, ${colCount} cols)`;
                 $("referenceIndicator").style.display = "block";
                 toast(`Reference table loaded: ${data.reference}`);
             } catch (e) {
@@ -3225,11 +3237,24 @@ LIMIT 100</textarea>
                 } catch (e) {
                     tutorialResults[tutorialCurrentStep] = "Failed: " + (e.message || "Unknown error");
                 }
+                tutorialCurrentStep++;
             } else {
-                tutorialResults[tutorialCurrentStep] = "Skipped (non-replayable)";
+                // Skip non-replayable steps automatically until we reach
+                // the next replayable step or the end of the session.
+                while (tutorialCurrentStep < tutorialSteps.length - 1) {
+                    tutorialResults[tutorialCurrentStep] = "Skipped (non-replayable)";
+                    tutorialCurrentStep++;
+                    if (_isReplayableStep(tutorialSteps[tutorialCurrentStep].event_type)) {
+                        break;
+                    }
+                }
+                // If we landed on the last step and it's non-replayable, mark it too
+                if (tutorialCurrentStep === tutorialSteps.length - 1
+                    && !_isReplayableStep(tutorialSteps[tutorialCurrentStep].event_type)) {
+                    tutorialResults[tutorialCurrentStep] = "Skipped (non-replayable)";
+                }
             }
 
-            tutorialCurrentStep++;
             tutorialUpdateDisplay();
         }
 
@@ -3294,7 +3319,8 @@ LIMIT 100</textarea>
                         method: "POST",
                     });
                     currentReference = refData.reference;
-                    $("referenceName").textContent = `${refData.reference} (${num(refData.row_count)} rows, ${refData.columns.length} cols)`;
+                    const tutRefCols = refData.column_count || (refData.columns && refData.columns.length) || "?";
+                    $("referenceName").textContent = `${refData.reference} (${num(refData.row_count)} rows, ${tutRefCols} cols)`;
                     $("referenceIndicator").style.display = "block";
                     toast(`Reference loaded: ${refData.reference}`);
                 }
@@ -3405,7 +3431,8 @@ LIMIT 100</textarea>
                     method: "POST",
                 });
                 currentReference = data.reference;
-                $("referenceName").textContent = `${data.reference} (${num(data.row_count)} rows, ${data.columns.length} cols)`;
+                const colCount = data.column_count || (data.columns && data.columns.length) || "?";
+                $("referenceName").textContent = `${data.reference} (${num(data.row_count)} rows, ${colCount} cols)`;
                 $("referenceIndicator").style.display = "block";
                 $("refLibraryPopover").style.display = "none";
                 toast(`Library reference loaded: ${data.reference}`);
@@ -4556,6 +4583,34 @@ LIMIT 100</textarea>
         }
 
         async function quitApp() {
+            // Check if session has meaningful activity and is unnamed
+            try {
+                const summary = await apiJson("/api/session/summary");
+                const hasActivity = (summary.event_count || 0) > 1; // more than just session_start
+                const isUnnamed = !summary.name;
+
+                if (hasActivity && isUnnamed) {
+                    // Show naming prompt before shutdown
+                    const sessionName = window.prompt(
+                        "Name this session before closing? (Leave blank to skip)",
+                        ""
+                    );
+                    if (sessionName !== null && sessionName.trim()) {
+                        try {
+                            await apiJson("/api/session/name", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ name: sessionName.trim(), description: "" }),
+                            });
+                        } catch (_) {
+                            // Non-fatal — proceed with shutdown
+                        }
+                    }
+                }
+            } catch (_) {
+                // Non-fatal — proceed with shutdown
+            }
+
             try { await fetch("/api/shutdown", { method: "POST" }); } catch (e) {}
             toast("Shutting down...");
             setTimeout(() => { try { window.close(); } catch(e) {} }, 250);

@@ -222,3 +222,69 @@ def test_order_by_and_group_by_preserved():
     assert "GROUP BY drug_name" in result
     assert "ORDER BY total DESC" in result
     assert "LIMIT 10" in result
+
+
+# ===========================================================================
+# BUG #12 REGRESSION — ORDER BY DESC must never be corrupted
+# ===========================================================================
+# Bug #12: Parser was appending extra characters to DESC keyword (e.g.
+# "DESCSC"). This test battery ensures DESC/ASC survive rewriting intact
+# across all common SQL patterns. If any of these fail, the _SQL_KW
+# keyword list in _rewrite_sql_dataset_reference is likely incomplete.
+
+def test_bug12_desc_not_corrupted():
+    """DESC keyword must appear exactly as written after rewriting."""
+    sql = "SELECT * FROM dataset ORDER BY total_paid DESC"
+    result = _rewrite_sql_dataset_reference(sql, "mydata", PARQUET)
+    assert "DESC" in result
+    assert "DESCSC" not in result
+    assert "ORDER BY total_paid DESC" in result
+
+
+def test_bug12_asc_not_corrupted():
+    """ASC keyword must appear exactly as written after rewriting."""
+    sql = "SELECT * FROM dataset ORDER BY drug_name ASC"
+    result = _rewrite_sql_dataset_reference(sql, "mydata", PARQUET)
+    assert "ASC" in result
+    assert "ORDER BY drug_name ASC" in result
+
+
+def test_bug12_desc_with_multiline_sql():
+    """Multiline SQL with ORDER BY DESC on its own line."""
+    sql = (
+        "SELECT drug_name, SUM(total_paid) AS total\n"
+        "FROM dataset\n"
+        "GROUP BY drug_name\n"
+        "ORDER BY total DESC\n"
+        "LIMIT 20"
+    )
+    result = _rewrite_sql_dataset_reference(sql, "mydata", PARQUET)
+    assert "ORDER BY total DESC" in result
+    assert "LIMIT 20" in result
+
+
+def test_bug12_desc_in_subquery():
+    """ORDER BY DESC inside a subquery must survive rewriting."""
+    sql = (
+        "SELECT * FROM "
+        "(SELECT drug_name, total_paid FROM dataset ORDER BY total_paid DESC LIMIT 10) sub"
+    )
+    result = _rewrite_sql_dataset_reference(sql, "mydata", PARQUET)
+    assert "ORDER BY total_paid DESC" in result
+
+
+def test_bug12_multiple_order_columns():
+    """Multiple ORDER BY columns with DESC/ASC must survive."""
+    sql = (
+        "SELECT * FROM dataset "
+        "ORDER BY total_paid DESC, drug_name ASC"
+    )
+    result = _rewrite_sql_dataset_reference(sql, "mydata", PARQUET)
+    assert "ORDER BY total_paid DESC, drug_name ASC" in result
+
+
+def test_bug12_nulls_first_last():
+    """NULLS FIRST / NULLS LAST must survive rewriting."""
+    sql = "SELECT * FROM dataset ORDER BY total_paid DESC NULLS LAST"
+    result = _rewrite_sql_dataset_reference(sql, "mydata", PARQUET)
+    assert "DESC NULLS LAST" in result

@@ -1129,7 +1129,9 @@ def _rewrite_sql_dataset_reference(
     _SQL_KW = (
         r'on|where|join|left|right|inner|outer|cross|full|natural|'
         r'group|order|limit|having|union|using|select|from|set|into|'
-        r'intersect|except|window|qualify|fetch|offset|returning|when'
+        r'intersect|except|window|qualify|fetch|offset|returning|when|'
+        r'desc|asc|nulls|first|last|case|end|as|and|or|not|in|is|'
+        r'between|like|exists|all|any|distinct|top|over|partition|by'
     )
 
     for ident in identifiers_to_match:
@@ -3614,6 +3616,7 @@ async def import_reference_endpoint(
         "reference": result.reference_name,
         "parquet_path": result.parquet_path,
         "row_count": result.row_count,
+        "column_count": len(result.columns),
         "columns": [{"name": c.name, "type": c.type} for c in result.columns],
     }
 
@@ -3744,6 +3747,7 @@ def load_library_reference(filename: str):
         "reference": result.reference_name,
         "parquet_path": result.parquet_path,
         "row_count": result.row_count,
+        "column_count": len(result.columns),
         "columns": [{"name": c.name, "type": c.type} for c in result.columns],
     }
 
@@ -4165,6 +4169,15 @@ def api_session_resume(req: ResumeRequest):
         ref_pq = (REFERENCES_DIR / ref_info["name"] / "source.parquet").resolve()
         if ref_pq.exists():
             ref_response = {"name": ref_info["name"], "loaded": True}
+            # Read _meta.json for row/column counts
+            ref_meta_path = REFERENCES_DIR / ref_info["name"] / "_meta.json"
+            if ref_meta_path.exists():
+                try:
+                    ref_meta = json.loads(ref_meta_path.read_text(encoding="utf-8"))
+                    ref_response["row_count"] = ref_meta.get("row_count")
+                    ref_response["column_count"] = ref_meta.get("column_count")
+                except Exception:
+                    pass
         else:
             ref_response = {
                 "name": ref_info["name"],
@@ -4299,6 +4312,7 @@ def api_load_example_case(case_id: str, req: LoadCaseRequest):
                     ref_info.append({
                         "name": ref_result.reference_name,
                         "row_count": ref_result.row_count,
+                        "column_count": len(ref_result.columns),
                         "columns": len(ref_result.columns),
                     })
                 except Exception as exc:

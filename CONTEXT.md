@@ -42,7 +42,7 @@
 
 **Validated at scale:** 220M rows, DuckDB local execution, sub-second import.
 
-**Test suite:** 590 automated tests, all passing (zero xfail), runs under 6 seconds.
+**Test suite:** 598 automated tests, all passing (zero xfail), runs under 10 seconds.
 Pre-commit and pre-push git hooks enforce green suite on every commit and push.
 
 ---
@@ -460,6 +460,11 @@ without your data ever leaving your machine."
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-20] [CODE] — UI polish + bug fixes: sidebar button styling (Refresh/Library/Save now proper
+  buttons), Bug #12 fix (ORDER BY DESC — expanded _SQL_KW keyword list + 6 regression tests),
+  Bug #13 tests (suggestions don't log query_run), reference "undefined cols" fix (column_count
+  in all API responses + frontend fallback), tutorial step-through fix (auto-skip non-replayable
+  steps), session naming on shutdown (prompt if unnamed), 598 tests. v1.7.1.
 [2026-03-20] [CODE] — Example Cases with real sample data: 3 curated cases (Part D IRA Exclusion,
   Part B GLOBE Candidates, USP Category Classification) with 500-row CMS samples + reference CSVs.
   Sidebar reorganized: Example Cases in Get Started, Sessions has Current Session/Save/Retrieve.
