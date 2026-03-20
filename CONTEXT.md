@@ -462,6 +462,11 @@ without your data ever leaving your machine."
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-20] [CODE] — Bug #15/#16 final fixes + Tutorial #2 (Part B GLOBE) + Workspace Snapshot
+  (M5 Component 6) + NYC Taxi example case (10K-row sample, 5 queries) + category-grouped
+  Example Cases browser. Workspace auto-saves on shutdown, resume prompt on next launch.
+  4 example cases across 2 domains (Medicare & Drug Policy, Transportation & Operations).
+  New endpoints: workspace CRUD, example case import_dataset/import_reference. 598 tests. v1.8.0.
 [2026-03-20] [BD] — Tutorial #1 validated end-to-end in live AW: clean state entry, live dataset
   import (single dataset in sidebar), live reference load, all 5 queries execute with results
   visible, narration at each step. Bug #15/#16 confirmed fixed. Button heights confirmed

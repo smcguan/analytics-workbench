@@ -10,7 +10,7 @@ stays on the analyst's machine — AI generates analysis instructions, not data 
 **Tech stack:** FastAPI backend, DuckDB query engine, OpenAI GPT-4.1-mini for AI,
 vanilla HTML/JS/CSS frontend, PyInstaller packaging for Windows desktop.
 
-**Current version:** v1.7.2 | **Total commits:** 100+ | **Test suite:** 598 tests (zero xfail)
+**Current version:** v1.8.0 | **Total commits:** 110+ | **Test suite:** 598 tests (zero xfail)
 
 ---
 
@@ -122,11 +122,17 @@ Building toward reproducible, auditable, shareable analytical sessions:
 | v1.7.0 | 2026-03-20 | Example Cases with real CMS sample data, sidebar reorg, 590 tests |
 | v1.7.1 | 2026-03-20 | UI polish, Bug #12 ORDER BY DESC, reference cols fix, tutorial step-through, 598 tests |
 | v1.7.2 | 2026-03-20 | Tutorial #1 session JSON, tutorial/Run All wiring, Save flush-to-disk, button sizing |
+| v1.8.0 | 2026-03-20 | Bug #15/#16 fixes, Tutorial #2, Workspace Snapshot, NYC Taxi case, category groups |
 
 ---
 
 ## Wrap Records
 <!-- Each /wrap appends a 3-line summary below. Most recent at top. -->
+
+**v1.8.0** | 2026-03-20
+Bug #15/#16 final fixes (tutorial runs queries live, clean state). Tutorial #2 (Part B GLOBE).
+Workspace Snapshot — auto-save on shutdown, resume prompt on launch. NYC Taxi example case
+(10K-row sample, 5 queries). Category-grouped Example Cases browser. 4 cases, 2 domains. 598 tests.
 
 **v1.7.2** | 2026-03-20
 UI polish + Bug #12 ORDER BY DESC fix + Tutorial #1 wired end-to-end. Session JSON

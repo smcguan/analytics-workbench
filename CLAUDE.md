@@ -681,6 +681,12 @@ GET  /api/example_cases                  (list curated example cases) [MILESTONE
 POST /api/example_cases/{id}/load        (load example case: import data + refs) [MILESTONE 5]
 GET  /api/sessions/saved                 (list analyst's named saved sessions) [MILESTONE 5]
 GET  /api/example_cases/{id}/session     (example case session JSON for tutorial) [MILESTONE 5]
+POST /api/example_cases/{id}/import_dataset    (import just the dataset for tutorial replay) [MILESTONE 5]
+POST /api/example_cases/{id}/import_reference  (import just the reference for tutorial replay) [MILESTONE 5]
+GET  /api/workspace                     (read workspace snapshot) [MILESTONE 5]
+POST /api/workspace                     (write workspace snapshot) [MILESTONE 5]
+POST /api/workspace/restore             (validate + return workspace for restore) [MILESTONE 5]
+DELETE /api/workspace                   (clear workspace — Start Fresh) [MILESTONE 5]
 POST /api/shutdown
 ```
 
