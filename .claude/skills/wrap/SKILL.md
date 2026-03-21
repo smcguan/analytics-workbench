@@ -43,17 +43,23 @@ memory alone.
   example cases, troubleshooting — update any section that was affected.
 - The Reference Guide is the in-app documentation. It must stay accurate.
 
-**7. Update RECORD.md**
+**7. Review and update Welcome screen (in frontend/index.html)**
+- Read the `welcomeDefaultCard` and `welcomeResumeCard` sections of index.html.
+- Update the feature highlights list if new features were added this session.
+- Update any version references or capability descriptions that changed.
+- The Welcome screen is the first thing a new user sees — keep it current.
+
+**8. Update RECORD.md**
 - Add a row to the Version History table.
 - Append a 3-line wrap record under "Wrap Records" (most recent at top):
   Format: version number, date, and what was built/changed/fixed.
 
-**8. Check for uncommitted changes**
+**9. Check for uncommitted changes**
 Run `git status` and warn if there are unstaged changes that would be
 left behind. Stage all relevant changed files.
 
-**9. Commit with descriptive message**
+**10. Commit with descriptive message**
 Stage all updated files and commit. Message should summarize the session.
 
-**10. Push to remote**
+**11. Push to remote**
 Run `git push` after successful commit.
