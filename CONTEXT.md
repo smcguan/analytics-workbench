@@ -27,7 +27,7 @@
 - Exit button with save prompts — COMPLETE (v1.10.0)
 - SESSIONS restructure (4 buttons, 2 rows) — COMPLETE (v1.10.0)
 
-**Test suite:** 607 automated tests, all passing (zero xfail), runs under 11 seconds.
+**Test suite:** 607 automated tests, all passing (zero xfail), runs under 10 seconds.
 Pre-commit and pre-push git hooks enforce green suite on every commit and push.
 
 **Validated at scale:** 220M rows, DuckDB local execution, sub-second import.
@@ -358,6 +358,9 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-21] [CODE] — Chart tab disabled by default and after non-chartable queries (updateChartTab +
+  _filterDatasetsToSession); Sessions sidebar Save no longer exits app; restore paths now filter
+  dataset list to session's dataset only (no stray datasets from prior sessions). v1.10.3.
 [2026-03-21] [CODE] — QoL improvements: Clear SQL button (overlay in editor, pretty pill style),
   Refresh redesigned as non-destructive workspace clear (clears UI, not disk files),
   Sessions Save button now exits after saving, SQL editor auto-clears on restore when

@@ -130,11 +130,17 @@ Building toward reproducible, auditable, shareable analytical sessions:
 | v1.10.0 | 2026-03-20 | Reference Guide, SESSIONS restructure, Exit button, collapsible sidebar, /sync skill |
 | v1.10.1 | 2026-03-21 | Bug #17: session/snapshot/workspace restore shows wrong datasets — root cause fix |
 | v1.10.2 | 2026-03-21 | Bug #18: Refresh was deleting disk files (root cause of restore loop); Clear SQL button; Sessions Save exits; SQL auto-clears on restore |
+| v1.10.3 | 2026-03-21 | Chart tab disabled until query returns chartable result; Sessions Save no longer exits; restore filters dataset list to session dataset only |
 
 ---
 
 ## Wrap Records
 <!-- Each /wrap appends a 3-line summary below. Most recent at top. -->
+
+**v1.10.3** | 2026-03-21
+Chart tab greys out and is non-functional by default and after any query that doesn't produce a
+chartable result (exactly 2 cols, 2–50 rows, categorical+numeric or date+numeric). Sessions sidebar
+Save no longer exits the app. Restore paths filter dataset list to session's dataset only. 607 tests.
 
 **v1.10.2** | 2026-03-21
 Bug #18 fix: Refresh Datasets was calling /api/datasets/{name}/delete (rmtree) for every dataset,

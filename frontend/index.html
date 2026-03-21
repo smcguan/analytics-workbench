@@ -841,6 +841,11 @@
             border-color:rgba(79,140,255,.30);
         }
 
+        .tab:disabled{
+            opacity:0.35;
+            cursor:not-allowed;
+        }
+
         .results-card,
         .saved-card,
         .inspect-card{
@@ -1787,7 +1792,7 @@ LIMIT 100</textarea>
 
                             <div class="tab-group">
                                 <button class="tab active" id="tableTab">Table</button>
-                                <button class="tab" id="chartTab">Chart</button>
+                                <button class="tab" id="chartTab" disabled>Chart</button>
                             </div>
 
                             <!-- Export buttons promoted directly into row 2 — no tab required -->
@@ -3293,6 +3298,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 // correct dataset's metadata instead of auto-selecting the first one
                 if (result.dataset) selectedDataset = result.dataset;
                 await loadDatasets();
+                _filterDatasetsToSession(result.dataset);
 
                 // Expand Data section immediately after load — must happen before any
                 // SQL re-run attempt so that datasets are visible even if SQL fails
@@ -3337,6 +3343,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                     renderResults(lastRun.columns, lastRun.rows);
                     $("resultsCount").textContent = `${num(lastRun.rowcount)} rows`;
                     $("resultsMeta").textContent = `executed in ${lastRun.elapsed}s`;
+                    updateChartTab(lastRun.visualization);
                 } else {
                     // No SQL to restore — reset editor to default template
                     $("sqlEditor").value = result.last_sql || "SELECT *\nFROM dataset\nLIMIT 100";
@@ -3478,10 +3485,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 
                 const savedPath = exportResult.exported_to || "";
                 const savedName = savedPath ? savedPath.split(/[\\/]/).pop() : "session";
-                toast(`Session saved: ${savedName} — shutting down...`);
-
-                // Save complete — exit the app
-                await _writeAutoSnapshotAndShutdown();
+                toast(`Session saved: ${savedName}`);
             } catch (e) {
                 toast("Failed to save session: " + (e.message || "Unknown error"), 6000);
             } finally {
@@ -3580,6 +3584,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 // correct dataset's metadata instead of auto-selecting the first one
                 if (result.dataset) selectedDataset = result.dataset;
                 await loadDatasets();
+                _filterDatasetsToSession(result.dataset);
 
                 // Expand Data section immediately after load so datasets are always visible
                 _expandSidebarSection("sidebarDataTitle", "sidebarDataBody");
@@ -4661,6 +4666,22 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             $("chartNoData").style.display = "none";
             const canvas = $("chartCanvas");
             canvas.style.display = "block";
+            // Disable chart tab until a result with a valid chart recommendation arrives
+            $("chartTab").disabled = true;
+        }
+
+        // After a restore, trim the dataset list to only the session's dataset so the
+        // sidebar doesn't show unrelated datasets from prior sessions on disk.
+        function _filterDatasetsToSession(datasetName) {
+            if (!datasetName) return;
+            datasets = datasets.filter(d => (d.name || "") === datasetName);
+            renderDatasets();
+            updateSelectedDatasetSummary();
+        }
+
+        // Enable/disable the Chart tab based on whether the backend recommends a chart
+        function updateChartTab(visualization) {
+            $("chartTab").disabled = !(visualization && visualization.recommended);
         }
 
         // ---------------------------------------------------------------
@@ -4825,6 +4846,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 
             try {
                 $("resultsMeta").textContent = "Running SQL...";
+                $("chartTab").disabled = true;
                 setActiveTab("table");
 
                 const sqlBody = { dataset, sql };
@@ -4851,6 +4873,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 renderResults(lastRun.columns, lastRun.rows);
                 $("resultsCount").textContent = `${num(lastRun.rowcount)} rows`;
                 $("copyResultSummaryBtn").disabled = false;
+                updateChartTab(lastRun.visualization);
                 let metaText = `executed in ${lastRun.elapsed}s • DuckDB local`;
                 // Reference table diagnostic
                 if (data.reference_info) {
@@ -5425,6 +5448,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 // correct dataset's metadata instead of auto-selecting the first one
                 if (result.dataset) selectedDataset = result.dataset;
                 await loadDatasets();
+                _filterDatasetsToSession(result.dataset);
 
                 // Expand Data and Workspace sections so restored state is visible
                 _expandSidebarSection("sidebarDataTitle", "sidebarDataBody");
