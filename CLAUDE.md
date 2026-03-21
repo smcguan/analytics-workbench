@@ -548,6 +548,18 @@ datasets from backend, showing pre-existing datasets alongside the
 tutorial one. Fix: set `datasets` array directly with only the imported
 dataset, then call `loadDatasetMeta()` for full metadata.
 
+### Bug 17: Session/snapshot restore shows wrong datasets — FIXED v1.10.1
+Two causes: (1) list_datasets() in main.py matched any directory containing
+.parquet files, including raw data storage dirs (demo/, parquets/) that
+weren't imported datasets. Fix: now requires source.parquet, _meta.json,
+metadata.json, or dataset_context.json as a marker of a properly imported
+dataset. (2) All three restore paths (resumeSession, _restoreSnapshot,
+_restoreWorkspace) called loadDatasets() before setting selectedDataset,
+so loadDatasets() auto-selected datasets[0] instead of the saved dataset.
+Fix: set selectedDataset before loadDatasets() in all three paths. Session
+restore also bails early when dataset is missing instead of running SQL
+against a nonexistent dataset.
+
 ## KNOWN BUGS — ACTIVE
 
 ### Bug 6: Refresh Datasets — Windows file lock issue

@@ -507,8 +507,11 @@ def list_datasets() -> list[str]:
     Return all valid registered datasets.
 
     A dataset is considered valid if:
-    - its folder contains parquet files, or
+    - its folder contains source.parquet (canonical import format), or
+    - its folder contains _meta.json (imported dataset metadata), or
     - it contains a valid _reference.txt pointer
+    Directories with arbitrary .parquet files but no source.parquet/_meta.json
+    are NOT treated as imported datasets — they may be raw data storage.
     """
     if not DATASETS_DIR.exists():
         return []
@@ -519,7 +522,8 @@ def list_datasets() -> list[str]:
         if not ds.is_dir():
             continue
 
-        if any(ds.glob("*.parquet")):
+        # Only recognise properly imported/registered datasets
+        if (ds / "source.parquet").exists() or (ds / "_meta.json").exists() or (ds / "metadata.json").exists() or (ds / "dataset_context.json").exists():
             out.append(ds.name)
             continue
 

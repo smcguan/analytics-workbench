@@ -10,7 +10,7 @@ stays on the analyst's machine — AI generates analysis instructions, not data 
 **Tech stack:** FastAPI backend, DuckDB query engine, OpenAI GPT-4.1-mini for AI,
 vanilla HTML/JS/CSS frontend, PyInstaller packaging for Windows desktop.
 
-**Current version:** v1.8.0 | **Total commits:** 110+ | **Test suite:** 598 tests (zero xfail)
+**Current version:** v1.10.1 | **Total commits:** 110+ | **Test suite:** 607 tests (zero xfail)
 
 ---
 
@@ -72,7 +72,7 @@ Building toward reproducible, auditable, shareable analytical sessions:
 
 ---
 
-## Bugs Fixed (12 resolved, 1 active)
+## Bugs Fixed (13 resolved, 1 active)
 
 | Bug | Issue | Fix | Version |
 |-----|-------|-----|---------|
@@ -87,6 +87,7 @@ Building toward reproducible, auditable, shareable analytical sessions:
 | #11 | AI using APPROX_PERCENTILE_CONT | Prompt updated for correct DuckDB syntax | v1.5.6 |
 | #12 | ORDER BY DESC regression — keywords captured as aliases | Expanded _SQL_KW list with 20+ SQL keywords | v1.7.1 |
 | #13 | Session Log recording all suggestions as query_run | Insight previews marked internal, double-fetch guard | v1.6.1 |
+| #17 | Session/snapshot restore shows wrong datasets | list_datasets() tightened + restore ordering fixed | v1.10.1 |
 | #6 | Windows file lock on Refresh Datasets | Partially addressed — retry logic, needs more testing | ACTIVE |
 
 ---
@@ -126,11 +127,17 @@ Building toward reproducible, auditable, shareable analytical sessions:
 | v1.8.1 | 2026-03-20 | Taxi TIMESTAMP cast fix, tutorial summary cards show file size + source |
 | v1.9.0 | 2026-03-20 | Tutorial #3, 3 new example cases, Named Snapshots, collapsible groups, 607 tests |
 | v1.10.0 | 2026-03-20 | Reference Guide, SESSIONS restructure, Exit button, collapsible sidebar, /sync skill |
+| v1.10.1 | 2026-03-20 | Bug #17: session/snapshot/workspace restore shows wrong datasets — root cause fix |
 
 ---
 
 ## Wrap Records
 <!-- Each /wrap appends a 3-line summary below. Most recent at top. -->
+
+**v1.10.1** | 2026-03-20
+Bug #17 fix: session/snapshot/workspace restore showed wrong datasets. Root cause: list_datasets()
+matched raw data dirs as datasets + restore set selectedDataset after loadDatasets(). Both fixed.
+Session restore bails early on missing dataset. Troubleshooting row added to Reference Guide. 607 tests.
 
 **v1.10.0** | 2026-03-20
 Reference Guide (full in-app product documentation). SESSIONS restructured to 4 buttons in 2 rows.

@@ -2047,7 +2047,8 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 <tr style="border-bottom:1px solid var(--bg2);"><td style="padding:6px; font-weight:600; white-space:nowrap;">"SQL must reference the selected dataset"</td><td style="padding:6px;">Use <code>FROM dataset</code> in your query, not the raw filename.</td></tr>
 <tr style="border-bottom:1px solid var(--bg2);"><td style="padding:6px; font-weight:600; white-space:nowrap;">"Parser error"</td><td style="padding:6px;">Check DuckDB syntax. Remove trailing semicolons.</td></tr>
 <tr style="border-bottom:1px solid var(--bg2);"><td style="padding:6px; font-weight:600; white-space:nowrap;">Import fails</td><td style="padding:6px;">Check file format. Try saving as CSV if Excel fails.</td></tr>
-<tr><td style="padding:6px; font-weight:600; white-space:nowrap;">Insights not generating</td><td style="padding:6px;">Check that OPENAI_API_KEY is set in your .env file.</td></tr>
+<tr style="border-bottom:1px solid var(--bg2);"><td style="padding:6px; font-weight:600; white-space:nowrap;">Insights not generating</td><td style="padding:6px;">Check that OPENAI_API_KEY is set in your .env file.</td></tr>
+<tr><td style="padding:6px; font-weight:600; white-space:nowrap;">Wrong dataset after restore</td><td style="padding:6px;">The saved dataset may have been deleted. Re-import it and try again.</td></tr>
 </table>
 
                         </div>
@@ -3260,18 +3261,18 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 
                 if (result.status === "dataset_missing") {
                     toast(result.message, 6000);
+                    // Load whatever datasets exist but don't auto-select
+                    await loadDatasets();
+                    if (result.last_sql) $("sqlEditor").value = result.last_sql;
+                    switchView("query");
+                    _expandSidebarSection("sidebarDataTitle", "sidebarDataBody");
+                    return;
                 }
 
-                // Load available datasets — even if the saved one is missing,
-                // show what's available so the user can pick or re-import
+                // Set selectedDataset BEFORE loadDatasets() so it loads the
+                // correct dataset's metadata instead of auto-selecting the first one
+                if (result.dataset) selectedDataset = result.dataset;
                 await loadDatasets();
-                if (result.dataset) {
-                    const found = datasets.some(d => d.name === result.dataset);
-                    if (found) {
-                        selectedDataset = result.dataset;
-                        renderDatasets();
-                    }
-                }
 
                 // Update reference indicator
                 if (result.reference && result.reference.loaded) {
@@ -3284,12 +3285,12 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 }
 
                 // Put last SQL in editor and switch to Query view
-                if (result.last_sql) {
+                if (result.last_sql && selectedDataset) {
                     $("sqlEditor").value = result.last_sql;
                     switchView("query");
 
                     // Run the last query to show results
-                    const sqlBody = { dataset: result.dataset, sql: result.last_sql };
+                    const sqlBody = { dataset: selectedDataset, sql: result.last_sql };
                     if (currentReference) sqlBody.reference = currentReference;
 
                     const data = await apiJson("/api/sql", {
@@ -3311,6 +3312,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                     $("resultsCount").textContent = `${num(lastRun.rowcount)} rows`;
                     $("resultsMeta").textContent = `executed in ${lastRun.elapsed}s`;
                 } else {
+                    if (result.last_sql) $("sqlEditor").value = result.last_sql;
                     switchView("query");
                 }
 
@@ -3549,16 +3551,10 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 const result = await apiJson("/api/snapshots/" + encodeURIComponent(filename) + "/restore", { method: "POST" });
                 $("snapshotsOverlay").classList.remove("visible");
 
-                // Load available datasets — proceed even if saved dataset is missing
+                // Set selectedDataset BEFORE loadDatasets() so it loads the
+                // correct dataset's metadata instead of auto-selecting the first one
+                if (result.dataset) selectedDataset = result.dataset;
                 await loadDatasets();
-                if (result.dataset) {
-                    const found = datasets.some(d => d.name === result.dataset);
-                    if (found) {
-                        selectedDataset = result.dataset;
-                        renderDatasets();
-                        updateSelectedDatasetSummary();
-                    }
-                }
                 if (result.references && result.references.length > 0) {
                     const ref = result.references[0];
                     currentReference = ref.name;
@@ -5429,17 +5425,12 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 
                 const result = await apiJson("/api/workspace/restore", { method: "POST" });
 
-                // Load available datasets — proceed even if saved dataset is gone
+                // Set selectedDataset BEFORE loadDatasets() so it loads the
+                // correct dataset's metadata instead of auto-selecting the first one
+                if (result.dataset) selectedDataset = result.dataset;
                 await loadDatasets();
-                if (result.dataset) {
-                    const found = datasets.some(d => d.name === result.dataset);
-                    if (found) {
-                        selectedDataset = result.dataset;
-                        renderDatasets();
-                        updateSelectedDatasetSummary();
-                    } else {
-                        toast("Dataset '" + result.dataset + "' not found — re-import it to continue.", 6000);
-                    }
+                if (result.dataset && !datasets.some(d => d.name === result.dataset)) {
+                    toast("Dataset '" + result.dataset + "' not found — re-import it to continue.", 6000);
                 }
 
                 // Load references

@@ -35,6 +35,11 @@
   6 regression tests.
 - Bug #13 (Session Log recording insight previews as query_run) — FIXED v1.6.2. Insight
   card mini-previews marked internal + double-fetchInsights race condition guard added.
+- Bug #17 (Session/snapshot restore shows wrong datasets) — FIXED v1.10.1. Two causes:
+  (1) list_datasets() matched raw data directories (demo/, parquets/) as datasets — now
+  requires source.parquet, _meta.json, metadata.json, or dataset_context.json marker.
+  (2) Session/snapshot/workspace restore called loadDatasets() before setting selectedDataset,
+  causing auto-selection of wrong dataset. All three restore paths fixed.
 
 **Reference Table JOIN validation:**
 - Mechanics test: PASSED (Part B, March 2026)
@@ -462,6 +467,10 @@ without your data ever leaving your machine."
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-20] [CODE] — Bug #17 fix (session/snapshot restore wrong datasets): list_datasets() tightened
+  to only return properly imported datasets (requires marker files, not just any .parquet). All three
+  restore paths (session/snapshot/workspace) set selectedDataset before loadDatasets(). Session restore
+  bails early on missing dataset instead of running SQL against nonexistent data. 607 tests. v1.10.1.
 [2026-03-20] [BD] — UI redesign batch validated in CONTEXT.md: Reference Guide built,
   SESSIONS restructured (4 buttons, 2 rows), Exit button with save prompts, Quit removed,
   collapsible sidebar, Example Cases groups collapsed by default. CLAUDE.md + CONTEXT.md
