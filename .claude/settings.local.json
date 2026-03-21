@@ -51,6 +51,6 @@
       "WebFetch",
       "WebSearch"
     ],
-    "defaultMode": "dontAsk"
+    "defaultMode": "auto"
   }
 }

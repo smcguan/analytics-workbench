@@ -4092,6 +4092,8 @@ def _derive_resume_state(events: list[dict]) -> dict:
         if et == "query_run" and "dataset" not in state:
             state["dataset"] = details.get("dataset", "")
             state["last_sql"] = details.get("sql", "")
+        if et == "dataset_import" and "dataset" not in state:
+            state["dataset"] = details.get("dataset", "")
         if et == "reference_load" and "reference" not in state:
             state["reference"] = {
                 "name": details.get("reference_name", ""),
@@ -4122,11 +4124,15 @@ def api_session_resume(req: ResumeRequest):
     last_sql = resume_state.get("last_sql", "")
     ref_info = resume_state.get("reference")
 
-    # Check dataset exists
+    # Check dataset exists — use same markers as list_datasets() so a dataset
+    # that appears in the sidebar is never reported as missing here.
     dataset_exists = False
     if dataset_name:
         ds_dir = (DATASETS_DIR / dataset_name).resolve()
-        dataset_exists = ds_dir.exists() and (ds_dir / "source.parquet").exists()
+        dataset_exists = ds_dir.exists() and any(
+            (ds_dir / m).exists()
+            for m in ("source.parquet", "_meta.json", "metadata.json", "dataset_context.json")
+        )
 
     if dataset_name and not dataset_exists:
         return {
@@ -4445,11 +4451,15 @@ def api_sessions_saved():
     for f in sorted(SESSIONS_DIR.glob("*.json"), reverse=True):
         try:
             data = json.loads(f.read_text(encoding="utf-8"))
-            name = data.get("name", "")
+            name = data.get("name", "").strip()
+            # Only show explicitly named sessions — unnamed auto-saves (session_{uuid}_{date}.json)
+            # are crash-recovery files and should not clutter the Retrieve Session list.
+            if not name:
+                continue
             saved.append({
                 "filename": f.name,
                 "session_id": data.get("session_id", ""),
-                "name": name or f"Session {f.stem.split('_')[1][:8] if '_' in f.stem else f.stem}",
+                "name": name,
                 "description": data.get("description", ""),
                 "started_at": data.get("started_at", ""),
                 "event_count": len(data.get("events", [])),
@@ -4723,7 +4733,8 @@ def api_snapshots_restore(filename: str):
     ds = data.get("dataset")
     if ds and ds.get("name"):
         ds_dir = (DATASETS_DIR / ds["name"]).resolve()
-        if (ds_dir / "source.parquet").exists():
+        # Use same markers as list_datasets() so sidebar-visible datasets are always restorable
+        if any((ds_dir / m).exists() for m in ("source.parquet", "_meta.json", "metadata.json", "dataset_context.json")):
             result["dataset"] = ds["name"]
         else:
             result["warnings"].append(f"Dataset '{ds['name']}' not found.")
@@ -4778,9 +4789,12 @@ def api_shutdown(bg: BackgroundTasks):
 
     try:
         end_session()
-        export_session(SESSIONS_DIR)
+        # Session export is intentionally NOT done here — sessions are only
+        # written to disk when the user explicitly saves via /api/session/export.
+        # Auto-exporting on shutdown created unwanted session files on plain Exit
+        # and duplicate files on Save & Exit (named file + unnamed file).
     except Exception:
-        logger.warning("Failed to export session on shutdown", exc_info=True)
+        logger.warning("Failed to end session on shutdown", exc_info=True)
 
     def _stop():
         time.sleep(0.25)

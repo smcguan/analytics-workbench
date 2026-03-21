@@ -10,7 +10,7 @@ stays on the analyst's machine — AI generates analysis instructions, not data 
 **Tech stack:** FastAPI backend, DuckDB query engine, OpenAI GPT-4.1-mini for AI,
 vanilla HTML/JS/CSS frontend, PyInstaller packaging for Windows desktop.
 
-**Current version:** v1.10.1 | **Total commits:** 110+ | **Test suite:** 607 tests (zero xfail)
+**Current version:** v1.10.2 | **Total commits:** 112+ | **Test suite:** 607 tests (zero xfail)
 
 ---
 
@@ -88,7 +88,8 @@ Building toward reproducible, auditable, shareable analytical sessions:
 | #12 | ORDER BY DESC regression — keywords captured as aliases | Expanded _SQL_KW list with 20+ SQL keywords | v1.7.1 |
 | #13 | Session Log recording all suggestions as query_run | Insight previews marked internal, double-fetch guard | v1.6.1 |
 | #17 | Session/snapshot restore shows wrong datasets | list_datasets() tightened + restore ordering fixed | v1.10.1 |
-| #6 | Windows file lock on Refresh Datasets | Partially addressed — retry logic, needs more testing | ACTIVE |
+| #6 | Windows file lock on Refresh Datasets | Mitigated — Refresh no longer calls delete endpoint (v1.10.2) | MITIGATED |
+| #18 | Refresh Datasets deleted files from disk + _restoreWorkspace missing expand + loadDatasets auto-select wrong dataset | Refresh → UI-only clear, _restoreWorkspace expand added, loadDatasets clears selectedDataset when missing | v1.10.2 |
 
 ---
 
@@ -127,14 +128,21 @@ Building toward reproducible, auditable, shareable analytical sessions:
 | v1.8.1 | 2026-03-20 | Taxi TIMESTAMP cast fix, tutorial summary cards show file size + source |
 | v1.9.0 | 2026-03-20 | Tutorial #3, 3 new example cases, Named Snapshots, collapsible groups, 607 tests |
 | v1.10.0 | 2026-03-20 | Reference Guide, SESSIONS restructure, Exit button, collapsible sidebar, /sync skill |
-| v1.10.1 | 2026-03-20 | Bug #17: session/snapshot/workspace restore shows wrong datasets — root cause fix |
+| v1.10.1 | 2026-03-21 | Bug #17: session/snapshot/workspace restore shows wrong datasets — root cause fix |
+| v1.10.2 | 2026-03-21 | Bug #18: Refresh was deleting disk files (root cause of restore loop); Clear SQL button; Sessions Save exits; SQL auto-clears on restore |
 
 ---
 
 ## Wrap Records
 <!-- Each /wrap appends a 3-line summary below. Most recent at top. -->
 
-**v1.10.1** | 2026-03-20
+**v1.10.2** | 2026-03-21
+Bug #18 fix: Refresh Datasets was calling /api/datasets/{name}/delete (rmtree) for every dataset,
+permanently destroying files — the root cause of the restore-loop. Refresh is now a UI-only clear.
+Also: Clear SQL button (pill overlay in editor), Sessions Save exits after saving, SQL editor
+auto-clears on restore when no saved SQL present. Reference Guide updated. 607 tests.
+
+**v1.10.1** | 2026-03-21
 Bug #17 fix: session/snapshot/workspace restore showed wrong datasets. Root cause: list_datasets()
 matched raw data dirs as datasets + restore set selectedDataset after loadDatasets(). Both fixed.
 Session restore bails early on missing dataset. Troubleshooting row added to Reference Guide. 607 tests.

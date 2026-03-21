@@ -160,6 +160,10 @@ def _build_resume_state(session: SessionLog) -> dict:
         if event.event_type == SessionEventType.QUERY_RUN and "dataset" not in state:
             state["dataset"] = event.details.get("dataset", "")
             state["last_sql"] = event.details.get("sql", "")
+        # Fall back to DATASET_IMPORT if no QUERY_RUN event exists (user imported
+        # but never ran SQL before saving — still need to restore the dataset).
+        if event.event_type == SessionEventType.DATASET_IMPORT and "dataset" not in state:
+            state["dataset"] = event.details.get("dataset", "")
         if event.event_type == SessionEventType.REFERENCE_LOAD and "reference" not in state:
             state["reference"] = {
                 "name": event.details.get("reference_name", ""),
@@ -241,10 +245,13 @@ def export_session(sessions_dir: Path) -> Path | None:
     # Build resume state before serializing
     _current_session.resume_state = _build_resume_state(_current_session)
 
-    # Use session name as filename if available
+    # Use session name as filename if available.
+    # Named sessions OVERWRITE the existing file — do not append _2, _3 etc.
+    # The user explicitly chose this name; creating duplicates causes the
+    # "two sessions with same name" confusion in Retrieve Session.
     sanitized = _sanitize_filename(_current_session.name) if _current_session.name else ""
     if sanitized:
-        filepath = _unique_filepath(sessions_dir, sanitized)
+        filepath = sessions_dir / f"{sanitized}.json"
     else:
         date_str = datetime.now(timezone.utc).strftime("%Y%m%d")
         filename = f"session_{_current_session.session_id}_{date_str}.json"
@@ -329,11 +336,27 @@ def set_sessions_dir(path: Path) -> None:
 # -----------------------------------------------------------------------------
 
 def _auto_save() -> None:
-    """Auto-save current session state to disk if sessions_dir is configured."""
-    if _sessions_dir is None:
+    """Auto-save current session to disk for crash safety.
+
+    Always writes to the UUID-based filename, never to the named file.
+    This prevents auto-save from creating 'MySession_2.json' after the user
+    has already explicitly saved 'MySession.json' via export_session().
+    Named exports are only done via explicit export_session() calls.
+    """
+    if _sessions_dir is None or _current_session is None:
         return
     try:
-        export_session(_sessions_dir)
+        import os as _os
+        _sessions_dir.mkdir(parents=True, exist_ok=True)
+        _current_session.resume_state = _build_resume_state(_current_session)
+        date_str = datetime.now(timezone.utc).strftime("%Y%m%d")
+        filepath = _sessions_dir / f"session_{_current_session.session_id}_{date_str}.json"
+        data = asdict(_current_session)
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2)
+            f.flush()
+            _os.fsync(f.fileno())
+        logger.info("Session auto-saved to %s", filepath)
     except Exception:
         logger.exception("Auto-save failed")
 

@@ -1538,12 +1538,15 @@
                 </section>
 
                 <section>
-                    <h3 class="section-title collapsed" id="sidebarWorkspaceTitle"><span class="section-toggle">&#9660;</span> Workspace</h3>
-                    <div class="section-body collapsed" id="sidebarWorkspaceBody">
-                    <div class="nav-list">
-                        <button class="nav-item" id="navInsights">Insights</button>
-                        <button class="nav-item" id="navQuery">Query</button>
-                        <button class="nav-item" id="navSavedQueries">Saved Queries</button>
+                    <h3 class="section-title collapsed" id="sidebarSessionsTitle"><span class="section-toggle">&#9660;</span> Sessions</h3>
+                    <div class="section-body collapsed" id="sidebarSessionsBody">
+                    <div class="sidebar-btn-row">
+                        <button class="btn import-btn" id="retrieveSessionBtn">Retrieve Session</button>
+                        <button class="btn sidebar-btn-secondary" id="saveSessionBtn">Save</button>
+                    </div>
+                    <div class="sidebar-btn-row" style="margin-top:2px;">
+                        <button class="btn import-btn" id="snapshotsBtn">Retrieve Snapshot</button>
+                        <button class="btn sidebar-btn-secondary" id="saveSnapshotSidebarBtn">Save</button>
                     </div>
                     </div>
                 </section>
@@ -1603,15 +1606,12 @@
                 </section>
 
                 <section>
-                    <h3 class="section-title collapsed" id="sidebarSessionsTitle"><span class="section-toggle">&#9660;</span> Sessions</h3>
-                    <div class="section-body collapsed" id="sidebarSessionsBody">
-                    <div class="sidebar-btn-row">
-                        <button class="btn import-btn" id="retrieveSessionBtn">Retrieve Session</button>
-                        <button class="btn sidebar-btn-secondary" id="saveSessionBtn">Save</button>
-                    </div>
-                    <div class="sidebar-btn-row" style="margin-top:2px;">
-                        <button class="btn import-btn" id="snapshotsBtn">Retrieve Snapshot</button>
-                        <button class="btn sidebar-btn-secondary" id="saveSnapshotSidebarBtn">Save</button>
+                    <h3 class="section-title collapsed" id="sidebarWorkspaceTitle"><span class="section-toggle">&#9660;</span> Workspace</h3>
+                    <div class="section-body collapsed" id="sidebarWorkspaceBody">
+                    <div class="nav-list">
+                        <button class="nav-item" id="navInsights">Insights</button>
+                        <button class="nav-item" id="navQuery">Query</button>
+                        <button class="nav-item" id="navSavedQueries">Saved Queries</button>
                     </div>
                     </div>
                 </section>
@@ -1738,9 +1738,24 @@ e.g. "Show revenue by region for 2024"'
 
                             <div class="editor-shell">
                                 <div class="editor-label">SQL Editor</div>
-                                <textarea id="sqlEditor" class="editor">SELECT *
+                                <div style="position:relative;">
+                                    <textarea id="sqlEditor" class="editor">SELECT *
 FROM dataset
 LIMIT 100</textarea>
+                                    <button id="clearSqlBtn" title="Clear editor" style="
+                                        position:absolute; top:10px; right:12px;
+                                        background:rgba(27,36,49,0.12);
+                                        border:1px solid rgba(27,36,49,0.18);
+                                        border-radius:6px;
+                                        color:#1b2431;
+                                        font-size:11px;
+                                        letter-spacing:.4px;
+                                        padding:3px 8px;
+                                        cursor:pointer;
+                                        opacity:0.55;
+                                        transition:opacity .15s;
+                                    " onmouseenter="this.style.opacity='0.9'" onmouseleave="this.style.opacity='0.55'">✕ Clear</button>
+                                </div>
                             </div>
                         </div>
                     </section>
@@ -1932,9 +1947,9 @@ LIMIT 100</textarea>
 <p><strong>Sidebar layout:</strong> The left sidebar has four collapsible sections. Click any section header to expand or collapse it.</p>
 <ul>
 <li><strong>GET STARTED</strong> — Welcome, Reference Guide, Example Cases</li>
-<li><strong>WORKSPACE</strong> — Insights, Query, Saved Queries (auto-expands on first query)</li>
-<li><strong>DATA</strong> — Imported datasets, reference tables, library (auto-expands on first import)</li>
 <li><strong>SESSIONS</strong> — Retrieve/Save sessions and snapshots</li>
+<li><strong>DATA</strong> — Imported datasets, reference tables, library (auto-expands on first import)</li>
+<li><strong>WORKSPACE</strong> — Insights, Query, Saved Queries (auto-expands on first query)</li>
 </ul>
 <p>Below the sidebar sections: <strong>Exit</strong> (close immediately) and <strong>Save</strong> (save session + snapshot, then close).</p>
 
@@ -1963,7 +1978,7 @@ LIMIT 100</textarea>
 
 <hr>
 <h3>Query</h3>
-<p><strong>SQL Editor:</strong> Write DuckDB SQL directly. Always use <code>dataset</code> as the table name. Do not end queries with a semicolon.</p>
+<p><strong>SQL Editor:</strong> Write DuckDB SQL directly. Always use <code>dataset</code> as the table name. Do not end queries with a semicolon. The <strong>✕ Clear</strong> button inside the editor resets it to the default <code>SELECT * FROM dataset LIMIT 100</code> template.</p>
 <p><strong>Natural Language:</strong> Type a question in the prompt box and click <strong>Generate SQL</strong>. AI generates DuckDB-compatible SQL from your question.</p>
 <p><strong>Suggestions:</strong> Click the <strong>Suggestions</strong> button for AI-generated analytical questions based on your dataset's schema.</p>
 <p><strong>Saving Queries:</strong> Save frequently-used queries via the Saved Queries panel in Workspace.</p>
@@ -2019,12 +2034,13 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 <h3>Sessions</h3>
 <p>The SESSIONS section in the sidebar provides four buttons in two rows:</p>
 <ul>
-<li><strong>Retrieve Session + Save</strong> — browse and restore saved sessions, or save the current session with a name. Session files are saved to <code>data/sessions/</code> using your chosen name as the filename.</li>
+<li><strong>Retrieve Session + Save</strong> — browse and restore named sessions, or save the current session with a name. Session files are saved to <code>data/sessions/</code>. After saving, the app closes automatically.</li>
 <li><strong>Retrieve Snapshot + Save</strong> — browse and restore workspace snapshots, or save the current workspace state. Snapshot files are saved to <code>data/snapshots/</code> using your chosen name.</li>
 </ul>
 <p><strong>Sessions vs. Snapshots:</strong> A session captures the full event log (every query, import, export). A snapshot captures the current workspace state (which dataset is loaded, which reference table, last SQL query). Use sessions for audit trails. Use snapshots for quick resume.</p>
 <p><strong>Auto-snapshot:</strong> AW automatically saves workspace state when you exit. On next launch, you'll see a resume prompt offering to restore where you left off.</p>
-<p><strong>Exit &amp; Save:</strong> The Exit button at the bottom of the sidebar closes AW immediately. The Save button next to it prompts for a name and saves both session and snapshot before closing.</p>
+<p><strong>Exit &amp; Save:</strong> The Exit button at the bottom of the sidebar closes AW immediately (auto-snapshot written). The Save button next to it prompts for a name and saves both session and snapshot before closing.</p>
+<p><strong>Refresh (Data section):</strong> Clears the active dataset and reference table from the workspace UI. Files on disk are not deleted — you can always restore them via Retrieve Session or Retrieve Snapshot.</p>
 <p><strong>Session Log:</strong> AW automatically records every action — imports, queries, reference loads, exports — with timestamps and details. This happens silently in the background.</p>
 
 <hr>
@@ -2432,9 +2448,13 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 datasets = data.datasets || [];
 
                 if (!selectedDataset && datasets.length) {
+                    // No dataset pre-selected — pick first
                     selectedDataset = datasets[0].name || "";
                 } else if (selectedDataset && !datasets.some(d => (d.name || "") === selectedDataset)) {
-                    selectedDataset = datasets.length ? (datasets[0].name || "") : "";
+                    // Pre-selected dataset not found on disk — don't silently switch to a
+                    // different one, leave selectedDataset as-is so the restore path can
+                    // show a proper "not found" message rather than loading the wrong dataset
+                    selectedDataset = "";
                 }
 
                 renderDatasets();
@@ -3274,6 +3294,12 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 if (result.dataset) selectedDataset = result.dataset;
                 await loadDatasets();
 
+                // Expand Data section immediately after load — must happen before any
+                // SQL re-run attempt so that datasets are visible even if SQL fails
+                _expandSidebarSection("sidebarDataTitle", "sidebarDataBody");
+                _expandSidebarSection("sidebarWorkspaceTitle", "sidebarWorkspaceBody");
+                _collapseSidebarSection("sidebarSessionsTitle", "sidebarSessionsBody");
+
                 // Update reference indicator
                 if (result.reference && result.reference.loaded) {
                     currentReference = result.reference.name;
@@ -3312,12 +3338,11 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                     $("resultsCount").textContent = `${num(lastRun.rowcount)} rows`;
                     $("resultsMeta").textContent = `executed in ${lastRun.elapsed}s`;
                 } else {
-                    if (result.last_sql) $("sqlEditor").value = result.last_sql;
+                    // No SQL to restore — reset editor to default template
+                    $("sqlEditor").value = result.last_sql || "SELECT *\nFROM dataset\nLIMIT 100";
                     switchView("query");
                 }
 
-                _expandSidebarSection("sidebarDataTitle", "sidebarDataBody");
-                _expandSidebarSection("sidebarWorkspaceTitle", "sidebarWorkspaceBody");
                 toast("Session resumed — ready to continue.");
             } catch (e) {
                 toast("Resume failed: " + (e.message || ""), 8000);
@@ -3452,11 +3477,11 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 closeSaveSessionDialog();
 
                 const savedPath = exportResult.exported_to || "";
-                if (savedPath) {
-                    toast(`Session saved: ${savedPath.split(/[\\/]/).pop()}`);
-                } else {
-                    toast("Session saved to library.");
-                }
+                const savedName = savedPath ? savedPath.split(/[\\/]/).pop() : "session";
+                toast(`Session saved: ${savedName} — shutting down...`);
+
+                // Save complete — exit the app
+                await _writeAutoSnapshotAndShutdown();
             } catch (e) {
                 toast("Failed to save session: " + (e.message || "Unknown error"), 6000);
             } finally {
@@ -3555,6 +3580,12 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 // correct dataset's metadata instead of auto-selecting the first one
                 if (result.dataset) selectedDataset = result.dataset;
                 await loadDatasets();
+
+                // Expand Data section immediately after load so datasets are always visible
+                _expandSidebarSection("sidebarDataTitle", "sidebarDataBody");
+                _expandSidebarSection("sidebarWorkspaceTitle", "sidebarWorkspaceBody");
+                _collapseSidebarSection("sidebarSessionsTitle", "sidebarSessionsBody");
+
                 if (result.references && result.references.length > 0) {
                     const ref = result.references[0];
                     currentReference = ref.name;
@@ -3563,10 +3594,8 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                         ? `${ref.name} (${num(ref.row_count)} rows, ${colCount} cols)` : ref.name;
                     $("referenceIndicator").style.display = "block";
                 }
-                if (result.last_query) $("sqlEditor").value = result.last_query;
+                $("sqlEditor").value = result.last_query || "SELECT *\nFROM dataset\nLIMIT 100";
                 for (const w of (result.warnings || [])) toast(w, 6000);
-                _expandSidebarSection("sidebarDataTitle", "sidebarDataBody");
-                _expandSidebarSection("sidebarWorkspaceTitle", "sidebarWorkspaceBody");
                 switchView(result.last_tab === "insights" ? "insights" : "query");
                 toast("Snapshot restored: " + (result.name || ""));
             } catch (e) {
@@ -5336,6 +5365,9 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         $("generateSqlBtn").addEventListener("click", generateAiSql);
         $("runSqlBtn").addEventListener("click", runSqlQuery);
         $("explainBtn").addEventListener("click", explainSql);
+        $("clearSqlBtn").addEventListener("click", () => {
+            $("sqlEditor").value = "SELECT *\nFROM dataset\nLIMIT 100";
+        });
 
         $("tableTab").addEventListener("click", () => setActiveTab("table"));
         $("chartTab").addEventListener("click", () => setActiveTab("chart"));
@@ -5356,56 +5388,20 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         $("saveSnapshotSidebarBtn").addEventListener("click", openSaveSnapshotDialog);
 
         // Refresh Datasets button.
-        // Calls DELETE on /api/datasets/<name>/delete for every known dataset
-        // to fully deregister them from the backend, then clears the UI.
-        // Now that the backend has this endpoint, Refresh is a true reset:
-        // the user can re-import any dataset with the same name afterwards.
-        $("refreshDatasetsBtn").addEventListener("click", async () => {
-            const toDelete = [...datasets];
-
-            // Clear UI immediately
+        // Clears the current workspace UI without deleting any files from disk.
+        // Files remain intact so session/snapshot restore continues to work.
+        // Use this to reset the active dataset between workflows.
+        $("refreshDatasetsBtn").addEventListener("click", () => {
             datasets = [];
             selectedDataset = "";
+            currentReference = "";
             renderDatasets();
             updateSelectedDatasetSummary();
             resetInspectState();
-
-            if (!toDelete.length) {
-                toast("Dataset list cleared.");
-                return;
-            }
-
-            let deleted = 0;
-            let failed = 0;
-
-            for (const d of toDelete) {
-                try {
-                    const res = await fetch(
-                        "/api/datasets/" + encodeURIComponent(d.name || "") + "/delete",
-                        { method: "POST" }
-                    );
-                    if (res.ok) {
-                        deleted++;
-                    } else {
-                        // Dataset may already be gone — treat 404 as success
-                        if (res.status === 404) {
-                            deleted++;
-                        } else {
-                            failed++;
-                            console.warn("Delete failed for", d.name, "HTTP", res.status);
-                        }
-                    }
-                } catch (e) {
-                    failed++;
-                    console.warn("Delete error for", d.name, e.message);
-                }
-            }
-
-            if (failed > 0) {
-                toast(`Cleared. ${deleted} dataset(s) removed; ${failed} could not be deleted from backend.`);
-            } else {
-                toast(`Cleared. ${deleted} dataset(s) removed. You can re-import any dataset now.`);
-            }
+            $("referenceIndicator").style.display = "none";
+            $("referenceName").textContent = "";
+            $("sqlEditor").value = "SELECT *\nFROM dataset\nLIMIT 100";
+            toast("Workspace cleared.");
         });
 
         $("askPrompt").addEventListener("keydown", (e) => {
@@ -5429,6 +5425,12 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 // correct dataset's metadata instead of auto-selecting the first one
                 if (result.dataset) selectedDataset = result.dataset;
                 await loadDatasets();
+
+                // Expand Data and Workspace sections so restored state is visible
+                _expandSidebarSection("sidebarDataTitle", "sidebarDataBody");
+                _expandSidebarSection("sidebarWorkspaceTitle", "sidebarWorkspaceBody");
+                _collapseSidebarSection("sidebarSessionsTitle", "sidebarSessionsBody");
+
                 if (result.dataset && !datasets.some(d => d.name === result.dataset)) {
                     toast("Dataset '" + result.dataset + "' not found — re-import it to continue.", 6000);
                 }
@@ -5445,10 +5447,8 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                     $("referenceIndicator").style.display = "block";
                 }
 
-                // Restore last query
-                if (result.last_query) {
-                    $("sqlEditor").value = result.last_query;
-                }
+                // Restore last query, or reset to default template if none saved
+                $("sqlEditor").value = result.last_query || "SELECT *\nFROM dataset\nLIMIT 100";
 
                 // Show warnings
                 for (const w of (result.warnings || [])) {

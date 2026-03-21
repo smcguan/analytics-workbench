@@ -326,11 +326,15 @@ def test_sessions_saved_empty(patched_app):
     assert resp.json()["sessions"] == []
 
 
-def test_sessions_saved_returns_all_sessions(patched_app):
-    """All sessions are returned — named ones with their name, unnamed with a fallback."""
+def test_sessions_saved_returns_named_sessions_only(patched_app):
+    """Only named sessions appear in the saved list.
+
+    Unnamed auto-saves (session_{uuid}_{date}.json) are crash-recovery files
+    and must not clutter the Retrieve Session list.
+    """
     client, dirs = patched_app
 
-    # Named session
+    # Named session — should appear
     _write_session_file(dirs["sessions"], "session_named.json", {
         "session_id": "abc-123",
         "name": "GLOBE Analysis Session",
@@ -340,7 +344,7 @@ def test_sessions_saved_returns_all_sessions(patched_app):
         "ai_mode": "cloud",
     })
 
-    # Unnamed session — should appear with fallback name
+    # Unnamed auto-save — must NOT appear
     _write_session_file(dirs["sessions"], "session_unnamed.json", {
         "session_id": "def-456",
         "name": "",
@@ -352,15 +356,15 @@ def test_sessions_saved_returns_all_sessions(patched_app):
     resp = client.get("/api/sessions/saved")
     assert resp.status_code == 200
     body = resp.json()
-    assert len(body["sessions"]) == 2
+    # Only the named session should appear — unnamed auto-save is excluded
+    assert len(body["sessions"]) == 1
 
-    # Named session appears with its name
-    named = [s for s in body["sessions"] if s["session_id"] == "abc-123"]
-    assert len(named) == 1
-    assert named[0]["name"] == "GLOBE Analysis Session"
-    assert named[0]["description"] == "Analyzed Part B GLOBE candidates"
-    assert named[0]["event_count"] == 1
-    assert named[0]["filename"] == "session_named.json"
+    named = body["sessions"][0]
+    assert named["session_id"] == "abc-123"
+    assert named["name"] == "GLOBE Analysis Session"
+    assert named["description"] == "Analyzed Part B GLOBE candidates"
+    assert named["event_count"] == 1
+    assert named["filename"] == "session_named.json"
 
 
 def test_sessions_saved_no_dir(patched_app):
