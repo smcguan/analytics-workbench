@@ -359,6 +359,10 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-22] [CODE] — UX polish: custom tooltip system replaces native browser title attrs with styled
+  animated tooltips; descriptive tooltips added to every interactive element; popover/suggestion chip
+  visual refinements (gradient backgrounds, box shadows); Clear Workspace now fully clears results
+  table, row count, explain panel, and chart; .gitignore updated to exclude runtime data. 603 tests. v1.12.1.
 [2026-03-22] [CODE] — Bug fix: Resume Session list no longer shows duplicates (UUID auto-save files
   with a name set were leaking through the named-session filter; fixed by pattern-matching filenames).
   New: Clear Workspace button in sidebar footer (full-width, above Resume/Save As row) — clears

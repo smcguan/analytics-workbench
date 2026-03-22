@@ -23,7 +23,8 @@
       "Bash(cmd:*)",
       "Bash(grep -n \"def test_\" /c/dev/analytics-workbench/tests/test_*.py)",
       "Bash(grep -n \"/api/session\" /c/dev/analytics-workbench/tests/test_*.py)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(python -m pytest tests/ -q --tb=short)"
     ],
     "deny": [
       "Read(C:/dev/analytics-workbench/.env)",

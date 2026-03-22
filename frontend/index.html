@@ -749,29 +749,34 @@
         .popover{
             display:none;
             margin-top:10px;
-            padding:12px 13px;
+            padding:14px 16px;
             border-radius:12px;
-            border:1px solid rgba(79,140,255,.22);
-            background:rgba(79,140,255,.08);
+            border:1px solid var(--accent-border);
+            background:linear-gradient(135deg, rgba(79,140,255,.10) 0%, rgba(79,140,255,.04) 100%);
+            box-shadow:0 4px 16px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.04);
             color:#d6e6ff;
-            font-size:12px;
-            line-height:1.5;
+            font-size:12.5px;
+            line-height:1.55;
         }
 
         .popover strong{
             display:block;
-            margin-bottom:6px;
+            margin-bottom:8px;
             font-size:12px;
+            text-transform:uppercase;
+            letter-spacing:.6px;
+            color:var(--accent);
         }
 
         /* Suggestions popover — chip buttons for each AI-generated question */
         #suggestionsPopover{
             display:none;
             margin-top:10px;
-            padding:12px 13px;
+            padding:14px 16px;
             border-radius:12px;
-            border:1px solid rgba(79,140,255,.22);
-            background:rgba(79,140,255,.08);
+            border:1px solid var(--accent-border);
+            background:linear-gradient(135deg, rgba(79,140,255,.10) 0%, rgba(79,140,255,.04) 100%);
+            box-shadow:0 4px 16px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.04);
         }
 
         .suggestions-header{
@@ -809,19 +814,22 @@
         }
 
         .suggestion-chip{
-            padding:8px 13px;
+            padding:8px 14px;
             border-radius:999px;
-            border:1px solid rgba(79,140,255,.30);
-            background:rgba(79,140,255,.12);
+            border:1px solid rgba(79,140,255,.25);
+            background:rgba(79,140,255,.10);
             color:#d6e6ff;
             font-size:12px;
             cursor:pointer;
             text-align:left;
-            transition:background .12s ease;
+            transition:all .15s ease;
+            box-shadow:0 1px 3px rgba(0,0,0,.15);
         }
 
         .suggestion-chip:hover{
-            background:rgba(79,140,255,.24);
+            background:rgba(79,140,255,.22);
+            border-color:var(--accent);
+            box-shadow:0 2px 8px rgba(79,140,255,.18);
         }
 
         .suggestions-empty{
@@ -1667,6 +1675,28 @@
         .ec-step-elapsed{
             font-size:11px; color:var(--muted2); white-space:nowrap;
         }
+
+        /* ── Custom tooltips (replaces native title attr) ── */
+        .aw-tooltip{
+            position:fixed;
+            z-index:99999;
+            max-width:280px;
+            padding:7px 12px;
+            border-radius:8px;
+            border:1px solid var(--accent-border);
+            background:#1a1a2e;
+            box-shadow:0 8px 24px rgba(0,0,0,.5), 0 0 0 1px rgba(79,140,255,.10);
+            color:#e8ecf4;
+            font:12.5px/1.45 var(--font);
+            pointer-events:none;
+            opacity:0;
+            transform:translateY(4px);
+            transition:opacity .15s ease, transform .15s ease;
+        }
+        .aw-tooltip.visible{
+            opacity:1;
+            transform:translateY(0);
+        }
     </style>
 </head>
 
@@ -1697,9 +1727,9 @@
                     <h3 class="section-title" id="sidebarGetStartedTitle"><span class="section-toggle">&#9660;</span> Get Started</h3>
                     <div class="section-body" id="sidebarGetStartedBody">
                     <div class="nav-list">
-                        <button class="nav-item" id="navWelcome">Welcome</button>
-                        <button class="nav-item" id="navReferenceGuide">Reference Guide</button>
-                        <button class="nav-item" id="exampleCasesBtn">Example Cases</button>
+                        <button class="nav-item" id="navWelcome" title="Return to the Welcome screen">Welcome</button>
+                        <button class="nav-item" id="navReferenceGuide" title="Open the Reference Guide for how-to help">Reference Guide</button>
+                        <button class="nav-item" id="exampleCasesBtn" title="Browse pre-built example cases and tutorials">Example Cases</button>
                     </div>
                     </div>
                 </section>
@@ -1710,10 +1740,10 @@
                     <div class="dataset-list" id="datasetList"></div>
 
                     <div class="sidebar-btn-row">
-                        <label for="importDatasetFile" class="btn primary import-btn" id="importDatasetBtn">
+                        <label for="importDatasetFile" class="btn primary import-btn" id="importDatasetBtn" title="Import a CSV, TSV, Excel, or Parquet file as your dataset">
                             + Import Dataset
                         </label>
-                        <button class="btn sidebar-btn-secondary" id="refreshDatasetsBtn">
+                        <button class="btn sidebar-btn-secondary" id="refreshDatasetsBtn" title="Clear the workspace without deleting files from disk">
                             Refresh
                         </button>
                     </div>
@@ -1734,10 +1764,10 @@
                     />
 
                     <div class="sidebar-btn-row">
-                        <label for="importReferenceFile" class="btn import-btn" id="importReferenceBtn">
+                        <label for="importReferenceFile" class="btn import-btn" id="importReferenceBtn" title="Import a reference table to JOIN with your dataset">
                             + Reference Table
                         </label>
-                        <button class="btn sidebar-btn-secondary" id="refLibraryBtn">
+                        <button class="btn sidebar-btn-secondary" id="refLibraryBtn" title="Browse pre-built reference tables available for loading">
                             Library
                         </button>
                     </div>
@@ -1753,7 +1783,7 @@
 
                     <div id="referenceIndicator" style="display:none; margin-top:8px; font-size:0.85em; color:var(--fg2);">
                         Reference: <strong id="referenceName"></strong>
-                        <button class="btn-link" id="clearReferenceBtn" style="margin-left:8px; font-size:0.85em;">✕ Remove</button>
+                        <button class="btn-link" id="clearReferenceBtn" style="margin-left:8px; font-size:0.85em;" title="Remove the active reference table">✕ Remove</button>
                     </div>
                     </div>
                 </section>
@@ -1762,9 +1792,9 @@
                     <h3 class="section-title collapsed" id="sidebarWorkspaceTitle"><span class="section-toggle">&#9660;</span> Workspace</h3>
                     <div class="section-body collapsed" id="sidebarWorkspaceBody">
                     <div class="nav-list">
-                        <button class="nav-item" id="navInsights">Insights</button>
-                        <button class="nav-item" id="navQuery">Query</button>
-                        <button class="nav-item" id="navSavedQueries">Saved Queries</button>
+                        <button class="nav-item" id="navInsights" title="View AI-generated insights about your dataset">Insights</button>
+                        <button class="nav-item" id="navQuery" title="Ask questions and write SQL queries">Query</button>
+                        <button class="nav-item" id="navSavedQueries" title="View and reload saved SQL queries">Saved Queries</button>
                     </div>
                     </div>
                 </section>
@@ -1772,11 +1802,11 @@
                 <div style="margin-top:12px; padding-top:10px; border-top:1px solid var(--bg2); position:relative;">
                     <div id="sidebarSessionDropdown" class="sidebar-session-dropdown" style="display:none;"></div>
                     <div class="sidebar-footer-grid">
-                        <button class="btn" id="sidebarClearWorkspaceBtn" style="grid-column:1/-1;">Clear Workspace</button>
-                        <button class="btn" id="resumeSessionBtn">Resume Session</button>
-                        <button class="btn" id="sidebarSaveAsBtn">Save As</button>
-                        <button class="btn" id="exitBtn">Exit</button>
-                        <button class="btn" id="saveExitBtn">Save &amp; Exit</button>
+                        <button class="btn" id="sidebarClearWorkspaceBtn" style="grid-column:1/-1;" title="Clear dataset, reference, SQL, results, and Ask Your Data — files on disk are not deleted">Clear Workspace</button>
+                        <button class="btn" id="resumeSessionBtn" title="Load a previously saved session">Resume Session</button>
+                        <button class="btn" id="sidebarSaveAsBtn" title="Save the current session with a name">Save As</button>
+                        <button class="btn" id="exitBtn" title="Close the application immediately without saving">Exit</button>
+                        <button class="btn" id="saveExitBtn" title="Save the current session and then close the application">Save &amp; Exit</button>
                     </div>
                 </div>
             </aside>
@@ -1820,9 +1850,9 @@
                             </div>
 
                             <div class="inspect-actions">
-                                <button class="btn small" id="inspectSchemaBtn">Schema</button>
-                                <button class="btn small" id="inspectPreviewBtn">Preview</button>
-                                <button class="btn small" id="exportPassportBtn">Export Passport</button>
+                                <button class="btn small" id="inspectSchemaBtn" title="Show column names and data types">Schema</button>
+                                <button class="btn small" id="inspectPreviewBtn" title="Show the first rows of the dataset">Preview</button>
+                                <button class="btn small" id="exportPassportBtn" title="Download a full JSON profile with schema, distributions, and AI grain description">Export Passport</button>
                             </div>
                         </div>
 
@@ -1863,9 +1893,9 @@ e.g. "Show revenue by region for 2024"'
                             ></textarea>
 
                             <div class="ask-actions">
-                                <button class="btn icon" id="infoBtn" aria-label="How to ask your data">ⓘ</button>
-                                <button class="btn" id="suggestionsBtn">Suggestions</button>
-                                <button class="btn primary" id="generateSqlBtn">Generate SQL</button>
+                                <button class="btn icon" id="infoBtn" aria-label="How to ask your data" title="Tips on how to ask questions about your data">ⓘ</button>
+                                <button class="btn" id="suggestionsBtn" title="Show AI-suggested questions for this dataset">Suggestions</button>
+                                <button class="btn primary" id="generateSqlBtn" title="Generate SQL from your natural-language question">Generate SQL</button>
                             </div>
 
                             <div class="popover" id="infoPopover">
@@ -1922,8 +1952,8 @@ LIMIT 100</textarea>
                     <section class="panel results-shell">
                         <div class="results-top">
                             <div class="results-actions">
-                                <button class="btn primary" id="runSqlBtn">Run SQL</button>
-                                <button class="btn" id="explainBtn">Explain</button>
+                                <button class="btn primary" id="runSqlBtn" title="Execute the SQL query against your dataset">Run SQL</button>
+                                <button class="btn" id="explainBtn" title="Get an AI-generated plain-English explanation of the SQL">Explain</button>
                             </div>
 
                             <div class="results-meta" id="resultsMeta">No query executed yet.</div>
@@ -1945,15 +1975,15 @@ LIMIT 100</textarea>
                             <div class="results-count-bubble" id="resultsCount">0 rows</div>
 
                             <div class="tab-group">
-                                <button class="tab active" id="tableTab">Table</button>
-                                <button class="tab" id="chartTab" disabled>Chart</button>
+                                <button class="tab active" id="tableTab" title="View results as a data table">Table</button>
+                                <button class="tab" id="chartTab" disabled title="View results as a chart (available when results have a category and numeric column)">Chart</button>
                             </div>
 
                             <!-- Export buttons promoted directly into row 2 — no tab required -->
                             <div class="tab-group" style="margin-left:auto;">
-                                <button class="btn small" id="exportExcelBtn">Export Excel</button>
-                                <button class="btn small" id="exportTsvBtn">Export TSV</button>
-                                <button class="btn small" id="copyResultSummaryBtn" disabled>Copy Result Summary</button>
+                                <button class="btn small" id="exportExcelBtn" title="Export query results as an Excel file">Export Excel</button>
+                                <button class="btn small" id="exportTsvBtn" title="Export query results as a tab-separated file">Export TSV</button>
+                                <button class="btn small" id="copyResultSummaryBtn" disabled title="Copy a structured summary of the result to your clipboard">Copy Result Summary</button>
                             </div>
                         </div>
 
@@ -1992,8 +2022,8 @@ LIMIT 100</textarea>
                         <div class="results-top">
                             <div class="saved-title">Saved Queries</div>
                             <div class="saved-actions">
-                                <button class="btn primary small" id="saveQueryBtn">Save Current Query</button>
-                                <button class="btn small" id="refreshQueriesBtn">Refresh</button>
+                                <button class="btn primary small" id="saveQueryBtn" title="Save the current SQL query for later reuse">Save Current Query</button>
+                                <button class="btn small" id="refreshQueriesBtn" title="Reload the saved queries list">Refresh</button>
                             </div>
                         </div>
 
@@ -2027,7 +2057,7 @@ LIMIT 100</textarea>
                     <section class="panel insights-shell">
                         <div class="insights-toolbar">
                             <div class="saved-title">Insights</div>
-                            <button class="btn small" id="refreshInsightsBtn">↺ Refresh Insights</button>
+                            <button class="btn small" id="refreshInsightsBtn" title="Regenerate insights from the AI (bypasses cache)">↺ Refresh Insights</button>
                         </div>
                         <div style="font-size:0.8em; color:var(--fg2); margin-top:4px;">
                             AI generates analysis instructions from column names and statistics only. Your data stays on your computer.
@@ -2063,7 +2093,7 @@ LIMIT 100</textarea>
                             <hr>
 
                             <h3>Resume Session</h3>
-                            <button class="btn primary" id="welcomeResumeSessionBtn" style="width:100%;">Resume Saved Session</button>
+                            <button class="btn primary" id="welcomeResumeSessionBtn" style="width:100%;" title="Load a previously saved session to continue where you left off">Resume Saved Session</button>
                             <div id="welcomeSessionDropdownPanel" style="display:none; border:1px solid var(--stroke-strong); border-radius:8px; background:var(--bg1); max-height:200px; overflow-y:auto; margin-top:6px;"></div>
 
                             <hr>
@@ -2096,7 +2126,7 @@ LIMIT 100</textarea>
         <div class="ec-panel">
             <div class="ec-header">
                 <h2 id="ecTitle">Example Cases</h2>
-                <button class="ec-close" id="ecCloseBtn">&times;</button>
+                <button class="ec-close" id="ecCloseBtn" title="Close">&times;</button>
             </div>
             <div id="ecContent">
                 <div style="color:var(--muted); font-size:13px;">Loading...</div>
@@ -2138,10 +2168,10 @@ LIMIT 100</textarea>
                 <span id="tutorialStepDesc">Loading...</span>
             </span>
             <span class="tutorial-controls">
-                <button class="btn sidebar-btn-secondary" id="tutorialPrevBtn">&#9664; Prev</button>
-                <button class="btn sidebar-btn-secondary" id="tutorialNextBtn">Next &#9654;</button>
-                <button class="btn sidebar-btn-secondary" id="tutorialRunAllBtn">Run All</button>
-                <button class="btn sidebar-btn-secondary" id="tutorialCloseBtn">&#10005; Close</button>
+                <button class="btn sidebar-btn-secondary" id="tutorialPrevBtn" title="Go to the previous tutorial step">&#9664; Prev</button>
+                <button class="btn sidebar-btn-secondary" id="tutorialNextBtn" title="Go to the next tutorial step">Next &#9654;</button>
+                <button class="btn sidebar-btn-secondary" id="tutorialRunAllBtn" title="Run all remaining tutorial steps automatically">Run All</button>
+                <button class="btn sidebar-btn-secondary" id="tutorialCloseBtn" title="Exit the tutorial">&#10005; Close</button>
             </span>
         </div>
         <div id="tutorialStatus" class="tutorial-status"></div>
@@ -5307,6 +5337,13 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             $("referenceName").textContent = "";
             $("sqlEditor").value = "SELECT *\nFROM dataset\nLIMIT 100";
             $("askPrompt").value = "";
+            $("resultsMeta").textContent = "No query executed yet.";
+            $("resultsCount").textContent = "0 rows";
+            $("resultsHead").innerHTML = "";
+            $("resultsBody").innerHTML = "";
+            $("explainPanel").style.display = "none";
+            $("explainText").textContent = "";
+            $("chartContainer").style.display = "none";
             toast("Workspace cleared.");
         });
 
@@ -5355,6 +5392,75 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         }
 
         // ---------------------------------------------------------------
+        // ── Custom tooltip system (replaces native title attrs) ──
+        (function initTooltips() {
+            const tip = document.createElement("div");
+            tip.className = "aw-tooltip";
+            document.body.appendChild(tip);
+            let showTimer = null;
+
+            // Move title → data-tip so the browser never shows the native tooltip
+            document.querySelectorAll("[title]").forEach(el => {
+                el.dataset.tip = el.getAttribute("title");
+                el.removeAttribute("title");
+            });
+
+            // Also handle dynamically-added titles via MutationObserver
+            new MutationObserver(muts => {
+                for (const m of muts) {
+                    if (m.type === "attributes" && m.attributeName === "title") {
+                        const el = m.target;
+                        if (el.getAttribute("title")) {
+                            el.dataset.tip = el.getAttribute("title");
+                            el.removeAttribute("title");
+                        }
+                    }
+                    for (const n of m.addedNodes) {
+                        if (n.nodeType === 1) {
+                            n.querySelectorAll?.("[title]").forEach(el => {
+                                el.dataset.tip = el.getAttribute("title");
+                                el.removeAttribute("title");
+                            });
+                            if (n.getAttribute?.("title")) {
+                                n.dataset.tip = n.getAttribute("title");
+                                n.removeAttribute("title");
+                            }
+                        }
+                    }
+                }
+            }).observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ["title"] });
+
+            function show(el) {
+                tip.textContent = el.dataset.tip;
+                tip.classList.remove("visible");
+                // Position below the element
+                const r = el.getBoundingClientRect();
+                tip.style.left = Math.min(r.left, window.innerWidth - 300) + "px";
+                tip.style.top  = (r.bottom + 6) + "px";
+                // Force reflow then animate in
+                void tip.offsetWidth;
+                tip.classList.add("visible");
+            }
+
+            function hide() {
+                clearTimeout(showTimer);
+                showTimer = null;
+                tip.classList.remove("visible");
+            }
+
+            document.addEventListener("pointerover", e => {
+                const el = e.target.closest("[data-tip]");
+                if (!el) return;
+                clearTimeout(showTimer);
+                showTimer = setTimeout(() => show(el), 400);
+            });
+            document.addEventListener("pointerout", e => {
+                if (e.target.closest("[data-tip]")) hide();
+            });
+            document.addEventListener("pointerdown", hide);
+            document.addEventListener("scroll", hide, true);
+        })();
+
         // Init
         // ---------------------------------------------------------------
         (async function init() {

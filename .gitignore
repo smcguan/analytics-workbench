@@ -34,7 +34,7 @@ Thumbs.db
 .idea/
 
 # -------------------------
-# Datasets
+# Runtime data
 # -------------------------
 
 # Ignore all datasets by default
@@ -46,6 +46,13 @@ data/datasets/**
 
 # Inside demo, only allow small parquet files
 !data/datasets/demo/*.parquet
+
+# Session files, references, snapshots, workspace state, saved queries
+data/sessions/
+data/references/
+data/snapshots/
+data/workspace.json
+data/queries.json
 
 # Environmental Variables
 
