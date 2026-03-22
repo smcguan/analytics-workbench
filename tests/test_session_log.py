@@ -307,13 +307,10 @@ def endpoint_client(tmp_path):
     orig_ds = main_module.DATASETS_DIR
     orig_ex = main_module.EXPORTS_DIR
     orig_wp = main_module.WORKSPACE_PATH
-    orig_sn = main_module.SNAPSHOTS_DIR
     main_module.DATASETS_DIR = ds_dir
     main_module.EXPORTS_DIR = tmp_path / "_exports"
     main_module.EXPORTS_DIR.mkdir(exist_ok=True)
     main_module.WORKSPACE_PATH = tmp_path / "workspace.json"
-    main_module.SNAPSHOTS_DIR = tmp_path / "snapshots"
-    main_module.SNAPSHOTS_DIR.mkdir(exist_ok=True)
 
     # Reset and start a fresh session using the APP's module instance
     app_session_log._reset_session()
@@ -326,7 +323,6 @@ def endpoint_client(tmp_path):
     main_module.DATASETS_DIR = orig_ds
     main_module.EXPORTS_DIR = orig_ex
     main_module.WORKSPACE_PATH = orig_wp
-    main_module.SNAPSHOTS_DIR = orig_sn
 
 
 def test_session_name_sets_name_and_description(endpoint_client):
@@ -488,86 +484,6 @@ def test_bug13_one_query_run_per_explicit_execution(endpoint_client):
         f"Expected exactly 1 new query_run, but count changed "
         f"from {pre_query_count} to {post_query_count}"
     )
-
-
-# ===========================================================================
-# NAMED SNAPSHOT TESTS
-# ===========================================================================
-
-def test_snapshot_save_and_list(endpoint_client):
-    """POST /api/snapshots saves, GET /api/snapshots returns it."""
-    # Save a snapshot
-    resp = endpoint_client.post("/api/snapshots", json={
-        "name": "Test Snapshot",
-        "description": "A test snapshot",
-        "dataset": INTERNAL_DATASET,
-        "last_query": "SELECT * FROM dataset",
-    })
-    assert resp.status_code == 200
-    data = resp.json()
-    assert data["status"] == "saved"
-    assert data["name"] == "Test Snapshot"
-
-    # List snapshots
-    resp = endpoint_client.get("/api/snapshots")
-    assert resp.status_code == 200
-    snapshots = resp.json()["snapshots"]
-    assert len(snapshots) >= 1
-    names = [s["name"] for s in snapshots]
-    assert "Test Snapshot" in names
-
-
-def test_snapshot_restore(endpoint_client):
-    """POST /api/snapshots/{filename}/restore returns dataset and query."""
-    # Save
-    resp = endpoint_client.post("/api/snapshots", json={
-        "name": "Restore Test",
-        "dataset": INTERNAL_DATASET,
-        "last_query": "SELECT COUNT(*) FROM dataset",
-        "last_tab": "query",
-    })
-    filename = resp.json()["filename"]
-
-    # Restore
-    resp = endpoint_client.post(f"/api/snapshots/{filename}/restore")
-    assert resp.status_code == 200
-    data = resp.json()
-    assert data["status"] == "ok"
-    assert data["dataset"] == INTERNAL_DATASET
-    assert data["last_query"] == "SELECT COUNT(*) FROM dataset"
-
-
-def test_snapshot_delete(endpoint_client):
-    """DELETE /api/snapshots/{filename} removes the snapshot."""
-    resp = endpoint_client.post("/api/snapshots", json={
-        "name": "Delete Me",
-        "dataset": INTERNAL_DATASET,
-    })
-    filename = resp.json()["filename"]
-
-    # Delete
-    resp = endpoint_client.delete(f"/api/snapshots/{filename}")
-    assert resp.status_code == 200
-
-    # Verify gone
-    resp = endpoint_client.get("/api/snapshots")
-    filenames = [s.get("_filename") for s in resp.json()["snapshots"]]
-    assert filename not in filenames
-
-
-def test_snapshot_restore_missing_dataset(endpoint_client):
-    """Restore with a non-existent dataset returns warning, not crash."""
-    resp = endpoint_client.post("/api/snapshots", json={
-        "name": "Missing DS",
-        "dataset": "nonexistent_dataset_xyz",
-    })
-    filename = resp.json()["filename"]
-
-    resp = endpoint_client.post(f"/api/snapshots/{filename}/restore")
-    assert resp.status_code == 200
-    data = resp.json()
-    assert data["dataset"] is None
-    assert len(data["warnings"]) > 0
 
 
 # ===========================================================================

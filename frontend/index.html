@@ -559,6 +559,30 @@
             transform:translateY(1px);
         }
 
+        /* ── Exit zone buttons (bottom of sidebar) ───────────────
+           Matched pair: ghost Exit + filled accent Save.
+           Distinct from session controls above without being alarming. */
+        #exitBtn{
+            background:transparent;
+            border-color:var(--stroke-strong);
+            color:var(--muted);
+        }
+        #exitBtn:hover{
+            background:rgba(255,255,255,.05);
+            border-color:rgba(255,255,255,.25);
+            color:var(--text);
+        }
+        #saveExitBtn{
+            background:var(--accent);
+            border-color:var(--accent);
+            color:#fff;
+            font-weight:700;
+        }
+        #saveExitBtn:hover{
+            background:#6ba3ff;
+            border-color:#6ba3ff;
+        }
+
         /* Import in-progress state:
            Applied to both the Import label-button and the Refresh button
            while an upload is active. Prevents double-import and signals
@@ -1134,6 +1158,38 @@
             color:var(--text);
             line-height:1.6;
         }
+        .welcome-session-select{
+            width:100%;
+            padding:9px 12px;
+            background:var(--bg1);
+            border:1px solid var(--stroke-strong);
+            border-radius:8px;
+            color:var(--text);
+            font-size:13px;
+            cursor:pointer;
+            outline:none;
+        }
+        .welcome-session-select:focus{
+            border-color:var(--accent);
+        }
+        .welcome-session-row{
+            display:flex;
+            gap:8px;
+            align-items:center;
+        }
+        .welcome-session-input{
+            padding:9px 12px;
+            background:var(--bg1);
+            border:1px solid var(--stroke-strong);
+            border-radius:8px;
+            color:var(--text);
+            font-size:13px;
+            outline:none;
+            width:100%;
+        }
+        .welcome-session-input:focus{
+            border-color:var(--accent);
+        }
         .welcome-card hr{
             border:none;
             border-top:1px solid var(--stroke);
@@ -1420,17 +1476,59 @@
             font-size:11px; color:var(--muted2); margin-bottom:6px;
         }
         /* Retrieve Session overlay — reuses ec-overlay patterns */
-        .rs-overlay{
-            display:none;
+        /* ── Reference Guide slide-in drawer ──────────────────────
+           Fixed right-side panel. Sidebar stays fully visible and
+           interactive while the guide is open. */
+        .ref-guide-drawer{
             position:fixed;
-            inset:0;
-            z-index:100;
-            background:rgba(0,0,0,.55);
-            backdrop-filter:blur(6px);
-            overflow-y:auto;
-            padding:40px 20px;
+            top:0; right:0; bottom:0;
+            width:480px;
+            max-width:95vw;
+            background:linear-gradient(180deg, rgba(18,28,44,.99) 0%, rgba(14,22,36,.99) 100%);
+            border-left:1px solid var(--stroke-strong);
+            box-shadow:-12px 0 40px rgba(0,0,0,.45);
+            z-index:300;
+            display:flex;
+            flex-direction:column;
+            transform:translateX(100%);
+            transition:transform .22s cubic-bezier(.4,0,.2,1);
         }
-        .rs-overlay.visible{ display:flex; justify-content:center; align-items:flex-start; }
+        .ref-guide-drawer.open{ transform:translateX(0); }
+        .ref-guide-drawer-header{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            padding:16px 20px;
+            border-bottom:1px solid var(--stroke);
+            flex-shrink:0;
+        }
+        .ref-guide-drawer-header h2{
+            margin:0; font-size:16px; font-weight:700; color:var(--text);
+        }
+        .ref-guide-drawer-body{
+            flex:1;
+            overflow-y:auto;
+            padding:20px 24px 32px;
+            font-size:13px;
+            line-height:1.75;
+            color:var(--text);
+        }
+        .ref-guide-drawer-body h2{ font-size:17px; margin-top:0; }
+        .ref-guide-drawer-body h3{ font-size:14px; margin-top:20px; margin-bottom:6px; color:var(--text); }
+        .ref-guide-drawer-body hr{ border:none; border-top:1px solid var(--stroke); margin:18px 0; }
+        .ref-guide-drawer-body code{
+            background:rgba(255,255,255,.08); padding:1px 5px;
+            border-radius:4px; font-family:var(--mono); font-size:11.5px;
+        }
+        .ref-guide-drawer-body pre{
+            background:var(--bg1); padding:12px; border-radius:8px;
+            font-size:11.5px; overflow-x:auto; font-family:var(--mono);
+        }
+        .ref-guide-drawer-body ul,
+        .ref-guide-drawer-body ol{ padding-left:20px; margin:6px 0 12px; }
+        .ref-guide-drawer-body li{ margin-bottom:4px; }
+        .ref-guide-drawer-body table{ width:100%; border-collapse:collapse; font-size:12px; }
+        .ref-guide-drawer-body td{ padding:6px 8px; border-bottom:1px solid var(--stroke); vertical-align:top; }
 
         /* Step-through view */
         .ec-session-meta{
@@ -1543,20 +1641,6 @@
                 </section>
 
                 <section>
-                    <h3 class="section-title collapsed" id="sidebarSessionsTitle"><span class="section-toggle">&#9660;</span> Sessions</h3>
-                    <div class="section-body collapsed" id="sidebarSessionsBody">
-                    <div class="sidebar-btn-row">
-                        <button class="btn import-btn" id="retrieveSessionBtn">Retrieve Session</button>
-                        <button class="btn sidebar-btn-secondary" id="saveSessionBtn">Save</button>
-                    </div>
-                    <div class="sidebar-btn-row" style="margin-top:2px;">
-                        <button class="btn import-btn" id="snapshotsBtn">Retrieve Snapshot</button>
-                        <button class="btn sidebar-btn-secondary" id="saveSnapshotSidebarBtn">Save</button>
-                    </div>
-                    </div>
-                </section>
-
-                <section>
                     <h3 class="section-title collapsed" id="sidebarDataTitle"><span class="section-toggle">&#9660;</span> Data</h3>
                     <div class="section-body collapsed" id="sidebarDataBody">
                     <div class="dataset-list" id="datasetList"></div>
@@ -1622,7 +1706,7 @@
                 </section>
 
                 <div class="sidebar-btn-row" style="margin-top:12px; padding-top:10px; border-top:1px solid var(--bg2);">
-                    <button class="btn import-btn" id="exitBtn" style="background:rgba(239,107,107,.08); border-color:rgba(239,107,107,.20); color:var(--fg2);">Exit</button>
+                    <button class="btn import-btn" id="exitBtn">Exit</button>
                     <button class="btn sidebar-btn-secondary" id="saveExitBtn">Save</button>
                 </div>
             </aside>
@@ -1888,23 +1972,7 @@ LIMIT 100</textarea>
 
                 <section id="welcomeView" class="hidden">
                     <section class="panel welcome-shell">
-                        <!-- Resume prompt — shown when workspace.json has a dataset -->
-                        <div class="welcome-card" id="welcomeResumeCard" style="display:none;">
-                            <h2>Welcome back.</h2>
-                            <p class="subtitle" id="resumeSessionLabel">You were last working on:</p>
-                            <div id="resumeDetails" style="margin:12px 0; padding:12px; border-radius:8px; background:rgba(79,140,255,.08); border:1px solid rgba(79,140,255,.18); font-size:13px; line-height:1.6;">
-                                <strong id="resumeDatasetName"></strong><br>
-                                <span id="resumeDatasetMeta" style="color:var(--fg2);"></span><br>
-                                <span id="resumeRefMeta" style="color:var(--fg2);"></span>
-                            </div>
-                            <p style="margin-bottom:14px; color:var(--fg2);">Resume where you left off?</p>
-                            <div class="welcome-actions" style="display:flex; gap:10px;">
-                                <button class="btn primary" id="resumeWorkspaceBtn">Resume Session</button>
-                                <button class="btn" id="startFreshBtn">Start Fresh</button>
-                            </div>
-                        </div>
-
-                        <!-- Default welcome — shown on first launch or after Start Fresh -->
+                        <!-- Default welcome -->
                         <div class="welcome-card" id="welcomeDefaultCard">
                             <h2>Analytics Workbench</h2>
                             <p class="subtitle">Local-first AI analytics for analysts who work with sensitive data.</p>
@@ -1924,6 +1992,22 @@ LIMIT 100</textarea>
 
                             <hr>
 
+                            <h3>Resume Session</h3>
+                            <div class="welcome-session-row">
+                                <select id="welcomeSessionSelect" class="welcome-session-select" style="flex:1;"></select>
+                                <button class="btn primary" id="welcomeLoadSessionBtn">Open</button>
+                            </div>
+                            <p id="welcomeNoSessions" style="color:var(--muted); font-size:12px; margin:6px 0 0 0; display:none;">No saved sessions yet.</p>
+
+                            <h3 style="margin-top:20px;">Save Session</h3>
+                            <div class="welcome-session-row">
+                                <input type="text" id="welcomeSaveSessionName" placeholder="Session name..." class="welcome-session-input" style="flex:1;" />
+                                <button class="btn primary" id="welcomeSaveSessionBtn">Save</button>
+                            </div>
+                            <div id="welcomeSaveSessionMsg" style="font-size:12px; color:var(--accent); margin:6px 0 0 0; min-height:16px;"></div>
+
+                            <hr>
+
                             <h3>Ready to start?</h3>
                             <div class="welcome-actions">
                                 <a class="welcome-link" id="welcomeImportLink">&#8594; Import a dataset to begin your own analysis</a>
@@ -1933,9 +2017,85 @@ LIMIT 100</textarea>
                     </section>
                 </section>
 
-                <section id="referenceGuideView" class="hidden">
-                    <section class="panel welcome-shell" style="max-width:800px;">
-                        <div class="welcome-card" style="font-size:13px; line-height:1.7;">
+                <section id="referenceGuideView" class="hidden"><!-- content moved to #refGuideDrawer -->
+                </section>
+
+                <section id="sessionLogView" class="hidden">
+                    <section class="panel session-log-shell">
+                        <div class="session-log-title">Session Log</div>
+                        <div class="help-text" id="sessionLogHelp">Events from the current session appear here.</div>
+                        <div class="session-log-events" id="sessionLogEvents"></div>
+                    </section>
+                </section>
+            </section>
+        </main>
+    </div>
+
+    <!-- Example Cases overlay -->
+    <div class="ec-overlay" id="ecOverlay">
+        <div class="ec-panel">
+            <div class="ec-header">
+                <h2 id="ecTitle">Example Cases</h2>
+                <button class="ec-close" id="ecCloseBtn">&times;</button>
+            </div>
+            <div id="ecContent">
+                <div style="color:var(--muted); font-size:13px;">Loading...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generic prompt modal — replaces all native browser dialogs -->
+    <div class="save-session-overlay" id="awPromptOverlay">
+        <div class="save-session-panel">
+            <h3 id="awPromptTitle">Enter value</h3>
+            <p id="awPromptMessage" style="font-size:12px; color:var(--fg2); margin:0 0 10px 0; display:none;"></p>
+            <input type="text" id="awPromptInput" placeholder="" />
+            <div class="save-session-btns">
+                <button class="btn sidebar-btn-secondary" id="awPromptCancel">Cancel</button>
+                <button class="btn primary" id="awPromptConfirm">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generic confirm modal — replaces native confirm() -->
+    <div class="save-session-overlay" id="awConfirmOverlay">
+        <div class="save-session-panel">
+            <h3 id="awConfirmTitle">Confirm</h3>
+            <p id="awConfirmMessage" style="font-size:13px; color:var(--fg1); margin:0 0 14px 0;"></p>
+            <div class="save-session-btns">
+                <button class="btn sidebar-btn-secondary" id="awConfirmCancel">Cancel</button>
+                <button class="btn primary" id="awConfirmOk">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tutorial bottom panel -->
+    <div id="tutorialPanel" style="display:none">
+        <div class="tutorial-bar">
+            <span class="tutorial-step-info">
+                <span id="tutorialStepNum">Step 1 of 1</span>
+                <span id="tutorialStepType" class="ec-step-badge">EVENT</span>
+                <span id="tutorialStepDesc">Loading...</span>
+            </span>
+            <span class="tutorial-controls">
+                <button class="btn sidebar-btn-secondary" id="tutorialPrevBtn">&#9664; Prev</button>
+                <button class="btn sidebar-btn-secondary" id="tutorialNextBtn">Next &#9654;</button>
+                <button class="btn sidebar-btn-secondary" id="tutorialRunAllBtn">Run All</button>
+                <button class="btn sidebar-btn-secondary" id="tutorialCloseBtn">&#10005; Close</button>
+            </span>
+        </div>
+        <div id="tutorialStatus" class="tutorial-status"></div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <!-- Reference Guide slide-in drawer -->
+    <div id="refGuideDrawer" class="ref-guide-drawer">
+        <div class="ref-guide-drawer-header">
+            <h2>Reference Guide</h2>
+            <button id="refGuideCloseBtn" class="ec-close" title="Close">&times;</button>
+        </div>
+        <div class="ref-guide-drawer-body">
 
 <h2 style="margin-top:0;">Analytics Workbench Reference Guide</h2>
 
@@ -1949,14 +2109,13 @@ LIMIT 100</textarea>
 <li><strong>Query</strong> — ask questions in natural language or write SQL</li>
 <li><strong>Export</strong> — download results as Excel, TSV, or structured passport</li>
 </ol>
-<p><strong>Sidebar layout:</strong> The left sidebar has four collapsible sections. Click any section header to expand or collapse it.</p>
+<p><strong>Sidebar layout:</strong> The left sidebar has three collapsible sections. Click any section header to expand or collapse it.</p>
 <ul>
 <li><strong>GET STARTED</strong> — Welcome, Reference Guide, Example Cases</li>
-<li><strong>SESSIONS</strong> — Retrieve/Save sessions and snapshots</li>
 <li><strong>DATA</strong> — Imported datasets, reference tables, library (auto-expands on first import)</li>
 <li><strong>WORKSPACE</strong> — Insights, Query, Saved Queries (auto-expands on first query)</li>
 </ul>
-<p>Below the sidebar sections: <strong>Exit</strong> (close immediately) and <strong>Save</strong> (save session + snapshot, then close).</p>
+<p>Below the sidebar sections: <strong>Exit</strong> (close immediately) and <strong>Save</strong> (navigate to Welcome to save the current session).</p>
 
 <hr>
 <h3>Importing Data</h3>
@@ -1983,7 +2142,7 @@ LIMIT 100</textarea>
 
 <hr>
 <h3>Query</h3>
-<p><strong>SQL Editor:</strong> Write DuckDB SQL directly. Always use <code>dataset</code> as the table name. Do not end queries with a semicolon. The <strong>✕ Clear</strong> button inside the editor resets it to the default <code>SELECT * FROM dataset LIMIT 100</code> template.</p>
+<p><strong>SQL Editor:</strong> Write DuckDB SQL directly. Always use <code>dataset</code> as the table name. Do not end queries with a semicolon. The <strong>&#10005; Clear</strong> button inside the editor resets it to the default <code>SELECT * FROM dataset LIMIT 100</code> template.</p>
 <p><strong>Natural Language:</strong> Type a question in the prompt box and click <strong>Generate SQL</strong>. AI generates DuckDB-compatible SQL from your question.</p>
 <p><strong>Suggestions:</strong> Click the <strong>Suggestions</strong> button for AI-generated analytical questions based on your dataset's schema.</p>
 <p><strong>Saving Queries:</strong> Save frequently-used queries via the Saved Queries panel in Workspace.</p>
@@ -2001,7 +2160,7 @@ LIMIT 100</textarea>
 <p><strong>Loading from the Library:</strong> Click <strong>Library</strong> in the Data section to browse pre-built reference tables. Click a table name to load it.</p>
 <p><strong>Importing your own:</strong> Click <strong>+ Reference Table</strong> to import a CSV, TSV, or Excel file as a reference table. One reference table active at a time.</p>
 <p><strong>Using in SQL:</strong> Reference tables are available as <code>reference</code> in your queries:</p>
-<pre style="background:var(--bg1); padding:10px; border-radius:6px; font-size:12px; overflow-x:auto;">-- Exclude IRA drugs via LEFT JOIN
+<pre>-- Exclude IRA drugs via LEFT JOIN
 SELECT d.Brnd_Name, d.Tot_Spndng_2023
 FROM dataset d
 LEFT JOIN reference r ON d.Brnd_Name = r.drug_name
@@ -2037,15 +2196,13 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 
 <hr>
 <h3>Sessions</h3>
-<p>The SESSIONS section in the sidebar provides four buttons in two rows:</p>
+<p>Session management lives on the <strong>Welcome</strong> card (accessible via Welcome in the GET STARTED section).</p>
 <ul>
-<li><strong>Retrieve Session + Save</strong> — browse and restore named sessions, or save the current session with a name. Session files are saved to <code>data/sessions/</code>. After saving, the app closes automatically.</li>
-<li><strong>Retrieve Snapshot + Save</strong> — browse and restore workspace snapshots, or save the current workspace state. Snapshot files are saved to <code>data/snapshots/</code> using your chosen name.</li>
+<li><strong>Resume Session</strong> — select a saved session from the dropdown and click Open to restore dataset, reference table, and last query.</li>
+<li><strong>Save Session</strong> — enter a name and click Save to write the current session to <code>data/sessions/</code>.</li>
 </ul>
-<p><strong>Sessions vs. Snapshots:</strong> A session captures the full event log (every query, import, export). A snapshot captures the current workspace state (which dataset is loaded, which reference table, last SQL query). Use sessions for audit trails. Use snapshots for quick resume.</p>
-<p><strong>Auto-snapshot:</strong> AW automatically saves workspace state when you exit. On next launch, you'll see a resume prompt offering to restore where you left off.</p>
-<p><strong>Exit &amp; Save:</strong> The Exit button at the bottom of the sidebar closes AW immediately (auto-snapshot written). The Save button next to it prompts for a name and saves both session and snapshot before closing.</p>
-<p><strong>Refresh (Data section):</strong> Clears the active dataset and reference table from the workspace UI. Files on disk are not deleted — you can always restore them via Retrieve Session or Retrieve Snapshot.</p>
+<p><strong>Save button (sidebar footer):</strong> Clicking Save navigates to the Welcome card and focuses the session name field.</p>
+<p><strong>Refresh (Data section):</strong> Clears the active dataset and reference table from the workspace UI. Files on disk are not deleted — you can always restore them via Resume Session on the Welcome card.</p>
 <p><strong>Session Log:</strong> AW automatically records every action — imports, queries, reference loads, exports — with timestamps and details. This happens silently in the background.</p>
 
 <hr>
@@ -2063,7 +2220,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 
 <hr>
 <h3>Troubleshooting</h3>
-<table style="width:100%; font-size:12px; border-collapse:collapse;">
+<table>
 <tr style="border-bottom:1px solid var(--bg2);"><td style="padding:6px; font-weight:600; white-space:nowrap;">"Table does not exist"</td><td style="padding:6px;">Reference table not loaded. Click <strong>Library</strong> to load it.</td></tr>
 <tr style="border-bottom:1px solid var(--bg2);"><td style="padding:6px; font-weight:600; white-space:nowrap;">"SQL must reference the selected dataset"</td><td style="padding:6px;">Use <code>FROM dataset</code> in your query, not the raw filename.</td></tr>
 <tr style="border-bottom:1px solid var(--bg2);"><td style="padding:6px; font-weight:600; white-space:nowrap;">"Parser error"</td><td style="padding:6px;">Check DuckDB syntax. Remove trailing semicolons.</td></tr>
@@ -2072,133 +2229,8 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 <tr><td style="padding:6px; font-weight:600; white-space:nowrap;">Wrong dataset after restore</td><td style="padding:6px;">The saved dataset may have been deleted. Re-import it and try again.</td></tr>
 </table>
 
-                        </div>
-                    </section>
-                </section>
-
-                <section id="sessionLogView" class="hidden">
-                    <section class="panel session-log-shell">
-                        <div class="session-log-title">Session Log</div>
-                        <div class="help-text" id="sessionLogHelp">Events from the current session appear here.</div>
-                        <div class="session-log-events" id="sessionLogEvents"></div>
-                    </section>
-                </section>
-            </section>
-        </main>
-    </div>
-
-    <!-- Example Cases overlay -->
-    <div class="ec-overlay" id="ecOverlay">
-        <div class="ec-panel">
-            <div class="ec-header">
-                <h2 id="ecTitle">Example Cases</h2>
-                <button class="ec-close" id="ecCloseBtn">&times;</button>
-            </div>
-            <div id="ecContent">
-                <div style="color:var(--muted); font-size:13px;">Loading...</div>
-            </div>
         </div>
     </div>
-
-    <!-- Save Session modal -->
-    <div class="save-session-overlay" id="saveSessionOverlay">
-        <div class="save-session-panel">
-            <h3>Save Session</h3>
-            <input type="text" id="saveSessionName" placeholder="Session name..." />
-            <textarea id="saveSessionDesc" placeholder="Brief description..."></textarea>
-            <div class="save-session-btns">
-                <button class="btn sidebar-btn-secondary" id="saveSessionCancel">Cancel</button>
-                <button class="btn primary" id="saveSessionConfirm">Save to Library</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Generic prompt modal — replaces all native browser dialogs -->
-    <div class="save-session-overlay" id="awPromptOverlay">
-        <div class="save-session-panel">
-            <h3 id="awPromptTitle">Enter value</h3>
-            <p id="awPromptMessage" style="font-size:12px; color:var(--fg2); margin:0 0 10px 0; display:none;"></p>
-            <input type="text" id="awPromptInput" placeholder="" />
-            <div class="save-session-btns">
-                <button class="btn sidebar-btn-secondary" id="awPromptCancel">Cancel</button>
-                <button class="btn primary" id="awPromptConfirm">OK</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Generic confirm modal — replaces native confirm() -->
-    <div class="save-session-overlay" id="awConfirmOverlay">
-        <div class="save-session-panel">
-            <h3 id="awConfirmTitle">Confirm</h3>
-            <p id="awConfirmMessage" style="font-size:13px; color:var(--fg1); margin:0 0 14px 0;"></p>
-            <div class="save-session-btns">
-                <button class="btn sidebar-btn-secondary" id="awConfirmCancel">Cancel</button>
-                <button class="btn primary" id="awConfirmOk">OK</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Retrieve Session overlay -->
-    <div class="rs-overlay" id="rsOverlay">
-        <div class="ec-panel">
-            <div class="ec-header">
-                <h2 id="rsTitle">Retrieve Session</h2>
-                <button class="ec-close" id="rsCloseBtn">&times;</button>
-            </div>
-            <div id="rsContent">
-                <div style="color:var(--muted); font-size:13px;">Loading...</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Snapshots overlay -->
-    <div class="rs-overlay" id="snapshotsOverlay">
-        <div class="ec-panel">
-            <div class="ec-header">
-                <h2>Snapshots</h2>
-                <button class="ec-close" id="snapshotsCloseBtn">&times;</button>
-            </div>
-            <div id="snapshotsContent">
-                <div style="color:var(--muted); font-size:13px;">Loading...</div>
-            </div>
-            <div style="padding:10px 16px; border-top:1px solid var(--bg2);">
-                <button class="btn primary" id="saveSnapshotBtn" style="width:100%;">Save New Snapshot...</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Save Snapshot dialog -->
-    <div class="save-session-overlay" id="saveSnapshotOverlay">
-        <div class="save-session-panel">
-            <h3>Save Snapshot</h3>
-            <input type="text" id="saveSnapshotName" placeholder="Snapshot name..." />
-            <textarea id="saveSnapshotDesc" placeholder="Brief description (optional)..."></textarea>
-            <div class="save-session-btns">
-                <button class="btn sidebar-btn-secondary" id="saveSnapshotCancel">Cancel</button>
-                <button class="btn primary" id="saveSnapshotConfirm">Save Snapshot</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Tutorial bottom panel -->
-    <div id="tutorialPanel" style="display:none">
-        <div class="tutorial-bar">
-            <span class="tutorial-step-info">
-                <span id="tutorialStepNum">Step 1 of 1</span>
-                <span id="tutorialStepType" class="ec-step-badge">EVENT</span>
-                <span id="tutorialStepDesc">Loading...</span>
-            </span>
-            <span class="tutorial-controls">
-                <button class="btn sidebar-btn-secondary" id="tutorialPrevBtn">&#9664; Prev</button>
-                <button class="btn sidebar-btn-secondary" id="tutorialNextBtn">Next &#9654;</button>
-                <button class="btn sidebar-btn-secondary" id="tutorialRunAllBtn">Run All</button>
-                <button class="btn sidebar-btn-secondary" id="tutorialCloseBtn">&#10005; Close</button>
-            </span>
-        </div>
-        <div id="tutorialStatus" class="tutorial-status"></div>
-    </div>
-
-    <div class="toast" id="toast"></div>
 
     <script>
         const $ = (id) => document.getElementById(id);
@@ -2331,13 +2363,14 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             $("savedQueriesView").classList.toggle("hidden", viewName !== "saved");
             $("insightsView").classList.toggle("hidden", viewName !== "insights");
             $("welcomeView").classList.toggle("hidden", viewName !== "welcome");
-            $("referenceGuideView").classList.toggle("hidden", viewName !== "referenceGuide");
             $("sessionLogView").classList.toggle("hidden", viewName !== "sessionLog");
 
             if (viewName === "query") setActiveNav("navQuery");
             if (viewName === "saved") setActiveNav("navSavedQueries");
-            if (viewName === "welcome") setActiveNav("navWelcome");
-            if (viewName === "referenceGuide") setActiveNav("navReferenceGuide");
+            if (viewName === "welcome") {
+                setActiveNav("navWelcome");
+                loadWelcomeSessions();
+            }
             if (viewName === "sessionLog") setActiveNav(null);
             if (viewName === "insights") {
                 setActiveNav("navInsights");
@@ -2708,10 +2741,9 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 toast(`Imported: ${returnedName}`);
                 _onDatasetImported();
 
-                // Hide Welcome view after first import — switch to Insights
-                if (currentView === "welcome") {
-                    switchView("insights");
-                }
+                // Go to Query on import so the analyst can start working immediately
+                switchView("query");
+
                 // AI consent auto-enabled — no user prompt needed.
                 // AI only sees column names and statistics, never raw data.
                 try {
@@ -2721,12 +2753,6 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                         body: JSON.stringify({ ai_consent: true })
                     });
                 } catch (_) {}
-
-
-                // If consent granted and on Insights view, auto-fetch
-                if (aiConsent && currentView === "insights") {
-                    fetchInsights();
-                }
 
             } catch (e) {
                 clearStatus();
@@ -3017,86 +3043,6 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             }
         }
 
-        async function toggleRetrieveSession() {
-            const overlay = $("rsOverlay");
-            if (overlay.classList.contains("visible")) {
-                overlay.classList.remove("visible");
-                return;
-            }
-            overlay.classList.add("visible");
-            $("rsContent").innerHTML = '<div style="color:var(--muted); font-size:13px;">Loading...</div>';
-
-            try {
-                const data = await apiJson("/api/sessions/saved");
-                const sessions = data.sessions || [];
-                if (sessions.length === 0) {
-                    $("rsContent").innerHTML = '<div style="color:var(--muted); font-size:13px;">No saved sessions found.</div>';
-                    return;
-                }
-                const container = document.createElement("div");
-                container.className = "ec-file-list";
-                for (const s of sessions) {
-                    const item = document.createElement("div");
-                    item.className = "ec-file-item";
-                    item.style.flexDirection = "column";
-                    item.style.alignItems = "stretch";
-
-                    const header = document.createElement("div");
-                    header.className = "ec-case-header";
-                    const nameEl = document.createElement("strong");
-                    nameEl.textContent = s.name || "Untitled";
-                    header.appendChild(nameEl);
-                    item.appendChild(header);
-
-                    if (s.description) {
-                        const desc = document.createElement("div");
-                        desc.className = "ec-case-desc";
-                        desc.textContent = s.description;
-                        item.appendChild(desc);
-                    }
-
-                    const metaParts = [];
-                    if (s.started_at) metaParts.push(_ecFormatDate(s.started_at));
-                    if (s.event_count !== undefined) metaParts.push(s.event_count + " events");
-                    if (metaParts.length) {
-                        const metaEl = document.createElement("div");
-                        metaEl.className = "ec-case-meta";
-                        metaEl.textContent = metaParts.join(" \u2022 ");
-                        item.appendChild(metaEl);
-                    }
-
-                    const btnGroup = document.createElement("div");
-                    btnGroup.className = "ec-action-btns";
-
-                    const resumeBtn = document.createElement("button");
-                    resumeBtn.className = "ec-action-btn ec-resume-btn";
-                    resumeBtn.textContent = "Resume";
-                    resumeBtn.addEventListener("click", () => {
-                        $("rsOverlay").classList.remove("visible");
-                        resumeSession(s.filename);
-                    });
-
-                    const tutorialBtn = document.createElement("button");
-                    tutorialBtn.className = "ec-action-btn ec-tutorial-btn";
-                    tutorialBtn.textContent = "Tutorial";
-                    tutorialBtn.addEventListener("click", () => {
-                        $("rsOverlay").classList.remove("visible");
-                        openTutorial(s.filename);
-                    });
-
-                    btnGroup.appendChild(resumeBtn);
-                    btnGroup.appendChild(tutorialBtn);
-                    item.appendChild(btnGroup);
-
-                    container.appendChild(item);
-                }
-                $("rsContent").innerHTML = "";
-                $("rsContent").appendChild(container);
-            } catch (e) {
-                $("rsContent").innerHTML = '<div style="color:var(--danger); font-size:13px;">Failed to load saved sessions.</div>';
-            }
-        }
-
         async function openSession(filename) {
             _ecCurrentFile = filename;
             $("ecTitle").textContent = "Session Details";
@@ -3281,8 +3227,6 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 
                 // Close all overlays
                 closeExampleCases();
-                $("rsOverlay").classList.remove("visible");
-                $("snapshotsOverlay").classList.remove("visible");
 
                 if (result.status === "dataset_missing") {
                     toast(result.message, 6000);
@@ -3304,7 +3248,6 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 // SQL re-run attempt so that datasets are visible even if SQL fails
                 _expandSidebarSection("sidebarDataTitle", "sidebarDataBody");
                 _expandSidebarSection("sidebarWorkspaceTitle", "sidebarWorkspaceBody");
-                _collapseSidebarSection("sidebarSessionsTitle", "sidebarSessionsBody");
 
                 // Update reference indicator
                 if (result.reference && result.reference.loaded) {
@@ -3447,204 +3390,54 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         }
 
         // ---------------------------------------------------------------
-        // Save Session
+        // Welcome card session management
         // ---------------------------------------------------------------
-        function openSaveSessionDialog() {
-            $("saveSessionName").value = "";
-            $("saveSessionDesc").value = "";
-            $("saveSessionOverlay").classList.add("visible");
-        }
-
-        function closeSaveSessionDialog() {
-            $("saveSessionOverlay").classList.remove("visible");
-        }
-
-        async function saveSession() {
-            const name = $("saveSessionName").value.trim();
-            const description = $("saveSessionDesc").value.trim();
-
+        async function loadWelcomeSessions() {
             try {
-                $("saveSessionConfirm").disabled = true;
-                $("saveSessionConfirm").textContent = "Saving...";
-
-                // Set name/description on current session
-                if (name || description) {
-                    await apiJson("/api/session/name", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ name, description }),
-                    });
+                const data = await apiJson("/api/sessions/saved");
+                const sessions = data.sessions || [];
+                const sel = $("welcomeSessionSelect");
+                if (sessions.length === 0) {
+                    sel.innerHTML = '<option value="">— no sessions —</option>';
+                    $("welcomeLoadSessionBtn").disabled = true;
+                    $("welcomeNoSessions").style.display = "";
+                } else {
+                    sel.innerHTML = sessions.map(s => {
+                        const date = s.started_at ? " (" + new Date(s.started_at).toLocaleDateString() + ")" : "";
+                        return `<option value="${s.filename}">${s.name}${date}</option>`;
+                    }).join("");
+                    $("welcomeLoadSessionBtn").disabled = false;
+                    $("welcomeNoSessions").style.display = "none";
                 }
-
-                // Export session to disk — POST ensures a fresh write
-                const exportResult = await apiJson("/api/session/export", {
-                    method: "POST",
-                });
-
-                closeSaveSessionDialog();
-
-                const savedPath = exportResult.exported_to || "";
-                const savedName = savedPath ? savedPath.split(/[\\/]/).pop() : "session";
-                toast(`Session saved: ${savedName}`);
-            } catch (e) {
-                toast("Failed to save session: " + (e.message || "Unknown error"), 6000);
-            } finally {
-                $("saveSessionConfirm").disabled = false;
-                $("saveSessionConfirm").textContent = "Save to Library";
-            }
+            } catch (_) {}
         }
 
-        // ---------------------------------------------------------------
-        // Named Snapshots
-        // ---------------------------------------------------------------
-        async function toggleSnapshots() {
-            const overlay = $("snapshotsOverlay");
-            if (overlay.classList.contains("visible")) {
-                overlay.classList.remove("visible");
+        async function welcomeSaveSession() {
+            const name = $("welcomeSaveSessionName").value.trim();
+            if (!name) {
+                $("welcomeSaveSessionMsg").textContent = "Enter a session name.";
+                $("welcomeSaveSessionMsg").style.color = "var(--error, #e06c75)";
+                $("welcomeSaveSessionName").focus();
                 return;
             }
-            overlay.classList.add("visible");
-            await _loadSnapshotsList();
-        }
-
-        async function _loadSnapshotsList() {
-            $("snapshotsContent").innerHTML = '<div style="color:var(--muted); font-size:13px;">Loading...</div>';
             try {
-                const data = await apiJson("/api/snapshots");
-                const snapshots = data.snapshots || [];
-                if (snapshots.length === 0) {
-                    $("snapshotsContent").innerHTML = '<div style="color:var(--muted); font-size:13px;">No saved snapshots. Click below to save one.</div>';
-                    return;
-                }
-                const container = document.createElement("div");
-                container.className = "ec-file-list";
-                for (const s of snapshots) {
-                    const item = document.createElement("div");
-                    item.className = "ec-file-item";
-                    item.style.cssText = "flex-direction:column; align-items:stretch;";
-
-                    const nameEl = document.createElement("strong");
-                    nameEl.textContent = s.name || "Unnamed snapshot";
-                    item.appendChild(nameEl);
-
-                    const meta = document.createElement("div");
-                    meta.style.cssText = "font-size:0.85em; color:var(--fg2); margin:4px 0;";
-                    const parts = [];
-                    if (s.dataset && s.dataset.name) parts.push("Dataset: " + s.dataset.name);
-                    const refCount = (s.references || []).length;
-                    if (refCount) parts.push(refCount + " reference" + (refCount > 1 ? "s" : ""));
-                    if (s.saved_at) {
-                        try { parts.push(new Date(s.saved_at).toLocaleDateString()); } catch(_) {}
-                    }
-                    meta.textContent = parts.join(" \u2022 ");
-                    item.appendChild(meta);
-
-                    if (s.description) {
-                        const desc = document.createElement("div");
-                        desc.className = "ec-case-desc";
-                        desc.textContent = s.description;
-                        item.appendChild(desc);
-                    }
-
-                    const btns = document.createElement("div");
-                    btns.className = "ec-action-btns";
-                    const restoreBtn = document.createElement("button");
-                    restoreBtn.className = "ec-action-btn ec-resume-btn";
-                    restoreBtn.textContent = "Restore";
-                    restoreBtn.addEventListener("click", () => _restoreSnapshot(s._filename));
-                    const delBtn = document.createElement("button");
-                    delBtn.className = "ec-action-btn ec-runall-btn";
-                    delBtn.textContent = "Delete";
-                    delBtn.addEventListener("click", async () => {
-                        if (!(await awConfirm("Delete Snapshot", "Delete snapshot '" + (s.name || "") + "'?"))) return;
-                        try {
-                            await apiJson("/api/snapshots/" + encodeURIComponent(s._filename), { method: "DELETE" });
-                            await _loadSnapshotsList();
-                            toast("Snapshot deleted.");
-                        } catch (e) { toast("Delete failed: " + e.message); }
-                    });
-                    btns.appendChild(restoreBtn);
-                    btns.appendChild(delBtn);
-                    item.appendChild(btns);
-                    container.appendChild(item);
-                }
-                $("snapshotsContent").innerHTML = "";
-                $("snapshotsContent").appendChild(container);
-            } catch (e) {
-                $("snapshotsContent").innerHTML = '<div style="color:var(--danger);">Failed to load snapshots.</div>';
-            }
-        }
-
-        async function _restoreSnapshot(filename) {
-            try {
-                const result = await apiJson("/api/snapshots/" + encodeURIComponent(filename) + "/restore", { method: "POST" });
-                $("snapshotsOverlay").classList.remove("visible");
-
-                // Set selectedDataset BEFORE loadDatasets() so it loads the
-                // correct dataset's metadata instead of auto-selecting the first one
-                if (result.dataset) selectedDataset = result.dataset;
-                await loadDatasets();
-                _filterDatasetsToSession(result.dataset);
-
-                // Expand Data section immediately after load so datasets are always visible
-                _expandSidebarSection("sidebarDataTitle", "sidebarDataBody");
-                _expandSidebarSection("sidebarWorkspaceTitle", "sidebarWorkspaceBody");
-                _collapseSidebarSection("sidebarSessionsTitle", "sidebarSessionsBody");
-
-                if (result.references && result.references.length > 0) {
-                    const ref = result.references[0];
-                    currentReference = ref.name;
-                    const colCount = ref.column_count || "?";
-                    $("referenceName").textContent = ref.row_count
-                        ? `${ref.name} (${num(ref.row_count)} rows, ${colCount} cols)` : ref.name;
-                    $("referenceIndicator").style.display = "block";
-                }
-                $("sqlEditor").value = result.last_query || "SELECT *\nFROM dataset\nLIMIT 100";
-                for (const w of (result.warnings || [])) toast(w, 6000);
-                switchView(result.last_tab === "insights" ? "insights" : "query");
-                toast("Snapshot restored: " + (result.name || ""));
-            } catch (e) {
-                toast("Restore failed: " + (e.message || ""), 6000);
-            }
-        }
-
-        function openSaveSnapshotDialog() {
-            $("saveSnapshotName").value = "";
-            $("saveSnapshotDesc").value = "";
-            $("saveSnapshotOverlay").classList.add("visible");
-        }
-
-        async function saveSnapshot() {
-            const name = $("saveSnapshotName").value.trim();
-            if (!name) { toast("Enter a snapshot name."); return; }
-            const description = $("saveSnapshotDesc").value.trim();
-
-            try {
-                $("saveSnapshotConfirm").disabled = true;
-                $("saveSnapshotConfirm").textContent = "Saving...";
-
-                const refList = currentReference ? [{ name: currentReference }] : [];
-                await apiJson("/api/snapshots", {
+                $("welcomeSaveSessionBtn").disabled = true;
+                await apiJson("/api/session/name", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        name,
-                        description,
-                        dataset: selectedDataset || null,
-                        references: refList.length ? refList : null,
-                        last_query: $("sqlEditor").value.trim(),
-                        last_tab: document.querySelector(".nav-item.active")?.id === "navInsights" ? "insights" : "query",
-                    }),
+                    body: JSON.stringify({ name })
                 });
-
-                $("saveSnapshotOverlay").classList.remove("visible");
-                toast("Snapshot saved: " + name);
-                await _loadSnapshotsList();
+                await apiJson("/api/session/export");
+                $("welcomeSaveSessionMsg").textContent = "Session saved: " + name;
+                $("welcomeSaveSessionMsg").style.color = "var(--accent)";
+                $("welcomeSaveSessionName").value = "";
+                await loadWelcomeSessions();
             } catch (e) {
-                toast("Snapshot save failed: " + (e.message || ""), 6000);
+                $("welcomeSaveSessionMsg").textContent = "Save failed.";
+                $("welcomeSaveSessionMsg").style.color = "var(--error, #e06c75)";
             } finally {
-                $("saveSnapshotConfirm").disabled = false;
-                $("saveSnapshotConfirm").textContent = "Save Snapshot";
+                $("welcomeSaveSessionBtn").disabled = false;
+                setTimeout(() => { $("welcomeSaveSessionMsg").textContent = ""; }, 3000);
             }
         }
 
@@ -5282,48 +5075,8 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         }
 
         async function saveAndExit() {
-            // Single prompt — saves both session and snapshot with the same name
-            const saveName = await awPrompt(
-                "Save & Exit",
-                "Name for session and snapshot...",
-                "",
-                "Enter a name to save your session and workspace snapshot before exiting. Leave blank to exit without saving."
-            );
-
-            if (saveName && saveName.trim()) {
-                const name = saveName.trim();
-                // Save session
-                try {
-                    await apiJson("/api/session/name", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ name, description: "" }),
-                    });
-                    await apiJson("/api/session/export", { method: "POST" });
-                } catch (_) {}
-
-                // Save snapshot with same name
-                try {
-                    const refList = currentReference ? [{ name: currentReference }] : [];
-                    await apiJson("/api/snapshots", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            name,
-                            description: "",
-                            dataset: selectedDataset || null,
-                            references: refList.length ? refList : null,
-                            last_query: $("sqlEditor").value.trim(),
-                            last_tab: _currentTab(),
-                        }),
-                    });
-                } catch (_) {}
-
-                toast("Saved: " + name);
-            }
-
-            // Auto-snapshot + shutdown
-            await _writeAutoSnapshotAndShutdown();
+            switchView("welcome");
+            setTimeout(() => $("welcomeSaveSessionName").focus(), 100);
         }
 
         $("navInsights").addEventListener("click", () => switchView("insights"));
@@ -5355,11 +5108,17 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         $("clearReferenceBtn").addEventListener("click", clearReference);
         $("refLibraryBtn").addEventListener("click", toggleRefLibrary);
         $("navWelcome").addEventListener("click", () => switchView("welcome"));
-        $("navReferenceGuide").addEventListener("click", () => switchView("referenceGuide"));
+        $("navReferenceGuide").addEventListener("click", () => {
+            const drawer = $("refGuideDrawer");
+            const isOpen = drawer.classList.contains("open");
+            drawer.classList.toggle("open", !isOpen);
+            $("navReferenceGuide").classList.toggle("active", !isOpen);
+        });
+        $("refGuideCloseBtn").addEventListener("click", () => {
+            $("refGuideDrawer").classList.remove("open");
+            $("navReferenceGuide").classList.remove("active");
+        });
         $("exampleCasesBtn").addEventListener("click", toggleExampleCases);
-        $("saveSessionBtn").addEventListener("click", openSaveSessionDialog);
-        $("saveSessionCancel").addEventListener("click", closeSaveSessionDialog);
-        $("saveSessionConfirm").addEventListener("click", saveSession);
         // navSessionLog removed — session log accessible via Retrieve Session
         $("tutorialPrevBtn").addEventListener("click", tutorialPrev);
         $("tutorialNextBtn").addEventListener("click", tutorialNext);
@@ -5371,13 +5130,6 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         });
         $("welcomeExampleLink").addEventListener("click", () => toggleExampleCases());
         $("ecCloseBtn").addEventListener("click", closeExampleCases);
-        $("retrieveSessionBtn").addEventListener("click", toggleRetrieveSession);
-        $("rsCloseBtn").addEventListener("click", () => $("rsOverlay").classList.remove("visible"));
-        $("snapshotsBtn").addEventListener("click", toggleSnapshots);
-        $("snapshotsCloseBtn").addEventListener("click", () => $("snapshotsOverlay").classList.remove("visible"));
-        $("saveSnapshotBtn").addEventListener("click", openSaveSnapshotDialog);
-        $("saveSnapshotCancel").addEventListener("click", () => $("saveSnapshotOverlay").classList.remove("visible"));
-        $("saveSnapshotConfirm").addEventListener("click", saveSnapshot);
 
         $("infoBtn").addEventListener("click", toggleInfoPopover);
         $("suggestionsBtn").addEventListener("click", () => fetchSuggestions());
@@ -5408,7 +5160,6 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         $("refreshQueriesBtn").addEventListener("click", loadSavedQueries);
         $("exitBtn").addEventListener("click", exitApp);
         $("saveExitBtn").addEventListener("click", saveAndExit);
-        $("saveSnapshotSidebarBtn").addEventListener("click", openSaveSnapshotDialog);
 
         // Refresh Datasets button.
         // Clears the current workspace UI without deleting any files from disk.
@@ -5434,75 +5185,11 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             }
         });
 
-        // ---------------------------------------------------------------
-        // Workspace restore handlers
-        // ---------------------------------------------------------------
-        async function _restoreWorkspace() {
-            try {
-                $("resumeWorkspaceBtn").disabled = true;
-                $("resumeWorkspaceBtn").textContent = "Restoring...";
-
-                const result = await apiJson("/api/workspace/restore", { method: "POST" });
-
-                // Set selectedDataset BEFORE loadDatasets() so it loads the
-                // correct dataset's metadata instead of auto-selecting the first one
-                if (result.dataset) selectedDataset = result.dataset;
-                await loadDatasets();
-                _filterDatasetsToSession(result.dataset);
-
-                // Expand Data and Workspace sections so restored state is visible
-                _expandSidebarSection("sidebarDataTitle", "sidebarDataBody");
-                _expandSidebarSection("sidebarWorkspaceTitle", "sidebarWorkspaceBody");
-                _collapseSidebarSection("sidebarSessionsTitle", "sidebarSessionsBody");
-
-                if (result.dataset && !datasets.some(d => d.name === result.dataset)) {
-                    toast("Dataset '" + result.dataset + "' not found — re-import it to continue.", 6000);
-                }
-
-                // Load references
-                if (result.references && result.references.length > 0) {
-                    const ref = result.references[0];
-                    currentReference = ref.name;
-                    const colCount = ref.column_count || "?";
-                    const refDisplay = ref.row_count
-                        ? `${ref.name} (${num(ref.row_count)} rows, ${colCount} cols)`
-                        : ref.name;
-                    $("referenceName").textContent = refDisplay;
-                    $("referenceIndicator").style.display = "block";
-                }
-
-                // Restore last query, or reset to default template if none saved
-                $("sqlEditor").value = result.last_query || "SELECT *\nFROM dataset\nLIMIT 100";
-
-                // Show warnings
-                for (const w of (result.warnings || [])) {
-                    toast(w, 6000);
-                }
-
-                // Delete workspace.json — will be rewritten on next shutdown
-                try { await apiJson("/api/workspace", { method: "DELETE" }); } catch (_) {}
-
-                // Switch to saved tab
-                switchView(result.last_tab === "insights" ? "insights" : "query");
-                toast("Session restored.");
-            } catch (e) {
-                toast("Restore failed: " + (e.message || "Unknown error") + ". Starting fresh.", 6000);
-                try { await apiJson("/api/workspace", { method: "DELETE" }); } catch (_) {}
-                switchView("welcome");
-            } finally {
-                $("resumeWorkspaceBtn").disabled = false;
-                $("resumeWorkspaceBtn").textContent = "Resume Session";
-            }
-        }
-
-        async function _startFresh() {
-            try { await apiJson("/api/workspace", { method: "DELETE" }); } catch (_) {}
-            $("welcomeResumeCard").style.display = "none";
-            $("welcomeDefaultCard").style.display = "";
-        }
-
-        $("resumeWorkspaceBtn").addEventListener("click", _restoreWorkspace);
-        $("startFreshBtn").addEventListener("click", _startFresh);
+        $("welcomeLoadSessionBtn").addEventListener("click", () => {
+            const filename = $("welcomeSessionSelect").value;
+            if (filename) resumeSession(filename);
+        });
+        $("welcomeSaveSessionBtn").addEventListener("click", welcomeSaveSession);
 
         // ---------------------------------------------------------------
         // Sidebar collapsible sections
@@ -5525,11 +5212,11 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         $("sidebarGetStartedTitle").addEventListener("click", () => _toggleSidebarSection("sidebarGetStartedTitle", "sidebarGetStartedBody"));
         $("sidebarWorkspaceTitle").addEventListener("click", () => _toggleSidebarSection("sidebarWorkspaceTitle", "sidebarWorkspaceBody"));
         $("sidebarDataTitle").addEventListener("click", () => _toggleSidebarSection("sidebarDataTitle", "sidebarDataBody"));
-        $("sidebarSessionsTitle").addEventListener("click", () => _toggleSidebarSection("sidebarSessionsTitle", "sidebarSessionsBody"));
 
         // Smart auto-expand: called after dataset import
         function _onDatasetImported() {
             _expandSidebarSection("sidebarDataTitle", "sidebarDataBody");
+            _expandSidebarSection("sidebarWorkspaceTitle", "sidebarWorkspaceBody");
             _collapseSidebarSection("sidebarGetStartedTitle", "sidebarGetStartedBody");
         }
 
@@ -5551,30 +5238,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             updateSelectedDatasetSummary();
             setActiveTab("table");
 
-            // Check for workspace snapshot — offer resume if present
-            try {
-                const ws = await apiJson("/api/workspace");
-                if (ws.workspace && ws.workspace.dataset && ws.workspace.dataset.name
-                    && !ws.workspace.dataset.file_missing) {
-                    // Show resume prompt
-                    const ds = ws.workspace.dataset;
-                    $("resumeDatasetName").textContent = ws.workspace.session_name || ds.name;
-                    const metaParts = ["Dataset: " + ds.name];
-                    if (ds.row_count) metaParts[0] += " \u2022 " + num(ds.row_count) + " rows";
-                    $("resumeDatasetMeta").textContent = metaParts[0];
-                    const refs = ws.workspace.references || [];
-                    $("resumeRefMeta").textContent = refs.length
-                        ? "Reference tables: " + refs.map(r => r.name).join(", ")
-                        : "";
-                    $("welcomeResumeCard").style.display = "";
-                    $("welcomeDefaultCard").style.display = "none";
-                    switchView("welcome");
-                } else {
-                    switchView("welcome");
-                }
-            } catch (_) {
-                switchView("welcome");
-            }
+            switchView("welcome");
 
             resetInspectState();
         })();

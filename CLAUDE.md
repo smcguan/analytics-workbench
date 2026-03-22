@@ -57,7 +57,6 @@ Milestones 1–4 complete. Milestone 5 in active planning. See CONTEXT.md.
 │   ├── references/             # Active reference tables (Parquet + _meta.json)
 │   ├── reference_library/      # Pre-built library CSVs + _library.json manifest
 │   ├── sessions/               # Saved session JSONs
-│   ├── snapshots/              # Named workspace snapshots
 │   ├── example_cases/          # Curated tutorial/demo cases with sample data
 │   │   └── <case_id>/
 │   │       ├── metadata.json   # Case name, category, difficulty, has_session
@@ -92,12 +91,7 @@ data/reference_library/
   (+ globe/guard/ira/multisource/nonglobe exclusion CSVs)
 
 data/sessions/
-  session_{uuid}_{date}.json — saved session files
-
-data/snapshots/
-  snapshot_{timestamp}.json  — named workspace snapshots
-
-data/workspace.json            — auto-snapshot on shutdown, resume prompt on launch
+  session_{uuid}_{date}.json — saved session files (named sessions only; UUID files filtered out)
 
 data/example_cases/<case_id>/
   metadata.json, session.json, data/<dataset>.csv, reference/<ref>.csv
@@ -137,14 +131,14 @@ Manufacturer data requires a supplemental source.
 
 ## UI DECISIONS (FROZEN — do not change without explicit instruction)
 - Nav order: Insights → Query → Saved Queries
-- App starts on Welcome view (or resume prompt if workspace.json exists)
+- App starts on Welcome view — Welcome card is the session management hub
 - GET STARTED section: Welcome, Reference Guide, Example Cases
-- SESSIONS section: Retrieve Session + Save / Retrieve Snapshot + Save (4 buttons, 2 rows)
-- Exit button below SESSIONS (outside collapsible sections) — replaces Quit
-- Exit sequence: Save Session prompt → Save Snapshot prompt → auto-snapshot → shutdown
+- No SESSIONS sidebar section — session management (Resume + Save) lives on Welcome card
+- Exit button below sidebar sections — closes immediately, no save prompt
+- Save button below sidebar sections — navigates to Welcome card, focuses session name field
 - Sidebar sections collapsible with ▼/▶ toggles
-- Sidebar section order: GET STARTED → SESSIONS → DATA → WORKSPACE → Exit
-- Default: GET STARTED expanded, SESSIONS/DATA/WORKSPACE collapsed
+- Sidebar section order: GET STARTED → DATA → WORKSPACE → Exit/Save
+- Default: GET STARTED expanded, DATA/WORKSPACE collapsed
 - Smart auto-expand: DATA on import, WORKSPACE on first query, GET STARTED collapses on import
 - Example Cases groups collapsed by default in browser dialog
 - Export Excel and Export TSV are direct toolbar buttons (no Export tab)
@@ -204,10 +198,6 @@ GET  /api/workspace
 POST /api/workspace
 POST /api/workspace/restore
 DELETE /api/workspace
-GET  /api/snapshots
-POST /api/snapshots
-POST /api/snapshots/{filename}/restore
-DELETE /api/snapshots/{filename}
 GET  /api/datasets/{name}/passport  (?refresh=true to bypass cache)
 POST /api/shutdown
 ```

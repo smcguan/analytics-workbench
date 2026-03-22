@@ -10,7 +10,7 @@ stays on the analyst's machine — AI generates analysis instructions, not data 
 **Tech stack:** FastAPI backend, DuckDB query engine, OpenAI GPT-4.1-mini for AI,
 vanilla HTML/JS/CSS frontend, PyInstaller packaging for Windows desktop.
 
-**Current version:** v1.10.2 | **Total commits:** 112+ | **Test suite:** 607 tests (zero xfail)
+**Current version:** v1.11.0 | **Total commits:** 115+ | **Test suite:** 603 tests (zero xfail)
 
 ---
 
@@ -131,11 +131,18 @@ Building toward reproducible, auditable, shareable analytical sessions:
 | v1.10.1 | 2026-03-21 | Bug #17: session/snapshot/workspace restore shows wrong datasets — root cause fix |
 | v1.10.2 | 2026-03-21 | Bug #18: Refresh was deleting disk files (root cause of restore loop); Clear SQL button; Sessions Save exits; SQL auto-clears on restore |
 | v1.10.3 | 2026-03-21 | Chart tab disabled until query returns chartable result; Sessions Save no longer exits; restore filters dataset list to session dataset only |
+| v1.11.0 | 2026-03-21 | SESSIONS sidebar removed; snapshots retired; Welcome card is session hub (Resume + Save); Reference Guide as slide-in drawer; 603 tests |
 
 ---
 
 ## Wrap Records
 <!-- Each /wrap appends a 3-line summary below. Most recent at top. -->
+
+**v1.11.0** | 2026-03-21
+Major UX simplification: SESSIONS sidebar section removed; snapshots retired. Welcome card is now
+the session hub — Resume Session (dropdown of all named sessions + Open button) and Save Session
+(name field + Save button). Reference Guide converted to right-side slide-in drawer. Exit closes
+immediately; Save navigates to Welcome + focuses name field. 4 snapshot endpoints + 4 tests removed. 603 tests.
 
 **v1.10.3** | 2026-03-21
 Chart tab greys out and is non-functional by default and after any query that doesn't produce a

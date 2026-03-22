@@ -20,14 +20,15 @@
 - Session Log — COMPLETE (v1.5.6)
 - Session File replay engine — COMPLETE automatic mode (v1.6.0)
 - Session Library / Example Cases — COMPLETE (v1.9.0) — 7 cases, 4 domains
-- Workspace Snapshot — COMPLETE (v1.8.0)
-- Named Snapshots — COMPLETE (v1.9.0)
-- Reference Guide (in-app documentation) — COMPLETE (v1.10.0)
+- Workspace Snapshot — RETIRED (v1.11.0) — replaced by named sessions on Welcome card
+- Named Snapshots — RETIRED (v1.11.0) — replaced by named sessions on Welcome card
+- Reference Guide — COMPLETE as right-side slide-in drawer (v1.11.0) — sidebar stays accessible while reading
 - Collapsible sidebar sections — COMPLETE (v1.10.0)
-- Exit button with save prompts — COMPLETE (v1.10.0)
-- SESSIONS restructure (4 buttons, 2 rows) — COMPLETE (v1.10.0)
+- Exit/Save buttons — COMPLETE (v1.11.0) — Exit closes immediately; Save goes to Welcome card session hub
+- SESSIONS sidebar removed — COMPLETE (v1.11.0) — all session management moved to Welcome card
+- Welcome card session hub — COMPLETE (v1.11.0) — Resume Session (dropdown + Open) + Save Session (name field + Save)
 
-**Test suite:** 607 automated tests, all passing (zero xfail), runs under 10 seconds.
+**Test suite:** 603 automated tests, all passing (zero xfail), runs under 10 seconds.
 Pre-commit and pre-push git hooks enforce green suite on every commit and push.
 
 **Validated at scale:** 220M rows, DuckDB local execution, sub-second import.
@@ -358,6 +359,11 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-21] [CODE] — Major UX simplification: SESSIONS sidebar section removed entirely; snapshots
+  retired; Welcome card is now the session hub (Resume Session dropdown + Save Session name field).
+  Reference Guide converted to right-side slide-in drawer — sidebar stays visible while reading.
+  Exit button closes immediately; Save button navigates to Welcome + focuses session name field.
+  4 snapshot backend endpoints removed, 4 snapshot tests removed. 603 tests. v1.11.0.
 [2026-03-21] [CODE] — Chart tab disabled by default and after non-chartable queries (updateChartTab +
   _filterDatasetsToSession); Sessions sidebar Save no longer exits app; restore paths now filter
   dataset list to session's dataset only (no stray datasets from prior sessions). v1.10.3.
