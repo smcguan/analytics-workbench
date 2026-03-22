@@ -10,7 +10,7 @@ stays on the analyst's machine — AI generates analysis instructions, not data 
 **Tech stack:** FastAPI backend, DuckDB query engine, OpenAI GPT-4.1-mini for AI,
 vanilla HTML/JS/CSS frontend, PyInstaller packaging for Windows desktop.
 
-**Current version:** v1.11.0 | **Total commits:** 115+ | **Test suite:** 603 tests (zero xfail)
+**Current version:** v1.12.0 | **Total commits:** 115+ | **Test suite:** 603 tests (zero xfail)
 
 ---
 
@@ -132,11 +132,18 @@ Building toward reproducible, auditable, shareable analytical sessions:
 | v1.10.2 | 2026-03-21 | Bug #18: Refresh was deleting disk files (root cause of restore loop); Clear SQL button; Sessions Save exits; SQL auto-clears on restore |
 | v1.10.3 | 2026-03-21 | Chart tab disabled until query returns chartable result; Sessions Save no longer exits; restore filters dataset list to session dataset only |
 | v1.11.0 | 2026-03-21 | SESSIONS sidebar removed; snapshots retired; Welcome card is session hub (Resume + Save); Reference Guide as slide-in drawer; 603 tests |
+| v1.12.0 | 2026-03-22 | Resume Session duplicate fix; Clear Workspace sidebar button; resume restores Ask Your Data question; 603 tests |
 
 ---
 
 ## Wrap Records
 <!-- Each /wrap appends a 3-line summary below. Most recent at top. -->
+
+**v1.12.0** | 2026-03-22
+Bug fix: Resume Session dropdown no longer shows duplicates — UUID auto-save files with a session
+name set were leaking through the named-session filter; fixed with filename pattern matching.
+New: Clear Workspace button in sidebar footer (full-width, above Resume/Save As). Session resume now
+restores the last natural-language question to Ask Your Data (blank if none). 603 tests.
 
 **v1.11.0** | 2026-03-21
 Major UX simplification: SESSIONS sidebar section removed; snapshots retired. Welcome card is now

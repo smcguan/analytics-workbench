@@ -4094,6 +4094,8 @@ def _derive_resume_state(events: list[dict]) -> dict:
             state["last_sql"] = details.get("sql", "")
         if et == "dataset_import" and "dataset" not in state:
             state["dataset"] = details.get("dataset", "")
+        if et == "ai_sql_generated" and "last_question" not in state:
+            state["last_question"] = details.get("question", "")
         if et == "reference_load" and "reference" not in state:
             state["reference"] = {
                 "name": details.get("reference_name", ""),
@@ -4122,6 +4124,7 @@ def api_session_resume(req: ResumeRequest):
 
     dataset_name = resume_state.get("dataset", "")
     last_sql = resume_state.get("last_sql", "")
+    last_question = resume_state.get("last_question", "")
     ref_info = resume_state.get("reference")
 
     # Check dataset exists — use same markers as list_datasets() so a dataset
@@ -4141,6 +4144,7 @@ def api_session_resume(req: ResumeRequest):
             "dataset_exists": False,
             "reference": None,
             "last_sql": last_sql,
+            "last_question": last_question,
             "message": f"Dataset '{dataset_name}' not found — import it first, then try Resume again.",
         }
 
@@ -4206,6 +4210,7 @@ def api_session_resume(req: ResumeRequest):
         "dataset_exists": dataset_exists,
         "reference": ref_response,
         "last_sql": last_sql,
+        "last_question": last_question,
         "message": None,
     }
 
@@ -4448,12 +4453,20 @@ def api_sessions_saved():
     saved: list[dict] = []
     if not SESSIONS_DIR.exists():
         return {"sessions": []}
+    import re as _re
+    _uuid_pattern = _re.compile(
+        r"^session_[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}_\d{8}\.json$"
+    )
     for f in sorted(SESSIONS_DIR.glob("*.json"), reverse=True):
+        # Skip UUID-based auto-save files — they are crash-recovery files only.
+        # Even if they carry a session name (because the user named the session
+        # before an auto-save fired), they must not appear alongside the
+        # explicitly-exported named file, which would create duplicates.
+        if _uuid_pattern.match(f.name):
+            continue
         try:
             data = json.loads(f.read_text(encoding="utf-8"))
             name = data.get("name", "").strip()
-            # Only show explicitly named sessions — unnamed auto-saves (session_{uuid}_{date}.json)
-            # are crash-recovery files and should not clutter the Retrieve Session list.
             if not name:
                 continue
             saved.append({

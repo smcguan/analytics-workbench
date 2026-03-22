@@ -28,7 +28,7 @@
 - SESSIONS sidebar removed — COMPLETE (v1.11.0) — all session management moved to Welcome card
 - Welcome card session hub — COMPLETE (v1.11.0) — Resume Session (dropdown + Open) + Save Session (name field + Save)
 
-**Test suite:** 603 automated tests, all passing (zero xfail), runs under 10 seconds.
+**Test suite:** 603 automated tests, all passing (zero xfail), runs under 11 seconds.
 Pre-commit and pre-push git hooks enforce green suite on every commit and push.
 
 **Validated at scale:** 220M rows, DuckDB local execution, sub-second import.
@@ -359,6 +359,12 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-22] [CODE] — Bug fix: Resume Session list no longer shows duplicates (UUID auto-save files
+  with a name set were leaking through the named-session filter; fixed by pattern-matching filenames).
+  New: Clear Workspace button in sidebar footer (full-width, above Resume/Save As row) — clears
+  dataset, reference, SQL editor, and Ask Your Data field. Session resume now restores last
+  natural-language question to Ask Your Data field (last_question stored in resume_state via
+  AI_SQL_GENERATED events; field blanked on resume if no question was saved). 603 tests. v1.12.0.
 [2026-03-21] [CODE] — Major UX simplification: SESSIONS sidebar section removed entirely; snapshots
   retired; Welcome card is now the session hub (Resume Session dropdown + Save Session name field).
   Reference Guide converted to right-side slide-in drawer — sidebar stays visible while reading.

@@ -134,6 +134,8 @@ Manufacturer data requires a supplemental source.
 - App starts on Welcome view — Welcome card is the session management hub
 - GET STARTED section: Welcome, Reference Guide, Example Cases
 - No SESSIONS sidebar section — session management (Resume + Save) lives on Welcome card
+- Sidebar footer button order: Clear Workspace (full-width) → Resume Session | Save As → Exit | Save & Exit
+- Clear Workspace button in sidebar footer: clears dataset, reference, SQL editor, Ask Your Data field
 - Exit button below sidebar sections — closes immediately, no save prompt
 - Save button below sidebar sections — navigates to Welcome card, focuses session name field
 - Sidebar sections collapsible with ▼/▶ toggles

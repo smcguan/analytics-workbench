@@ -164,6 +164,8 @@ def _build_resume_state(session: SessionLog) -> dict:
         # but never ran SQL before saving — still need to restore the dataset).
         if event.event_type == SessionEventType.DATASET_IMPORT and "dataset" not in state:
             state["dataset"] = event.details.get("dataset", "")
+        if event.event_type == SessionEventType.AI_SQL_GENERATED and "last_question" not in state:
+            state["last_question"] = event.details.get("question", "")
         if event.event_type == SessionEventType.REFERENCE_LOAD and "reference" not in state:
             state["reference"] = {
                 "name": event.details.get("reference_name", ""),

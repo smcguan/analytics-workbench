@@ -582,6 +582,70 @@
             background:#6ba3ff;
             border-color:#6ba3ff;
         }
+        .sidebar-footer-grid{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:5px;
+        }
+        .sidebar-footer-grid .btn{
+            font-size:11px;
+            padding:6px 4px;
+            height:30px;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+            width:100%;
+            box-sizing:border-box;
+        }
+        #resumeSessionBtn{
+            background:transparent;
+            border-color:var(--stroke-strong);
+            color:var(--muted);
+        }
+        #resumeSessionBtn:hover{
+            background:rgba(255,255,255,.05);
+            border-color:rgba(255,255,255,.25);
+            color:var(--text);
+        }
+        #sidebarSaveAsBtn{
+            background:transparent;
+            border-color:var(--stroke-strong);
+            color:var(--muted);
+        }
+        #sidebarSaveAsBtn:hover{
+            background:rgba(255,255,255,.05);
+            border-color:rgba(255,255,255,.25);
+            color:var(--text);
+        }
+        .sidebar-session-dropdown{
+            position:absolute;
+            bottom:calc(100% + 6px);
+            left:0; right:0;
+            background:var(--bg1);
+            border:1px solid var(--stroke-strong);
+            border-radius:8px;
+            box-shadow:0 -6px 20px rgba(0,0,0,.5);
+            z-index:200;
+            max-height:200px;
+            overflow-y:auto;
+        }
+        .sidebar-session-item{
+            padding:8px 12px;
+            font-size:12px;
+            cursor:pointer;
+            color:var(--text);
+            border-bottom:1px solid var(--stroke);
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+        }
+        .sidebar-session-item:last-child{ border-bottom:none; }
+        .sidebar-session-item:hover{ background:rgba(79,140,255,.12); color:var(--text); }
+        .sidebar-session-empty{
+            padding:10px 12px;
+            font-size:12px;
+            color:var(--muted);
+        }
 
         /* Import in-progress state:
            Applied to both the Import label-button and the Refresh button
@@ -1705,9 +1769,15 @@
                     </div>
                 </section>
 
-                <div class="sidebar-btn-row" style="margin-top:12px; padding-top:10px; border-top:1px solid var(--bg2);">
-                    <button class="btn import-btn" id="exitBtn">Exit</button>
-                    <button class="btn sidebar-btn-secondary" id="saveExitBtn">Save</button>
+                <div style="margin-top:12px; padding-top:10px; border-top:1px solid var(--bg2); position:relative;">
+                    <div id="sidebarSessionDropdown" class="sidebar-session-dropdown" style="display:none;"></div>
+                    <div class="sidebar-footer-grid">
+                        <button class="btn" id="sidebarClearWorkspaceBtn" style="grid-column:1/-1;">Clear Workspace</button>
+                        <button class="btn" id="resumeSessionBtn">Resume Session</button>
+                        <button class="btn" id="sidebarSaveAsBtn">Save As</button>
+                        <button class="btn" id="exitBtn">Exit</button>
+                        <button class="btn" id="saveExitBtn">Save &amp; Exit</button>
+                    </div>
                 </div>
             </aside>
 
@@ -1756,7 +1826,7 @@
                             </div>
                         </div>
 
-                        <div class="inspect-card">
+                        <div class="inspect-card" id="inspectCard" style="display:none;">
                             <div class="inspect-empty" id="inspectEmpty">
                                 Select a dataset, then choose Schema or Preview.
                             </div>
@@ -1993,18 +2063,8 @@ LIMIT 100</textarea>
                             <hr>
 
                             <h3>Resume Session</h3>
-                            <div class="welcome-session-row">
-                                <select id="welcomeSessionSelect" class="welcome-session-select" style="flex:1;"></select>
-                                <button class="btn primary" id="welcomeLoadSessionBtn">Open</button>
-                            </div>
-                            <p id="welcomeNoSessions" style="color:var(--muted); font-size:12px; margin:6px 0 0 0; display:none;">No saved sessions yet.</p>
-
-                            <h3 style="margin-top:20px;">Save Session</h3>
-                            <div class="welcome-session-row">
-                                <input type="text" id="welcomeSaveSessionName" placeholder="Session name..." class="welcome-session-input" style="flex:1;" />
-                                <button class="btn primary" id="welcomeSaveSessionBtn">Save</button>
-                            </div>
-                            <div id="welcomeSaveSessionMsg" style="font-size:12px; color:var(--accent); margin:6px 0 0 0; min-height:16px;"></div>
+                            <button class="btn primary" id="welcomeResumeSessionBtn" style="width:100%;">Resume Saved Session</button>
+                            <div id="welcomeSessionDropdownPanel" style="display:none; border:1px solid var(--stroke-strong); border-radius:8px; background:var(--bg1); max-height:200px; overflow-y:auto; margin-top:6px;"></div>
 
                             <hr>
 
@@ -2115,7 +2175,14 @@ LIMIT 100</textarea>
 <li><strong>DATA</strong> — Imported datasets, reference tables, library (auto-expands on first import)</li>
 <li><strong>WORKSPACE</strong> — Insights, Query, Saved Queries (auto-expands on first query)</li>
 </ul>
-<p>Below the sidebar sections: <strong>Exit</strong> (close immediately) and <strong>Save</strong> (navigate to Welcome to save the current session).</p>
+<p>Below the sidebar sections, the footer has four buttons:</p>
+<ul>
+<li><strong>Clear Workspace</strong> (full-width) — clears the active dataset, reference table, SQL editor, and Ask Your Data field without deleting any files from disk.</li>
+<li><strong>Resume Session</strong> — opens the saved session dropdown (same as the Welcome card).</li>
+<li><strong>Save As</strong> — prompts for a name and saves the current session.</li>
+<li><strong>Exit</strong> — closes the app immediately.</li>
+<li><strong>Save &amp; Exit</strong> — saves the session then closes.</li>
+</ul>
 
 <hr>
 <h3>Importing Data</h3>
@@ -2196,13 +2263,13 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 
 <hr>
 <h3>Sessions</h3>
-<p>Session management lives on the <strong>Welcome</strong> card (accessible via Welcome in the GET STARTED section).</p>
+<p>Session management is accessible from both the <strong>Welcome</strong> card and the <strong>sidebar footer</strong>.</p>
 <ul>
-<li><strong>Resume Session</strong> — select a saved session from the dropdown and click Open to restore dataset, reference table, and last query.</li>
-<li><strong>Save Session</strong> — enter a name and click Save to write the current session to <code>data/sessions/</code>.</li>
+<li><strong>Resume Session</strong> — select a saved session from the dropdown to restore dataset, reference table, last SQL query, and last Ask Your Data question.</li>
+<li><strong>Save As</strong> — enter a name and save the current session to <code>data/sessions/</code>. Saving with the same name overwrites the previous file.</li>
 </ul>
-<p><strong>Save button (sidebar footer):</strong> Clicking Save navigates to the Welcome card and focuses the session name field.</p>
-<p><strong>Refresh (Data section):</strong> Clears the active dataset and reference table from the workspace UI. Files on disk are not deleted — you can always restore them via Resume Session on the Welcome card.</p>
+<p><strong>Clear Workspace (sidebar footer):</strong> Resets the active workspace — clears the dataset, reference table, SQL editor, and Ask Your Data field. Files on disk are not deleted; you can restore at any time via Resume Session.</p>
+<p><strong>Refresh (Data section):</strong> Same as Clear Workspace. Files on disk are not deleted — you can always restore them via Resume Session.</p>
 <p><strong>Session Log:</strong> AW automatically records every action — imports, queries, reference loads, exports — with timestamps and details. This happens silently in the background.</p>
 
 <hr>
@@ -2369,7 +2436,6 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             if (viewName === "saved") setActiveNav("navSavedQueries");
             if (viewName === "welcome") {
                 setActiveNav("navWelcome");
-                loadWelcomeSessions();
             }
             if (viewName === "sessionLog") setActiveNav(null);
             if (viewName === "insights") {
@@ -3233,6 +3299,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                     // Load whatever datasets exist but don't auto-select
                     await loadDatasets();
                     if (result.last_sql) $("sqlEditor").value = result.last_sql;
+                    $("askPrompt").value = result.last_question || "";
                     switchView("query");
                     _expandSidebarSection("sidebarDataTitle", "sidebarDataBody");
                     return;
@@ -3258,6 +3325,9 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                     $("referenceName").textContent = refDisplay;
                     $("referenceIndicator").style.display = "block";
                 }
+
+                // Restore last natural-language question (or clear the field)
+                $("askPrompt").value = result.last_question || "";
 
                 // Put last SQL in editor and switch to Query view
                 if (result.last_sql && selectedDataset) {
@@ -3392,52 +3462,81 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         // ---------------------------------------------------------------
         // Welcome card session management
         // ---------------------------------------------------------------
-        async function loadWelcomeSessions() {
+        async function _toggleWelcomeSessionDropdown() {
+            const panel = $("welcomeSessionDropdownPanel");
+            if (panel.style.display !== "none") {
+                panel.style.display = "none";
+                return;
+            }
+            panel.innerHTML = '<div class="sidebar-session-empty">Loading...</div>';
+            panel.style.display = "";
             try {
                 const data = await apiJson("/api/sessions/saved");
                 const sessions = data.sessions || [];
-                const sel = $("welcomeSessionSelect");
                 if (sessions.length === 0) {
-                    sel.innerHTML = '<option value="">— no sessions —</option>';
-                    $("welcomeLoadSessionBtn").disabled = true;
-                    $("welcomeNoSessions").style.display = "";
+                    panel.innerHTML = '<div class="sidebar-session-empty">No saved sessions yet.</div>';
                 } else {
-                    sel.innerHTML = sessions.map(s => {
-                        const date = s.started_at ? " (" + new Date(s.started_at).toLocaleDateString() + ")" : "";
-                        return `<option value="${s.filename}">${s.name}${date}</option>`;
+                    panel.innerHTML = sessions.map(s => {
+                        const date = s.started_at ? " — " + new Date(s.started_at).toLocaleDateString() : "";
+                        return `<div class="sidebar-session-item" data-filename="${s.filename}">${s.name}${date}</div>`;
                     }).join("");
-                    $("welcomeLoadSessionBtn").disabled = false;
-                    $("welcomeNoSessions").style.display = "none";
+                    panel.querySelectorAll(".sidebar-session-item").forEach(el => {
+                        el.addEventListener("click", () => {
+                            panel.style.display = "none";
+                            resumeSession(el.dataset.filename);
+                        });
+                    });
                 }
-            } catch (_) {}
+            } catch (_) {
+                panel.innerHTML = '<div class="sidebar-session-empty">Could not load sessions.</div>';
+            }
         }
 
-        async function welcomeSaveSession() {
-            const name = $("welcomeSaveSessionName").value.trim();
-            if (!name) {
-                $("welcomeSaveSessionMsg").textContent = "Enter a session name.";
-                $("welcomeSaveSessionMsg").style.color = "var(--error, #e06c75)";
-                $("welcomeSaveSessionName").focus();
-                return;
-            }
+        async function _saveSessionAs() {
+            const name = await awPrompt("Save Session", "Session name...");
+            if (!name || !name.trim()) return false;
             try {
-                $("welcomeSaveSessionBtn").disabled = true;
                 await apiJson("/api/session/name", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ name })
+                    body: JSON.stringify({ name: name.trim() })
                 });
                 await apiJson("/api/session/export");
-                $("welcomeSaveSessionMsg").textContent = "Session saved: " + name;
-                $("welcomeSaveSessionMsg").style.color = "var(--accent)";
-                $("welcomeSaveSessionName").value = "";
-                await loadWelcomeSessions();
+                toast("Session saved: " + name.trim());
+                return true;
             } catch (e) {
-                $("welcomeSaveSessionMsg").textContent = "Save failed.";
-                $("welcomeSaveSessionMsg").style.color = "var(--error, #e06c75)";
-            } finally {
-                $("welcomeSaveSessionBtn").disabled = false;
-                setTimeout(() => { $("welcomeSaveSessionMsg").textContent = ""; }, 3000);
+                toast("Save failed.", 4000);
+                return false;
+            }
+        }
+
+        async function _toggleSidebarSessionDropdown() {
+            const panel = $("sidebarSessionDropdown");
+            if (panel.style.display !== "none") {
+                panel.style.display = "none";
+                return;
+            }
+            panel.innerHTML = '<div class="sidebar-session-empty">Loading...</div>';
+            panel.style.display = "";
+            try {
+                const data = await apiJson("/api/sessions/saved");
+                const sessions = data.sessions || [];
+                if (sessions.length === 0) {
+                    panel.innerHTML = '<div class="sidebar-session-empty">No saved sessions.</div>';
+                } else {
+                    panel.innerHTML = sessions.map(s => {
+                        const date = s.started_at ? " — " + new Date(s.started_at).toLocaleDateString() : "";
+                        return `<div class="sidebar-session-item" data-filename="${s.filename}">${s.name}${date}</div>`;
+                    }).join("");
+                    panel.querySelectorAll(".sidebar-session-item").forEach(el => {
+                        el.addEventListener("click", () => {
+                            panel.style.display = "none";
+                            resumeSession(el.dataset.filename);
+                        });
+                    });
+                }
+            } catch (_) {
+                panel.innerHTML = '<div class="sidebar-session-empty">Could not load sessions.</div>';
             }
         }
 
@@ -4776,6 +4875,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         function resetInspectState() {
             inspectMode = "";
             setInspectButtons();
+            $("inspectCard").style.display = "none";
             $("inspectEmpty").style.display = "flex";
             $("inspectTableWrap").classList.add("hidden");
             $("inspectHead").innerHTML = "";
@@ -4817,6 +4917,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 body.appendChild(tr);
             }
 
+            $("inspectCard").style.display = "";
             $("inspectEmpty").style.display = "none";
             $("inspectTableWrap").classList.remove("hidden");
         }
@@ -5075,8 +5176,8 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         }
 
         async function saveAndExit() {
-            switchView("welcome");
-            setTimeout(() => $("welcomeSaveSessionName").focus(), 100);
+            const saved = await _saveSessionAs();
+            if (saved) exitApp();
         }
 
         $("navInsights").addEventListener("click", () => switchView("insights"));
@@ -5160,6 +5261,16 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         $("refreshQueriesBtn").addEventListener("click", loadSavedQueries);
         $("exitBtn").addEventListener("click", exitApp);
         $("saveExitBtn").addEventListener("click", saveAndExit);
+        $("resumeSessionBtn").addEventListener("click", _toggleSidebarSessionDropdown);
+        $("sidebarSaveAsBtn").addEventListener("click", _saveSessionAs);
+        document.addEventListener("click", (e) => {
+            const panel = $("sidebarSessionDropdown");
+            if (panel.style.display !== "none"
+                && !panel.contains(e.target)
+                && e.target !== $("resumeSessionBtn")) {
+                panel.style.display = "none";
+            }
+        });
 
         // Refresh Datasets button.
         // Clears the current workspace UI without deleting any files from disk.
@@ -5185,11 +5296,29 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             }
         });
 
-        $("welcomeLoadSessionBtn").addEventListener("click", () => {
-            const filename = $("welcomeSessionSelect").value;
-            if (filename) resumeSession(filename);
+        $("sidebarClearWorkspaceBtn").addEventListener("click", () => {
+            datasets = [];
+            selectedDataset = "";
+            currentReference = "";
+            renderDatasets();
+            updateSelectedDatasetSummary();
+            resetInspectState();
+            $("referenceIndicator").style.display = "none";
+            $("referenceName").textContent = "";
+            $("sqlEditor").value = "SELECT *\nFROM dataset\nLIMIT 100";
+            $("askPrompt").value = "";
+            toast("Workspace cleared.");
         });
-        $("welcomeSaveSessionBtn").addEventListener("click", welcomeSaveSession);
+
+        $("welcomeResumeSessionBtn").addEventListener("click", _toggleWelcomeSessionDropdown);
+        document.addEventListener("click", (e) => {
+            const panel = $("welcomeSessionDropdownPanel");
+            if (panel.style.display !== "none"
+                && !panel.contains(e.target)
+                && e.target !== $("welcomeResumeSessionBtn")) {
+                panel.style.display = "none";
+            }
+        });
 
         // ---------------------------------------------------------------
         // Sidebar collapsible sections
