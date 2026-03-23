@@ -19,7 +19,7 @@
 - Reference Table Library v1 — COMPLETE (IRA drug list, 35 drugs Rounds 1-3)
 - Session Log — COMPLETE (v1.5.6)
 - Session File replay engine — COMPLETE automatic mode (v1.6.0)
-- Session Library / Example Cases — COMPLETE (v1.9.0) — 7 cases, 4 domains
+- Session Library / Example Cases — COMPLETE (v1.9.0/v1.14.0) — 8 cases, 5 domains
 - Workspace Snapshot — RETIRED (v1.11.0) — replaced by named sessions on Welcome card
 - Named Snapshots — RETIRED (v1.11.0) — replaced by named sessions on Welcome card
 - Reference Guide — COMPLETE as right-side slide-in drawer (v1.11.0) — sidebar stays accessible while reading
@@ -475,7 +475,7 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 - [ ] Multi-state Medicaid sample file — ask Farragut for sanitized sample to validate schema mapping approach.
 - [ ] M5 P1 scope — schema mapping only, or include MCO lookup in same build?
 - [ ] Analysis Summary Artifact format — configurable template (Farragut memo style) vs. fixed output?
-- [ ] Demo build for Farragut — M5 P1 backend complete; Tutorial #4 example case would serve as demo
+- [x] Demo build for Farragut — COMPLETE. Tutorial #4 Multi-State Medicaid Diligence is the demo.
 - [ ] Local AI mode quality bar — Ollama good enough for Tier 3 analytical queries?
 - [ ] In-App Chat — replaces or complements claude.ai partnership workflow?
 - [ ] Farragut confirmations — 5 flagged items from GUARD memo still pending.

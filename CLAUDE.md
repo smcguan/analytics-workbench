@@ -95,6 +95,16 @@ data/sessions/
 
 data/example_cases/<case_id>/
   metadata.json, session.json, data/<dataset>.csv, reference/<ref>.csv
+
+  metadata.json fields:
+    dataset_file — primary CSV filename in data/
+    additional_datasets — array of {file, display_name} for multi-dataset cases
+    reference_tables — array of reference names available in reference/
+    has_session, difficulty, estimated_minutes, version
+
+  Multi-dataset cases (e.g. medicaid_pe_diligence) have 3 CSVs in data/ and
+  4 CSVs in reference/. The SQL rewrite resolves all registered dataset names
+  in FROM/JOIN via additional_datasets in api_sql().
 ```
 
 ---
