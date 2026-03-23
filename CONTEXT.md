@@ -359,6 +359,31 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-22] [CODE] — M5 Phase 2 schema normalization validated end-to-end. medicaid_schema_map
+  imported as reference table (30 rows, 4 cols: state/source_column/canonical_column/data_type).
+  Title-case normalization confirmed on import (TX→Tx, BENE_ID→Bene_Id) — JOINs require UPPER()
+  on both sides. All three states return correct canonical columns with zero data loss:
+  TX=5000, FL=4500, OH=3500 rows. Full 13,000-row UNION ALL with canonical schema confirmed.
+  OH ZIP_CODE is numeric — requires ::VARCHAR cast in UNION. Phase 2 PASS.
+  Multi-dataset UNION backend (Phase 3) re-confirmed: 13K rows, MCO concentration by state works.
+  Next: build Tutorial #4 Multi-State Medicaid Diligence example case.
+[2026-03-22] [CODE] — M5 Phase 1-3 complete. Multi-dataset UNION/JOIN now works in AW.
+  Phase 1: all three Medicaid state files (TX 5000/FL 4500/OH 3500) import simultaneously,
+  correct row counts, no data mixing. Phase 2: reference JOIN workflow validated with
+  mco_lookup and audit_risk_flags against each state independently. Schema divergence
+  confirmed (BENE_ID/MEMBER_ID/CLIENT_ID etc) — schema_map reference table structure correct.
+  Phase 3: extended _rewrite_sql_dataset_reference() in main.py to resolve any registered
+  dataset name found in FROM/JOIN clauses — ~20 line change. Cross-state UNION ALL now
+  works: 13,000 rows TX+FL+OH in a single query, MCO concentration by state, reimbursement
+  differential (OH -14% vs TX/FL) all validated. 603 tests passing. Dev server confirmed.
+  Next: kill dev server, wrap, then build Tutorial #4 example case.
+[2026-03-22] [BD] — M5 planning session. Farragut engagement model (Tutorial #4 spec)
+  reviewed and adopted as M5 anchor. All 7 synthetic datasets generated and validated:
+  tx_medicaid_claims.csv (5,000 rows), fl_medicaid_claims.csv (4,500),
+  oh_medicaid_claims.csv (3,500), plus 4 reference tables. All seeded test conditions
+  confirmed: TX MCO concentration 47.8%, anomalous provider ratios 3.2x/3.4x,
+  null DIAG_CD 5.3%, OH reimbursement 16 ppts below TX/FL.
+  M5 Phase 1 priority: validate multi-dataset simultaneous loading in AW (Steps 1-3).
 [2026-03-22] [CODE] — UX polish: custom tooltip system replaces native browser title attrs with styled
   animated tooltips; descriptive tooltips added to every interactive element; popover/suggestion chip
   visual refinements (gradient backgrounds, box shadows); Clear Workspace now fully clears results
@@ -446,7 +471,9 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 - Draft proposal and contract template skeleton
 
 **Product / code (Claude Code):**
-- Spec M5 Priority 1: Multi-State Medicaid Normalization (schema mapping reference table)
+- ~~Spec M5 Priority 1: Multi-State Medicaid Normalization~~ COMPLETE — multi-dataset UNION built (v1.12.x)
+- Build Tutorial #4 example case: Multi-State Medicaid Diligence (TX/FL/OH datasets + 4 reference tables)
+- Add medicaid_schema_map, mco_lookup, audit_risk_flags, service_category_map to Reference Table Library
 - Spec M5 Priority 2: Analysis Summary Artifact (configurable memo template)
 - Spec M5 Priority 3: AI Mode Switch (session-level Local/Cloud toggle)
 - Build additional Reference Table Library files: Medicaid schema map, MCO lookup

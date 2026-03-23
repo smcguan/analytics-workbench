@@ -3330,6 +3330,9 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                     await loadDatasets();
                     if (result.last_sql) $("sqlEditor").value = result.last_sql;
                     $("askPrompt").value = result.last_question || "";
+                    currentReference = "";
+                    $("referenceName").textContent = "";
+                    $("referenceIndicator").style.display = "none";
                     switchView("query");
                     _expandSidebarSection("sidebarDataTitle", "sidebarDataBody");
                     return;
@@ -3346,7 +3349,13 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 _expandSidebarSection("sidebarDataTitle", "sidebarDataBody");
                 _expandSidebarSection("sidebarWorkspaceTitle", "sidebarWorkspaceBody");
 
-                // Update reference indicator
+                // Always reset reference state first — prevents a stale reference
+                // from the previous workspace bleeding into the resumed session.
+                currentReference = "";
+                $("referenceName").textContent = "";
+                $("referenceIndicator").style.display = "none";
+
+                // Restore reference if the session had one
                 if (result.reference && result.reference.loaded) {
                     currentReference = result.reference.name;
                     const refDisplay = result.reference.row_count

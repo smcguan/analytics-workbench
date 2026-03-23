@@ -24,7 +24,10 @@
       "Bash(grep -n \"def test_\" /c/dev/analytics-workbench/tests/test_*.py)",
       "Bash(grep -n \"/api/session\" /c/dev/analytics-workbench/tests/test_*.py)",
       "Bash(grep:*)",
-      "Bash(python -m pytest tests/ -q --tb=short)"
+      "Bash(python3:*)",
+      "Bash(python -m pytest tests/ -k \"sessions_saved or session_saved\" -v)",
+      "Bash(.venv/Scripts/pytest tests/ -k \"sessions_saved or session_saved\" -v)",
+      "Bash(.venv/Scripts/pytest tests/ -q)"
     ],
     "deny": [
       "Read(C:/dev/analytics-workbench/.env)",

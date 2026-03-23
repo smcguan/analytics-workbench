@@ -101,6 +101,14 @@ data/example_cases/<case_id>/
 
 ## KNOWN BUGS — ACTIVE
 
+### Bug 9: Insights View fails on non-standard column names
+**Symptom:** Insights generation fails or produces no results when dataset column names
+don't match expected patterns (e.g. abbreviated names like BENE_ID, PRVDR_NPI, SVC_DT
+as seen in Medicaid claims data). First observed with TX/FL/OH Medicaid test datasets.
+**Recommended fix:** Run insights against the post-JOIN normalized dataset (canonical
+column names) rather than the raw import column names.
+**Priority:** High — blocks M5 Tutorial #4 Insights step.
+
 ### Bug 6: Refresh Datasets — Windows file lock issue
 **Symptom:** shutil.rmtree() in /api/datasets/{name}/delete may fail silently
 when DuckDB has the Parquet file open.

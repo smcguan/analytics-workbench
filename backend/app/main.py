@@ -1093,6 +1093,7 @@ def _rewrite_sql_dataset_reference(
     parquet_sql: str,
     reference_parquet_sql: str | None = None,
     reference_name: str | None = None,
+    additional_datasets: dict[str, str] | None = None,
 ) -> str:
     """
     Rewrite logical dataset references to read_parquet(...).
@@ -1116,6 +1117,13 @@ def _rewrite_sql_dataset_reference(
     When a reference table is loaded, also rewrites:
         FROM reference  →  read_parquet('...reference path...')
         JOIN reference  →  read_parquet('...reference path...')
+
+    When additional_datasets is provided (a dict of {name: parquet_sql}),
+    any other registered dataset names found in FROM/JOIN clauses are also
+    rewritten. This enables multi-dataset UNION/JOIN queries — e.g.:
+        SELECT ... FROM dataset
+        UNION ALL
+        SELECT ... FROM fl_medicaid_claims
 
     IMPORTANT
     ---------
@@ -1213,6 +1221,25 @@ def _rewrite_sql_dataset_reference(
                 return f"{keyword} {reference_parquet_sql} AS {alias}"
 
             rewritten = ref_pattern.sub(_ref_repl, rewritten)
+
+    # Rewrite any other registered datasets referenced in the SQL.
+    # This allows multi-dataset UNION/JOIN queries where the analyst
+    # names another registered dataset directly (e.g. fl_medicaid_claims).
+    # Each name is resolved to its own read_parquet(...) path exactly like
+    # the primary dataset.
+    if additional_datasets:
+        for add_name, add_parquet_sql in additional_datasets.items():
+            add_pattern = re.compile(
+                rf'(?i)\b(from|join)\s+(")?{re.escape(add_name)}(")?\b'
+                rf'(\s+as\s+\w+|\s+(?!{_SQL_KW}\b)\w+)?'
+            )
+            if add_pattern.search(rewritten):
+                def _add_repl(m: re.Match[str], _n=add_name, _p=add_parquet_sql) -> str:
+                    keyword = m.group(1)
+                    existing_alias = m.group(4)
+                    alias = existing_alias.strip().split()[-1] if existing_alias else _n
+                    return f"{keyword} {_p} AS {alias}"
+                rewritten = add_pattern.sub(_add_repl, rewritten)
 
     return rewritten
 
@@ -2646,10 +2673,23 @@ def api_sql(req: SqlRequest):
         # Rewrite logical dataset references in FROM / JOIN
         # clauses to the actual parquet source.
         # Also rewrites "reference" if a reference table is loaded.
+        # Also rewrites any other registered dataset names so that
+        # multi-dataset UNION/JOIN queries work (e.g. for multi-state
+        # Medicaid normalization where TX/FL/OH are each a dataset).
         # ----------------------------------------------------
         reference_parquet_sql, reference_name = _resolve_reference_for_sql(
             req.reference
         )
+
+        additional_datasets: dict[str, str] = {}
+        for other_name in list_datasets():
+            if other_name == req.dataset:
+                continue
+            try:
+                other_src, _ = dataset_source_path(other_name)
+                additional_datasets[other_name] = f"read_parquet('{_sql_escape_path(other_src)}')"
+            except Exception:
+                pass
 
         sql = _rewrite_sql_dataset_reference(
             sql=cleaned_sql,
@@ -2657,6 +2697,7 @@ def api_sql(req: SqlRequest):
             parquet_sql=parquet_sql,
             reference_parquet_sql=reference_parquet_sql,
             reference_name=reference_name,
+            additional_datasets=additional_datasets,
         )
 
         # ----------------------------------------------------

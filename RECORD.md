@@ -132,6 +132,7 @@ Building toward reproducible, auditable, shareable analytical sessions:
 | v1.10.2 | 2026-03-21 | Bug #18: Refresh was deleting disk files (root cause of restore loop); Clear SQL button; Sessions Save exits; SQL auto-clears on restore |
 | v1.10.3 | 2026-03-21 | Chart tab disabled until query returns chartable result; Sessions Save no longer exits; restore filters dataset list to session dataset only |
 | v1.11.0 | 2026-03-21 | SESSIONS sidebar removed; snapshots retired; Welcome card is session hub (Resume + Save); Reference Guide as slide-in drawer; 603 tests |
+| v1.13.0 | 2026-03-22 | Multi-dataset UNION/JOIN backend; schema normalization JOIN validated (TX/FL/OH); reference bleed-through fix on resume; 603 tests |
 | v1.12.1 | 2026-03-22 | Custom tooltip system; descriptive tooltips on all buttons; popover visual polish; Clear Workspace completeness; .gitignore runtime data; 603 tests |
 | v1.12.0 | 2026-03-22 | Resume Session duplicate fix; Clear Workspace sidebar button; resume restores Ask Your Data question; 603 tests |
 
@@ -139,6 +140,13 @@ Building toward reproducible, auditable, shareable analytical sessions:
 
 ## Wrap Records
 <!-- Each /wrap appends a 3-line summary below. Most recent at top. -->
+
+**v1.13.0** | 2026-03-22
+Multi-dataset UNION/JOIN: extended `_rewrite_sql_dataset_reference()` to resolve any registered
+dataset name in FROM/JOIN — enables cross-state UNION queries (TX+FL+OH 13,000 rows validated).
+Schema normalization JOIN validated Phase 2: title-case normalization requires UPPER() on both sides;
+OH ZIP_CODE is numeric (needs ::VARCHAR in UNION); all three states return correct canonical columns
+with zero data loss. Reference bleed-through on session resume fixed (always reset before restore).
 
 **v1.12.1** | 2026-03-22
 UX polish: custom tooltip system replaces native browser title attributes with styled, animated
