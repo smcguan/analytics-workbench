@@ -101,6 +101,26 @@ data/example_cases/<case_id>/
 
 ## KNOWN BUGS — ACTIVE
 
+### Bug 10: Reference table title-case normalization breaks JOIN conditions
+**Symptom:** AW title-cases all string values on reference table import (e.g. 'TX'→'Tx',
+'BENE_ID'→'Bene_Id'). Any SQL JOIN against a reference table using exact string match
+will return zero rows unless both sides are wrapped in UPPER().
+**Workaround:** Wrap both sides of JOIN string comparisons in UPPER() — e.g.
+`UPPER(r.state) = 'TX'` and `UPPER(r.source_column) = 'BENE_ID'`.
+**Do not fix yet** — workaround is sufficient for Tutorial #4. Fix would require
+either disabling title-case normalization (breaks existing CMS JOIN cases) or
+storing both raw and normalized forms.
+**Priority:** Medium — known workaround exists; affects any reference table JOIN.
+
+### Bug 11: OH ZIP_CODE is numeric — type mismatch in cross-state UNION
+**Symptom:** Ohio's geographic column (ZIP_CODE) is stored as INTEGER. In a UNION ALL
+across TX (VARCHAR county) + FL (VARCHAR region) + OH (INTEGER zip), DuckDB raises a
+type mismatch error unless OH ZIP_CODE is cast explicitly.
+**Workaround:** `ZIP_CODE::VARCHAR AS geography` in the OH leg of any UNION query.
+**Do not fix yet** — this is a data generation characteristic; fix belongs in Tutorial #4
+SQL authoring, not in AW product code.
+**Priority:** Low — only affects cross-state UNION; workaround is a single SQL cast.
+
 ### Bug 9: Insights View fails on non-standard column names
 **Symptom:** Insights generation fails or produces no results when dataset column names
 don't match expected patterns (e.g. abbreviated names like BENE_ID, PRVDR_NPI, SVC_DT

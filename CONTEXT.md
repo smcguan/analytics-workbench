@@ -361,6 +361,22 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-23] [CODE] — M5 Phase 3 query bank: 8/10 PASS. Bugs #10/#11 logged.
+  Q1 (MCO totals TX): PASS — 3 rows. Q2 (MCO concentration): PASS — Lone Star 47.8%.
+  Q3 (null DIAG_CD): PASS — 266 nulls = 5.3%. Q4 (anomalous providers): PASS — both
+  seeded NPIs found (ratio 3.43 and 3.21). Q5 (cross-state category totals): PASS — 5
+  canonical categories, service_category_map JOIN works. Q6 (FL audit risk JOIN): PASS —
+  all 8 flagged procedure codes matched. Q7 (reimbursement rate by state×category): PASS —
+  15 rows, OH 66-67% vs TX/FL 83-84% as designed. Q10 (FL monthly trend): PASS — 12 months.
+  Q8 FAIL: top 2 TX categories only 41.9% (expected >60%) — synthetic data too evenly
+  distributed. Q9 FAIL: 0 counties with provider >20% concentration — same cause.
+  Both Q8/Q9 failures are data generation issues, not product bugs. Synthetic datasets need
+  regeneration with intentional skew. Bug #10: title-case normalization requires UPPER() on
+  both sides of reference JOINs. Bug #11: OH ZIP_CODE is numeric, needs ::VARCHAR in UNION.
+  Named reference routing confirmed: specify reference='name' in SQL request body to target a
+  specific registered reference table by name (not just the 'reference' keyword).
+  Next: regenerate TX synthetic data with service category concentration + county provider
+  concentration, then build Tutorial #4 session JSON.
 [2026-03-22] [CODE] — M5 Phase 2 schema normalization validated end-to-end. medicaid_schema_map
   imported as reference table (30 rows, 4 cols: state/source_column/canonical_column/data_type).
   Title-case normalization confirmed on import (TX→Tx, BENE_ID→Bene_Id) — JOINs require UPPER()
@@ -477,6 +493,8 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 - ~~Phase 1: Validate multi-dataset simultaneous load~~ COMPLETE — TX/FL/OH all load correctly (v1.13.0)
 - ~~Phase 2: Validate schema normalization JOIN~~ COMPLETE — medicaid_schema_map validated, title-case UPPER() fix documented (v1.13.0)
 - ~~Phase 3: Multi-dataset UNION backend~~ COMPLETE — 13K row cross-state UNION working (v1.13.0)
+- ~~Phase 3 query bank validation~~ 8/10 PASS — 2 FAIL due to synthetic data distribution
+- Regenerate TX synthetic data: service categories need intentional skew (top 2 >60%), add county/provider concentration (>20% in at least 1 county) — Q8 and Q9 test conditions
 - Build Tutorial #4 example case: Multi-State Medicaid Diligence (TX/FL/OH datasets + 4 reference tables)
 - Add medicaid_schema_map, mco_lookup, audit_risk_flags, service_category_map to Reference Table Library
 - Spec M5 Priority 2: Analysis Summary Artifact (configurable memo template)
