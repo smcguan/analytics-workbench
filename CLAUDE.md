@@ -104,7 +104,8 @@ data/example_cases/<case_id>/
 
   Multi-dataset cases (e.g. medicaid_pe_diligence) have 3 CSVs in data/ and
   4 CSVs in reference/. The SQL rewrite resolves all registered dataset names
-  in FROM/JOIN via additional_datasets in api_sql().
+  in FROM/JOIN via additional_datasets, and all registered reference table names
+  via additional_references. Both /api/sql and /api/sql/export resolve these.
 ```
 
 ---
@@ -170,17 +171,25 @@ Manufacturer data requires a supplemental source.
 ## UI DECISIONS (FROZEN — do not change without explicit instruction)
 - Nav order: Insights → Query → Saved Queries
 - App starts on Welcome view — Welcome card is the session management hub
-- GET STARTED section: Welcome, Reference Guide, Example Cases
-- No SESSIONS sidebar section — session management (Resume + Save) lives on Welcome card
-- Sidebar footer button order: Clear Workspace (full-width) → Resume Session | Save As → Exit | Save & Exit
-- Clear Workspace button in sidebar footer: clears dataset, reference, SQL editor, Ask Your Data field
-- Exit button below sidebar sections — closes immediately, no save prompt
-- Save button below sidebar sections — navigates to Welcome card, focuses session name field
+- GET STARTED section: Welcome, Reference Guide, Example Workflows
+- WORKFLOWS sidebar section: [Stored Workflows][Save] row + Session Log checkbox (collapsible)
+- Unified Workflows dialog: Stored Workflows + Example Workflows sections (EC-style overlay)
+- Stored Workflow cards: Edit, Step Through, Run All, Resume, Delete buttons
+- Example Workflow cards: Step Through, Run All, Resume buttons (no Edit/Delete — read-only)
+- Footer actions below WORKFLOWS: Clear Workspace (full-width) → Exit | Save & Exit
+- Clear Workspace: clears everything + closes Session Log + collapses SQL editor + resets session
+- Exit button — closes immediately, no save prompt
+- Save & Exit — saves session then exits
+- Session Log Viewer — slide-in drawer, checkbox toggle in sidebar
+- Workflow Edit panel — slide-in drawer for dataset/reference remapping
+- Reference tables as individual sidebar items with REF badge and per-item remove
 - Sidebar sections collapsible with ▼/▶ toggles
-- Sidebar section order: GET STARTED → DATA → WORKSPACE → Exit/Save
-- Default: GET STARTED expanded, DATA/WORKSPACE collapsed
+- Sidebar section order: GET STARTED → DATA → WORKSPACE → WORKFLOWS → footer actions
+- Default: GET STARTED expanded, DATA/WORKSPACE/WORKFLOWS collapsed
 - Smart auto-expand: DATA on import, WORKSPACE on first query, GET STARTED collapses on import
-- Example Cases groups collapsed by default in browser dialog
+- SQL editor collapsible — auto-expands on AI generate, stays open during playback
+- Import Dataset and Reference Table buttons are full-width (no Refresh/Library buttons)
+- Baseline mismatch during playback = warning, not failure
 - Export Excel and Export TSV are direct toolbar buttons (no Export tab)
 - Import uses <label for="file-input"> pattern, NOT programmatic .click()
 - Prompt and SQL editor clear when switching datasets
@@ -227,13 +236,18 @@ POST /api/session/replay
 POST /api/session/annotate
 POST /api/session/resume
 POST /api/session/name
+POST /api/session/reset
+POST /api/session/log_event
+POST /api/session/replay/prepare
 GET  /api/session/load/{filename}
 GET  /api/example_cases
 POST /api/example_cases/{id}/load
 GET  /api/sessions/saved
+POST /api/sessions/{filename}/delete
 GET  /api/example_cases/{id}/session
 POST /api/example_cases/{id}/import_dataset
 POST /api/example_cases/{id}/import_reference
+POST /api/references/restore
 GET  /api/workspace
 POST /api/workspace
 POST /api/workspace/restore
@@ -249,6 +263,9 @@ All SQL runs against Parquet via DuckDB.
 Frontend writes SQL using logical table name "dataset".
 main.py rewrites `FROM dataset` → `FROM read_parquet('/absolute/path/source.parquet')`.
 When a reference table is loaded, main.py also rewrites "reference" to its absolute Parquet path.
+Additionally, all other registered dataset names and all registered reference table names
+are resolved in FROM/JOIN clauses (via additional_datasets and additional_references dicts).
+This enables multi-dataset UNION queries and multi-reference JOINs in a single SQL statement.
 Both rewrites happen before execution. AI always uses "dataset" as table name, no semicolon.
 
 ---

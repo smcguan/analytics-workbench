@@ -27,7 +27,13 @@
       "Bash(python3:*)",
       "Bash(python -m pytest tests/ -k \"sessions_saved or session_saved\" -v)",
       "Bash(.venv/Scripts/pytest tests/ -k \"sessions_saved or session_saved\" -v)",
-      "Bash(.venv/Scripts/pytest tests/ -q)"
+      "Bash(.venv/Scripts/pytest tests/ -q)",
+      "Bash(cp -r frontend dist/AnalyticsWorkbench/)",
+      "Bash(cp -r data dist/AnalyticsWorkbench/)",
+      "Bash(cp .env dist/AnalyticsWorkbench/)",
+      "Bash(taskkill //F //IM AnalyticsWorkbench.exe)",
+      "Bash(python -c \":*)",
+      "Bash(PYTHONPATH=backend .venv/Scripts/python -c \":*)"
     ],
     "deny": [
       "Read(C:/dev/analytics-workbench/.env)",

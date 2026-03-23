@@ -10,7 +10,7 @@ stays on the analyst's machine — AI generates analysis instructions, not data 
 **Tech stack:** FastAPI backend, DuckDB query engine, OpenAI GPT-4.1-mini for AI,
 vanilla HTML/JS/CSS frontend, PyInstaller packaging for Windows desktop.
 
-**Current version:** v1.12.1 | **Total commits:** 115+ | **Test suite:** 603 tests (zero xfail)
+**Current version:** v1.15.0 | **Total commits:** 120+ | **Test suite:** 603 tests (zero xfail)
 
 ---
 
@@ -132,6 +132,7 @@ Building toward reproducible, auditable, shareable analytical sessions:
 | v1.10.2 | 2026-03-21 | Bug #18: Refresh was deleting disk files (root cause of restore loop); Clear SQL button; Sessions Save exits; SQL auto-clears on restore |
 | v1.10.3 | 2026-03-21 | Chart tab disabled until query returns chartable result; Sessions Save no longer exits; restore filters dataset list to session dataset only |
 | v1.11.0 | 2026-03-21 | SESSIONS sidebar removed; snapshots retired; Welcome card is session hub (Resume + Save); Reference Guide as slide-in drawer; 603 tests |
+| v1.15.0 | 2026-03-23 | M5 Demo Sprint: unified Workflows dialog, workflow replay engine, reference table sidebar items, Edit panel, session isolation, PyInstaller fix; 603 tests |
 | v1.14.0 | 2026-03-23 | Tutorial #4 Multi-State Medicaid Diligence; 8 example cases; 4 reference tables; narrated 12-step session; Farragut demo ready; 603 tests |
 | v1.13.0 | 2026-03-22 | Multi-dataset UNION/JOIN backend; schema normalization JOIN validated (TX/FL/OH); reference bleed-through fix on resume; 603 tests |
 | v1.12.1 | 2026-03-22 | Custom tooltip system; descriptive tooltips on all buttons; popover visual polish; Clear Workspace completeness; .gitignore runtime data; 603 tests |
@@ -141,6 +142,14 @@ Building toward reproducible, auditable, shareable analytical sessions:
 
 ## Wrap Records
 <!-- Each /wrap appends a 3-line summary below. Most recent at top. -->
+
+**v1.15.0** | 2026-03-23
+M5 Demo Sprint: unified Workflows dialog (Stored + Example Workflows with Step Through/Run All/Resume/
+Edit/Delete). Workflow replay engine with session isolation and 3-tier reference restore. Reference
+tables as individual sidebar items with REF badge. Workflow Edit slide-in panel for dataset remapping.
+Session save captures all_datasets + all_references. Clear Workspace resets session + closes panels.
+SQL editor stays open during playback. Baseline mismatch = warning not failure. PyInstaller fix
+(python313.dll bundled). Session Log checkbox toggle. Refresh/Library buttons removed. 6 new endpoints.
 
 **v1.14.0** | 2026-03-23
 Tutorial #4: Multi-State Medicaid Diligence added to Session Library. 500-row samples for

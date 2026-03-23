@@ -1087,6 +1087,18 @@ def _resolve_reference_for_sql(
     return f"read_parquet('{ref_esc}')", ref_name
 
 
+def _build_additional_references() -> dict[str, str]:
+    """Build a dict of all registered reference tables → read_parquet(...)."""
+    refs: dict[str, str] = {}
+    if REFERENCES_DIR.exists():
+        for d in REFERENCES_DIR.iterdir():
+            if d.is_dir():
+                pq = d / "source.parquet"
+                if pq.exists():
+                    refs[d.name] = f"read_parquet('{_sql_escape_path(str(pq.resolve()))}')"
+    return refs
+
+
 def _rewrite_sql_dataset_reference(
     sql: str,
     dataset_name: str,
@@ -1094,6 +1106,7 @@ def _rewrite_sql_dataset_reference(
     reference_parquet_sql: str | None = None,
     reference_name: str | None = None,
     additional_datasets: dict[str, str] | None = None,
+    additional_references: dict[str, str] | None = None,
 ) -> str:
     """
     Rewrite logical dataset references to read_parquet(...).
@@ -1240,6 +1253,27 @@ def _rewrite_sql_dataset_reference(
                     alias = existing_alias.strip().split()[-1] if existing_alias else _n
                     return f"{keyword} {_p} AS {alias}"
                 rewritten = add_pattern.sub(_add_repl, rewritten)
+
+    # Rewrite any other registered reference tables referenced in the SQL.
+    # This allows multi-reference queries where the analyst names a
+    # reference table directly (e.g. JOIN medicaid_schema_map) even when
+    # a different reference is the "active" one.
+    if additional_references:
+        for add_ref_name, add_ref_pq_sql in additional_references.items():
+            # Skip if already handled as the primary reference
+            if add_ref_name == reference_name:
+                continue
+            add_ref_pattern = re.compile(
+                rf'(?i)\b(from|join)\s+(")?{re.escape(add_ref_name)}(")?\b'
+                rf'(\s+as\s+\w+|\s+(?!{_SQL_KW}\b)\w+)?'
+            )
+            if add_ref_pattern.search(rewritten):
+                def _add_ref_repl(m: re.Match[str], _n=add_ref_name, _p=add_ref_pq_sql) -> str:
+                    keyword = m.group(1)
+                    existing_alias = m.group(4)
+                    alias = existing_alias.strip().split()[-1] if existing_alias else _n
+                    return f"{keyword} {_p} AS {alias}"
+                rewritten = add_ref_pattern.sub(_add_ref_repl, rewritten)
 
     return rewritten
 
@@ -2691,6 +2725,8 @@ def api_sql(req: SqlRequest):
             except Exception:
                 pass
 
+        additional_references = _build_additional_references()
+
         sql = _rewrite_sql_dataset_reference(
             sql=cleaned_sql,
             dataset_name=req.dataset,
@@ -2698,6 +2734,7 @@ def api_sql(req: SqlRequest):
             reference_parquet_sql=reference_parquet_sql,
             reference_name=reference_name,
             additional_datasets=additional_datasets,
+            additional_references=additional_references,
         )
 
         # ----------------------------------------------------
@@ -2902,12 +2939,26 @@ def api_sql_export(req: SqlExportRequest):
             req.reference
         )
 
+        additional_datasets_export: dict[str, str] = {}
+        for other_name in list_datasets():
+            if other_name == req.dataset:
+                continue
+            try:
+                other_src, _ = dataset_source_path(other_name)
+                additional_datasets_export[other_name] = f"read_parquet('{_sql_escape_path(other_src)}')"
+            except Exception:
+                pass
+
+        additional_references_export = _build_additional_references()
+
         sql = _rewrite_sql_dataset_reference(
             sql=cleaned_sql,
             dataset_name=req.dataset,
             parquet_sql=parquet_sql,
             reference_parquet_sql=reference_parquet_sql,
             reference_name=reference_name,
+            additional_datasets=additional_datasets_export,
+            additional_references=additional_references_export,
         )
 
         # ----------------------------------------------------
@@ -4104,6 +4155,37 @@ def api_session_name(req: SessionNameRequest):
     return {"status": "ok", "name": req.name, "description": req.description}
 
 
+@app.post("/api/session/reset")
+def api_session_reset():
+    """Start a fresh session, discarding all events from the current one."""
+    session = start_session()
+    return {
+        "status": "ok",
+        "session_id": session.session_id,
+        "started_at": session.started_at,
+    }
+
+
+class LogEventRequest(BaseModel):
+    event_type: str
+    details: dict = {}
+
+
+@app.post("/api/session/log_event")
+def api_session_log_event(req: LogEventRequest):
+    """Manually append an event to the current session log.
+
+    Used by the frontend during workflow replay to record dataset/reference
+    steps that don't go through the normal import endpoints.
+    """
+    try:
+        et = SessionEventType(req.event_type)
+    except ValueError:
+        raise HTTPException(status_code=400, detail=f"Invalid event type: {req.event_type}")
+    log_event(et, req.details)
+    return {"status": "ok"}
+
+
 @app.get("/api/session/load/{filename}")
 def api_session_load(filename: str):
     """Load and return full session JSON data from a saved file."""
@@ -4145,6 +4227,100 @@ def _derive_resume_state(events: list[dict]) -> dict:
         if et == "reference_delete" and "reference" not in state:
             state["reference"] = None
     return state
+
+
+def _restore_single_reference(ref_info: dict) -> dict:
+    """Try to restore a reference table from disk, library, or example cases.
+
+    Returns a dict with 'name', 'loaded' (bool), and optionally row/column counts.
+    """
+    rname = ref_info.get("name", "")
+    rsource = ref_info.get("library_source", "")
+
+    # 1. Already on disk
+    if rname:
+        ref_pq = (REFERENCES_DIR / rname / "source.parquet").resolve()
+        if ref_pq.exists():
+            resp: dict = {"name": rname, "loaded": True}
+            meta_path = REFERENCES_DIR / rname / "_meta.json"
+            if meta_path.exists():
+                try:
+                    m = json.loads(meta_path.read_text(encoding="utf-8"))
+                    resp["row_count"] = m.get("row_count")
+                    resp["column_count"] = m.get("column_count")
+                except Exception:
+                    pass
+            return resp
+
+    # 2. Reference library
+    if rsource:
+        csv_path = REFERENCE_LIBRARY_DIR / rsource
+        if csv_path.exists():
+            try:
+                with csv_path.open("rb") as f:
+                    result = import_reference_table(
+                        uploaded_file=f,
+                        original_filename=rsource,
+                        registered_root=REFERENCES_DIR,
+                        overwrite=True,
+                    )
+                return {
+                    "name": result.reference_name,
+                    "loaded": True,
+                    "row_count": result.row_count,
+                    "column_count": len(result.columns),
+                }
+            except Exception as exc:
+                logger.warning("Failed to load reference %s from library: %s", rname, exc)
+
+    # 3. Search example case reference directories
+    search_name = rsource or (rname + ".csv")
+    if EXAMPLE_CASES_DIR.exists():
+        for case_dir in EXAMPLE_CASES_DIR.iterdir():
+            ref_dir = case_dir / "reference"
+            if not ref_dir.is_dir():
+                continue
+            candidate = ref_dir / search_name
+            if candidate.exists():
+                try:
+                    with candidate.open("rb") as f:
+                        result = import_reference_table(
+                            uploaded_file=f,
+                            original_filename=candidate.name,
+                            registered_root=REFERENCES_DIR,
+                            overwrite=True,
+                        )
+                    return {
+                        "name": result.reference_name,
+                        "loaded": True,
+                        "row_count": result.row_count,
+                        "column_count": len(result.columns),
+                    }
+                except Exception as exc:
+                    logger.warning("Failed to load reference %s from example case: %s", rname, exc)
+                break
+
+    return {"name": rname, "loaded": False, "message": f"Reference '{rname}' not found"}
+
+
+@app.post("/api/references/restore")
+def api_restore_reference(name: str, source: str = ""):
+    """Restore a reference table from disk, library, or example cases.
+
+    Used by the frontend during workflow replay to ensure a reference table
+    is available before queries that depend on it execute.
+    """
+    result = _restore_single_reference({"name": name, "library_source": source})
+    if result.get("loaded"):
+        try:
+            log_event(SessionEventType.REFERENCE_LOAD, {
+                "reference_name": result["name"],
+                "row_count": result.get("row_count"),
+                "source": source or (name + ".csv"),
+            })
+        except Exception:
+            logger.warning("Failed to log session event", exc_info=True)
+    return result
 
 
 @app.post("/api/session/resume")
@@ -4189,67 +4365,33 @@ def api_session_resume(req: ResumeRequest):
             "message": f"Dataset '{dataset_name}' not found — import it first, then try Resume again.",
         }
 
-    # Load reference table if needed
+    # Load the active reference table — try disk, library, then example cases
     ref_response = None
-    if ref_info and ref_info.get("library_source"):
-        csv_path = REFERENCE_LIBRARY_DIR / ref_info["library_source"]
-        if csv_path.exists():
-            try:
-                with csv_path.open("rb") as f:
-                    result = import_reference_table(
-                        uploaded_file=f,
-                        original_filename=ref_info["library_source"],
-                        registered_root=REFERENCES_DIR,
-                        overwrite=True,
-                    )
-                ref_response = {
-                    "name": result.reference_name,
-                    "loaded": True,
-                    "library_source": ref_info["library_source"],
-                    "row_count": result.row_count,
-                    "column_count": len(result.columns),
-                }
-            except Exception as exc:
-                logger.warning("Failed to load reference on resume: %s", exc)
-                ref_response = {
-                    "name": ref_info.get("name", ""),
-                    "loaded": False,
-                    "library_source": ref_info["library_source"],
-                    "message": str(exc),
-                }
-        else:
-            ref_response = {
-                "name": ref_info.get("name", ""),
-                "loaded": False,
-                "library_source": ref_info["library_source"],
-                "message": f"Library CSV '{ref_info['library_source']}' not found",
-            }
-    elif ref_info and ref_info.get("name"):
-        # Check if reference already exists in references dir
-        ref_pq = (REFERENCES_DIR / ref_info["name"] / "source.parquet").resolve()
-        if ref_pq.exists():
-            ref_response = {"name": ref_info["name"], "loaded": True}
-            # Read _meta.json for row/column counts
-            ref_meta_path = REFERENCES_DIR / ref_info["name"] / "_meta.json"
-            if ref_meta_path.exists():
-                try:
-                    ref_meta = json.loads(ref_meta_path.read_text(encoding="utf-8"))
-                    ref_response["row_count"] = ref_meta.get("row_count")
-                    ref_response["column_count"] = ref_meta.get("column_count")
-                except Exception:
-                    pass
-        else:
-            ref_response = {
-                "name": ref_info["name"],
-                "loaded": False,
-                "message": f"Reference '{ref_info['name']}' not found and no library source available",
-            }
+    if ref_info and (ref_info.get("name") or ref_info.get("library_source")):
+        ref_response = _restore_single_reference(ref_info)
+
+    # Collect all datasets from session for multi-dataset restore
+    all_datasets = resume_state.get("all_datasets", [])
+    if dataset_name and dataset_name not in all_datasets:
+        all_datasets.insert(0, dataset_name)
+
+    # Load ALL references from session — not just the active one.
+    # The SQL rewriter resolves any registered reference by name, so all
+    # must be on disk for multi-reference queries to work.
+    all_references = resume_state.get("all_references", [])
+    all_ref_responses: list[dict] = []
+    for ref in all_references:
+        if not ref.get("name"):
+            continue
+        all_ref_responses.append(_restore_single_reference(ref))
 
     return {
         "status": "ready",
         "dataset": dataset_name,
         "dataset_exists": dataset_exists,
         "reference": ref_response,
+        "all_datasets": all_datasets,
+        "all_references": all_ref_responses,
         "last_sql": last_sql,
         "last_question": last_question,
         "message": None,
@@ -4263,6 +4405,79 @@ class ReplayRequest(BaseModel):
 
 class AnnotateRequest(BaseModel):
     filename: str
+
+
+class ReplayPrepareRequest(BaseModel):
+    filename: str
+
+
+@app.post("/api/session/replay/prepare")
+def api_session_replay_prepare(req: ReplayPrepareRequest):
+    """Load a saved session and extract its dataset/reference requirements.
+
+    Returns information the Replay Wizard needs to show the dataset mapping UI:
+    which datasets the session expects, which are already on disk, and which
+    reference tables are needed.
+    """
+    from app.services.session_replay import SessionReplayEngine
+    engine = SessionReplayEngine(DATASETS_DIR, REFERENCES_DIR, REFERENCE_LIBRARY_DIR, SESSIONS_DIR)
+    try:
+        session_data = engine.load_session(req.filename)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail=f"Session file not found: {req.filename}")
+
+    events = session_data.get("events", [])
+
+    # Extract unique datasets from import and query_run events
+    required_datasets: list[dict] = []
+    seen_datasets: set[str] = set()
+    required_references: list[dict] = []
+    seen_refs: set[str] = set()
+    replayable_count = 0
+
+    for ev in events:
+        et = ev.get("event_type", "")
+        d = ev.get("details", {})
+
+        if et in ("dataset_import", "query_run", "reference_load", "reference_delete", "export", "session_end"):
+            replayable_count += 1
+
+        if et == "dataset_import":
+            name = d.get("dataset", "")
+            if name and name not in seen_datasets:
+                seen_datasets.add(name)
+                ds_dir = (DATASETS_DIR / name).resolve()
+                exists = ds_dir.exists() and any(
+                    (ds_dir / m).exists()
+                    for m in ("source.parquet", "_meta.json", "metadata.json")
+                )
+                required_datasets.append({
+                    "name": name,
+                    "exists": exists,
+                    "row_count": d.get("row_count"),
+                    "column_count": d.get("column_count"),
+                })
+
+        if et == "reference_load":
+            ref_name = d.get("reference_name", "")
+            if ref_name and ref_name not in seen_refs:
+                seen_refs.add(ref_name)
+                ref_pq = (REFERENCES_DIR / ref_name / "source.parquet").resolve()
+                exists = ref_pq.exists()
+                required_references.append({
+                    "name": ref_name,
+                    "source": d.get("source", ""),
+                    "exists": exists,
+                })
+
+    return {
+        "session_name": session_data.get("name", ""),
+        "event_count": len(events),
+        "replayable_count": replayable_count,
+        "required_datasets": required_datasets,
+        "required_references": required_references,
+        "events": events,
+    }
 
 
 @app.get("/api/session/files")
@@ -4336,9 +4551,11 @@ def api_load_example_case(case_id: str, req: LoadCaseRequest):
 
     meta = json.loads(meta_path.read_text(encoding="utf-8"))
 
-    # Import the sample dataset
+    # Import all sample datasets (multi-dataset cases have several files)
     dataset_name = None
+    imported_datasets: list[str] = []
     data_dir = case_dir / "data"
+
     if data_dir.exists():
         for data_file in data_dir.iterdir():
             if data_file.suffix.lower() in (".csv", ".tsv", ".xlsx", ".parquet"):
@@ -4347,14 +4564,25 @@ def api_load_example_case(case_id: str, req: LoadCaseRequest):
                         result = import_dataset(
                             uploaded_file=f,
                             original_filename=data_file.name,
-                            display_name=meta.get("dataset_display_name", data_file.stem),
+                            display_name=None,
                             registered_root=str(DATASETS_DIR),
                             overwrite=True,
                         )
-                    dataset_name = result.metadata.registered_name
+                    imported_datasets.append(result.metadata.registered_name)
+                    # First imported dataset becomes the "primary" for response
+                    if dataset_name is None:
+                        dataset_name = result.metadata.registered_name
+                    try:
+                        log_event(SessionEventType.DATASET_IMPORT, {
+                            "dataset": result.metadata.registered_name,
+                            "row_count": result.metadata.row_count,
+                            "column_count": result.metadata.column_count,
+                            "source_filename": data_file.name,
+                        })
+                    except Exception:
+                        logger.warning("Failed to log session event", exc_info=True)
                 except Exception as exc:
-                    logger.warning("Failed to import example case dataset: %s", exc)
-                break  # Only import the first data file
+                    logger.warning("Failed to import example case dataset %s: %s", data_file.name, exc)
 
     # Load reference tables
     ref_info: list[dict] = []
@@ -4376,6 +4604,14 @@ def api_load_example_case(case_id: str, req: LoadCaseRequest):
                         "column_count": len(ref_result.columns),
                         "columns": len(ref_result.columns),
                     })
+                    try:
+                        log_event(SessionEventType.REFERENCE_LOAD, {
+                            "reference_name": ref_result.reference_name,
+                            "row_count": ref_result.row_count,
+                            "source": ref_file.name,
+                        })
+                    except Exception:
+                        logger.warning("Failed to log session event", exc_info=True)
                 except Exception as exc:
                     logger.warning("Failed to import example case reference: %s", exc)
 
@@ -4389,11 +4625,15 @@ def api_load_example_case(case_id: str, req: LoadCaseRequest):
 
 
 @app.post("/api/example_cases/{case_id}/import_dataset")
-def api_example_case_import_dataset(case_id: str):
-    """Import only the dataset from an example case (for tutorial step-by-step replay).
+def api_example_case_import_dataset(case_id: str, filename: str | None = None):
+    """Import a dataset from an example case (for tutorial step-by-step replay).
 
-    Unlike /load which imports everything at once, this imports just the dataset
-    so the tutorial can show each step happening live.
+    Unlike /load which imports everything at once, this imports one dataset at a
+    time so the tutorial can show each step happening live.
+
+    When *filename* is provided (e.g. ``fl_medicaid_claims.csv``), only that
+    specific file is imported.  Without it, the first importable file is used
+    (backwards-compatible with single-dataset cases).
     """
     case_dir = (EXAMPLE_CASES_DIR / case_id).resolve()
     if not case_dir.exists():
@@ -4407,33 +4647,54 @@ def api_example_case_import_dataset(case_id: str):
         raise HTTPException(status_code=404, detail="No data directory in example case")
 
     for data_file in data_dir.iterdir():
-        if data_file.suffix.lower() in (".csv", ".tsv", ".xlsx", ".parquet"):
+        if data_file.suffix.lower() not in (".csv", ".tsv", ".xlsx", ".parquet"):
+            continue
+        # If caller asked for a specific file, skip non-matches
+        if filename and data_file.name != filename:
+            continue
+        try:
+            # Use filename stem as display_name so the registered name matches
+            # what session.json expects (e.g. "tx_medicaid_claims" not
+            # "texas_medicaid_claims_500_row_sample").
+            with data_file.open("rb") as f:
+                result = import_dataset(
+                    uploaded_file=f,
+                    original_filename=data_file.name,
+                    display_name=None,
+                    registered_root=str(DATASETS_DIR),
+                    overwrite=True,
+                )
             try:
-                with data_file.open("rb") as f:
-                    result = import_dataset(
-                        uploaded_file=f,
-                        original_filename=data_file.name,
-                        display_name=meta.get("dataset_display_name", data_file.stem),
-                        registered_root=str(DATASETS_DIR),
-                        overwrite=True,
-                    )
-                return {
-                    "status": "imported",
+                log_event(SessionEventType.DATASET_IMPORT, {
                     "dataset": result.metadata.registered_name,
                     "row_count": result.metadata.row_count,
                     "column_count": result.metadata.column_count,
-                }
-            except Exception as exc:
-                raise HTTPException(
-                    status_code=500, detail=f"Dataset import failed: {exc}"
-                ) from exc
+                    "source_filename": data_file.name,
+                })
+            except Exception:
+                logger.warning("Failed to log session event", exc_info=True)
+            return {
+                "status": "imported",
+                "dataset": result.metadata.registered_name,
+                "row_count": result.metadata.row_count,
+                "column_count": result.metadata.column_count,
+            }
+        except Exception as exc:
+            raise HTTPException(
+                status_code=500, detail=f"Dataset import failed: {exc}"
+            ) from exc
 
     raise HTTPException(status_code=404, detail="No importable data file found in example case")
 
 
 @app.post("/api/example_cases/{case_id}/import_reference")
-def api_example_case_import_reference(case_id: str):
-    """Import only the reference table(s) from an example case."""
+def api_example_case_import_reference(case_id: str, filename: str | None = None):
+    """Import reference table(s) from an example case.
+
+    When *filename* is provided (e.g. ``medicaid_schema_map.csv``), only that
+    specific file is imported.  Without it, all reference files are imported
+    (backwards-compatible with single-reference and bulk-load cases).
+    """
     case_dir = (EXAMPLE_CASES_DIR / case_id).resolve()
     if not case_dir.exists():
         raise HTTPException(status_code=404, detail=f"Example case not found: {case_id}")
@@ -4444,22 +4705,34 @@ def api_example_case_import_reference(case_id: str):
 
     ref_info: list[dict] = []
     for ref_file in ref_dir.iterdir():
-        if ref_file.suffix.lower() in (".csv", ".tsv", ".xlsx"):
+        if ref_file.suffix.lower() not in (".csv", ".tsv", ".xlsx"):
+            continue
+        # If caller asked for a specific file, skip non-matches
+        if filename and ref_file.name != filename:
+            continue
+        try:
+            with ref_file.open("rb") as f:
+                ref_result = import_reference_table(
+                    uploaded_file=f,
+                    original_filename=ref_file.name,
+                    registered_root=REFERENCES_DIR,
+                    overwrite=True,
+                )
+            ref_info.append({
+                "name": ref_result.reference_name,
+                "row_count": ref_result.row_count,
+                "column_count": len(ref_result.columns),
+            })
             try:
-                with ref_file.open("rb") as f:
-                    ref_result = import_reference_table(
-                        uploaded_file=f,
-                        original_filename=ref_file.name,
-                        registered_root=REFERENCES_DIR,
-                        overwrite=True,
-                    )
-                ref_info.append({
-                    "name": ref_result.reference_name,
+                log_event(SessionEventType.REFERENCE_LOAD, {
+                    "reference_name": ref_result.reference_name,
                     "row_count": ref_result.row_count,
-                    "column_count": len(ref_result.columns),
+                    "source": ref_file.name,
                 })
-            except Exception as exc:
-                logger.warning("Failed to import example case reference: %s", exc)
+            except Exception:
+                logger.warning("Failed to log session event", exc_info=True)
+        except Exception as exc:
+            logger.warning("Failed to import example case reference: %s", exc)
 
     if not ref_info:
         raise HTTPException(status_code=404, detail="No importable reference files found")
@@ -4486,6 +4759,18 @@ def api_example_case_session(case_id: str):
 # ============================================================
 # SAVED SESSIONS
 # ============================================================
+
+
+@app.post("/api/sessions/{filename}/delete")
+def api_session_delete(filename: str):
+    """Delete a saved session file."""
+    filepath = (SESSIONS_DIR / filename).resolve()
+    if not filepath.exists():
+        raise HTTPException(status_code=404, detail=f"Session file not found: {filename}")
+    if not str(filepath).startswith(str(SESSIONS_DIR.resolve())):
+        raise HTTPException(status_code=400, detail="Invalid filename")
+    filepath.unlink()
+    return {"status": "deleted", "filename": filename}
 
 
 @app.get("/api/sessions/saved")

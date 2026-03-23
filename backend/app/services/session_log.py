@@ -153,9 +153,40 @@ def _build_resume_state(session: SessionLog) -> dict:
 
     Finds the last dataset/SQL from query_run events, and the last
     active reference table (a load not followed by a delete).
+    Also collects ALL imported datasets and ALL loaded references
+    so multi-dataset sessions can be fully restored.
     """
     state: dict[str, Any] = {}
 
+    # Collect all datasets and references (forward scan for complete picture)
+    all_datasets: list[str] = []
+    deleted_datasets: set[str] = set()
+    all_references: list[dict] = []
+    deleted_references: set[str] = set()
+
+    for event in session.events:
+        if event.event_type == SessionEventType.DATASET_IMPORT:
+            name = event.details.get("dataset", "")
+            if name and name not in all_datasets:
+                all_datasets.append(name)
+            deleted_datasets.discard(name)
+        if event.event_type == SessionEventType.DATASET_DELETE:
+            deleted_datasets.add(event.details.get("dataset", ""))
+        if event.event_type == SessionEventType.REFERENCE_LOAD:
+            ref = {
+                "name": event.details.get("reference_name", ""),
+                "library_source": event.details.get("source", ""),
+            }
+            if ref["name"] and ref["name"] not in [r["name"] for r in all_references]:
+                all_references.append(ref)
+            deleted_references.discard(ref["name"])
+        if event.event_type == SessionEventType.REFERENCE_DELETE:
+            deleted_references.add(event.details.get("reference_name", ""))
+
+    state["all_datasets"] = [d for d in all_datasets if d not in deleted_datasets]
+    state["all_references"] = [r for r in all_references if r["name"] not in deleted_references]
+
+    # Reverse scan for last active dataset/SQL/reference
     for event in reversed(session.events):
         if event.event_type == SessionEventType.QUERY_RUN and "dataset" not in state:
             state["dataset"] = event.details.get("dataset", "")

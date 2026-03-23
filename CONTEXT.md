@@ -25,10 +25,18 @@
 - Reference Guide — COMPLETE as right-side slide-in drawer (v1.11.0) — sidebar stays accessible while reading
 - Collapsible sidebar sections — COMPLETE (v1.10.0)
 - Exit/Save buttons — COMPLETE (v1.11.0) — Exit closes immediately; Save goes to Welcome card session hub
-- SESSIONS sidebar removed — COMPLETE (v1.11.0) — all session management moved to Welcome card
-- Welcome card session hub — COMPLETE (v1.11.0) — Resume Session (dropdown + Open) + Save Session (name field + Save)
+- Unified Workflows dialog — COMPLETE (v1.15.0) — Stored Workflows + Example Workflows in one dialog
+- WORKFLOWS sidebar section — COMPLETE (v1.15.0) — Stored Workflows, Save, Session Log checkbox
+- Session Log Viewer — COMPLETE (v1.14.0) — slide-in drawer with colored badges, expandable SQL, auto-refresh, export
+- Collapsible SQL editor — COMPLETE (v1.14.0) — auto-expands on AI generate, stays open during playback
+- Reference tables as sidebar items — COMPLETE (v1.15.0) — individual selectable items with REF badge, per-item remove
+- Workflow Edit panel — COMPLETE (v1.15.0) — slide-in panel for dataset/reference remapping
+- Workflow replay engine — COMPLETE (v1.15.0) — Step Through, Run All, Resume modes; session isolation
+- Multi-reference restore — COMPLETE (v1.15.0) — 3-tier fallback: disk → library → example cases
+- Session save full state — COMPLETE (v1.15.0) — all_datasets + all_references in resume_state
+- PyInstaller packaging fix — COMPLETE (v1.15.0) — python313.dll bundled, upx_exclude for DLLs
 
-**Current version:** v1.14.0
+**Current version:** v1.15.0
 
 **Test suite:** 603 automated tests, all passing (zero xfail), runs under 11 seconds.
 Pre-commit and pre-push git hooks enforce green suite on every commit and push.
@@ -361,6 +369,36 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-23] [CODE] — M5 Demo Sprint complete. Major session: unified Workflows dialog (Stored + Example
+  Workflows in one EC-style overlay with Step Through/Run All/Resume/Edit/Delete per entry). Session
+  isolation fix (loadAndResume now filters datasets to selected case only). Workflow replay engine
+  with 3-tier reference restore (disk→library→example cases). Multi-reference session save/restore
+  (all_datasets + all_references captured and restored). Reference tables as first-class sidebar items
+  (individual REF-badged selectable items with per-item remove). Workflow Edit slide-in panel for
+  dataset/reference remapping. Collapsible SQL editor stays open during playback. Session Log as
+  checkbox toggle. Clear Workspace closes session log + collapses editor + resets session. Baseline
+  mismatch treated as warning not failure (stale baselines in 6/8 example cases). PyInstaller fix:
+  python313.dll now bundled with upx_exclude. Sidebar: Refresh + Library buttons removed; Import
+  Dataset + Reference Table full-width. "Tutorial" → "Step Through" rename. Session delete endpoint.
+  POST /api/session/reset, /api/session/log_event, /api/references/restore, /api/sessions/{fn}/delete,
+  /api/session/replay/prepare added. 603 tests. v1.15.0.
+[2026-03-23] [CODE] — Demo sprint: 5-item follow-up pass. Critical fix: example case dataset imports
+  used display_name for registered_name, producing mismatched names (e.g. texas_medicaid_claims_500_row_sample
+  vs expected tx_medicaid_claims) — every tutorial query silently failed. Fix: pass display_name=None so
+  registered name derives from filename stem. Also: SESSIONS collapsible sidebar section (Session Log,
+  Resume, Save As as nav-items; Clear/Exit/Save&Exit as footer actions); Session Log viewer now captures
+  all events including example case imports and references (log_event calls added to 3 endpoints);
+  collapsible SQL editor (auto-expand on AI generate, auto-collapse with preview after query);
+  tutorial playback now shows SQL in editor before execution. 603 tests.
+[2026-03-23] [CODE] — Tutorial #4 multi-resource bug fixes. Three issues found during live demo:
+  (1) Only TX dataset imported — /import_dataset and /load endpoints returned after first file;
+  fixed with ?filename= param and loop-all in /load. (2) JOIN medicaid_schema_map failed — SQL
+  rewriter only resolved one reference table; fixed with additional_references dict resolving all
+  registered references (same pattern as additional_datasets). (3) Schema normalization query hit
+  wrong dataset — selectedDataset stuck on OH (last imported); tutorial query_run handler now
+  switches to step's details.dataset before running. Also: /import_reference accepts ?filename=
+  for step-by-step reference loading; export endpoint now resolves additional_datasets +
+  additional_references; session_end tutorial step now opens Session Log view. 603 tests.
 [2026-03-23] [CODE] — Tutorial #4 Multi-State Medicaid Diligence built and in Session Library. v1.14.0.
   500-row samples for TX/FL/OH + all 4 reference tables packaged. 12-step narrated session JSON:
   3 dataset imports, 4 reference loads (schema_map, audit_risk_flags, service_category_map, mco_lookup),

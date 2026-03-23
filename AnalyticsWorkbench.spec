@@ -101,6 +101,11 @@ coll = COLLECT(
     a.datas,
     strip=False,
     upx=True,
-    upx_exclude=[],
+    upx_exclude=[
+        'python3.dll',
+        'python313.dll',
+        'vcruntime140.dll',
+        'vcruntime140_1.dll',
+    ],
     name='AnalyticsWorkbench',
 )
