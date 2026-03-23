@@ -28,6 +28,8 @@
 - SESSIONS sidebar removed — COMPLETE (v1.11.0) — all session management moved to Welcome card
 - Welcome card session hub — COMPLETE (v1.11.0) — Resume Session (dropdown + Open) + Save Session (name field + Save)
 
+**Current version:** v1.13.0
+
 **Test suite:** 603 automated tests, all passing (zero xfail), runs under 11 seconds.
 Pre-commit and pre-push git hooks enforce green suite on every commit and push.
 
@@ -449,7 +451,7 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 - [ ] Multi-state Medicaid sample file — ask Farragut for sanitized sample to validate schema mapping approach.
 - [ ] M5 P1 scope — schema mapping only, or include MCO lookup in same build?
 - [ ] Analysis Summary Artifact format — configurable template (Farragut memo style) vs. fixed output?
-- [ ] Demo build for Farragut — can we demo a Medicaid workflow before M5 P1 ships?
+- [ ] Demo build for Farragut — M5 P1 backend complete; Tutorial #4 example case would serve as demo
 - [ ] Local AI mode quality bar — Ollama good enough for Tier 3 analytical queries?
 - [ ] In-App Chat — replaces or complements claude.ai partnership workflow?
 - [ ] Farragut confirmations — 5 flagged items from GUARD memo still pending.
@@ -471,7 +473,10 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 - Draft proposal and contract template skeleton
 
 **Product / code (Claude Code):**
-- ~~Spec M5 Priority 1: Multi-State Medicaid Normalization~~ COMPLETE — multi-dataset UNION built (v1.12.x)
+- ~~Spec M5 Priority 1: Multi-State Medicaid Normalization~~ COMPLETE — multi-dataset UNION built (v1.13.0)
+- ~~Phase 1: Validate multi-dataset simultaneous load~~ COMPLETE — TX/FL/OH all load correctly (v1.13.0)
+- ~~Phase 2: Validate schema normalization JOIN~~ COMPLETE — medicaid_schema_map validated, title-case UPPER() fix documented (v1.13.0)
+- ~~Phase 3: Multi-dataset UNION backend~~ COMPLETE — 13K row cross-state UNION working (v1.13.0)
 - Build Tutorial #4 example case: Multi-State Medicaid Diligence (TX/FL/OH datasets + 4 reference tables)
 - Add medicaid_schema_map, mco_lookup, audit_risk_flags, service_category_map to Reference Table Library
 - Spec M5 Priority 2: Analysis Summary Artifact (configurable memo template)
