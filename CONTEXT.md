@@ -28,7 +28,7 @@
 - SESSIONS sidebar removed — COMPLETE (v1.11.0) — all session management moved to Welcome card
 - Welcome card session hub — COMPLETE (v1.11.0) — Resume Session (dropdown + Open) + Save Session (name field + Save)
 
-**Current version:** v1.13.0
+**Current version:** v1.14.0
 
 **Test suite:** 603 automated tests, all passing (zero xfail), runs under 11 seconds.
 Pre-commit and pre-push git hooks enforce green suite on every commit and push.
@@ -361,6 +361,14 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-23] [CODE] — Tutorial #4 Multi-State Medicaid Diligence built and in Session Library. v1.14.0.
+  500-row samples for TX/FL/OH + all 4 reference tables packaged. 12-step narrated session JSON:
+  3 dataset imports, 4 reference loads (schema_map, audit_risk_flags, service_category_map, mco_lookup),
+  5 analytical queries, export, Result Passport, session end. Baselines validated from sample data:
+  schema normalization=20, MCO totals=3, MCO concentration=3, audit risk JOIN=8, Skilled Nursing
+  cross-state=3, top-2-cats/state=6. Narration at Steps 4/7/8/12 as specified. 8 example cases
+  total. Farragut demo is ready to run. 603 tests. Q8/Q9 TX data re-run after regeneration: PASS
+  (70.3% top-2 combined, Harris County NPI 3 at 25.1%). All 10 queries 10/10 PASS.
 [2026-03-23] [CODE] — M5 Phase 3 query bank: 8/10 PASS. Bugs #10/#11 logged.
   Q1 (MCO totals TX): PASS — 3 rows. Q2 (MCO concentration): PASS — Lone Star 47.8%.
   Q3 (null DIAG_CD): PASS — 266 nulls = 5.3%. Q4 (anomalous providers): PASS — both
@@ -494,8 +502,8 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 - ~~Phase 2: Validate schema normalization JOIN~~ COMPLETE — medicaid_schema_map validated, title-case UPPER() fix documented (v1.13.0)
 - ~~Phase 3: Multi-dataset UNION backend~~ COMPLETE — 13K row cross-state UNION working (v1.13.0)
 - ~~Phase 3 query bank validation~~ 8/10 PASS — 2 FAIL due to synthetic data distribution
-- Regenerate TX synthetic data: service categories need intentional skew (top 2 >60%), add county/provider concentration (>20% in at least 1 county) — Q8 and Q9 test conditions
-- Build Tutorial #4 example case: Multi-State Medicaid Diligence (TX/FL/OH datasets + 4 reference tables)
+- ~~Regenerate TX synthetic data~~ COMPLETE — Q8/Q9 now pass (70.3%, Harris 25.1%)
+- ~~Build Tutorial #4 example case~~ COMPLETE v1.14.0 — Farragut demo ready
 - Add medicaid_schema_map, mco_lookup, audit_risk_flags, service_category_map to Reference Table Library
 - Spec M5 Priority 2: Analysis Summary Artifact (configurable memo template)
 - Spec M5 Priority 3: AI Mode Switch (session-level Local/Cloud toggle)

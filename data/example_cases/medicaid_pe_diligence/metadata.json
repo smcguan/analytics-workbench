@@ -1,0 +1,30 @@
+{
+  "id": "medicaid_pe_diligence",
+  "name": "Multi-State Medicaid Diligence",
+  "description": "Normalize and analyze Medicaid claims data across Texas, Florida, and Ohio to assess revenue concentration, audit risk, and reimbursement differentials for a PE acquisition target.",
+  "tagline": "Normalize, analyze, and compare Medicaid claims across multiple states for acquisition diligence.",
+  "category": "Healthcare Policy",
+  "subcategory": "PE Diligence",
+  "difficulty": "Advanced",
+  "estimated_minutes": 25,
+  "dataset_file": "tx_medicaid_claims.csv",
+  "dataset_display_name": "Texas Medicaid Claims (500-row sample)",
+  "additional_datasets": [
+    {
+      "file": "fl_medicaid_claims.csv",
+      "display_name": "Florida Medicaid Claims (500-row sample)"
+    },
+    {
+      "file": "oh_medicaid_claims.csv",
+      "display_name": "Ohio Medicaid Claims (500-row sample)"
+    }
+  ],
+  "reference_tables": [
+    "medicaid_schema_map",
+    "service_category_map",
+    "mco_lookup",
+    "audit_risk_flags"
+  ],
+  "has_session": true,
+  "version": "1.0"
+}

@@ -132,6 +132,7 @@ Building toward reproducible, auditable, shareable analytical sessions:
 | v1.10.2 | 2026-03-21 | Bug #18: Refresh was deleting disk files (root cause of restore loop); Clear SQL button; Sessions Save exits; SQL auto-clears on restore |
 | v1.10.3 | 2026-03-21 | Chart tab disabled until query returns chartable result; Sessions Save no longer exits; restore filters dataset list to session dataset only |
 | v1.11.0 | 2026-03-21 | SESSIONS sidebar removed; snapshots retired; Welcome card is session hub (Resume + Save); Reference Guide as slide-in drawer; 603 tests |
+| v1.14.0 | 2026-03-23 | Tutorial #4 Multi-State Medicaid Diligence; 8 example cases; 4 reference tables; narrated 12-step session; Farragut demo ready; 603 tests |
 | v1.13.0 | 2026-03-22 | Multi-dataset UNION/JOIN backend; schema normalization JOIN validated (TX/FL/OH); reference bleed-through fix on resume; 603 tests |
 | v1.12.1 | 2026-03-22 | Custom tooltip system; descriptive tooltips on all buttons; popover visual polish; Clear Workspace completeness; .gitignore runtime data; 603 tests |
 | v1.12.0 | 2026-03-22 | Resume Session duplicate fix; Clear Workspace sidebar button; resume restores Ask Your Data question; 603 tests |
@@ -140,6 +141,14 @@ Building toward reproducible, auditable, shareable analytical sessions:
 
 ## Wrap Records
 <!-- Each /wrap appends a 3-line summary below. Most recent at top. -->
+
+**v1.14.0** | 2026-03-23
+Tutorial #4: Multi-State Medicaid Diligence added to Session Library. 500-row samples for
+TX/FL/OH claims + all 4 reference tables (medicaid_schema_map, service_category_map, mco_lookup,
+audit_risk_flags). 12-step narrated session: 3 dataset imports, 4 reference loads, 5 analytical
+queries, export, Result Passport, session log. Baselines validated from sample data. Narration
+embedded at Steps 4 (schema normalization), 7 (audit risk JOIN), 8 (cross-state reimbursement),
+12 (audit trail). Farragut PE diligence demo is ready to run. 8 example cases total. 603 tests.
 
 **v1.13.0** | 2026-03-22
 Multi-dataset UNION/JOIN: extended `_rewrite_sql_dataset_reference()` to resolve any registered

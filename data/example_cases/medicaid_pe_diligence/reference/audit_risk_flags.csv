@@ -1,0 +1,9 @@
+procedure_code,risk_level,audit_reason,notes
+G0156,High,Home health aide services — frequent upcoding target in Medicaid audits,
+G0162,High,Skilled services by RN — documentation deficiency risk,
+T1019,Medium,"Personal care services — high volume, prone to duplicate billing",
+T1020,Medium,Personal care services attendant — companion code to T1019,
+S9123,Medium,Nursing care in home — coverage boundary disputes common,
+G0163,High,"Skilled nursing — overlap with G0162, dual-billing risk",
+T1021,Low,Home health aide or certified nurse assistant — lower audit frequency,
+97530,Low,Therapeutic activities — functional documentation required,

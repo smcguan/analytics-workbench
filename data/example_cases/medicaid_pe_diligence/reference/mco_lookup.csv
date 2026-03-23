@@ -1,0 +1,9 @@
+mco_name,state,plan_type,tier,notes
+Lone Star Health,TX,Medicaid Managed Care,Tier 1,Largest MCO in TX market — high concentration risk
+Texas Complete Care,TX,Medicaid Managed Care,Tier 2,"Mid-size MCO, stable contract history"
+Gulf Coast MCO,TX,Medicaid Managed Care,Tier 3,"Regional MCO, limited geographic footprint"
+Sunshine Health,FL,Medicaid Managed Care,Tier 1,"Statewide FL MCO, Centene subsidiary"
+Florida Community Care,FL,Medicaid Managed Care,Tier 2,"Regional MCO, Southeast FL focus"
+Prestige Health Choice,FL,Medicaid Managed Care,Tier 3,"Smaller FL MCO, Miami-Dade focus"
+Buckeye Health Plan,OH,Medicaid Managed Care,Tier 1,"Largest OH MCO, Centene subsidiary"
+CareSource Ohio,OH,Medicaid Managed Care,Tier 1,"Major OH MCO, nonprofit model"

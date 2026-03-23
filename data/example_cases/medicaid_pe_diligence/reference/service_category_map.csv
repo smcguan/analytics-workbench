@@ -1,0 +1,16 @@
+state,raw_label,canonical_category
+TX,Home Health Aide,Home Health Aide
+TX,Skilled Nursing,Skilled Nursing
+TX,Physical Therapy,Physical Therapy
+TX,Personal Care,Personal Care
+TX,Hospice,Hospice
+FL,HHA,Home Health Aide
+FL,SN,Skilled Nursing
+FL,PT,Physical Therapy
+FL,PCS,Personal Care
+FL,HOSP,Hospice
+OH,Home Health,Home Health Aide
+OH,Skilled Nsg,Skilled Nursing
+OH,Phys Therapy,Physical Therapy
+OH,Personal Care Svc,Personal Care
+OH,Hospice Care,Hospice

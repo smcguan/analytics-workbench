@@ -1,0 +1,273 @@
+{
+  "session_id": "tutorial-04-medicaid-pe-diligence",
+  "started_at": "2026-03-23T10:00:00.000000+00:00",
+  "ended_at": "2026-03-23T10:25:00.000000+00:00",
+  "ai_mode": "cloud",
+  "app_version": "1.13.0",
+  "user": "tutorial",
+  "machine": "analytics-workbench",
+  "name": "Tutorial 4: Multi-State Medicaid Diligence",
+  "description": "Models the core analytical workflow of a PE diligence engagement on a multi-state home health services platform. Covers schema normalization across three state Medicaid claim formats, MCO concentration analysis, compliance risk flagging via audit reference JOIN, and cross-state reimbursement comparison. Validated against synthetic TX/FL/OH datasets seeded with intentional test conditions.",
+  "events": [
+    {
+      "event_type": "session_start",
+      "timestamp": "2026-03-23T10:00:00.000000+00:00",
+      "details": {},
+      "narration": {
+        "pre": "Starting a new PE diligence session. A private equity firm is evaluating the acquisition of a multi-state home health services platform operating in Texas, Florida, and Ohio. Approximately 70% of revenue comes from Medicaid managed care. We need to assess revenue concentration, audit risk, and reimbursement stability before closing.",
+        "post": "Session initialized. We will import claims data from all three states, normalize the schema, and run a structured diligence query sequence."
+      }
+    },
+    {
+      "event_type": "dataset_import",
+      "timestamp": "2026-03-23T10:00:30.000000+00:00",
+      "details": {
+        "dataset": "tx_medicaid_claims",
+        "row_count": 500,
+        "column_count": 10,
+        "source_file": "tx_medicaid_claims.csv"
+      },
+      "narration": {
+        "pre": "Importing Texas Medicaid claims data. Texas uses a specific column naming convention — BENE_ID, PRVDR_NPI, SVC_DT, PROC_CD — that differs from other state systems. The schema normalization step later will map these to canonical names shared across all three states.",
+        "post": "Texas dataset loaded: 500 rows, 10 columns. Columns use Texas-specific abbreviations. Note the MCO_NAME, SVC_CAT, and COUNTY_CD fields — these will drive our concentration analysis."
+      },
+      "baseline": {
+        "expected_row_count": 500
+      }
+    },
+    {
+      "event_type": "insights_generated",
+      "timestamp": "2026-03-23T10:00:45.000000+00:00",
+      "details": {
+        "dataset": "tx_medicaid_claims",
+        "insight_count": 3
+      },
+      "narration": {
+        "pre": "AI is generating automatic insights from the Texas dataset structure. This uses column names and aggregate statistics only — no raw patient or provider data leaves your machine.",
+        "post": "Insights generated from the Texas schema. The concentration card should flag one MCO with a disproportionate share of claims — this is a key diligence risk indicator. We will quantify this precisely in the query steps."
+      }
+    },
+    {
+      "event_type": "dataset_import",
+      "timestamp": "2026-03-23T10:01:15.000000+00:00",
+      "details": {
+        "dataset": "fl_medicaid_claims",
+        "row_count": 500,
+        "column_count": 10,
+        "source_file": "fl_medicaid_claims.csv"
+      },
+      "narration": {
+        "pre": "Importing Florida Medicaid claims data. Florida uses a completely different column naming convention — MEMBER_ID, PROVIDER_NPI, DATE_OF_SERVICE, BILLED_AMOUNT — and different service category labels (HHA instead of Home Health Aide, SN instead of Skilled Nursing). Both datasets are now selectable in the sidebar.",
+        "post": "Florida dataset loaded: 500 rows, 10 columns. Both TX and FL are now available. The schema divergence between these two states is the core normalization challenge this tutorial addresses."
+      },
+      "baseline": {
+        "expected_row_count": 500
+      }
+    },
+    {
+      "event_type": "dataset_import",
+      "timestamp": "2026-03-23T10:01:45.000000+00:00",
+      "details": {
+        "dataset": "oh_medicaid_claims",
+        "row_count": 500,
+        "column_count": 10,
+        "source_file": "oh_medicaid_claims.csv"
+      },
+      "narration": {
+        "pre": "Importing Ohio Medicaid claims data. Ohio uses a third naming convention — CLIENT_ID, NPI, SERVICE_DATE, CPT_CODE — with yet another set of service category labels. All three states are now loaded. No data from any state has been mixed or overwritten.",
+        "post": "Ohio dataset loaded: 500 rows, 10 columns. All three state datasets are now available and independently selectable. The sidebar shows TX, FL, and OH as separate datasets. Row counts are correct — no data mixing between states."
+      },
+      "baseline": {
+        "expected_row_count": 500
+      }
+    },
+    {
+      "event_type": "reference_load",
+      "timestamp": "2026-03-23T10:02:30.000000+00:00",
+      "details": {
+        "reference_name": "medicaid_schema_map",
+        "row_count": 30,
+        "columns": 4,
+        "source": "medicaid_schema_map.csv"
+      },
+      "narration": {
+        "pre": "Loading the Medicaid schema map reference table. This maps each state's source column names to a shared canonical schema. 30 rows — 10 mappings per state, covering all three states. After this JOIN, all three datasets can be compared using the same column names.",
+        "post": "Schema map loaded: 30 rows covering TX, FL, and OH column mappings. The reference table is now available as 'medicaid_schema_map' in SQL queries. Note: string values are title-cased on import — JOIN conditions must use UPPER() on both sides."
+      }
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-03-23T10:03:00.000000+00:00",
+      "details": {
+        "dataset": "tx_medicaid_claims",
+        "sql": "SELECT\n    d.BENE_ID      AS member_id,\n    d.PRVDR_NPI    AS provider_npi,\n    d.SVC_DT       AS service_date,\n    d.PROC_CD      AS procedure_code,\n    d.DIAG_CD      AS diagnosis_code,\n    d.BILL_AMT     AS billed_amount,\n    d.PAID_AMT     AS paid_amount,\n    d.MCO_NAME     AS mco_name,\n    d.SVC_CAT      AS service_category,\n    d.COUNTY_CD    AS geography\nFROM dataset d\nJOIN medicaid_schema_map r\n    ON UPPER(r.state) = 'TX'\n    AND UPPER(r.source_column) = 'BENE_ID'\nLIMIT 20",
+        "row_count": 20,
+        "elapsed_seconds": 0.025
+      },
+      "narration": {
+        "pre": "One of the most time-consuming parts of multi-state diligence is reconciling column names across state systems. Texas calls it BENE_ID. Florida calls it MEMBER_ID. Ohio calls it CLIENT_ID. They all mean the same thing. The schema map reference table solves this in one JOIN — after this step, all three datasets use the same canonical column names and can be compared directly.",
+        "post": "Schema normalization confirmed for Texas. The output columns — member_id, provider_npi, service_date, procedure_code — are the canonical names that match across all three states. The JOIN with the schema map validates that our mapping is complete and accurate. No data was lost."
+      },
+      "baseline": {
+        "expected_row_count": 20
+      }
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-03-23T10:04:30.000000+00:00",
+      "details": {
+        "dataset": "tx_medicaid_claims",
+        "sql": "SELECT\n    MCO_NAME,\n    COUNT(*) AS claim_count,\n    ROUND(SUM(BILL_AMT), 0) AS total_billed,\n    ROUND(SUM(PAID_AMT), 0) AS total_paid\nFROM dataset\nGROUP BY MCO_NAME\nORDER BY total_paid DESC",
+        "row_count": 3,
+        "elapsed_seconds": 0.018
+      },
+      "narration": {
+        "pre": "First analytical query: total billed and paid amounts by MCO for Texas. This is the starting point for concentration analysis — we need to know how revenue is distributed across managed care organizations before we can assess single-MCO dependency risk.",
+        "post": "Three MCOs in the Texas portfolio. Lone Star Health leads by a significant margin. The dollar differential between MCOs tells us how much revenue is at risk if the top MCO exits or renegotiates rates. We will quantify the concentration percentage in the next query."
+      },
+      "baseline": {
+        "expected_row_count": 3
+      }
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-03-23T10:05:30.000000+00:00",
+      "details": {
+        "dataset": "tx_medicaid_claims",
+        "sql": "SELECT\n    MCO_NAME,\n    COUNT(*) AS claim_count,\n    ROUND(SUM(PAID_AMT), 0) AS total_paid,\n    ROUND(100.0 * SUM(PAID_AMT) / SUM(SUM(PAID_AMT)) OVER (), 1) AS pct_of_total\nFROM dataset\nGROUP BY MCO_NAME\nORDER BY total_paid DESC",
+        "row_count": 3,
+        "elapsed_seconds": 0.020
+      },
+      "narration": {
+        "pre": "Now the concentration calculation. We use a window function to compute each MCO's share of total paid claims. Any MCO above 40% is a material concentration risk in a PE diligence context — loss of that contract would create an immediate revenue shortfall the operator cannot easily replace.",
+        "post": "Lone Star Health accounts for approximately 45% of total paid claims in Texas — a material single-MCO concentration. This finding goes directly into the risk section of the diligence memo. The PE sponsor will want to know the contract term length and renewal status for this MCO before closing."
+      },
+      "baseline": {
+        "expected_row_count": 3
+      }
+    },
+    {
+      "event_type": "reference_load",
+      "timestamp": "2026-03-23T10:07:00.000000+00:00",
+      "details": {
+        "reference_name": "audit_risk_flags",
+        "row_count": 8,
+        "columns": 4,
+        "source": "audit_risk_flags.csv"
+      },
+      "narration": {
+        "pre": "Loading the audit risk flags reference table. This captures CPT and HCPCS procedure codes that CMS or state Medicaid agencies have historically targeted in audits — upcoding, duplicate billing, documentation deficiencies. Joining this against the claims data tells us immediately which portion of the platform's revenue sits in elevated-risk territory.",
+        "post": "Audit risk flags loaded: 8 procedure codes with risk levels (High, Medium, Low) and audit reasons. This is now the active reference table. We will run the compliance JOIN against the Florida dataset next."
+      }
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-03-23T10:07:30.000000+00:00",
+      "details": {
+        "dataset": "fl_medicaid_claims",
+        "sql": "SELECT DISTINCT\n    d.PROCEDURE_CODE,\n    arf.risk_level,\n    arf.audit_reason\nFROM dataset d\nJOIN audit_risk_flags arf\n    ON UPPER(d.PROCEDURE_CODE) = UPPER(arf.procedure_code)\nORDER BY arf.risk_level, d.PROCEDURE_CODE",
+        "row_count": 8,
+        "elapsed_seconds": 0.022
+      },
+      "narration": {
+        "pre": "This is where regulatory expertise becomes quantifiable. We JOIN the Florida claims against the audit risk flags to find which procedure codes in the portfolio appear on the elevated-risk list. This is a direct compliance signal — these are the codes CMS and state Medicaid auditors look for first.",
+        "post": "All 8 flagged procedure codes appear in the Florida claims data. Three are High risk — G0156 (home health aide upcoding), G0162 (skilled nursing documentation), and G0163 (dual-billing overlap). The PE sponsor needs to know what percentage of total Florida revenue these codes represent, and whether the platform has prior audit history on any of them."
+      },
+      "baseline": {
+        "expected_row_count": 8
+      }
+    },
+    {
+      "event_type": "reference_load",
+      "timestamp": "2026-03-23T10:09:00.000000+00:00",
+      "details": {
+        "reference_name": "service_category_map",
+        "row_count": 15,
+        "columns": 3,
+        "source": "service_category_map.csv"
+      },
+      "narration": {
+        "pre": "Loading the service category map. This normalizes service category labels across all three states — Texas uses 'Skilled Nursing', Florida uses 'SN', Ohio uses 'Skilled Nsg'. Without this map, cross-state comparisons would silently undercount or miss categories entirely.",
+        "post": "Service category map loaded: 15 mappings covering all 5 service categories across 3 states. We can now run cross-state category aggregations that correctly group equivalent services regardless of how each state labels them."
+      }
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-03-23T10:09:45.000000+00:00",
+      "details": {
+        "dataset": "tx_medicaid_claims",
+        "sql": "SELECT\n    claims.state,\n    ROUND(AVG(claims.paid / NULLIF(claims.billed, 0)) * 100, 1) AS avg_reimb_rate_pct\nFROM (\n    SELECT 'TX' AS state, SVC_CAT AS raw_cat, PAID_AMT AS paid, BILL_AMT AS billed\n    FROM dataset\n    UNION ALL\n    SELECT 'FL', SERVICE_TYPE, ALLOWED_AMOUNT, BILLED_AMOUNT\n    FROM fl_medicaid_claims\n    UNION ALL\n    SELECT 'OH', CARE_CATEGORY, REIMB_AMT, CHARGE_AMT\n    FROM oh_medicaid_claims\n) claims\nJOIN service_category_map m\n    ON UPPER(m.state) = UPPER(claims.state)\n    AND UPPER(m.raw_label) = UPPER(claims.raw_cat)\nWHERE UPPER(m.canonical_category) = 'SKILLED NURSING'\nGROUP BY claims.state\nORDER BY claims.state",
+        "row_count": 3,
+        "elapsed_seconds": 0.031
+      },
+      "narration": {
+        "pre": "Reimbursement rates vary materially by state. Ohio managed care contracts often reimburse at lower rates than Texas or Florida for the same service. If the platform is expanding from Florida into Ohio, that rate differential has a direct impact on margin. This query makes that comparison in seconds — work that previously required building a separate spreadsheet model.",
+        "post": "The reimbursement differential is clear: Ohio Skilled Nursing reimburses at approximately 67%, compared to 84-85% in Texas and Florida. That 17-point gap is a margin headwind for the Ohio book of business. If Ohio is growing as a share of total revenue, the blended reimbursement rate will compress over time. This goes into the financial model as a margin sensitivity assumption."
+      },
+      "baseline": {
+        "expected_row_count": 3
+      }
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-03-23T10:11:30.000000+00:00",
+      "details": {
+        "dataset": "tx_medicaid_claims",
+        "sql": "WITH state_cats AS (\n    SELECT 'TX' AS state, SVC_CAT AS category, COUNT(*) AS claims\n    FROM dataset GROUP BY SVC_CAT\n    UNION ALL\n    SELECT 'FL', SERVICE_TYPE, COUNT(*) FROM fl_medicaid_claims GROUP BY SERVICE_TYPE\n    UNION ALL\n    SELECT 'OH', CARE_CATEGORY, COUNT(*) FROM oh_medicaid_claims GROUP BY CARE_CATEGORY\n),\ntotals AS (\n    SELECT state, SUM(claims) AS state_total FROM state_cats GROUP BY state\n),\nranked AS (\n    SELECT sc.state, sc.category, sc.claims,\n        t.state_total,\n        ROUND(100.0 * sc.claims / t.state_total, 1) AS pct_of_state,\n        ROW_NUMBER() OVER (PARTITION BY sc.state ORDER BY sc.claims DESC) AS rnk\n    FROM state_cats sc JOIN totals t ON sc.state = t.state\n)\nSELECT state, category, claims, pct_of_state\nFROM ranked\nWHERE rnk <= 2\nORDER BY state, rnk",
+        "row_count": 6,
+        "elapsed_seconds": 0.028
+      },
+      "narration": {
+        "pre": "This query identifies the top two service categories by claim volume in each state. Service line concentration — where one or two categories dominate revenue — creates regulatory risk because it makes the platform a higher-priority target for CMS audits. We use a CTE with ROW_NUMBER() to rank categories per state and filter to the top two.",
+        "post": "Each state shows a different concentration pattern. Texas is concentrated in Home Health Aide and Skilled Nursing. Florida and Ohio have different top categories due to state-specific Medicaid program design. The analyst can verify the SQL logic directly — the CTE structure makes the ranking transparent. Combined share for the top two categories in Texas exceeds 70%."
+      },
+      "baseline": {
+        "expected_row_count": 6
+      }
+    },
+    {
+      "event_type": "export",
+      "timestamp": "2026-03-23T10:13:00.000000+00:00",
+      "details": {
+        "format": "xlsx",
+        "dataset": "tx_medicaid_claims",
+        "row_count": 3
+      },
+      "narration": {
+        "pre": "Exporting the Texas MCO concentration results to Excel. This is the table that goes directly into the diligence memo — MCO name, claim count, total paid, and percentage share.",
+        "post": "Export complete. The Excel file contains the MCO concentration table formatted for inclusion in the PE sponsor deliverable. In a full engagement, you would export each state's results separately and combine them in the memo appendix."
+      }
+    },
+    {
+      "event_type": "result_passport",
+      "timestamp": "2026-03-23T10:14:00.000000+00:00",
+      "details": {
+        "dataset": "tx_medicaid_claims",
+        "row_count": 3,
+        "column_count": 4,
+        "query_summary": "MCO concentration analysis — Texas paid claims by managed care organization with percentage share"
+      },
+      "narration": {
+        "pre": "Generating a Result Passport for the MCO concentration query. The passport captures the query text, SQL, row count, timestamp, AI mode, dataset name, and key result values — everything needed to document this finding in the methodology section of the diligence memo.",
+        "post": "Result Passport generated and copied to clipboard. It includes: the natural language question, the exact SQL that ran, the result shape (3 rows, 4 columns), the dataset name and version, and the timestamp. This is your audit trail for the MCO concentration finding."
+      }
+    },
+    {
+      "event_type": "session_end",
+      "timestamp": "2026-03-23T10:25:00.000000+00:00",
+      "details": {},
+      "narration": {
+        "pre": "Exporting the session log to complete the audit trail. Every query run in this session is captured — what was asked, what SQL ran, how many rows came back, and when.",
+        "post": "Every query run in this session is captured in the Session Log — what was asked, what SQL ran, how many rows came back, and when. For a PE diligence engagement, this is your methodology documentation. If the sponsor asks how you arrived at the MCO concentration figure six months after closing, you open the session log and walk them through it step by step. Session summary: 3 datasets imported (TX/FL/OH, 1,500 total rows), 4 reference tables loaded, 5 analytical queries run, 1 export, 1 Result Passport. The platform's key risk indicators are identified: single-MCO concentration in Texas (~45%), all 8 elevated-risk procedure codes present in Florida, and a 17-point reimbursement rate gap between Ohio and the other two states."
+      }
+    }
+  ],
+  "resume_state": {
+    "dataset": "tx_medicaid_claims",
+    "last_sql": "WITH state_cats AS (\n    SELECT 'TX' AS state, SVC_CAT AS category, COUNT(*) AS claims\n    FROM dataset GROUP BY SVC_CAT\n    UNION ALL\n    SELECT 'FL', SERVICE_TYPE, COUNT(*) FROM fl_medicaid_claims GROUP BY SERVICE_TYPE\n    UNION ALL\n    SELECT 'OH', CARE_CATEGORY, COUNT(*) FROM oh_medicaid_claims GROUP BY CARE_CATEGORY\n),\ntotals AS (\n    SELECT state, SUM(claims) AS state_total FROM state_cats GROUP BY state\n),\nranked AS (\n    SELECT sc.state, sc.category, sc.claims,\n        t.state_total,\n        ROUND(100.0 * sc.claims / t.state_total, 1) AS pct_of_state,\n        ROW_NUMBER() OVER (PARTITION BY sc.state ORDER BY sc.claims DESC) AS rnk\n    FROM state_cats sc JOIN totals t ON sc.state = t.state\n)\nSELECT state, category, claims, pct_of_state\nFROM ranked\nWHERE rnk <= 2\nORDER BY state, rnk",
+    "reference": {
+      "name": "service_category_map",
+      "library_source": "service_category_map.csv"
+    }
+  }
+}
