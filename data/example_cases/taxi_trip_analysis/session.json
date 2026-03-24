@@ -63,33 +63,29 @@
       }
     },
     {
-      "event_type": "query_run",
+      "event_type": "ai_ask",
       "timestamp": "2026-03-20T19:01:00.000000+00:00",
       "details": {
         "dataset": "nyc_taxi_2023_03_sample",
-        "sql": "SELECT COUNT(*) AS total_trips, ROUND(AVG(fare_amount), 2) AS avg_fare, ROUND(AVG(trip_distance), 2) AS avg_distance, ROUND(AVG(tip_amount), 2) AS avg_tip FROM dataset WHERE fare_amount > 0",
-        "row_count": 1,
-        "elapsed_seconds": 0.018
+        "question": "What is the total trip count, average fare, average distance, and average tip for trips where the fare is greater than zero?"
       },
       "narration": {
-        "pre": "First, basic aggregation: how many trips, average fare, average distance, and average tip? We filter out zero-fare trips (voided rides or data errors) to get clean averages.",
-        "post": "The average March 2023 yellow cab ride costs about $19, covers roughly 3 miles, and generates a $3-4 tip. These baselines help us spot outliers later."
+        "pre": "Type a question in plain English: 'What is the total trip count, average fare, average distance, and average tip for trips where the fare is greater than zero?' We filter out zero-fare trips (voided rides or data errors) to get clean averages.",
+        "post": "The average March 2023 yellow cab ride costs about $19, covers roughly 3 miles, and generates a $3-4 tip. These baselines help us spot outliers later. One natural language question — the AI wrote the SQL."
       },
       "baseline": {
         "expected_row_count": 1
       }
     },
     {
-      "event_type": "query_run",
+      "event_type": "ai_ask",
       "timestamp": "2026-03-20T19:03:00.000000+00:00",
       "details": {
         "dataset": "nyc_taxi_2023_03_sample",
-        "sql": "SELECT PULocationID AS pickup_zone, COUNT(*) AS trips, ROUND(AVG(fare_amount), 2) AS avg_fare FROM dataset GROUP BY PULocationID ORDER BY trips DESC LIMIT 10",
-        "row_count": 10,
-        "elapsed_seconds": 0.015
+        "question": "Which are the top 10 pickup zones by trip count, and what is the average fare for each?"
       },
       "narration": {
-        "pre": "Concentration analysis: which pickup zones generate the most trips? NYC taxi demand is heavily concentrated in Manhattan — a small number of zones account for a disproportionate share of all rides.",
+        "pre": "Concentration analysis: 'Which are the top 10 pickup zones by trip count, and what is the average fare for each?' NYC taxi demand is heavily concentrated in Manhattan — a small number of zones account for a disproportionate share of all rides.",
         "post": "Top 10 pickup zones identified. Zone IDs map to NYC neighborhoods — the highest-volume zones are typically Midtown Manhattan, Penn Station, and the airports (JFK zone 132, LaGuardia zone 138). This concentration pattern is a classic Pareto distribution."
       },
       "baseline": {
@@ -114,33 +110,29 @@
       }
     },
     {
-      "event_type": "query_run",
+      "event_type": "ai_ask",
       "timestamp": "2026-03-20T19:07:00.000000+00:00",
       "details": {
         "dataset": "nyc_taxi_2023_03_sample",
-        "sql": "SELECT EXTRACT(HOUR FROM tpep_pickup_datetime::TIMESTAMP) AS pickup_hour, COUNT(*) AS trips, ROUND(AVG(fare_amount), 2) AS avg_fare FROM dataset GROUP BY pickup_hour ORDER BY pickup_hour",
-        "row_count": 24,
-        "elapsed_seconds": 0.017
+        "question": "What is the trip count and average fare by hour of day?"
       },
       "narration": {
-        "pre": "Time-of-day analysis: when do people take cabs, and do fares vary by hour? This reveals the daily rhythm of the city — morning commutes, lunch rush, evening entertainment, late-night bar traffic.",
-        "post": "24 hourly bins showing the full daily cycle. Peak trip volume typically hits 6-7 PM (evening commute + dinner), with a secondary morning peak. Average fares tend to be higher in early morning hours (longer airport runs) and lower during midday (shorter local trips). This time pattern is valuable for fleet planning and surge pricing analysis."
+        "pre": "Time-of-day analysis: 'What is the trip count and average fare by hour of day?' This reveals the daily rhythm of the city — morning commutes, lunch rush, evening entertainment, late-night bar traffic.",
+        "post": "24 hourly bins showing the full daily cycle. Peak trip volume typically hits 6-7 PM (evening commute + dinner), with a secondary morning peak. Average fares tend to be higher in early morning hours (longer airport runs) and lower during midday (shorter local trips). The AI handled the EXTRACT(HOUR) function automatically."
       },
       "baseline": {
         "expected_row_count": 24
       }
     },
     {
-      "event_type": "query_run",
+      "event_type": "ai_ask",
       "timestamp": "2026-03-20T19:09:00.000000+00:00",
       "details": {
         "dataset": "nyc_taxi_2023_03_sample",
-        "sql": "SELECT tpep_pickup_datetime::TIMESTAMP AS pickup_time, PULocationID, DOLocationID, trip_distance, fare_amount, tip_amount, total_amount FROM dataset WHERE fare_amount > 100 ORDER BY fare_amount DESC",
-        "row_count": 24,
-        "elapsed_seconds": 0.014
+        "question": "Show me all trips with fares over $100, ordered by fare amount highest first"
       },
       "narration": {
-        "pre": "Outlier identification: which trips had fares over $100? High-fare trips are typically airport runs, long-distance trips to the suburbs, or flat-rate fares. Identifying outliers helps distinguish normal patterns from exceptional cases.",
+        "pre": "Outlier identification: 'Show me all trips with fares over $100.' High-fare trips are typically airport runs, long-distance trips to the suburbs, or flat-rate fares.",
         "post": "24 high-fare trips found. These include JFK airport flat rates (~$70 fare + tolls + surcharges pushing over $100), long-distance trips, and a few unusually expensive rides worth investigating. In a real analysis, you'd cross-reference these with distance to flag potential fare errors."
       },
       "baseline": {

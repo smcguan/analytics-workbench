@@ -51,76 +51,66 @@
       }
     },
     {
-      "event_type": "query_run",
+      "event_type": "ai_ask",
       "timestamp": "2026-03-20T21:01:00.000000+00:00",
       "details": {
         "dataset": "logistics_shipments_sample",
-        "sql": "SELECT mode, COUNT(*) AS shipments, ROUND(AVG(total_cost), 2) AS avg_cost, ROUND(AVG(delay_hours), 1) AS avg_delay, ROUND(SUM(CASE WHEN on_time = 'Y' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 1) AS on_time_pct FROM dataset GROUP BY mode ORDER BY shipments DESC",
-        "row_count": 4,
-        "elapsed_seconds": 0.016
+        "question": "What are the shipment count, average cost, average delay hours, and on-time percentage by transport mode?"
       },
       "narration": {
-        "pre": "Performance by transport mode: how do Air, Ground, Rail, and Ocean compare on volume, cost, delays, and on-time rate?",
-        "post": "4 transport modes compared. Each mode has a different cost/speed tradeoff. Air is fastest but most expensive; Ocean is cheapest but slowest. On-time rates vary significantly by mode."
+        "pre": "Performance by transport mode: 'What are the shipment count, average cost, average delay hours, and on-time percentage by transport mode?'",
+        "post": "4 transport modes compared. Each mode has a different cost/speed tradeoff. Air is fastest but most expensive; Ocean is cheapest but slowest. On-time rates vary significantly by mode. One question, four dimensions."
       },
       "baseline": { "expected_row_count": 4 }
     },
     {
-      "event_type": "query_run",
+      "event_type": "ai_ask",
       "timestamp": "2026-03-20T21:03:00.000000+00:00",
       "details": {
         "dataset": "logistics_shipments_sample",
-        "sql": "SELECT origin_city, destination_city, COUNT(*) AS shipments, ROUND(AVG(total_cost), 2) AS avg_cost FROM dataset GROUP BY origin_city, destination_city ORDER BY shipments DESC LIMIT 10",
-        "row_count": 10,
-        "elapsed_seconds": 0.015
+        "question": "What are the top 10 routes by shipment count, and what is the average cost for each?"
       },
       "narration": {
-        "pre": "Top 10 routes by shipment volume. Logistics networks tend to be heavily concentrated — a small number of city pairs handle most of the freight.",
+        "pre": "Top 10 routes: 'What are the top 10 routes by shipment count, and what is the average cost for each?' Logistics networks tend to be heavily concentrated — a small number of city pairs handle most of the freight.",
         "post": "Top 10 routes identified. These high-volume lanes are candidates for dedicated carrier contracts or rate negotiation. Average cost per route helps identify over- or under-priced lanes."
       },
       "baseline": { "expected_row_count": 10 }
     },
     {
-      "event_type": "query_run",
+      "event_type": "ai_ask",
       "timestamp": "2026-03-20T21:05:00.000000+00:00",
       "details": {
         "dataset": "logistics_shipments_sample",
-        "sql": "SELECT on_time, COUNT(*) AS shipments, ROUND(AVG(total_cost), 2) AS avg_cost, ROUND(AVG(weight_kg), 1) AS avg_weight FROM dataset GROUP BY on_time ORDER BY on_time",
-        "row_count": 2,
-        "elapsed_seconds": 0.014
+        "question": "Compare on-time vs late shipments on shipment count, average cost, and average weight"
       },
       "narration": {
-        "pre": "On-time vs late: do late shipments cost more? Are they heavier? This tells us whether delays correlate with shipment characteristics or are purely operational.",
-        "post": "On-time vs late comparison. If late shipments are heavier or more expensive on average, that suggests capacity or routing issues on certain shipment types. If costs are similar, the delays are likely operational (carrier performance, weather, congestion)."
+        "pre": "On-time vs late: 'Compare on-time vs late shipments on shipment count, average cost, and average weight.' This tells us whether delays correlate with shipment characteristics or are purely operational.",
+        "post": "On-time vs late comparison. If late shipments are heavier or more expensive on average, that suggests capacity or routing issues on certain shipment types. If costs are similar, the delays are likely operational."
       },
       "baseline": { "expected_row_count": 2 }
     },
     {
-      "event_type": "query_run",
+      "event_type": "ai_ask",
       "timestamp": "2026-03-20T21:07:00.000000+00:00",
       "details": {
         "dataset": "logistics_shipments_sample",
-        "sql": "SELECT carrier, COUNT(*) AS shipments, ROUND(SUM(CASE WHEN on_time = 'Y' THEN 1 ELSE 0 END) * 100.0 / COUNT(*), 1) AS on_time_pct, ROUND(AVG(total_cost), 2) AS avg_cost FROM dataset GROUP BY carrier ORDER BY on_time_pct DESC LIMIT 10",
-        "row_count": 10,
-        "elapsed_seconds": 0.016
+        "question": "What are the top 10 carriers by on-time percentage, with their shipment count and average cost?"
       },
       "narration": {
-        "pre": "Carrier scorecard: which carriers have the best on-time rates, and at what cost? This is the classic carrier performance analysis — balancing reliability against price.",
+        "pre": "Carrier scorecard: 'What are the top 10 carriers by on-time percentage, with their shipment count and average cost?' The classic carrier performance analysis — balancing reliability against price.",
         "post": "Top 10 carriers by on-time rate with their average cost. The best carriers aren't always the cheapest — the analysis reveals which carriers offer the best value (high reliability at reasonable cost)."
       },
       "baseline": { "expected_row_count": 10 }
     },
     {
-      "event_type": "query_run",
+      "event_type": "ai_ask",
       "timestamp": "2026-03-20T21:09:00.000000+00:00",
       "details": {
         "dataset": "logistics_shipments_sample",
-        "sql": "SELECT shipment_id, origin_city, destination_city, mode, carrier, delay_hours, total_cost FROM dataset WHERE delay_hours > 24 ORDER BY delay_hours DESC LIMIT 20",
-        "row_count": 20,
-        "elapsed_seconds": 0.015
+        "question": "Show me the top 20 shipments delayed more than 24 hours, ordered by delay hours"
       },
       "narration": {
-        "pre": "Delay outliers: shipments delayed more than 24 hours. These are the exceptions that warrant investigation — root cause analysis on the worst delays often reveals systemic issues.",
+        "pre": "Delay outliers: 'Show me the top 20 shipments delayed more than 24 hours.' These are the exceptions that warrant investigation — root cause analysis on the worst delays often reveals systemic issues.",
         "post": "Top 20 most-delayed shipments. Each of these represents a service failure worth investigating. Patterns in the outliers (same carrier? same route? same mode?) point to the root cause."
       },
       "baseline": { "expected_row_count": 20 }

@@ -51,76 +51,66 @@
       }
     },
     {
-      "event_type": "query_run",
+      "event_type": "ai_ask",
       "timestamp": "2026-03-20T22:01:00.000000+00:00",
       "details": {
         "dataset": "saas_accounts_sample",
-        "sql": "SELECT plan_tier, COUNT(*) AS accounts, ROUND(SUM(annual_recurring_revenue), 2) AS total_arr, ROUND(AVG(annual_recurring_revenue), 2) AS avg_arr, ROUND(AVG(seat_utilization), 2) AS avg_utilization FROM dataset GROUP BY plan_tier ORDER BY total_arr DESC",
-        "row_count": 4,
-        "elapsed_seconds": 0.016
+        "question": "What are the account count, total ARR, average ARR, and average seat utilization by plan tier?"
       },
       "narration": {
-        "pre": "ARR by plan tier: how is revenue distributed across Free, Starter, Professional, and Enterprise tiers? This reveals revenue concentration and tier adoption patterns.",
+        "pre": "ARR by plan tier: 'What are the account count, total ARR, average ARR, and average seat utilization by plan tier?' This reveals revenue concentration and tier adoption patterns.",
         "post": "4 plan tiers compared. Enterprise accounts typically drive the most ARR with highest average revenue per account. Utilization rates by tier show whether customers are getting value — low utilization is a leading indicator of churn."
       },
       "baseline": { "expected_row_count": 4 }
     },
     {
-      "event_type": "query_run",
+      "event_type": "ai_ask",
       "timestamp": "2026-03-20T22:03:00.000000+00:00",
       "details": {
         "dataset": "saas_accounts_sample",
-        "sql": "SELECT churn_risk, COUNT(*) AS accounts, ROUND(SUM(annual_recurring_revenue), 2) AS at_risk_arr, ROUND(AVG(nps), 1) AS avg_nps, ROUND(AVG(support_tickets_90d), 1) AS avg_tickets FROM dataset GROUP BY churn_risk ORDER BY at_risk_arr DESC",
-        "row_count": 3,
-        "elapsed_seconds": 0.015
+        "question": "What are the account count, total at-risk ARR, average NPS, and average support tickets by churn risk level?"
       },
       "narration": {
-        "pre": "Churn risk segmentation: how much ARR is at risk by churn category? And what do high-risk accounts look like in terms of NPS and support ticket volume?",
+        "pre": "Churn risk segmentation: 'What are the account count, total at-risk ARR, average NPS, and average support tickets by churn risk level?'",
         "post": "3 risk segments. The critical number is at-risk ARR in the High churn bucket — that's the revenue the customer success team needs to protect this quarter. High-risk accounts with low NPS and high ticket volume are the most urgent cases."
       },
       "baseline": { "expected_row_count": 3 }
     },
     {
-      "event_type": "query_run",
+      "event_type": "ai_ask",
       "timestamp": "2026-03-20T22:05:00.000000+00:00",
       "details": {
         "dataset": "saas_accounts_sample",
-        "sql": "SELECT industry, COUNT(*) AS accounts, ROUND(SUM(annual_recurring_revenue), 2) AS total_arr, ROUND(AVG(feature_adoption_rate), 2) AS avg_adoption FROM dataset GROUP BY industry ORDER BY total_arr DESC LIMIT 10",
-        "row_count": 6,
-        "elapsed_seconds": 0.016
+        "question": "What are the top industries by total ARR, with account count and average feature adoption rate?"
       },
       "narration": {
-        "pre": "Industry breakdown: which verticals contribute the most ARR, and which have the highest feature adoption? Industries with high ARR but low adoption may need vertical-specific enablement.",
+        "pre": "Industry breakdown: 'What are the top industries by total ARR, with account count and average feature adoption rate?' Industries with high ARR but low adoption may need vertical-specific enablement.",
         "post": "6 industries ranked. Feature adoption rate by industry reveals product-market fit differences — high adoption industries are natural expansion targets, while low adoption industries may need different onboarding approaches."
       },
       "baseline": { "expected_row_count": 6 }
     },
     {
-      "event_type": "query_run",
+      "event_type": "ai_ask",
       "timestamp": "2026-03-20T22:07:00.000000+00:00",
       "details": {
         "dataset": "saas_accounts_sample",
-        "sql": "SELECT account_id, plan_tier, industry, annual_recurring_revenue, seat_utilization, churn_risk, nps FROM dataset WHERE seat_utilization < 0.3 ORDER BY annual_recurring_revenue DESC LIMIT 20",
-        "row_count": 20,
-        "elapsed_seconds": 0.015
+        "question": "Show me the top 20 accounts with less than 30% seat utilization, ordered by ARR highest first"
       },
       "narration": {
-        "pre": "Under-utilized accounts: accounts using less than 30% of their licensed seats. These are at high risk of downsizing or churning — but they're also candidates for re-engagement if the product isn't meeting their needs.",
+        "pre": "Under-utilized accounts: 'Show me the top 20 accounts with less than 30% seat utilization, ordered by ARR highest first.' These are at high risk of downsizing or churning.",
         "post": "Top 20 under-utilized accounts by ARR. These are the highest-value accounts at risk of seat reduction. A customer success team would prioritize these for proactive outreach — understand why utilization is low and drive adoption before renewal."
       },
       "baseline": { "expected_row_count": 20 }
     },
     {
-      "event_type": "query_run",
+      "event_type": "ai_ask",
       "timestamp": "2026-03-20T22:09:00.000000+00:00",
       "details": {
         "dataset": "saas_accounts_sample",
-        "sql": "SELECT plan_tier, expansion_opportunity, COUNT(*) AS accounts, ROUND(SUM(annual_recurring_revenue), 2) AS current_arr, ROUND(AVG(seat_utilization), 2) AS avg_util FROM dataset WHERE expansion_opportunity = 'Y' GROUP BY plan_tier, expansion_opportunity ORDER BY current_arr DESC",
-        "row_count": 4,
-        "elapsed_seconds": 0.016
+        "question": "What are the account count, total ARR, and average seat utilization for expansion-opportunity accounts, broken out by plan tier?"
       },
       "narration": {
-        "pre": "Expansion pipeline: accounts flagged for expansion opportunity, broken out by current plan tier. High-utilization accounts on lower tiers are natural upsell candidates.",
+        "pre": "Expansion pipeline: 'What are the account count, total ARR, and average seat utilization for expansion-opportunity accounts, broken out by plan tier?'",
         "post": "4 tiers with expansion-flagged accounts. The biggest upsell opportunity is typically Professional-to-Enterprise upgrades on accounts with high utilization — they're already using the product heavily and could benefit from Enterprise features."
       },
       "baseline": { "expected_row_count": 4 }

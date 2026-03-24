@@ -60,62 +60,54 @@
       }
     },
     {
-      "event_type": "query_run",
+      "event_type": "ai_ask",
       "timestamp": "2026-03-20T21:31:00.000000+00:00",
       "details": {
         "dataset": "retail_orders_sample",
-        "sql": "SELECT category, COUNT(*) AS orders, ROUND(SUM(net_revenue), 2) AS total_revenue, ROUND(AVG(margin), 2) AS avg_margin FROM dataset GROUP BY category ORDER BY total_revenue DESC",
-        "row_count": 7,
-        "elapsed_seconds": 0.015
+        "question": "What are the order count, total revenue, and average margin by product category?"
       },
       "narration": {
-        "pre": "Revenue by product category: which categories drive the most revenue, and which have the best margins? This is the fundamental question in retail analytics.",
+        "pre": "Revenue by product category: 'What are the order count, total revenue, and average margin by product category?' This is the fundamental question in retail analytics.",
         "post": "7 product categories ranked by revenue. The gap between top and bottom categories, combined with margin differences, reveals where to focus growth vs. optimization efforts."
       },
       "baseline": { "expected_row_count": 7 }
     },
     {
-      "event_type": "query_run",
+      "event_type": "ai_ask",
       "timestamp": "2026-03-20T21:33:00.000000+00:00",
       "details": {
         "dataset": "retail_orders_sample",
-        "sql": "SELECT region, COUNT(*) AS orders, ROUND(SUM(net_revenue), 2) AS total_revenue, ROUND(AVG(csat_score), 1) AS avg_csat FROM dataset GROUP BY region ORDER BY total_revenue DESC",
-        "row_count": 4,
-        "elapsed_seconds": 0.014
+        "question": "What are the order count, total revenue, and average customer satisfaction by region?"
       },
       "narration": {
-        "pre": "Regional performance: how do the four regions compare on order volume, revenue, and customer satisfaction? Regional gaps often point to execution differences worth investigating.",
+        "pre": "Regional performance: 'What are the order count, total revenue, and average customer satisfaction by region?' Regional gaps often point to execution differences worth investigating.",
         "post": "4 regions compared. Revenue and satisfaction can diverge — a high-revenue region with low CSAT may be growing unsustainably. A low-revenue region with high CSAT may be underinvested."
       },
       "baseline": { "expected_row_count": 4 }
     },
     {
-      "event_type": "query_run",
+      "event_type": "ai_ask",
       "timestamp": "2026-03-20T21:35:00.000000+00:00",
       "details": {
         "dataset": "retail_orders_sample",
-        "sql": "SELECT sales_rep, COUNT(*) AS orders, ROUND(SUM(net_revenue), 2) AS total_revenue, ROUND(AVG(discount_pct), 1) AS avg_discount FROM dataset GROUP BY sales_rep ORDER BY total_revenue DESC LIMIT 10",
-        "row_count": 10,
-        "elapsed_seconds": 0.016
+        "question": "What are the top 10 sales reps by total revenue, with their order count and average discount?"
       },
       "narration": {
-        "pre": "Top 10 sales reps by revenue. The interesting metric isn't just total revenue — it's revenue relative to discount rate. A rep who sells a lot but gives deep discounts may not be the best performer.",
+        "pre": "Top 10 sales reps: 'What are the top 10 sales reps by total revenue, with their order count and average discount?' The interesting metric isn't just revenue — it's revenue relative to discount rate.",
         "post": "Top 10 reps with their discount rates. Compare the rep who sells $X at 5% discount vs. the rep who sells similar volume at 15% discount — the first rep is more valuable to the business."
       },
       "baseline": { "expected_row_count": 10 }
     },
     {
-      "event_type": "query_run",
+      "event_type": "ai_ask",
       "timestamp": "2026-03-20T21:37:00.000000+00:00",
       "details": {
         "dataset": "retail_orders_sample",
-        "sql": "SELECT returned, COUNT(*) AS orders, ROUND(SUM(net_revenue), 2) AS revenue, ROUND(AVG(csat_score), 1) AS avg_csat, ROUND(AVG(shipping_days), 1) AS avg_ship_days FROM dataset GROUP BY returned ORDER BY returned",
-        "row_count": 2,
-        "elapsed_seconds": 0.014
+        "question": "Compare returned vs non-returned orders on order count, revenue, average satisfaction, and average shipping days"
       },
       "narration": {
-        "pre": "Returns analysis: how do returned orders compare to non-returned orders on revenue, satisfaction, and shipping time? Returns are the most expensive failure in retail — understanding their drivers is critical.",
-        "post": "Returned vs. non-returned comparison. If returned orders have lower CSAT and longer shipping times, that points to a fulfillment quality issue. If CSAT is similar, the returns may be product-driven (wrong size, wrong item)."
+        "pre": "Returns analysis: 'Compare returned vs non-returned orders on order count, revenue, average satisfaction, and average shipping days.' Returns are the most expensive failure in retail.",
+        "post": "Returned vs. non-returned comparison. If returned orders have lower CSAT and longer shipping times, that points to a fulfillment quality issue. If CSAT is similar, the returns may be product-driven."
       },
       "baseline": { "expected_row_count": 2 }
     },

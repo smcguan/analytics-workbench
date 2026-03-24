@@ -77,33 +77,29 @@
       }
     },
     {
-      "event_type": "query_run",
+      "event_type": "ai_ask",
       "timestamp": "2026-03-20T17:16:00.000000+00:00",
       "details": {
         "dataset": "part_d_spending_sample",
-        "sql": "SELECT COUNT(DISTINCT Brnd_Name) AS total_drugs FROM dataset WHERE Mftr_Name != 'Overall'",
-        "row_count": 272,
-        "elapsed_seconds": 0.018
+        "question": "How many distinct drugs are in the dataset, excluding the 'Overall' manufacturer summary rows?"
       },
       "narration": {
-        "pre": "First, let's count how many distinct drugs are in the dataset. We filter out 'Overall' manufacturer rows since those are CMS summary rows, not individual manufacturers. This gives us the universe of drugs we're working with.",
-        "post": "272 distinct brand-name drugs in the dataset. This is our starting universe. The next step is to see which ones are the biggest spenders before we apply the IRA exclusion."
+        "pre": "First question in plain English: 'How many distinct drugs are in the dataset, excluding the Overall manufacturer summary rows?' This gives us the universe of drugs we're working with.",
+        "post": "272 distinct brand-name drugs in the dataset. This is our starting universe. The AI correctly filtered out the CMS summary rows and counted distinct brand names. The next step is to see which ones are the biggest spenders."
       },
       "baseline": {
         "expected_row_count": 272
       }
     },
     {
-      "event_type": "query_run",
+      "event_type": "ai_ask",
       "timestamp": "2026-03-20T17:17:00.000000+00:00",
       "details": {
         "dataset": "part_d_spending_sample",
-        "sql": "SELECT Brnd_Name, Gnrc_Name, Tot_Spndng_2023, Tot_Benes_2023 FROM dataset WHERE Mftr_Name != 'Overall' ORDER BY Tot_Spndng_2023 DESC LIMIT 10",
-        "row_count": 10,
-        "elapsed_seconds": 0.015
+        "question": "What are the top 10 drugs by 2023 spending, excluding the 'Overall' manufacturer rows?"
       },
       "narration": {
-        "pre": "Now let's see the top 10 drugs by 2023 spending. This shows where Medicare Part D dollars are most concentrated — and several of these top spenders are IRA-negotiated drugs that will need to be excluded.",
+        "pre": "Next: 'What are the top 10 drugs by 2023 spending, excluding the Overall manufacturer rows?' This shows where Medicare Part D dollars are most concentrated.",
         "post": "Top 10 spenders identified. Eliquis and Ozempic lead the list with billions in spending. Note that several of these drugs appear on the IRA negotiated list — they'll be filtered out in the next steps."
       },
       "baseline": {

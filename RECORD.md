@@ -10,7 +10,7 @@ stays on the analyst's machine — AI generates analysis instructions, not data 
 **Tech stack:** FastAPI backend, DuckDB query engine, OpenAI GPT-4.1-mini for AI,
 vanilla HTML/JS/CSS frontend, PyInstaller packaging for Windows desktop.
 
-**Current version:** v1.16.0 | **Total commits:** 120+ | **Test suite:** 611 tests (zero xfail)
+**Current version:** v1.17.0 | **Total commits:** 120+ | **Test suite:** 611 tests (zero xfail)
 
 ---
 
@@ -132,6 +132,7 @@ Building toward reproducible, auditable, shareable analytical sessions:
 | v1.10.2 | 2026-03-21 | Bug #18: Refresh was deleting disk files (root cause of restore loop); Clear SQL button; Sessions Save exits; SQL auto-clears on restore |
 | v1.10.3 | 2026-03-21 | Chart tab disabled until query returns chartable result; Sessions Save no longer exits; restore filters dataset list to session dataset only |
 | v1.11.0 | 2026-03-21 | SESSIONS sidebar removed; snapshots retired; Welcome card is session hub (Resume + Save); Reference Guide as slide-in drawer; 603 tests |
+| v1.17.0 | 2026-03-24 | Tutorial #6 Parameterized Workflow Retail, PyInstaller build hardening, 22 ai_ask conversions across 7 demos, Clear Workspace closes Insights, Library button style fix; 611 tests |
 | v1.16.0 | 2026-03-24 | Tutorial #5 Real Estate, About button, Library button, awPrompt extra field, Reference Guide workflow docs, shimmer buttons; 611 tests |
 | v1.15.0 | 2026-03-23 | M5 Demo Sprint: unified Workflows dialog, workflow replay engine, reference table sidebar items, Edit panel, session isolation, PyInstaller fix; 603 tests |
 | v1.14.0 | 2026-03-23 | Tutorial #4 Multi-State Medicaid Diligence; 8 example cases; 4 reference tables; narrated 12-step session; Farragut demo ready; 603 tests |
@@ -143,6 +144,15 @@ Building toward reproducible, auditable, shareable analytical sessions:
 
 ## Wrap Records
 <!-- Each /wrap appends a 3-line summary below. Most recent at top. -->
+
+**v1.17.0** | 2026-03-24
+Tutorial #6: Parameterized Workflow — Retail Sales Performance (electronics → sporting goods via Edit
+panel, 4 CSVs, 13-step session, all baselines validated). PyInstaller build hardened: python313.dll
+force-bundled from sys.base_prefix, upx_exclude expanded to 14 entries, BUILD_RELEASE.bat rewritten
+(process kill, dist/build wipe, post-build DLL verification), graceful shutdown handlers added. 3
+consecutive clean builds verified. 22 query_run → ai_ask conversions across 7 example case sessions.
+Features Exercised section added for Tutorial #6. Clear Workspace closes Insights panel. Library button
+matched to Reference Table style. 611 tests.
 
 **v1.16.0** | 2026-03-24
 Tutorial #5: Real Estate Market Analysis — multi-phase tutorial with Austin analysis + Denver workflow

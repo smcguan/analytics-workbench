@@ -1,0 +1,24 @@
+{
+  "id": "parameterized_workflow_retail",
+  "name": "Parameterized Workflow — Retail Sales Performance",
+  "description": "Build a complete store performance analysis on electronics sales data, save it as a workflow, then swap to an entirely different retail vertical (sporting goods) via the Edit panel. Same queries, same methodology, completely different business context. Demonstrates that a consistent data standard is what makes parameterized workflows possible.",
+  "tagline": "Build your analytical methodology once. Run it on every new client engagement.",
+  "category": "Retail & E-Commerce",
+  "subcategory": "Store Performance",
+  "difficulty": "Intermediate",
+  "estimated_minutes": 20,
+  "dataset_file": "electronics_sales.csv",
+  "dataset_display_name": "Electronics Sales (1,500 rows)",
+  "additional_datasets": [
+    {
+      "file": "sporting_goods_sales.csv",
+      "display_name": "Sporting Goods Sales (1,500 rows)"
+    }
+  ],
+  "reference_tables": [
+    "electronics_targets",
+    "sporting_goods_targets"
+  ],
+  "has_session": true,
+  "version": "1.0"
+}

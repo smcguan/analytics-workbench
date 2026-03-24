@@ -31,7 +31,15 @@ datas = [
     ('backend\\app', 'app'),
 ]
 
-binaries = []
+import sys, pathlib
+_py_base = pathlib.Path(sys.base_prefix)
+
+binaries = [
+    # PyInstaller sometimes fails to bundle the core Python DLLs from the
+    # base interpreter into a venv-based build.  Force-include them.
+    (str(_py_base / 'python313.dll'), '.'),
+    (str(_py_base / 'python3.dll'),   '.'),
+]
 
 hiddenimports = [
     # Application entry/import roots
@@ -106,6 +114,16 @@ coll = COLLECT(
         'python313.dll',
         'vcruntime140.dll',
         'vcruntime140_1.dll',
+        '_asyncio.pyd',
+        '_decimal.pyd',
+        '_elementtree.pyd',
+        '_hashlib.pyd',
+        '_multiprocessing.pyd',
+        '_overlapped.pyd',
+        '_queue.pyd',
+        '_socket.pyd',
+        '_ssl.pyd',
+        'unicodedata.pyd',
     ],
     name='AnalyticsWorkbench',
 )

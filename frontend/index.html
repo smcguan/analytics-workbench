@@ -2026,11 +2026,9 @@
                     <div class="section-body collapsed" id="sidebarDataBody">
                     <div class="dataset-list" id="datasetList"></div>
 
-                    <div>
-                        <label for="importDatasetFile" class="btn primary import-btn" id="importDatasetBtn" style="display:block; width:100%; text-align:center; box-sizing:border-box;" title="Import a CSV, TSV, Excel, or Parquet file as your dataset">
-                            + Import Dataset
-                        </label>
-                    </div>
+                    <label for="importDatasetFile" class="btn primary import-btn" id="importDatasetBtn" style="display:block; width:100%; text-align:center; box-sizing:border-box;" title="Import a CSV, TSV, Excel, or Parquet file as your dataset">
+                        + Import Dataset
+                    </label>
 
                     <!--
                         Import status bar:
@@ -2049,11 +2047,11 @@
 
                     <div class="dataset-list" id="referenceTableList" style="margin-top:8px;"></div>
 
-                    <div style="display:flex; gap:6px;">
-                        <label for="importReferenceFile" class="btn import-btn" id="importReferenceBtn" style="flex:1; text-align:center; box-sizing:border-box;" title="Import a reference table to JOIN with your dataset">
+                    <div style="display:flex; flex-direction:row; gap:6px; width:100%;">
+                        <label for="importReferenceFile" class="btn import-btn" id="importReferenceBtn" style="flex:1; text-align:center; box-sizing:border-box; margin-top:0;" title="Import a reference table to JOIN with your dataset">
                             + Reference Table
                         </label>
-                        <button class="btn" id="refLibraryBtn" style="flex:0 0 auto; font-size:12px;" title="Browse pre-built reference tables">Library</button>
+                        <button class="btn import-btn" id="refLibraryBtn" style="flex:0 0 auto; width:72px; margin-top:0;" title="Browse pre-built reference tables">Library</button>
                     </div>
                     <input
                         id="importReferenceFile"
@@ -4474,6 +4472,16 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                     "Auto-insights on import",
                     "Churn risk segmentation",
                     "Seat utilization and expansion analysis"
+                ],
+                parameterized_workflow_retail: [
+                    "Multi-dataset import (electronics + sporting goods)",
+                    "Reference table JOIN (store targets vs actual revenue)",
+                    "AI-generated SQL from natural language",
+                    "CTE-based anomaly detection (stores >1.5x peer average)",
+                    "Edit Workflow panel with dataset + reference table swap",
+                    "Column compatibility check (12/12 green)",
+                    "Full workflow rerun on new vertical without modification",
+                    "Two complete engagements from one saved methodology"
                 ]
             };
 
@@ -7264,6 +7272,8 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             renderReferences();
             updateSelectedDatasetSummary();
             resetInspectState();
+            // If Insights view is active, switch back to Welcome
+            if (currentView === "insights") switchView("welcome");
             $("referenceIndicator").style.display = "none";
             $("referenceName").textContent = "";
             // Delete all reference tables from disk

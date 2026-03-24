@@ -561,9 +561,10 @@ def test_example_cases_with_sessions_have_valid_session_json():
         session = _json.loads(session_path.read_text(encoding="utf-8"))
         events = session.get("events", [])
         assert len(events) >= 3, f"Too few events ({len(events)}) in {case_dir.name}/session.json"
-        # Must have at least one query_run
+        # Must have at least one query step (query_run or ai_ask)
         event_types = [e["event_type"] for e in events]
-        assert "query_run" in event_types, f"No query_run events in {case_dir.name}/session.json"
+        assert "query_run" in event_types or "ai_ask" in event_types, \
+            f"No query_run or ai_ask events in {case_dir.name}/session.json"
 
 
 def test_example_cases_have_data_files():

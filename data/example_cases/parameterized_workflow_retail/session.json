@@ -1,0 +1,312 @@
+{
+  "session_id": "tutorial-06-parameterized-workflow-retail",
+  "started_at": "2026-03-24T16:00:00.000000+00:00",
+  "ended_at": "2026-03-24T16:25:00.000000+00:00",
+  "ai_mode": "cloud",
+  "app_version": "1.16.0",
+  "user": "tutorial",
+  "machine": "analytics-workbench",
+  "name": "Tutorial 6: Parameterized Workflow — Retail Sales Performance",
+  "description": "Demonstrates the full parameterized workflow lifecycle. Phase 1 builds a store performance analysis on electronics sales data — revenue by region, store vs target JOIN, category breakdown, anomaly detection. Phase 2 saves the workflow, opens the Edit panel, swaps both the dataset and the reference table to a sporting goods vertical, and reruns the entire analysis. Same methodology. Different business. Zero queries rewritten.",
+  "events": [
+    {
+      "event_type": "session_start",
+      "timestamp": "2026-03-24T16:00:00.000000+00:00",
+      "details": {},
+      "narration": {
+        "pre": "A retail analytics consultant runs the same sales performance analysis for every client engagement. We start with their current client — a regional electronics retailer with 20 stores across four regions and 1,500 transactions.",
+        "post": "Session initialized. Phase 1 builds the electronics analysis — four queries covering regional performance, store vs target, category breakdown, and anomaly detection. Phase 2 saves the workflow, swaps to a sporting goods client via the Edit panel, and reruns everything. The methodology is the asset. The data is just the input."
+      }
+    },
+    {
+      "event_type": "dataset_import",
+      "timestamp": "2026-03-24T16:00:30.000000+00:00",
+      "details": {
+        "dataset": "electronics_sales",
+        "row_count": 1500,
+        "column_count": 12,
+        "source_file": "electronics_sales.csv"
+      },
+      "narration": {
+        "pre": "Importing electronics sales data. 1,500 transactions across 20 stores in four regions — Northeast, Southeast, Midwest, West. Each row has store, product, category, units sold, unit price, and revenue.",
+        "post": "Data loaded. 1,500 rows, 12 columns. Let's inspect the schema before querying."
+      },
+      "baseline": {
+        "expected_row_count": 1500
+      }
+    },
+    {
+      "event_type": "inspect_schema",
+      "timestamp": "2026-03-24T16:00:45.000000+00:00",
+      "details": {
+        "dataset": "electronics_sales"
+      },
+      "narration": {
+        "pre": "Click Schema to see every column name and type. Understanding the structure is always the first step.",
+        "post": "12 columns. STORE_ID and STORE_NAME identify each location. REGION is the geographic grouping. CATEGORY splits products into Laptops, Phones, Tablets, Accessories, and Audio. REVENUE is UNITS_SOLD times UNIT_PRICE. STORE_ID is the join key we will use later to connect actual sales against target benchmarks."
+      }
+    },
+    {
+      "event_type": "insights_generated",
+      "timestamp": "2026-03-24T16:00:55.000000+00:00",
+      "details": {
+        "dataset": "electronics_sales",
+        "insight_count": 5
+      },
+      "narration": {
+        "pre": "Switch to the Insights view. The AI reads column names and statistics — never the actual row data — and generates observations automatically.",
+        "post": "The AI flagged revenue concentration — a few stores are driving a disproportionate share of total revenue. It also noted regional variance and category price dispersion. These are starting points. Now let's load the targets reference table and start querying."
+      }
+    },
+    {
+      "event_type": "reference_load",
+      "timestamp": "2026-03-24T16:01:00.000000+00:00",
+      "details": {
+        "reference_name": "electronics_targets",
+        "row_count": 20,
+        "columns": 8,
+        "source": "electronics_targets.csv"
+      },
+      "narration": {
+        "pre": "Every client engagement includes a targets file — what each store was supposed to hit. This is the benchmark we JOIN against actual sales to measure performance. Click + Reference Table to import it.",
+        "post": "Targets loaded: 20 rows, 8 columns — STORE_ID, STORE_NAME, REGION, Q1 through Q4 targets, and ANNUAL_TARGET. It appears in the sidebar with a REF badge. In SQL, use the table name 'electronics_targets' in your JOIN clause. The join key is STORE_ID."
+      }
+    },
+    {
+      "event_type": "ai_ask",
+      "timestamp": "2026-03-24T16:02:00.000000+00:00",
+      "details": {
+        "dataset": "electronics_sales",
+        "question": "What is the total revenue and total units sold by region?"
+      },
+      "narration": {
+        "pre": "First question — type it in plain English: 'What is the total revenue and total units sold by region?' The AI reads column names and types and writes the SQL.",
+        "post": "Four rows, one per region. West is lagging — over 20% below the other regions. That is the first finding, and it came from a single natural language question."
+      },
+      "baseline": {
+        "expected_row_count": 4
+      }
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-03-24T16:03:00.000000+00:00",
+      "details": {
+        "dataset": "electronics_sales",
+        "sql": "SELECT\n    s.STORE_ID,\n    s.STORE_NAME,\n    s.REGION,\n    ROUND(SUM(s.REVENUE), 2) AS actual_revenue,\n    t.ANNUAL_TARGET,\n    ROUND(SUM(s.REVENUE) - t.ANNUAL_TARGET, 2) AS variance,\n    ROUND(100.0 * (SUM(s.REVENUE) - t.ANNUAL_TARGET) / t.ANNUAL_TARGET, 1) AS pct_variance\nFROM dataset s\nJOIN electronics_targets t ON s.STORE_ID = t.STORE_ID\nGROUP BY s.STORE_ID, s.STORE_NAME, s.REGION, t.ANNUAL_TARGET\nORDER BY variance DESC",
+        "row_count": 20,
+        "elapsed_seconds": 0.015
+      },
+      "narration": {
+        "pre": "Now the JOIN query — the core deliverable in a retail performance engagement. This connects actual revenue against the target for each store. Look at the SQL: FROM dataset s JOIN electronics_targets t ON s.STORE_ID = t.STORE_ID. The variance column shows how each store performed relative to its target.",
+        "post": "20 rows — every store with actual revenue, target, and variance. The JOIN pulled in the annual target for each store and calculated the gap automatically. Stores with negative variance are below target. This is the analysis a client pays for."
+      },
+      "baseline": {
+        "expected_row_count": 20
+      }
+    },
+    {
+      "event_type": "ai_ask",
+      "timestamp": "2026-03-24T16:04:00.000000+00:00",
+      "details": {
+        "dataset": "electronics_sales",
+        "question": "What is the total revenue and average unit price by product category?"
+      },
+      "narration": {
+        "pre": "Category breakdown: 'What is the total revenue and average unit price by product category?'",
+        "post": "Five categories. Laptops lead on total revenue — high unit price drives it. Accessories has the lowest total but the highest margin potential. Any client looking to optimize product mix starts with this breakdown."
+      },
+      "baseline": {
+        "expected_row_count": 5
+      }
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-03-24T16:05:00.000000+00:00",
+      "details": {
+        "dataset": "electronics_sales",
+        "sql": "WITH store_rev AS (\n    SELECT STORE_ID, STORE_NAME, REGION, SUM(REVENUE) AS total_revenue\n    FROM dataset\n    GROUP BY STORE_ID, STORE_NAME, REGION\n),\navg_rev AS (\n    SELECT AVG(total_revenue) AS avg_store_revenue FROM store_rev\n)\nSELECT\n    s.STORE_ID,\n    s.STORE_NAME,\n    s.REGION,\n    ROUND(s.total_revenue, 2) AS total_revenue,\n    ROUND(a.avg_store_revenue, 2) AS avg_store_revenue,\n    ROUND(s.total_revenue / a.avg_store_revenue, 2) AS ratio_to_avg\nFROM store_rev s, avg_rev a\nWHERE s.total_revenue > a.avg_store_revenue * 1.5\nORDER BY s.total_revenue DESC",
+        "row_count": 2,
+        "elapsed_seconds": 0.012
+      },
+      "narration": {
+        "pre": "Anomaly detection — which stores have revenue more than 50% above the average store? This uses a CTE to calculate each store's total revenue, then filters to outliers. More complex than a natural language question, so we use the SQL editor directly.",
+        "post": "Two stores — Magnolia Park (E-007) at 2.2x the average and River North (E-014) at 1.7x. Before presenting this to a client, you would verify whether this reflects genuine outperformance or a data issue. Flag for review. The electronics analysis is complete. Four queries, two data sources, clear findings."
+      },
+      "baseline": {
+        "expected_row_count": 2
+      }
+    },
+    {
+      "event_type": "session_end",
+      "timestamp": "2026-03-24T16:06:00.000000+00:00",
+      "details": {},
+      "narration": {
+        "pre": "Save this as a stored workflow. Click Save As in the sidebar footer. Name it 'Retail Sales Performance — Electronics'. Every query, every JOIN, every step — locked in and replayable.",
+        "post": "Workflow saved. Now a new client comes in. Sporting goods retailer. Same type of business, completely different stores, products, and targets. Watch what happens next."
+      }
+    },
+    {
+      "event_type": "edit_panel_open",
+      "timestamp": "2026-03-24T16:07:00.000000+00:00",
+      "details": {
+        "workflow_name": "Retail Sales Performance — Electronics",
+        "datasets": [
+          {
+            "name": "electronics_sales",
+            "original_file": "electronics_sales.csv",
+            "row_count": 1500
+          }
+        ],
+        "references": [
+          { "name": "electronics_targets" }
+        ]
+      },
+      "narration": {
+        "pre": "Open the Workflows dialog. Find the electronics workflow. Click Edit. This is where the parameterization happens.",
+        "post": "The Edit panel shows every file the workflow depends on. Two files — the sales dataset and the targets reference table. Both point to electronics files. We are going to remap both to sporting goods."
+      }
+    },
+    {
+      "event_type": "edit_panel_choose",
+      "timestamp": "2026-03-24T16:07:20.000000+00:00",
+      "details": {
+        "target_dataset": "electronics_sales",
+        "original_file": "electronics_sales.csv",
+        "new_file": "sporting_goods_sales.csv",
+        "new_source_file": "sporting_goods_sales.csv",
+        "new_row_count": 1500
+      },
+      "narration": {
+        "pre": "Click Choose File next to the sales dataset. Select sporting_goods_sales.csv — the new client's transaction data.",
+        "post": "File selected. The current mapping now shows sporting_goods_sales.csv with 1,500 rows. Column check is running."
+      }
+    },
+    {
+      "event_type": "edit_panel_check",
+      "timestamp": "2026-03-24T16:07:40.000000+00:00",
+      "details": {
+        "target_dataset": "electronics_sales",
+        "columns_checked": 12,
+        "columns_matched": 12,
+        "column_list": ["TRANSACTION_ID", "STORE_ID", "STORE_NAME", "REGION", "PRODUCT_ID", "PRODUCT_NAME", "CATEGORY", "UNITS_SOLD", "UNIT_PRICE", "REVENUE", "SALE_DATE", "SALES_REP_ID"]
+      },
+      "narration": {
+        "pre": "Watch the column check — each column from the original workflow is verified against the new file.",
+        "post": "Green across the board. All 12 columns match. The sporting goods file uses the exact same column names as electronics. Every query will run without a single modification. This is what a consistent data standard buys you."
+      }
+    },
+    {
+      "event_type": "edit_panel_run",
+      "timestamp": "2026-03-24T16:08:00.000000+00:00",
+      "details": {
+        "dataset": "sporting_goods_sales"
+      },
+      "narration": {
+        "pre": "Both files remapped. Both column checks green. Run Now is active. Click it. Same workflow. New client.",
+        "post": "The Edit panel closes. Every step from the electronics workflow now replays against the sporting goods dataset. The reference table swap happens automatically — sporting_goods_targets replaces electronics_targets."
+      }
+    },
+    {
+      "event_type": "dataset_import",
+      "timestamp": "2026-03-24T16:08:10.000000+00:00",
+      "details": {
+        "dataset": "sporting_goods_sales",
+        "row_count": 1500,
+        "column_count": 12,
+        "source_file": "sporting_goods_sales.csv"
+      },
+      "narration": {
+        "pre": "Sporting goods data imported. The same queries now run against an entirely different retail vertical.",
+        "post": "Sporting goods loaded: 1,500 rows, 12 columns. Same schema as electronics. The queries will execute identically — only the data changes."
+      },
+      "baseline": {
+        "expected_row_count": 1500
+      }
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-03-24T16:09:00.000000+00:00",
+      "details": {
+        "dataset": "sporting_goods_sales",
+        "sql": "SELECT\n    REGION,\n    ROUND(SUM(REVENUE), 2) AS total_revenue,\n    SUM(UNITS_SOLD) AS total_units\nFROM dataset\nGROUP BY REGION\nORDER BY total_revenue DESC",
+        "row_count": 4,
+        "elapsed_seconds": 0.010
+      },
+      "narration": {
+        "pre": "Same regional revenue query, sporting goods data.",
+        "post": "Southeast is lagging in sporting goods — nearly 30% below the top region. The opposite of electronics where West was the problem. Same query, completely different finding. That is the point."
+      },
+      "baseline": {
+        "expected_row_count": 4
+      }
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-03-24T16:10:00.000000+00:00",
+      "details": {
+        "dataset": "sporting_goods_sales",
+        "sql": "SELECT\n    s.STORE_ID,\n    s.STORE_NAME,\n    s.REGION,\n    ROUND(SUM(s.REVENUE), 2) AS actual_revenue,\n    t.ANNUAL_TARGET,\n    ROUND(SUM(s.REVENUE) - t.ANNUAL_TARGET, 2) AS variance,\n    ROUND(100.0 * (SUM(s.REVENUE) - t.ANNUAL_TARGET) / t.ANNUAL_TARGET, 1) AS pct_variance\nFROM dataset s\nJOIN sporting_goods_targets t ON s.STORE_ID = t.STORE_ID\nGROUP BY s.STORE_ID, s.STORE_NAME, s.REGION, t.ANNUAL_TARGET\nORDER BY variance DESC",
+        "row_count": 20,
+        "elapsed_seconds": 0.014
+      },
+      "narration": {
+        "pre": "Store vs target for sporting goods — same JOIN pattern, different reference table.",
+        "post": "Different stores, different targets, different variances. The anomaly stores are in completely different positions than electronics. The workflow found them all. The consultant did not write a single new query."
+      },
+      "baseline": {
+        "expected_row_count": 20
+      }
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-03-24T16:11:00.000000+00:00",
+      "details": {
+        "dataset": "sporting_goods_sales",
+        "sql": "SELECT\n    CATEGORY,\n    ROUND(SUM(REVENUE), 2) AS total_revenue,\n    ROUND(AVG(UNIT_PRICE), 2) AS avg_unit_price\nFROM dataset\nGROUP BY CATEGORY\nORDER BY total_revenue DESC",
+        "row_count": 5,
+        "elapsed_seconds": 0.010
+      },
+      "narration": {
+        "pre": "Category breakdown for sporting goods.",
+        "post": "Equipment dominates — high unit price drives total revenue, just like Laptops did for electronics. Nutrition is the low end. Same structural pattern, different products."
+      },
+      "baseline": {
+        "expected_row_count": 5
+      }
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-03-24T16:12:00.000000+00:00",
+      "details": {
+        "dataset": "sporting_goods_sales",
+        "sql": "WITH store_rev AS (\n    SELECT STORE_ID, STORE_NAME, REGION, SUM(REVENUE) AS total_revenue\n    FROM dataset\n    GROUP BY STORE_ID, STORE_NAME, REGION\n),\navg_rev AS (\n    SELECT AVG(total_revenue) AS avg_store_revenue FROM store_rev\n)\nSELECT\n    s.STORE_ID,\n    s.STORE_NAME,\n    s.REGION,\n    ROUND(s.total_revenue, 2) AS total_revenue,\n    ROUND(a.avg_store_revenue, 2) AS avg_store_revenue,\n    ROUND(s.total_revenue / a.avg_store_revenue, 2) AS ratio_to_avg\nFROM store_rev s, avg_rev a\nWHERE s.total_revenue > a.avg_store_revenue * 1.5\nORDER BY s.total_revenue DESC",
+        "row_count": 2,
+        "elapsed_seconds": 0.011
+      },
+      "narration": {
+        "pre": "Anomaly detection on sporting goods — same 1.5x threshold.",
+        "post": "Two different anomaly stores — Coastal Outfitters (S-019) and Summit Sports (S-003). Different stores, different ratios, same detection logic. The workflow found them without any modification."
+      },
+      "baseline": {
+        "expected_row_count": 2
+      }
+    },
+    {
+      "event_type": "session_end",
+      "timestamp": "2026-03-24T16:13:00.000000+00:00",
+      "details": {},
+      "narration": {
+        "pre": "Open the Session Log to see both engagements documented with timestamps, SQL, and row counts. Then save this session.",
+        "post": "Two client engagements. Two stored workflows. The second one took five minutes — open Edit, swap two files, run. The methodology is the asset. The data is just the input."
+      }
+    }
+  ],
+  "resume_state": {
+    "dataset": "sporting_goods_sales",
+    "last_sql": "WITH store_rev AS (\n    SELECT STORE_ID, STORE_NAME, REGION, SUM(REVENUE) AS total_revenue\n    FROM dataset\n    GROUP BY STORE_ID, STORE_NAME, REGION\n),\navg_rev AS (\n    SELECT AVG(total_revenue) AS avg_store_revenue FROM store_rev\n)\nSELECT\n    s.STORE_ID,\n    s.STORE_NAME,\n    s.REGION,\n    ROUND(s.total_revenue, 2) AS total_revenue,\n    ROUND(a.avg_store_revenue, 2) AS avg_store_revenue,\n    ROUND(s.total_revenue / a.avg_store_revenue, 2) AS ratio_to_avg\nFROM store_rev s, avg_rev a\nWHERE s.total_revenue > a.avg_store_revenue * 1.5\nORDER BY s.total_revenue DESC",
+    "reference": {
+      "name": "sporting_goods_targets",
+      "library_source": "sporting_goods_targets.csv"
+    }
+  }
+}

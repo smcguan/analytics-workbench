@@ -1,0 +1,1501 @@
+TRANSACTION_ID,STORE_ID,STORE_NAME,REGION,PRODUCT_ID,PRODUCT_NAME,CATEGORY,UNITS_SOLD,UNIT_PRICE,REVENUE,SALE_DATE,SALES_REP_ID
+SPG-00001,S-015,Crossroads Sports,Midwest,P-SPG-03-09,Foam Roller,Accessories,19,62.68,1190.92,2024-11-05,REP-S-015-03
+SPG-00002,S-006,Bayou Fitness,Southeast,P-SPG-03-07,Ankle Brace,Accessories,6,14.89,89.34,2024-09-05,REP-S-006-01
+SPG-00003,S-009,Magnolia Active,Southeast,P-SPG-02-00,Carbon Bike,Equipment,6,628.5,3771.0,2024-04-18,REP-S-009-03
+SPG-00004,S-011,Lakeside Sports,Midwest,P-SPG-04-03,Recovery Bar,Nutrition,2,40.78,81.56,2024-12-25,REP-S-011-03
+SPG-00005,S-009,Magnolia Active,Southeast,P-SPG-02-04,Climbing Pack,Equipment,1,143.23,143.23,2024-08-31,REP-S-009-03
+SPG-00006,S-009,Magnolia Active,Southeast,P-SPG-01-03,Running Short,Apparel,12,22.76,273.12,2024-02-28,REP-S-009-01
+SPG-00007,S-015,Crossroads Sports,Midwest,P-SPG-00-02,Hiker Pro,Footwear,16,173.93,2782.88,2024-05-22,REP-S-015-02
+SPG-00008,S-014,River Trail Gear,Midwest,P-SPG-00-04,Cross Train V2,Footwear,3,98.05,294.15,2024-08-20,REP-S-014-03
+SPG-00009,S-003,Summit Sports,Northeast,P-SPG-03-02,Yoga Mat,Accessories,24,62.45,1498.8,2024-01-20,REP-S-003-04
+SPG-00010,S-005,Evergreen Athletics,Northeast,P-SPG-01-01,Rain Shell,Apparel,5,159.4,797.0,2024-10-06,REP-S-005-01
+SPG-00011,S-008,Palmetto Sports,Southeast,P-SPG-00-00,Trail Runner X,Footwear,4,183.73,734.92,2024-03-20,REP-S-008-04
+SPG-00012,S-019,Coastal Outfitters,West,P-SPG-02-00,Carbon Bike,Equipment,46,588.02,27048.92,2024-08-28,REP-S-019-03
+SPG-00013,S-009,Magnolia Active,Southeast,P-SPG-00-02,Hiker Pro,Footwear,14,190.85,2671.9,2024-03-15,REP-S-009-02
+SPG-00014,S-012,Prairie Athletics,Midwest,P-SPG-00-00,Trail Runner X,Footwear,17,133.2,2264.4,2024-11-23,REP-S-012-01
+SPG-00015,S-008,Palmetto Sports,Southeast,P-SPG-01-02,Fleece Vest,Apparel,15,79.42,1191.3,2024-04-19,REP-S-008-04
+SPG-00016,S-003,Summit Sports,Northeast,P-SPG-03-04,Sport Towel,Accessories,15,6.85,102.75,2024-06-12,REP-S-003-03
+SPG-00017,S-011,Lakeside Sports,Midwest,P-SPG-03-05,Grip Tape,Accessories,16,75.69,1211.04,2024-10-17,REP-S-011-03
+SPG-00018,S-020,Mountain Peak Gear,West,P-SPG-00-01,Court Ace,Footwear,12,49.37,592.44,2024-01-17,REP-S-020-02
+SPG-00019,S-019,Coastal Outfitters,West,P-SPG-00-00,Trail Runner X,Footwear,56,84.41,4726.96,2024-11-03,REP-S-019-03
+SPG-00020,S-007,Gulf Coast Gear,Southeast,P-SPG-03-09,Foam Roller,Accessories,1,54.28,54.28,2024-07-13,REP-S-007-02
+SPG-00021,S-013,Heartland Fitness,Midwest,P-SPG-00-00,Trail Runner X,Footwear,8,158.73,1269.84,2024-02-01,REP-S-013-04
+SPG-00022,S-018,Canyon Sports,West,P-SPG-00-04,Cross Train V2,Footwear,2,167.49,334.98,2024-07-04,REP-S-018-04
+SPG-00023,S-011,Lakeside Sports,Midwest,P-SPG-02-01,Kayak Explorer,Equipment,19,269.8,5126.2,2024-08-08,REP-S-011-02
+SPG-00024,S-011,Lakeside Sports,Midwest,P-SPG-01-02,Fleece Vest,Apparel,8,92.93,743.44,2024-08-30,REP-S-011-01
+SPG-00025,S-008,Palmetto Sports,Southeast,P-SPG-03-06,Swim Goggles,Accessories,9,10.98,98.82,2024-04-19,REP-S-008-01
+SPG-00026,S-012,Prairie Athletics,Midwest,P-SPG-03-09,Foam Roller,Accessories,8,38.67,309.36,2024-01-28,REP-S-012-04
+SPG-00027,S-008,Palmetto Sports,Southeast,P-SPG-04-01,Energy Gel Pack,Nutrition,14,22.25,311.5,2024-04-18,REP-S-008-04
+SPG-00028,S-019,Coastal Outfitters,West,P-SPG-01-04,Base Layer,Apparel,25,147.34,3683.5,2024-01-12,REP-S-019-01
+SPG-00029,S-003,Summit Sports,Northeast,P-SPG-03-06,Swim Goggles,Accessories,52,78.74,4094.48,2024-12-16,REP-S-003-02
+SPG-00030,S-006,Bayou Fitness,Southeast,P-SPG-03-00,Water Bottle,Accessories,4,14.06,56.24,2024-08-04,REP-S-006-03
+SPG-00031,S-018,Canyon Sports,West,P-SPG-03-01,Fitness Band,Accessories,5,70.21,351.05,2024-05-18,REP-S-018-04
+SPG-00032,S-001,Alpine Outfitters,Northeast,P-SPG-01-00,Compression Tee,Apparel,5,102.38,511.9,2024-05-09,REP-S-001-04
+SPG-00033,S-014,River Trail Gear,Midwest,P-SPG-02-01,Kayak Explorer,Equipment,13,572.7,7445.1,2024-11-21,REP-S-014-02
+SPG-00034,S-010,Delta Outfitters,Southeast,P-SPG-00-02,Hiker Pro,Footwear,9,164.21,1477.89,2024-03-31,REP-S-010-01
+SPG-00035,S-002,Trailhead NE,Northeast,P-SPG-00-02,Hiker Pro,Footwear,15,231.24,3468.6,2024-02-12,REP-S-002-04
+SPG-00036,S-014,River Trail Gear,Midwest,P-SPG-02-03,Weight Set Pro,Equipment,5,600.08,3000.4,2024-03-13,REP-S-014-01
+SPG-00037,S-005,Evergreen Athletics,Northeast,P-SPG-00-04,Cross Train V2,Footwear,19,117.67,2235.73,2024-02-05,REP-S-005-04
+SPG-00038,S-013,Heartland Fitness,Midwest,P-SPG-02-03,Weight Set Pro,Equipment,6,431.5,2589.0,2024-05-20,REP-S-013-03
+SPG-00039,S-004,Harbor Run,Northeast,P-SPG-01-02,Fleece Vest,Apparel,16,74.58,1193.28,2024-07-26,REP-S-004-04
+SPG-00040,S-010,Delta Outfitters,Southeast,P-SPG-02-03,Weight Set Pro,Equipment,9,617.98,5561.82,2024-02-11,REP-S-010-02
+SPG-00041,S-002,Trailhead NE,Northeast,P-SPG-01-03,Running Short,Apparel,17,64.52,1096.84,2024-06-01,REP-S-002-03
+SPG-00042,S-004,Harbor Run,Northeast,P-SPG-02-02,Treadmill T500,Equipment,6,138.91,833.46,2024-12-30,REP-S-004-03
+SPG-00043,S-016,Pacific Surf & Sport,West,P-SPG-03-03,Resistance Bands,Accessories,6,26.64,159.84,2024-08-19,REP-S-016-03
+SPG-00044,S-020,Mountain Peak Gear,West,P-SPG-00-01,Court Ace,Footwear,9,69.61,626.49,2024-08-02,REP-S-020-02
+SPG-00045,S-018,Canyon Sports,West,P-SPG-04-01,Energy Gel Pack,Nutrition,1,39.92,39.92,2024-09-25,REP-S-018-01
+SPG-00046,S-018,Canyon Sports,West,P-SPG-04-01,Energy Gel Pack,Nutrition,1,34.42,34.42,2024-04-19,REP-S-018-01
+SPG-00047,S-012,Prairie Athletics,Midwest,P-SPG-01-02,Fleece Vest,Apparel,19,88.24,1676.56,2024-12-08,REP-S-012-04
+SPG-00048,S-017,Redwood Athletics,West,P-SPG-01-03,Running Short,Apparel,10,166.88,1668.8,2024-05-12,REP-S-017-01
+SPG-00049,S-015,Crossroads Sports,Midwest,P-SPG-03-07,Ankle Brace,Accessories,9,11.51,103.59,2024-04-04,REP-S-015-02
+SPG-00050,S-009,Magnolia Active,Southeast,P-SPG-00-02,Hiker Pro,Footwear,2,196.3,392.6,2024-01-28,REP-S-009-02
+SPG-00051,S-003,Summit Sports,Northeast,P-SPG-02-01,Kayak Explorer,Equipment,50,301.5,15075.0,2024-02-17,REP-S-003-01
+SPG-00052,S-011,Lakeside Sports,Midwest,P-SPG-00-03,Sprint Elite,Footwear,4,235.8,943.2,2024-08-07,REP-S-011-03
+SPG-00053,S-007,Gulf Coast Gear,Southeast,P-SPG-04-00,Whey Protein,Nutrition,1,22.3,22.3,2024-06-24,REP-S-007-04
+SPG-00054,S-008,Palmetto Sports,Southeast,P-SPG-01-02,Fleece Vest,Apparel,13,44.23,574.99,2024-06-01,REP-S-008-02
+SPG-00055,S-016,Pacific Surf & Sport,West,P-SPG-02-01,Kayak Explorer,Equipment,7,526.08,3682.56,2024-03-25,REP-S-016-01
+SPG-00056,S-017,Redwood Athletics,West,P-SPG-01-00,Compression Tee,Apparel,14,30.76,430.64,2024-04-11,REP-S-017-02
+SPG-00057,S-006,Bayou Fitness,Southeast,P-SPG-00-03,Sprint Elite,Footwear,7,168.81,1181.67,2024-06-27,REP-S-006-02
+SPG-00058,S-012,Prairie Athletics,Midwest,P-SPG-03-08,Jump Rope,Accessories,6,70.84,425.04,2024-08-02,REP-S-012-02
+SPG-00059,S-010,Delta Outfitters,Southeast,P-SPG-03-07,Ankle Brace,Accessories,10,49.84,498.4,2024-09-03,REP-S-010-04
+SPG-00060,S-010,Delta Outfitters,Southeast,P-SPG-00-01,Court Ace,Footwear,3,242.21,726.63,2024-08-31,REP-S-010-03
+SPG-00061,S-014,River Trail Gear,Midwest,P-SPG-03-05,Grip Tape,Accessories,8,54.68,437.44,2024-10-01,REP-S-014-01
+SPG-00062,S-006,Bayou Fitness,Southeast,P-SPG-03-05,Grip Tape,Accessories,3,31.07,93.21,2024-12-18,REP-S-006-04
+SPG-00063,S-005,Evergreen Athletics,Northeast,P-SPG-03-07,Ankle Brace,Accessories,20,35.9,718.0,2024-03-23,REP-S-005-02
+SPG-00064,S-001,Alpine Outfitters,Northeast,P-SPG-02-02,Treadmill T500,Equipment,17,211.33,3592.61,2024-12-22,REP-S-001-04
+SPG-00065,S-002,Trailhead NE,Northeast,P-SPG-04-02,Electrolyte Mix,Nutrition,9,43.75,393.75,2024-08-11,REP-S-002-04
+SPG-00066,S-013,Heartland Fitness,Midwest,P-SPG-03-06,Swim Goggles,Accessories,13,24.55,319.15,2024-06-30,REP-S-013-01
+SPG-00067,S-009,Magnolia Active,Southeast,P-SPG-03-03,Resistance Bands,Accessories,9,52.72,474.48,2024-12-20,REP-S-009-01
+SPG-00068,S-010,Delta Outfitters,Southeast,P-SPG-03-06,Swim Goggles,Accessories,6,47.94,287.64,2024-10-19,REP-S-010-02
+SPG-00069,S-018,Canyon Sports,West,P-SPG-01-00,Compression Tee,Apparel,20,117.72,2354.4,2024-07-18,REP-S-018-02
+SPG-00070,S-020,Mountain Peak Gear,West,P-SPG-04-00,Whey Protein,Nutrition,1,50.12,50.12,2024-01-06,REP-S-020-01
+SPG-00071,S-011,Lakeside Sports,Midwest,P-SPG-02-04,Climbing Pack,Equipment,3,541.2,1623.6,2024-10-14,REP-S-011-02
+SPG-00072,S-012,Prairie Athletics,Midwest,P-SPG-04-01,Energy Gel Pack,Nutrition,6,51.91,311.46,2024-11-01,REP-S-012-04
+SPG-00073,S-008,Palmetto Sports,Southeast,P-SPG-02-01,Kayak Explorer,Equipment,9,298.63,2687.67,2024-04-11,REP-S-008-02
+SPG-00074,S-018,Canyon Sports,West,P-SPG-01-00,Compression Tee,Apparel,2,155.28,310.56,2024-02-09,REP-S-018-01
+SPG-00075,S-017,Redwood Athletics,West,P-SPG-03-07,Ankle Brace,Accessories,2,16.77,33.54,2024-12-07,REP-S-017-03
+SPG-00076,S-001,Alpine Outfitters,Northeast,P-SPG-01-01,Rain Shell,Apparel,2,63.59,127.18,2024-10-23,REP-S-001-01
+SPG-00077,S-013,Heartland Fitness,Midwest,P-SPG-03-02,Yoga Mat,Accessories,9,69.65,626.85,2024-11-11,REP-S-013-01
+SPG-00078,S-003,Summit Sports,Northeast,P-SPG-04-03,Recovery Bar,Nutrition,3,10.74,32.22,2024-03-15,REP-S-003-02
+SPG-00079,S-004,Harbor Run,Northeast,P-SPG-04-03,Recovery Bar,Nutrition,7,51.57,360.99,2024-06-14,REP-S-004-03
+SPG-00080,S-011,Lakeside Sports,Midwest,P-SPG-03-08,Jump Rope,Accessories,1,27.66,27.66,2024-12-06,REP-S-011-04
+SPG-00081,S-007,Gulf Coast Gear,Southeast,P-SPG-00-02,Hiker Pro,Footwear,15,138.99,2084.85,2024-06-11,REP-S-007-03
+SPG-00082,S-014,River Trail Gear,Midwest,P-SPG-00-01,Court Ace,Footwear,14,157.81,2209.34,2024-01-08,REP-S-014-04
+SPG-00083,S-010,Delta Outfitters,Southeast,P-SPG-04-04,BCAAs,Nutrition,6,29.12,174.72,2024-03-18,REP-S-010-04
+SPG-00084,S-013,Heartland Fitness,Midwest,P-SPG-02-04,Climbing Pack,Equipment,4,389.2,1556.8,2024-08-22,REP-S-013-01
+SPG-00085,S-013,Heartland Fitness,Midwest,P-SPG-01-03,Running Short,Apparel,12,96.29,1155.48,2024-03-16,REP-S-013-01
+SPG-00086,S-010,Delta Outfitters,Southeast,P-SPG-02-01,Kayak Explorer,Equipment,2,121.54,243.08,2024-09-12,REP-S-010-02
+SPG-00087,S-007,Gulf Coast Gear,Southeast,P-SPG-03-09,Foam Roller,Accessories,6,11.29,67.74,2024-06-11,REP-S-007-04
+SPG-00088,S-020,Mountain Peak Gear,West,P-SPG-03-08,Jump Rope,Accessories,19,62.04,1178.76,2024-02-28,REP-S-020-01
+SPG-00089,S-016,Pacific Surf & Sport,West,P-SPG-02-03,Weight Set Pro,Equipment,10,605.38,6053.8,2024-12-11,REP-S-016-02
+SPG-00090,S-002,Trailhead NE,Northeast,P-SPG-02-04,Climbing Pack,Equipment,20,354.9,7098.0,2024-07-27,REP-S-002-01
+SPG-00091,S-009,Magnolia Active,Southeast,P-SPG-01-04,Base Layer,Apparel,13,107.29,1394.77,2024-05-14,REP-S-009-03
+SPG-00092,S-008,Palmetto Sports,Southeast,P-SPG-02-03,Weight Set Pro,Equipment,13,435.82,5665.66,2024-09-23,REP-S-008-01
+SPG-00093,S-004,Harbor Run,Northeast,P-SPG-03-01,Fitness Band,Accessories,13,14.55,189.15,2024-01-02,REP-S-004-01
+SPG-00094,S-006,Bayou Fitness,Southeast,P-SPG-04-00,Whey Protein,Nutrition,4,19.87,79.48,2024-08-18,REP-S-006-01
+SPG-00095,S-002,Trailhead NE,Northeast,P-SPG-03-07,Ankle Brace,Accessories,6,51.96,311.76,2024-03-05,REP-S-002-04
+SPG-00096,S-005,Evergreen Athletics,Northeast,P-SPG-04-03,Recovery Bar,Nutrition,13,10.46,135.98,2024-11-20,REP-S-005-01
+SPG-00097,S-014,River Trail Gear,Midwest,P-SPG-02-02,Treadmill T500,Equipment,17,291.79,4960.43,2024-08-18,REP-S-014-03
+SPG-00098,S-019,Coastal Outfitters,West,P-SPG-01-01,Rain Shell,Apparel,27,103.72,2800.44,2024-11-23,REP-S-019-03
+SPG-00099,S-017,Redwood Athletics,West,P-SPG-04-02,Electrolyte Mix,Nutrition,16,33.14,530.24,2024-10-23,REP-S-017-03
+SPG-00100,S-005,Evergreen Athletics,Northeast,P-SPG-01-04,Base Layer,Apparel,16,21.57,345.12,2024-02-19,REP-S-005-04
+SPG-00101,S-006,Bayou Fitness,Southeast,P-SPG-01-03,Running Short,Apparel,2,178.93,357.86,2024-01-19,REP-S-006-01
+SPG-00102,S-010,Delta Outfitters,Southeast,P-SPG-01-01,Rain Shell,Apparel,3,106.04,318.12,2024-04-21,REP-S-010-03
+SPG-00103,S-004,Harbor Run,Northeast,P-SPG-00-04,Cross Train V2,Footwear,15,164.84,2472.6,2024-04-06,REP-S-004-01
+SPG-00104,S-012,Prairie Athletics,Midwest,P-SPG-04-01,Energy Gel Pack,Nutrition,12,41.44,497.28,2024-08-03,REP-S-012-02
+SPG-00105,S-009,Magnolia Active,Southeast,P-SPG-02-03,Weight Set Pro,Equipment,15,596.99,8954.85,2024-12-22,REP-S-009-03
+SPG-00106,S-020,Mountain Peak Gear,West,P-SPG-03-04,Sport Towel,Accessories,18,45.58,820.44,2024-10-06,REP-S-020-02
+SPG-00107,S-003,Summit Sports,Northeast,P-SPG-04-01,Energy Gel Pack,Nutrition,11,46.53,511.83,2024-03-26,REP-S-003-03
+SPG-00108,S-019,Coastal Outfitters,West,P-SPG-00-01,Court Ace,Footwear,55,163.34,8983.7,2024-11-03,REP-S-019-03
+SPG-00109,S-019,Coastal Outfitters,West,P-SPG-04-04,BCAAs,Nutrition,29,58.33,1691.57,2024-07-12,REP-S-019-04
+SPG-00110,S-007,Gulf Coast Gear,Southeast,P-SPG-01-00,Compression Tee,Apparel,6,178.25,1069.5,2024-04-20,REP-S-007-01
+SPG-00111,S-020,Mountain Peak Gear,West,P-SPG-01-01,Rain Shell,Apparel,6,96.07,576.42,2024-06-27,REP-S-020-01
+SPG-00112,S-011,Lakeside Sports,Midwest,P-SPG-00-00,Trail Runner X,Footwear,5,147.46,737.3,2024-04-17,REP-S-011-04
+SPG-00113,S-014,River Trail Gear,Midwest,P-SPG-03-05,Grip Tape,Accessories,10,42.53,425.3,2024-04-07,REP-S-014-01
+SPG-00114,S-008,Palmetto Sports,Southeast,P-SPG-04-03,Recovery Bar,Nutrition,10,48.7,487.0,2024-12-13,REP-S-008-04
+SPG-00115,S-012,Prairie Athletics,Midwest,P-SPG-02-04,Climbing Pack,Equipment,11,448.01,4928.11,2024-10-22,REP-S-012-02
+SPG-00116,S-006,Bayou Fitness,Southeast,P-SPG-02-01,Kayak Explorer,Equipment,11,470.36,5173.96,2024-01-08,REP-S-006-04
+SPG-00117,S-009,Magnolia Active,Southeast,P-SPG-00-04,Cross Train V2,Footwear,11,176.94,1946.34,2024-07-08,REP-S-009-02
+SPG-00118,S-001,Alpine Outfitters,Northeast,P-SPG-02-03,Weight Set Pro,Equipment,12,596.37,7156.44,2024-07-05,REP-S-001-02
+SPG-00119,S-020,Mountain Peak Gear,West,P-SPG-04-01,Energy Gel Pack,Nutrition,13,28.71,373.23,2024-01-09,REP-S-020-01
+SPG-00120,S-007,Gulf Coast Gear,Southeast,P-SPG-03-05,Grip Tape,Accessories,13,19.62,255.06,2024-06-03,REP-S-007-03
+SPG-00121,S-011,Lakeside Sports,Midwest,P-SPG-00-02,Hiker Pro,Footwear,9,145.59,1310.31,2024-06-06,REP-S-011-01
+SPG-00122,S-020,Mountain Peak Gear,West,P-SPG-02-00,Carbon Bike,Equipment,9,531.26,4781.34,2024-09-14,REP-S-020-04
+SPG-00123,S-002,Trailhead NE,Northeast,P-SPG-02-02,Treadmill T500,Equipment,2,778.36,1556.72,2024-03-04,REP-S-002-01
+SPG-00124,S-016,Pacific Surf & Sport,West,P-SPG-04-03,Recovery Bar,Nutrition,16,18.69,299.04,2024-12-24,REP-S-016-01
+SPG-00125,S-002,Trailhead NE,Northeast,P-SPG-02-00,Carbon Bike,Equipment,20,720.7,14414.0,2024-09-12,REP-S-002-02
+SPG-00126,S-006,Bayou Fitness,Southeast,P-SPG-01-00,Compression Tee,Apparel,11,153.45,1687.95,2024-11-28,REP-S-006-01
+SPG-00127,S-002,Trailhead NE,Northeast,P-SPG-03-00,Water Bottle,Accessories,11,12.31,135.41,2024-08-21,REP-S-002-03
+SPG-00128,S-007,Gulf Coast Gear,Southeast,P-SPG-04-00,Whey Protein,Nutrition,9,51.86,466.74,2024-07-30,REP-S-007-03
+SPG-00129,S-006,Bayou Fitness,Southeast,P-SPG-04-02,Electrolyte Mix,Nutrition,13,10.71,139.23,2024-07-29,REP-S-006-04
+SPG-00130,S-014,River Trail Gear,Midwest,P-SPG-00-00,Trail Runner X,Footwear,7,213.26,1492.82,2024-06-29,REP-S-014-02
+SPG-00131,S-009,Magnolia Active,Southeast,P-SPG-00-01,Court Ace,Footwear,12,49.35,592.2,2024-06-29,REP-S-009-02
+SPG-00132,S-017,Redwood Athletics,West,P-SPG-03-02,Yoga Mat,Accessories,1,28.34,28.34,2024-10-04,REP-S-017-03
+SPG-00133,S-004,Harbor Run,Northeast,P-SPG-02-03,Weight Set Pro,Equipment,19,677.08,12864.52,2024-08-06,REP-S-004-01
+SPG-00134,S-019,Coastal Outfitters,West,P-SPG-03-01,Fitness Band,Accessories,10,73.85,738.5,2024-09-24,REP-S-019-01
+SPG-00135,S-006,Bayou Fitness,Southeast,P-SPG-02-04,Climbing Pack,Equipment,1,625.04,625.04,2024-06-20,REP-S-006-01
+SPG-00136,S-007,Gulf Coast Gear,Southeast,P-SPG-02-03,Weight Set Pro,Equipment,2,707.9,1415.8,2024-02-28,REP-S-007-02
+SPG-00137,S-010,Delta Outfitters,Southeast,P-SPG-01-01,Rain Shell,Apparel,8,28.53,228.24,2024-03-31,REP-S-010-03
+SPG-00138,S-006,Bayou Fitness,Southeast,P-SPG-02-01,Kayak Explorer,Equipment,15,286.66,4299.9,2024-08-22,REP-S-006-02
+SPG-00139,S-007,Gulf Coast Gear,Southeast,P-SPG-02-01,Kayak Explorer,Equipment,4,784.46,3137.84,2024-08-07,REP-S-007-03
+SPG-00140,S-015,Crossroads Sports,Midwest,P-SPG-02-00,Carbon Bike,Equipment,16,316.36,5061.76,2024-07-10,REP-S-015-03
+SPG-00141,S-012,Prairie Athletics,Midwest,P-SPG-04-03,Recovery Bar,Nutrition,6,11.84,71.04,2024-03-31,REP-S-012-04
+SPG-00142,S-005,Evergreen Athletics,Northeast,P-SPG-04-04,BCAAs,Nutrition,7,59.69,417.83,2024-10-10,REP-S-005-04
+SPG-00143,S-012,Prairie Athletics,Midwest,P-SPG-02-01,Kayak Explorer,Equipment,11,574.74,6322.14,2024-10-31,REP-S-012-03
+SPG-00144,S-003,Summit Sports,Northeast,P-SPG-04-01,Energy Gel Pack,Nutrition,24,20.91,501.84,2024-03-24,REP-S-003-01
+SPG-00145,S-017,Redwood Athletics,West,P-SPG-01-03,Running Short,Apparel,5,94.76,473.8,2024-10-04,REP-S-017-03
+SPG-00146,S-012,Prairie Athletics,Midwest,P-SPG-04-03,Recovery Bar,Nutrition,19,55.06,1046.14,2024-08-11,REP-S-012-03
+SPG-00147,S-004,Harbor Run,Northeast,P-SPG-02-00,Carbon Bike,Equipment,6,366.06,2196.36,2024-07-14,REP-S-004-03
+SPG-00148,S-011,Lakeside Sports,Midwest,P-SPG-00-01,Court Ace,Footwear,12,104.32,1251.84,2024-05-25,REP-S-011-04
+SPG-00149,S-018,Canyon Sports,West,P-SPG-01-00,Compression Tee,Apparel,15,149.48,2242.2,2024-12-03,REP-S-018-04
+SPG-00150,S-019,Coastal Outfitters,West,P-SPG-04-03,Recovery Bar,Nutrition,35,33.68,1178.8,2024-12-18,REP-S-019-03
+SPG-00151,S-020,Mountain Peak Gear,West,P-SPG-02-03,Weight Set Pro,Equipment,13,275.13,3576.69,2024-12-14,REP-S-020-02
+SPG-00152,S-017,Redwood Athletics,West,P-SPG-00-03,Sprint Elite,Footwear,14,202.56,2835.84,2024-08-11,REP-S-017-04
+SPG-00153,S-019,Coastal Outfitters,West,P-SPG-00-01,Court Ace,Footwear,47,74.94,3522.18,2024-11-20,REP-S-019-02
+SPG-00154,S-019,Coastal Outfitters,West,P-SPG-01-01,Rain Shell,Apparel,28,146.17,4092.76,2024-05-25,REP-S-019-01
+SPG-00155,S-010,Delta Outfitters,Southeast,P-SPG-01-02,Fleece Vest,Apparel,12,83.36,1000.32,2024-12-25,REP-S-010-04
+SPG-00156,S-001,Alpine Outfitters,Northeast,P-SPG-01-01,Rain Shell,Apparel,6,68.21,409.26,2024-11-13,REP-S-001-01
+SPG-00157,S-006,Bayou Fitness,Southeast,P-SPG-01-01,Rain Shell,Apparel,11,34.43,378.73,2024-02-20,REP-S-006-02
+SPG-00158,S-005,Evergreen Athletics,Northeast,P-SPG-04-02,Electrolyte Mix,Nutrition,1,33.87,33.87,2024-02-14,REP-S-005-03
+SPG-00159,S-004,Harbor Run,Northeast,P-SPG-03-08,Jump Rope,Accessories,13,57.41,746.33,2024-02-23,REP-S-004-04
+SPG-00160,S-013,Heartland Fitness,Midwest,P-SPG-03-03,Resistance Bands,Accessories,4,34.07,136.28,2024-02-15,REP-S-013-03
+SPG-00161,S-005,Evergreen Athletics,Northeast,P-SPG-03-05,Grip Tape,Accessories,10,66.48,664.8,2024-11-28,REP-S-005-04
+SPG-00162,S-020,Mountain Peak Gear,West,P-SPG-03-08,Jump Rope,Accessories,3,31.02,93.06,2024-01-09,REP-S-020-01
+SPG-00163,S-008,Palmetto Sports,Southeast,P-SPG-04-01,Energy Gel Pack,Nutrition,6,28.46,170.76,2024-11-11,REP-S-008-03
+SPG-00164,S-017,Redwood Athletics,West,P-SPG-00-04,Cross Train V2,Footwear,20,197.85,3957.0,2024-07-29,REP-S-017-01
+SPG-00165,S-008,Palmetto Sports,Southeast,P-SPG-01-03,Running Short,Apparel,5,27.08,135.4,2024-02-23,REP-S-008-03
+SPG-00166,S-014,River Trail Gear,Midwest,P-SPG-00-02,Hiker Pro,Footwear,13,177.35,2305.55,2024-09-11,REP-S-014-04
+SPG-00167,S-005,Evergreen Athletics,Northeast,P-SPG-02-02,Treadmill T500,Equipment,13,556.45,7233.85,2024-11-15,REP-S-005-04
+SPG-00168,S-002,Trailhead NE,Northeast,P-SPG-02-03,Weight Set Pro,Equipment,6,172.66,1035.96,2024-10-05,REP-S-002-01
+SPG-00169,S-015,Crossroads Sports,Midwest,P-SPG-00-02,Hiker Pro,Footwear,4,177.73,710.92,2024-02-21,REP-S-015-04
+SPG-00170,S-001,Alpine Outfitters,Northeast,P-SPG-01-02,Fleece Vest,Apparel,5,111.95,559.75,2024-11-20,REP-S-001-04
+SPG-00171,S-015,Crossroads Sports,Midwest,P-SPG-00-03,Sprint Elite,Footwear,13,128.72,1673.36,2024-08-15,REP-S-015-01
+SPG-00172,S-010,Delta Outfitters,Southeast,P-SPG-03-04,Sport Towel,Accessories,3,50.27,150.81,2024-09-14,REP-S-010-04
+SPG-00173,S-017,Redwood Athletics,West,P-SPG-02-03,Weight Set Pro,Equipment,11,683.13,7514.43,2024-10-24,REP-S-017-03
+SPG-00174,S-004,Harbor Run,Northeast,P-SPG-01-03,Running Short,Apparel,18,141.54,2547.72,2024-01-17,REP-S-004-01
+SPG-00175,S-005,Evergreen Athletics,Northeast,P-SPG-00-02,Hiker Pro,Footwear,19,94.15,1788.85,2024-12-07,REP-S-005-04
+SPG-00176,S-014,River Trail Gear,Midwest,P-SPG-00-03,Sprint Elite,Footwear,10,48.37,483.7,2024-05-28,REP-S-014-04
+SPG-00177,S-015,Crossroads Sports,Midwest,P-SPG-02-00,Carbon Bike,Equipment,20,564.79,11295.8,2024-08-03,REP-S-015-03
+SPG-00178,S-014,River Trail Gear,Midwest,P-SPG-02-02,Treadmill T500,Equipment,1,457.06,457.06,2024-04-18,REP-S-014-02
+SPG-00179,S-010,Delta Outfitters,Southeast,P-SPG-02-03,Weight Set Pro,Equipment,1,385.08,385.08,2024-04-24,REP-S-010-03
+SPG-00180,S-002,Trailhead NE,Northeast,P-SPG-04-00,Whey Protein,Nutrition,12,46.6,559.2,2024-08-20,REP-S-002-04
+SPG-00181,S-008,Palmetto Sports,Southeast,P-SPG-01-00,Compression Tee,Apparel,14,35.13,491.82,2024-10-09,REP-S-008-02
+SPG-00182,S-016,Pacific Surf & Sport,West,P-SPG-03-04,Sport Towel,Accessories,12,77.89,934.68,2024-07-14,REP-S-016-02
+SPG-00183,S-017,Redwood Athletics,West,P-SPG-04-03,Recovery Bar,Nutrition,2,13.83,27.66,2024-02-28,REP-S-017-03
+SPG-00184,S-002,Trailhead NE,Northeast,P-SPG-01-04,Base Layer,Apparel,4,81.11,324.44,2024-04-10,REP-S-002-01
+SPG-00185,S-011,Lakeside Sports,Midwest,P-SPG-02-03,Weight Set Pro,Equipment,13,66.79,868.27,2024-08-28,REP-S-011-03
+SPG-00186,S-003,Summit Sports,Northeast,P-SPG-03-01,Fitness Band,Accessories,24,47.82,1147.68,2024-03-04,REP-S-003-02
+SPG-00187,S-002,Trailhead NE,Northeast,P-SPG-02-04,Climbing Pack,Equipment,16,211.41,3382.56,2024-06-28,REP-S-002-04
+SPG-00188,S-009,Magnolia Active,Southeast,P-SPG-01-02,Fleece Vest,Apparel,13,127.43,1656.59,2024-08-25,REP-S-009-04
+SPG-00189,S-006,Bayou Fitness,Southeast,P-SPG-02-02,Treadmill T500,Equipment,1,355.39,355.39,2024-07-30,REP-S-006-01
+SPG-00190,S-014,River Trail Gear,Midwest,P-SPG-01-02,Fleece Vest,Apparel,9,93.99,845.91,2024-11-26,REP-S-014-03
+SPG-00191,S-004,Harbor Run,Northeast,P-SPG-01-01,Rain Shell,Apparel,1,133.44,133.44,2024-12-26,REP-S-004-02
+SPG-00192,S-003,Summit Sports,Northeast,P-SPG-04-02,Electrolyte Mix,Nutrition,61,51.35,3132.35,2024-07-21,REP-S-003-03
+SPG-00193,S-018,Canyon Sports,West,P-SPG-03-07,Ankle Brace,Accessories,18,5.94,106.92,2024-01-04,REP-S-018-03
+SPG-00194,S-011,Lakeside Sports,Midwest,P-SPG-02-03,Weight Set Pro,Equipment,5,396.46,1982.3,2024-07-10,REP-S-011-04
+SPG-00195,S-007,Gulf Coast Gear,Southeast,P-SPG-04-01,Energy Gel Pack,Nutrition,10,22.78,227.8,2024-04-24,REP-S-007-01
+SPG-00196,S-019,Coastal Outfitters,West,P-SPG-00-03,Sprint Elite,Footwear,46,246.84,11354.64,2024-09-16,REP-S-019-03
+SPG-00197,S-010,Delta Outfitters,Southeast,P-SPG-02-02,Treadmill T500,Equipment,12,555.88,6670.56,2024-05-25,REP-S-010-01
+SPG-00198,S-005,Evergreen Athletics,Northeast,P-SPG-04-04,BCAAs,Nutrition,6,41.21,247.26,2024-05-17,REP-S-005-04
+SPG-00199,S-014,River Trail Gear,Midwest,P-SPG-00-02,Hiker Pro,Footwear,18,196.25,3532.5,2024-12-03,REP-S-014-02
+SPG-00200,S-013,Heartland Fitness,Midwest,P-SPG-04-01,Energy Gel Pack,Nutrition,13,40.36,524.68,2024-05-15,REP-S-013-01
+SPG-00201,S-004,Harbor Run,Northeast,P-SPG-03-03,Resistance Bands,Accessories,7,79.41,555.87,2024-06-06,REP-S-004-03
+SPG-00202,S-006,Bayou Fitness,Southeast,P-SPG-01-03,Running Short,Apparel,14,85.36,1195.04,2024-07-31,REP-S-006-02
+SPG-00203,S-014,River Trail Gear,Midwest,P-SPG-04-02,Electrolyte Mix,Nutrition,11,48.52,533.72,2024-12-10,REP-S-014-01
+SPG-00204,S-011,Lakeside Sports,Midwest,P-SPG-04-04,BCAAs,Nutrition,18,29.61,532.98,2024-05-03,REP-S-011-04
+SPG-00205,S-016,Pacific Surf & Sport,West,P-SPG-03-04,Sport Towel,Accessories,15,16.77,251.55,2024-01-03,REP-S-016-02
+SPG-00206,S-013,Heartland Fitness,Midwest,P-SPG-02-00,Carbon Bike,Equipment,18,672.4,12103.2,2024-07-31,REP-S-013-04
+SPG-00207,S-006,Bayou Fitness,Southeast,P-SPG-00-03,Sprint Elite,Footwear,15,177.15,2657.25,2024-01-17,REP-S-006-04
+SPG-00208,S-014,River Trail Gear,Midwest,P-SPG-01-00,Compression Tee,Apparel,20,55.87,1117.4,2024-01-08,REP-S-014-01
+SPG-00209,S-020,Mountain Peak Gear,West,P-SPG-04-03,Recovery Bar,Nutrition,1,26.25,26.25,2024-01-14,REP-S-020-02
+SPG-00210,S-006,Bayou Fitness,Southeast,P-SPG-04-03,Recovery Bar,Nutrition,2,57.59,115.18,2024-03-19,REP-S-006-01
+SPG-00211,S-020,Mountain Peak Gear,West,P-SPG-03-08,Jump Rope,Accessories,17,69.76,1185.92,2024-07-10,REP-S-020-02
+SPG-00212,S-015,Crossroads Sports,Midwest,P-SPG-02-01,Kayak Explorer,Equipment,6,404.13,2424.78,2024-09-22,REP-S-015-02
+SPG-00213,S-011,Lakeside Sports,Midwest,P-SPG-01-02,Fleece Vest,Apparel,3,163.11,489.33,2024-11-03,REP-S-011-02
+SPG-00214,S-019,Coastal Outfitters,West,P-SPG-03-07,Ankle Brace,Accessories,23,56.28,1294.44,2024-06-11,REP-S-019-02
+SPG-00215,S-006,Bayou Fitness,Southeast,P-SPG-03-08,Jump Rope,Accessories,3,65.28,195.84,2024-06-20,REP-S-006-03
+SPG-00216,S-006,Bayou Fitness,Southeast,P-SPG-01-03,Running Short,Apparel,2,21.1,42.2,2024-03-28,REP-S-006-01
+SPG-00217,S-014,River Trail Gear,Midwest,P-SPG-04-03,Recovery Bar,Nutrition,13,13.52,175.76,2024-10-19,REP-S-014-04
+SPG-00218,S-009,Magnolia Active,Southeast,P-SPG-04-00,Whey Protein,Nutrition,16,42.35,677.6,2024-08-08,REP-S-009-01
+SPG-00219,S-015,Crossroads Sports,Midwest,P-SPG-03-00,Water Bottle,Accessories,10,65.87,658.7,2024-05-03,REP-S-015-01
+SPG-00220,S-012,Prairie Athletics,Midwest,P-SPG-03-08,Jump Rope,Accessories,15,37.14,557.1,2024-10-11,REP-S-012-01
+SPG-00221,S-004,Harbor Run,Northeast,P-SPG-01-02,Fleece Vest,Apparel,19,140.57,2670.83,2024-07-19,REP-S-004-01
+SPG-00222,S-006,Bayou Fitness,Southeast,P-SPG-02-03,Weight Set Pro,Equipment,9,156.46,1408.14,2024-04-08,REP-S-006-02
+SPG-00223,S-016,Pacific Surf & Sport,West,P-SPG-01-02,Fleece Vest,Apparel,4,72.8,291.2,2024-11-11,REP-S-016-01
+SPG-00224,S-015,Crossroads Sports,Midwest,P-SPG-03-03,Resistance Bands,Accessories,9,30.68,276.12,2024-11-25,REP-S-015-04
+SPG-00225,S-011,Lakeside Sports,Midwest,P-SPG-03-04,Sport Towel,Accessories,19,25.65,487.35,2024-07-20,REP-S-011-01
+SPG-00226,S-005,Evergreen Athletics,Northeast,P-SPG-01-04,Base Layer,Apparel,10,24.15,241.5,2024-01-27,REP-S-005-03
+SPG-00227,S-019,Coastal Outfitters,West,P-SPG-02-02,Treadmill T500,Equipment,26,758.59,19723.34,2024-10-22,REP-S-019-03
+SPG-00228,S-016,Pacific Surf & Sport,West,P-SPG-03-04,Sport Towel,Accessories,5,60.78,303.9,2024-08-07,REP-S-016-02
+SPG-00229,S-005,Evergreen Athletics,Northeast,P-SPG-04-02,Electrolyte Mix,Nutrition,13,22.87,297.31,2024-03-06,REP-S-005-02
+SPG-00230,S-001,Alpine Outfitters,Northeast,P-SPG-01-04,Base Layer,Apparel,10,43.74,437.4,2024-11-21,REP-S-001-01
+SPG-00231,S-009,Magnolia Active,Southeast,P-SPG-02-04,Climbing Pack,Equipment,13,354.38,4606.94,2024-07-18,REP-S-009-02
+SPG-00232,S-012,Prairie Athletics,Midwest,P-SPG-01-04,Base Layer,Apparel,17,70.29,1194.93,2024-03-29,REP-S-012-03
+SPG-00233,S-013,Heartland Fitness,Midwest,P-SPG-03-02,Yoga Mat,Accessories,17,41.15,699.55,2024-07-25,REP-S-013-04
+SPG-00234,S-013,Heartland Fitness,Midwest,P-SPG-00-00,Trail Runner X,Footwear,11,87.21,959.31,2024-06-11,REP-S-013-02
+SPG-00235,S-008,Palmetto Sports,Southeast,P-SPG-01-02,Fleece Vest,Apparel,16,144.48,2311.68,2024-09-21,REP-S-008-01
+SPG-00236,S-007,Gulf Coast Gear,Southeast,P-SPG-02-03,Weight Set Pro,Equipment,12,477.06,5724.72,2024-03-22,REP-S-007-01
+SPG-00237,S-017,Redwood Athletics,West,P-SPG-01-01,Rain Shell,Apparel,12,126.28,1515.36,2024-08-11,REP-S-017-04
+SPG-00238,S-004,Harbor Run,Northeast,P-SPG-02-04,Climbing Pack,Equipment,3,253.61,760.83,2024-04-28,REP-S-004-01
+SPG-00239,S-002,Trailhead NE,Northeast,P-SPG-03-09,Foam Roller,Accessories,17,23.6,401.2,2024-02-20,REP-S-002-03
+SPG-00240,S-006,Bayou Fitness,Southeast,P-SPG-01-01,Rain Shell,Apparel,12,48.39,580.68,2024-12-29,REP-S-006-03
+SPG-00241,S-018,Canyon Sports,West,P-SPG-02-00,Carbon Bike,Equipment,7,600.0,4200.0,2024-03-05,REP-S-018-01
+SPG-00242,S-005,Evergreen Athletics,Northeast,P-SPG-04-02,Electrolyte Mix,Nutrition,2,20.39,40.78,2024-09-15,REP-S-005-02
+SPG-00243,S-019,Coastal Outfitters,West,P-SPG-04-03,Recovery Bar,Nutrition,50,14.91,745.5,2024-03-01,REP-S-019-01
+SPG-00244,S-011,Lakeside Sports,Midwest,P-SPG-00-01,Court Ace,Footwear,16,64.45,1031.2,2024-11-19,REP-S-011-01
+SPG-00245,S-016,Pacific Surf & Sport,West,P-SPG-01-00,Compression Tee,Apparel,18,114.3,2057.4,2024-10-22,REP-S-016-04
+SPG-00246,S-010,Delta Outfitters,Southeast,P-SPG-04-00,Whey Protein,Nutrition,15,31.49,472.35,2024-07-19,REP-S-010-01
+SPG-00247,S-015,Crossroads Sports,Midwest,P-SPG-01-04,Base Layer,Apparel,20,140.89,2817.8,2024-11-17,REP-S-015-01
+SPG-00248,S-009,Magnolia Active,Southeast,P-SPG-03-09,Foam Roller,Accessories,7,41.95,293.65,2024-05-13,REP-S-009-02
+SPG-00249,S-011,Lakeside Sports,Midwest,P-SPG-04-03,Recovery Bar,Nutrition,17,24.19,411.23,2024-10-10,REP-S-011-03
+SPG-00250,S-009,Magnolia Active,Southeast,P-SPG-04-01,Energy Gel Pack,Nutrition,9,23.76,213.84,2024-03-22,REP-S-009-03
+SPG-00251,S-015,Crossroads Sports,Midwest,P-SPG-00-01,Court Ace,Footwear,16,41.37,661.92,2024-06-14,REP-S-015-04
+SPG-00252,S-016,Pacific Surf & Sport,West,P-SPG-01-01,Rain Shell,Apparel,3,141.67,425.01,2024-04-14,REP-S-016-03
+SPG-00253,S-004,Harbor Run,Northeast,P-SPG-03-05,Grip Tape,Accessories,18,66.69,1200.42,2024-02-17,REP-S-004-02
+SPG-00254,S-004,Harbor Run,Northeast,P-SPG-01-01,Rain Shell,Apparel,10,100.28,1002.8,2024-02-17,REP-S-004-03
+SPG-00255,S-017,Redwood Athletics,West,P-SPG-03-01,Fitness Band,Accessories,10,74.57,745.7,2024-01-14,REP-S-017-02
+SPG-00256,S-019,Coastal Outfitters,West,P-SPG-01-02,Fleece Vest,Apparel,17,50.7,861.9,2024-08-11,REP-S-019-02
+SPG-00257,S-006,Bayou Fitness,Southeast,P-SPG-04-01,Energy Gel Pack,Nutrition,9,57.84,520.56,2024-01-06,REP-S-006-04
+SPG-00258,S-020,Mountain Peak Gear,West,P-SPG-03-04,Sport Towel,Accessories,8,74.96,599.68,2024-11-17,REP-S-020-04
+SPG-00259,S-010,Delta Outfitters,Southeast,P-SPG-02-01,Kayak Explorer,Equipment,8,300.29,2402.32,2024-10-30,REP-S-010-03
+SPG-00260,S-011,Lakeside Sports,Midwest,P-SPG-03-04,Sport Towel,Accessories,14,47.25,661.5,2024-03-19,REP-S-011-04
+SPG-00261,S-001,Alpine Outfitters,Northeast,P-SPG-03-00,Water Bottle,Accessories,14,31.52,441.28,2024-01-15,REP-S-001-02
+SPG-00262,S-015,Crossroads Sports,Midwest,P-SPG-02-00,Carbon Bike,Equipment,7,206.46,1445.22,2024-11-12,REP-S-015-03
+SPG-00263,S-010,Delta Outfitters,Southeast,P-SPG-02-00,Carbon Bike,Equipment,9,370.62,3335.58,2024-12-28,REP-S-010-04
+SPG-00264,S-011,Lakeside Sports,Midwest,P-SPG-04-04,BCAAs,Nutrition,7,49.87,349.09,2024-10-05,REP-S-011-04
+SPG-00265,S-009,Magnolia Active,Southeast,P-SPG-00-00,Trail Runner X,Footwear,6,73.69,442.14,2024-02-10,REP-S-009-04
+SPG-00266,S-019,Coastal Outfitters,West,P-SPG-03-00,Water Bottle,Accessories,44,56.59,2489.96,2024-10-19,REP-S-019-04
+SPG-00267,S-008,Palmetto Sports,Southeast,P-SPG-02-04,Climbing Pack,Equipment,15,331.26,4968.9,2024-07-14,REP-S-008-01
+SPG-00268,S-002,Trailhead NE,Northeast,P-SPG-02-02,Treadmill T500,Equipment,18,327.09,5887.62,2024-01-13,REP-S-002-03
+SPG-00269,S-004,Harbor Run,Northeast,P-SPG-03-02,Yoga Mat,Accessories,3,29.34,88.02,2024-03-07,REP-S-004-04
+SPG-00270,S-005,Evergreen Athletics,Northeast,P-SPG-01-04,Base Layer,Apparel,10,111.85,1118.5,2024-08-20,REP-S-005-01
+SPG-00271,S-015,Crossroads Sports,Midwest,P-SPG-01-02,Fleece Vest,Apparel,19,107.45,2041.55,2024-11-20,REP-S-015-03
+SPG-00272,S-018,Canyon Sports,West,P-SPG-04-02,Electrolyte Mix,Nutrition,1,17.02,17.02,2024-11-19,REP-S-018-01
+SPG-00273,S-011,Lakeside Sports,Midwest,P-SPG-02-03,Weight Set Pro,Equipment,7,188.11,1316.77,2024-07-02,REP-S-011-04
+SPG-00274,S-008,Palmetto Sports,Southeast,P-SPG-03-05,Grip Tape,Accessories,9,19.92,179.28,2024-04-05,REP-S-008-03
+SPG-00275,S-009,Magnolia Active,Southeast,P-SPG-04-00,Whey Protein,Nutrition,4,15.96,63.84,2024-05-02,REP-S-009-04
+SPG-00276,S-014,River Trail Gear,Midwest,P-SPG-03-07,Ankle Brace,Accessories,2,67.38,134.76,2024-11-30,REP-S-014-01
+SPG-00277,S-017,Redwood Athletics,West,P-SPG-02-00,Carbon Bike,Equipment,19,377.91,7180.29,2024-04-23,REP-S-017-01
+SPG-00278,S-017,Redwood Athletics,West,P-SPG-02-04,Climbing Pack,Equipment,16,261.98,4191.68,2024-06-01,REP-S-017-03
+SPG-00279,S-003,Summit Sports,Northeast,P-SPG-00-04,Cross Train V2,Footwear,9,244.59,2201.31,2024-04-09,REP-S-003-02
+SPG-00280,S-017,Redwood Athletics,West,P-SPG-00-04,Cross Train V2,Footwear,15,168.11,2521.65,2024-10-01,REP-S-017-02
+SPG-00281,S-003,Summit Sports,Northeast,P-SPG-03-04,Sport Towel,Accessories,50,38.85,1942.5,2024-05-05,REP-S-003-02
+SPG-00282,S-011,Lakeside Sports,Midwest,P-SPG-00-01,Court Ace,Footwear,19,111.36,2115.84,2024-07-12,REP-S-011-04
+SPG-00283,S-001,Alpine Outfitters,Northeast,P-SPG-03-09,Foam Roller,Accessories,10,5.48,54.8,2024-05-13,REP-S-001-04
+SPG-00284,S-001,Alpine Outfitters,Northeast,P-SPG-00-01,Court Ace,Footwear,11,129.7,1426.7,2024-12-03,REP-S-001-03
+SPG-00285,S-008,Palmetto Sports,Southeast,P-SPG-04-02,Electrolyte Mix,Nutrition,14,32.89,460.46,2024-01-27,REP-S-008-02
+SPG-00286,S-019,Coastal Outfitters,West,P-SPG-02-04,Climbing Pack,Equipment,13,191.64,2491.32,2024-05-20,REP-S-019-03
+SPG-00287,S-006,Bayou Fitness,Southeast,P-SPG-00-00,Trail Runner X,Footwear,14,166.4,2329.6,2024-02-12,REP-S-006-01
+SPG-00288,S-005,Evergreen Athletics,Northeast,P-SPG-04-02,Electrolyte Mix,Nutrition,3,26.37,79.11,2024-03-14,REP-S-005-03
+SPG-00289,S-008,Palmetto Sports,Southeast,P-SPG-01-01,Rain Shell,Apparel,8,46.13,369.04,2024-11-17,REP-S-008-03
+SPG-00290,S-008,Palmetto Sports,Southeast,P-SPG-01-02,Fleece Vest,Apparel,1,41.97,41.97,2024-01-12,REP-S-008-04
+SPG-00291,S-004,Harbor Run,Northeast,P-SPG-03-00,Water Bottle,Accessories,15,70.06,1050.9,2024-11-22,REP-S-004-02
+SPG-00292,S-013,Heartland Fitness,Midwest,P-SPG-00-03,Sprint Elite,Footwear,15,123.83,1857.45,2024-10-23,REP-S-013-02
+SPG-00293,S-013,Heartland Fitness,Midwest,P-SPG-04-00,Whey Protein,Nutrition,3,58.46,175.38,2024-02-22,REP-S-013-01
+SPG-00294,S-006,Bayou Fitness,Southeast,P-SPG-01-00,Compression Tee,Apparel,13,138.5,1800.5,2024-02-26,REP-S-006-03
+SPG-00295,S-011,Lakeside Sports,Midwest,P-SPG-03-03,Resistance Bands,Accessories,7,78.89,552.23,2024-08-23,REP-S-011-03
+SPG-00296,S-016,Pacific Surf & Sport,West,P-SPG-02-04,Climbing Pack,Equipment,4,758.67,3034.68,2024-11-01,REP-S-016-01
+SPG-00297,S-001,Alpine Outfitters,Northeast,P-SPG-03-06,Swim Goggles,Accessories,13,77.12,1002.56,2024-03-03,REP-S-001-01
+SPG-00298,S-012,Prairie Athletics,Midwest,P-SPG-02-02,Treadmill T500,Equipment,3,375.61,1126.83,2024-02-24,REP-S-012-03
+SPG-00299,S-008,Palmetto Sports,Southeast,P-SPG-00-03,Sprint Elite,Footwear,13,43.33,563.29,2024-03-13,REP-S-008-03
+SPG-00300,S-011,Lakeside Sports,Midwest,P-SPG-00-01,Court Ace,Footwear,8,77.25,618.0,2024-05-24,REP-S-011-01
+SPG-00301,S-005,Evergreen Athletics,Northeast,P-SPG-04-01,Energy Gel Pack,Nutrition,5,44.75,223.75,2024-05-14,REP-S-005-01
+SPG-00302,S-002,Trailhead NE,Northeast,P-SPG-04-01,Energy Gel Pack,Nutrition,10,28.59,285.9,2024-04-02,REP-S-002-04
+SPG-00303,S-006,Bayou Fitness,Southeast,P-SPG-03-02,Yoga Mat,Accessories,4,75.22,300.88,2024-02-17,REP-S-006-02
+SPG-00304,S-006,Bayou Fitness,Southeast,P-SPG-02-00,Carbon Bike,Equipment,4,72.49,289.96,2024-02-09,REP-S-006-02
+SPG-00305,S-010,Delta Outfitters,Southeast,P-SPG-03-05,Grip Tape,Accessories,7,51.64,361.48,2024-09-10,REP-S-010-01
+SPG-00306,S-001,Alpine Outfitters,Northeast,P-SPG-02-00,Carbon Bike,Equipment,16,75.67,1210.72,2024-07-04,REP-S-001-02
+SPG-00307,S-014,River Trail Gear,Midwest,P-SPG-00-04,Cross Train V2,Footwear,13,200.13,2601.69,2024-04-16,REP-S-014-02
+SPG-00308,S-006,Bayou Fitness,Southeast,P-SPG-00-00,Trail Runner X,Footwear,9,228.41,2055.69,2024-07-19,REP-S-006-01
+SPG-00309,S-014,River Trail Gear,Midwest,P-SPG-00-00,Trail Runner X,Footwear,16,137.53,2200.48,2024-02-21,REP-S-014-04
+SPG-00310,S-018,Canyon Sports,West,P-SPG-03-02,Yoga Mat,Accessories,20,65.71,1314.2,2024-09-08,REP-S-018-01
+SPG-00311,S-010,Delta Outfitters,Southeast,P-SPG-03-07,Ankle Brace,Accessories,7,14.61,102.27,2024-01-12,REP-S-010-03
+SPG-00312,S-020,Mountain Peak Gear,West,P-SPG-00-03,Sprint Elite,Footwear,16,197.23,3155.68,2024-07-30,REP-S-020-02
+SPG-00313,S-005,Evergreen Athletics,Northeast,P-SPG-01-04,Base Layer,Apparel,5,148.87,744.35,2024-02-07,REP-S-005-02
+SPG-00314,S-008,Palmetto Sports,Southeast,P-SPG-00-00,Trail Runner X,Footwear,10,99.28,992.8,2024-09-06,REP-S-008-01
+SPG-00315,S-008,Palmetto Sports,Southeast,P-SPG-01-02,Fleece Vest,Apparel,4,136.8,547.2,2024-11-16,REP-S-008-03
+SPG-00316,S-011,Lakeside Sports,Midwest,P-SPG-03-09,Foam Roller,Accessories,17,43.77,744.09,2024-02-09,REP-S-011-03
+SPG-00317,S-005,Evergreen Athletics,Northeast,P-SPG-02-03,Weight Set Pro,Equipment,12,545.9,6550.8,2024-04-17,REP-S-005-01
+SPG-00318,S-013,Heartland Fitness,Midwest,P-SPG-00-01,Court Ace,Footwear,6,43.01,258.06,2024-12-17,REP-S-013-01
+SPG-00319,S-008,Palmetto Sports,Southeast,P-SPG-01-03,Running Short,Apparel,9,21.87,196.83,2024-08-02,REP-S-008-04
+SPG-00320,S-016,Pacific Surf & Sport,West,P-SPG-02-01,Kayak Explorer,Equipment,19,354.24,6730.56,2024-07-11,REP-S-016-02
+SPG-00321,S-015,Crossroads Sports,Midwest,P-SPG-04-02,Electrolyte Mix,Nutrition,18,31.99,575.82,2024-06-09,REP-S-015-03
+SPG-00322,S-017,Redwood Athletics,West,P-SPG-02-02,Treadmill T500,Equipment,6,241.46,1448.76,2024-11-20,REP-S-017-04
+SPG-00323,S-018,Canyon Sports,West,P-SPG-03-01,Fitness Band,Accessories,11,62.25,684.75,2024-08-18,REP-S-018-03
+SPG-00324,S-003,Summit Sports,Northeast,P-SPG-02-03,Weight Set Pro,Equipment,2,773.57,1547.14,2024-03-23,REP-S-003-02
+SPG-00325,S-015,Crossroads Sports,Midwest,P-SPG-00-00,Trail Runner X,Footwear,18,189.67,3414.06,2024-04-02,REP-S-015-02
+SPG-00326,S-012,Prairie Athletics,Midwest,P-SPG-02-03,Weight Set Pro,Equipment,14,464.97,6509.58,2024-06-01,REP-S-012-01
+SPG-00327,S-017,Redwood Athletics,West,P-SPG-01-03,Running Short,Apparel,17,51.18,870.06,2024-01-06,REP-S-017-02
+SPG-00328,S-001,Alpine Outfitters,Northeast,P-SPG-01-02,Fleece Vest,Apparel,17,116.15,1974.55,2024-04-01,REP-S-001-02
+SPG-00329,S-019,Coastal Outfitters,West,P-SPG-04-04,BCAAs,Nutrition,5,50.01,250.05,2024-12-03,REP-S-019-02
+SPG-00330,S-017,Redwood Athletics,West,P-SPG-01-02,Fleece Vest,Apparel,6,36.02,216.12,2024-10-17,REP-S-017-02
+SPG-00331,S-020,Mountain Peak Gear,West,P-SPG-01-01,Rain Shell,Apparel,18,170.75,3073.5,2024-11-19,REP-S-020-04
+SPG-00332,S-007,Gulf Coast Gear,Southeast,P-SPG-02-00,Carbon Bike,Equipment,10,272.37,2723.7,2024-11-06,REP-S-007-04
+SPG-00333,S-016,Pacific Surf & Sport,West,P-SPG-03-05,Grip Tape,Accessories,5,59.12,295.6,2024-01-17,REP-S-016-03
+SPG-00334,S-001,Alpine Outfitters,Northeast,P-SPG-00-02,Hiker Pro,Footwear,18,180.31,3245.58,2024-03-01,REP-S-001-02
+SPG-00335,S-020,Mountain Peak Gear,West,P-SPG-04-00,Whey Protein,Nutrition,2,47.76,95.52,2024-06-24,REP-S-020-02
+SPG-00336,S-005,Evergreen Athletics,Northeast,P-SPG-03-02,Yoga Mat,Accessories,8,34.34,274.72,2024-06-26,REP-S-005-02
+SPG-00337,S-014,River Trail Gear,Midwest,P-SPG-03-09,Foam Roller,Accessories,7,23.64,165.48,2024-09-04,REP-S-014-03
+SPG-00338,S-003,Summit Sports,Northeast,P-SPG-01-02,Fleece Vest,Apparel,13,162.82,2116.66,2024-11-10,REP-S-003-02
+SPG-00339,S-007,Gulf Coast Gear,Southeast,P-SPG-03-02,Yoga Mat,Accessories,7,62.04,434.28,2024-11-03,REP-S-007-01
+SPG-00340,S-004,Harbor Run,Northeast,P-SPG-04-02,Electrolyte Mix,Nutrition,17,15.13,257.21,2024-10-06,REP-S-004-04
+SPG-00341,S-008,Palmetto Sports,Southeast,P-SPG-03-04,Sport Towel,Accessories,3,45.59,136.77,2024-01-03,REP-S-008-04
+SPG-00342,S-005,Evergreen Athletics,Northeast,P-SPG-00-02,Hiker Pro,Footwear,9,239.39,2154.51,2024-03-22,REP-S-005-01
+SPG-00343,S-013,Heartland Fitness,Midwest,P-SPG-02-00,Carbon Bike,Equipment,15,369.43,5541.45,2024-09-24,REP-S-013-02
+SPG-00344,S-016,Pacific Surf & Sport,West,P-SPG-02-01,Kayak Explorer,Equipment,17,127.29,2163.93,2024-05-10,REP-S-016-03
+SPG-00345,S-008,Palmetto Sports,Southeast,P-SPG-03-06,Swim Goggles,Accessories,11,9.25,101.75,2024-03-03,REP-S-008-01
+SPG-00346,S-009,Magnolia Active,Southeast,P-SPG-02-02,Treadmill T500,Equipment,13,296.62,3856.06,2024-04-08,REP-S-009-03
+SPG-00347,S-012,Prairie Athletics,Midwest,P-SPG-00-00,Trail Runner X,Footwear,4,189.75,759.0,2024-11-06,REP-S-012-04
+SPG-00348,S-008,Palmetto Sports,Southeast,P-SPG-04-03,Recovery Bar,Nutrition,6,39.55,237.3,2024-01-16,REP-S-008-03
+SPG-00349,S-004,Harbor Run,Northeast,P-SPG-03-08,Jump Rope,Accessories,20,67.81,1356.2,2024-10-01,REP-S-004-04
+SPG-00350,S-020,Mountain Peak Gear,West,P-SPG-04-03,Recovery Bar,Nutrition,2,40.08,80.16,2024-01-12,REP-S-020-01
+SPG-00351,S-019,Coastal Outfitters,West,P-SPG-00-00,Trail Runner X,Footwear,25,115.75,2893.75,2024-09-22,REP-S-019-04
+SPG-00352,S-013,Heartland Fitness,Midwest,P-SPG-00-02,Hiker Pro,Footwear,15,218.97,3284.55,2024-09-19,REP-S-013-01
+SPG-00353,S-013,Heartland Fitness,Midwest,P-SPG-03-00,Water Bottle,Accessories,7,47.52,332.64,2024-03-19,REP-S-013-01
+SPG-00354,S-011,Lakeside Sports,Midwest,P-SPG-00-02,Hiker Pro,Footwear,14,208.4,2917.6,2024-04-20,REP-S-011-04
+SPG-00355,S-009,Magnolia Active,Southeast,P-SPG-02-02,Treadmill T500,Equipment,9,780.18,7021.62,2024-07-05,REP-S-009-02
+SPG-00356,S-009,Magnolia Active,Southeast,P-SPG-03-00,Water Bottle,Accessories,9,39.37,354.33,2024-02-28,REP-S-009-03
+SPG-00357,S-006,Bayou Fitness,Southeast,P-SPG-01-04,Base Layer,Apparel,14,123.73,1732.22,2024-04-21,REP-S-006-04
+SPG-00358,S-012,Prairie Athletics,Midwest,P-SPG-01-03,Running Short,Apparel,3,73.4,220.2,2024-01-16,REP-S-012-02
+SPG-00359,S-011,Lakeside Sports,Midwest,P-SPG-02-00,Carbon Bike,Equipment,3,529.59,1588.77,2024-06-16,REP-S-011-03
+SPG-00360,S-020,Mountain Peak Gear,West,P-SPG-03-02,Yoga Mat,Accessories,13,20.16,262.08,2024-03-11,REP-S-020-04
+SPG-00361,S-012,Prairie Athletics,Midwest,P-SPG-02-03,Weight Set Pro,Equipment,12,616.08,7392.96,2024-04-22,REP-S-012-02
+SPG-00362,S-011,Lakeside Sports,Midwest,P-SPG-00-00,Trail Runner X,Footwear,7,162.19,1135.33,2024-02-12,REP-S-011-03
+SPG-00363,S-018,Canyon Sports,West,P-SPG-04-01,Energy Gel Pack,Nutrition,13,40.92,531.96,2024-12-20,REP-S-018-01
+SPG-00364,S-007,Gulf Coast Gear,Southeast,P-SPG-00-00,Trail Runner X,Footwear,16,232.09,3713.44,2024-03-05,REP-S-007-04
+SPG-00365,S-009,Magnolia Active,Southeast,P-SPG-01-02,Fleece Vest,Apparel,14,76.61,1072.54,2024-05-17,REP-S-009-02
+SPG-00366,S-013,Heartland Fitness,Midwest,P-SPG-00-02,Hiker Pro,Footwear,20,159.72,3194.4,2024-05-20,REP-S-013-01
+SPG-00367,S-011,Lakeside Sports,Midwest,P-SPG-01-03,Running Short,Apparel,2,59.34,118.68,2024-09-03,REP-S-011-02
+SPG-00368,S-009,Magnolia Active,Southeast,P-SPG-00-03,Sprint Elite,Footwear,6,214.98,1289.88,2024-04-12,REP-S-009-02
+SPG-00369,S-008,Palmetto Sports,Southeast,P-SPG-01-03,Running Short,Apparel,5,43.26,216.3,2024-02-17,REP-S-008-03
+SPG-00370,S-008,Palmetto Sports,Southeast,P-SPG-00-04,Cross Train V2,Footwear,13,215.97,2807.61,2024-06-27,REP-S-008-04
+SPG-00371,S-018,Canyon Sports,West,P-SPG-04-04,BCAAs,Nutrition,7,30.62,214.34,2024-12-28,REP-S-018-04
+SPG-00372,S-019,Coastal Outfitters,West,P-SPG-03-04,Sport Towel,Accessories,33,65.26,2153.58,2024-10-09,REP-S-019-03
+SPG-00373,S-012,Prairie Athletics,Midwest,P-SPG-01-02,Fleece Vest,Apparel,18,77.13,1388.34,2024-11-29,REP-S-012-02
+SPG-00374,S-011,Lakeside Sports,Midwest,P-SPG-01-04,Base Layer,Apparel,19,40.6,771.4,2024-05-30,REP-S-011-04
+SPG-00375,S-018,Canyon Sports,West,P-SPG-02-00,Carbon Bike,Equipment,20,220.87,4417.4,2024-08-27,REP-S-018-03
+SPG-00376,S-018,Canyon Sports,West,P-SPG-01-03,Running Short,Apparel,9,111.88,1006.92,2024-09-10,REP-S-018-01
+SPG-00377,S-015,Crossroads Sports,Midwest,P-SPG-04-03,Recovery Bar,Nutrition,16,39.55,632.8,2024-08-11,REP-S-015-01
+SPG-00378,S-006,Bayou Fitness,Southeast,P-SPG-00-04,Cross Train V2,Footwear,12,157.39,1888.68,2024-09-19,REP-S-006-01
+SPG-00379,S-012,Prairie Athletics,Midwest,P-SPG-03-02,Yoga Mat,Accessories,3,56.15,168.45,2024-07-23,REP-S-012-01
+SPG-00380,S-009,Magnolia Active,Southeast,P-SPG-04-02,Electrolyte Mix,Nutrition,1,45.68,45.68,2024-04-08,REP-S-009-04
+SPG-00381,S-014,River Trail Gear,Midwest,P-SPG-01-03,Running Short,Apparel,7,125.89,881.23,2024-05-08,REP-S-014-03
+SPG-00382,S-018,Canyon Sports,West,P-SPG-02-02,Treadmill T500,Equipment,8,477.39,3819.12,2024-03-29,REP-S-018-04
+SPG-00383,S-005,Evergreen Athletics,Northeast,P-SPG-04-04,BCAAs,Nutrition,11,53.14,584.54,2024-04-11,REP-S-005-01
+SPG-00384,S-012,Prairie Athletics,Midwest,P-SPG-04-00,Whey Protein,Nutrition,3,40.69,122.07,2024-12-17,REP-S-012-04
+SPG-00385,S-006,Bayou Fitness,Southeast,P-SPG-01-01,Rain Shell,Apparel,16,143.8,2300.8,2024-05-23,REP-S-006-02
+SPG-00386,S-006,Bayou Fitness,Southeast,P-SPG-00-03,Sprint Elite,Footwear,3,109.68,329.04,2024-07-20,REP-S-006-01
+SPG-00387,S-013,Heartland Fitness,Midwest,P-SPG-04-03,Recovery Bar,Nutrition,14,29.06,406.84,2024-02-22,REP-S-013-04
+SPG-00388,S-005,Evergreen Athletics,Northeast,P-SPG-02-01,Kayak Explorer,Equipment,4,283.4,1133.6,2024-10-25,REP-S-005-02
+SPG-00389,S-014,River Trail Gear,Midwest,P-SPG-02-03,Weight Set Pro,Equipment,3,188.42,565.26,2024-10-27,REP-S-014-04
+SPG-00390,S-007,Gulf Coast Gear,Southeast,P-SPG-01-02,Fleece Vest,Apparel,2,74.36,148.72,2024-06-08,REP-S-007-01
+SPG-00391,S-017,Redwood Athletics,West,P-SPG-02-00,Carbon Bike,Equipment,20,95.68,1913.6,2024-03-25,REP-S-017-01
+SPG-00392,S-012,Prairie Athletics,Midwest,P-SPG-00-01,Court Ace,Footwear,1,242.36,242.36,2024-04-15,REP-S-012-01
+SPG-00393,S-001,Alpine Outfitters,Northeast,P-SPG-02-03,Weight Set Pro,Equipment,10,70.74,707.4,2024-09-06,REP-S-001-03
+SPG-00394,S-003,Summit Sports,Northeast,P-SPG-01-01,Rain Shell,Apparel,60,99.71,5982.6,2024-08-09,REP-S-003-03
+SPG-00395,S-004,Harbor Run,Northeast,P-SPG-01-04,Base Layer,Apparel,12,111.84,1342.08,2024-08-16,REP-S-004-04
+SPG-00396,S-006,Bayou Fitness,Southeast,P-SPG-04-01,Energy Gel Pack,Nutrition,12,11.52,138.24,2024-08-04,REP-S-006-01
+SPG-00397,S-018,Canyon Sports,West,P-SPG-00-02,Hiker Pro,Footwear,10,62.63,626.3,2024-11-01,REP-S-018-02
+SPG-00398,S-019,Coastal Outfitters,West,P-SPG-04-01,Energy Gel Pack,Nutrition,12,34.88,418.56,2024-05-19,REP-S-019-03
+SPG-00399,S-015,Crossroads Sports,Midwest,P-SPG-04-03,Recovery Bar,Nutrition,15,57.2,858.0,2024-06-12,REP-S-015-01
+SPG-00400,S-011,Lakeside Sports,Midwest,P-SPG-01-02,Fleece Vest,Apparel,5,58.31,291.55,2024-11-14,REP-S-011-04
+SPG-00401,S-007,Gulf Coast Gear,Southeast,P-SPG-03-00,Water Bottle,Accessories,9,9.4,84.6,2024-02-25,REP-S-007-04
+SPG-00402,S-019,Coastal Outfitters,West,P-SPG-00-04,Cross Train V2,Footwear,8,179.34,1434.72,2024-11-06,REP-S-019-04
+SPG-00403,S-018,Canyon Sports,West,P-SPG-01-02,Fleece Vest,Apparel,11,41.68,458.48,2024-07-15,REP-S-018-02
+SPG-00404,S-010,Delta Outfitters,Southeast,P-SPG-03-06,Swim Goggles,Accessories,11,33.28,366.08,2024-08-07,REP-S-010-04
+SPG-00405,S-001,Alpine Outfitters,Northeast,P-SPG-03-01,Fitness Band,Accessories,11,47.09,517.99,2024-04-12,REP-S-001-04
+SPG-00406,S-010,Delta Outfitters,Southeast,P-SPG-03-04,Sport Towel,Accessories,1,44.57,44.57,2024-10-17,REP-S-010-01
+SPG-00407,S-007,Gulf Coast Gear,Southeast,P-SPG-00-02,Hiker Pro,Footwear,15,197.05,2955.75,2024-06-29,REP-S-007-02
+SPG-00408,S-011,Lakeside Sports,Midwest,P-SPG-00-04,Cross Train V2,Footwear,1,49.91,49.91,2024-07-10,REP-S-011-03
+SPG-00409,S-013,Heartland Fitness,Midwest,P-SPG-01-02,Fleece Vest,Apparel,18,28.39,511.02,2024-11-19,REP-S-013-04
+SPG-00410,S-017,Redwood Athletics,West,P-SPG-04-01,Energy Gel Pack,Nutrition,17,28.54,485.18,2024-02-02,REP-S-017-01
+SPG-00411,S-007,Gulf Coast Gear,Southeast,P-SPG-00-03,Sprint Elite,Footwear,4,227.39,909.56,2024-08-18,REP-S-007-03
+SPG-00412,S-003,Summit Sports,Northeast,P-SPG-01-03,Running Short,Apparel,21,111.38,2338.98,2024-03-26,REP-S-003-01
+SPG-00413,S-013,Heartland Fitness,Midwest,P-SPG-01-00,Compression Tee,Apparel,10,20.76,207.6,2024-01-18,REP-S-013-02
+SPG-00414,S-011,Lakeside Sports,Midwest,P-SPG-01-03,Running Short,Apparel,8,79.49,635.92,2024-09-18,REP-S-011-04
+SPG-00415,S-002,Trailhead NE,Northeast,P-SPG-01-01,Rain Shell,Apparel,20,59.39,1187.8,2024-05-09,REP-S-002-03
+SPG-00416,S-014,River Trail Gear,Midwest,P-SPG-04-02,Electrolyte Mix,Nutrition,7,57.01,399.07,2024-10-27,REP-S-014-03
+SPG-00417,S-014,River Trail Gear,Midwest,P-SPG-00-03,Sprint Elite,Footwear,14,119.2,1668.8,2024-07-28,REP-S-014-02
+SPG-00418,S-016,Pacific Surf & Sport,West,P-SPG-02-04,Climbing Pack,Equipment,1,519.9,519.9,2024-05-30,REP-S-016-04
+SPG-00419,S-002,Trailhead NE,Northeast,P-SPG-03-02,Yoga Mat,Accessories,8,10.29,82.32,2024-11-05,REP-S-002-01
+SPG-00420,S-004,Harbor Run,Northeast,P-SPG-01-03,Running Short,Apparel,3,49.34,148.02,2024-11-26,REP-S-004-03
+SPG-00421,S-006,Bayou Fitness,Southeast,P-SPG-02-03,Weight Set Pro,Equipment,8,452.2,3617.6,2024-09-28,REP-S-006-03
+SPG-00422,S-019,Coastal Outfitters,West,P-SPG-02-00,Carbon Bike,Equipment,13,346.18,4500.34,2024-06-29,REP-S-019-02
+SPG-00423,S-003,Summit Sports,Northeast,P-SPG-04-03,Recovery Bar,Nutrition,24,16.36,392.64,2024-07-22,REP-S-003-04
+SPG-00424,S-016,Pacific Surf & Sport,West,P-SPG-00-00,Trail Runner X,Footwear,8,47.99,383.92,2024-01-16,REP-S-016-04
+SPG-00425,S-006,Bayou Fitness,Southeast,P-SPG-00-00,Trail Runner X,Footwear,6,131.55,789.3,2024-02-28,REP-S-006-03
+SPG-00426,S-015,Crossroads Sports,Midwest,P-SPG-01-03,Running Short,Apparel,20,143.06,2861.2,2024-04-02,REP-S-015-02
+SPG-00427,S-007,Gulf Coast Gear,Southeast,P-SPG-02-00,Carbon Bike,Equipment,15,60.66,909.9,2024-06-14,REP-S-007-02
+SPG-00428,S-011,Lakeside Sports,Midwest,P-SPG-02-01,Kayak Explorer,Equipment,12,396.53,4758.36,2024-08-07,REP-S-011-01
+SPG-00429,S-013,Heartland Fitness,Midwest,P-SPG-03-02,Yoga Mat,Accessories,10,42.92,429.2,2024-04-05,REP-S-013-02
+SPG-00430,S-006,Bayou Fitness,Southeast,P-SPG-01-02,Fleece Vest,Apparel,12,24.05,288.6,2024-07-02,REP-S-006-04
+SPG-00431,S-003,Summit Sports,Northeast,P-SPG-01-04,Base Layer,Apparel,45,66.05,2972.25,2024-05-05,REP-S-003-03
+SPG-00432,S-002,Trailhead NE,Northeast,P-SPG-00-00,Trail Runner X,Footwear,14,148.79,2083.06,2024-02-07,REP-S-002-01
+SPG-00433,S-020,Mountain Peak Gear,West,P-SPG-01-02,Fleece Vest,Apparel,12,26.15,313.8,2024-04-20,REP-S-020-01
+SPG-00434,S-008,Palmetto Sports,Southeast,P-SPG-00-03,Sprint Elite,Footwear,1,158.17,158.17,2024-12-02,REP-S-008-04
+SPG-00435,S-019,Coastal Outfitters,West,P-SPG-00-01,Court Ace,Footwear,5,158.36,791.8,2024-07-09,REP-S-019-04
+SPG-00436,S-019,Coastal Outfitters,West,P-SPG-03-04,Sport Towel,Accessories,68,34.01,2312.68,2024-07-09,REP-S-019-02
+SPG-00437,S-016,Pacific Surf & Sport,West,P-SPG-04-02,Electrolyte Mix,Nutrition,12,59.01,708.12,2024-03-15,REP-S-016-04
+SPG-00438,S-016,Pacific Surf & Sport,West,P-SPG-01-03,Running Short,Apparel,18,160.71,2892.78,2024-06-09,REP-S-016-02
+SPG-00439,S-005,Evergreen Athletics,Northeast,P-SPG-02-01,Kayak Explorer,Equipment,13,799.36,10391.68,2024-03-03,REP-S-005-02
+SPG-00440,S-012,Prairie Athletics,Midwest,P-SPG-00-03,Sprint Elite,Footwear,10,70.24,702.4,2024-01-05,REP-S-012-04
+SPG-00441,S-014,River Trail Gear,Midwest,P-SPG-04-01,Energy Gel Pack,Nutrition,13,16.25,211.25,2024-06-12,REP-S-014-03
+SPG-00442,S-007,Gulf Coast Gear,Southeast,P-SPG-03-06,Swim Goggles,Accessories,11,39.54,434.94,2024-12-18,REP-S-007-04
+SPG-00443,S-015,Crossroads Sports,Midwest,P-SPG-03-07,Ankle Brace,Accessories,12,30.34,364.08,2024-01-06,REP-S-015-04
+SPG-00444,S-005,Evergreen Athletics,Northeast,P-SPG-04-01,Energy Gel Pack,Nutrition,8,20.85,166.8,2024-06-17,REP-S-005-02
+SPG-00445,S-019,Coastal Outfitters,West,P-SPG-01-04,Base Layer,Apparel,36,164.06,5906.16,2024-04-19,REP-S-019-04
+SPG-00446,S-012,Prairie Athletics,Midwest,P-SPG-02-01,Kayak Explorer,Equipment,13,156.0,2028.0,2024-08-26,REP-S-012-01
+SPG-00447,S-018,Canyon Sports,West,P-SPG-03-04,Sport Towel,Accessories,20,35.91,718.2,2024-10-17,REP-S-018-02
+SPG-00448,S-007,Gulf Coast Gear,Southeast,P-SPG-02-04,Climbing Pack,Equipment,4,544.74,2178.96,2024-06-13,REP-S-007-04
+SPG-00449,S-006,Bayou Fitness,Southeast,P-SPG-03-00,Water Bottle,Accessories,5,33.95,169.75,2024-04-29,REP-S-006-02
+SPG-00450,S-009,Magnolia Active,Southeast,P-SPG-04-01,Energy Gel Pack,Nutrition,10,38.75,387.5,2024-10-14,REP-S-009-02
+SPG-00451,S-005,Evergreen Athletics,Northeast,P-SPG-03-05,Grip Tape,Accessories,15,23.43,351.45,2024-02-03,REP-S-005-02
+SPG-00452,S-016,Pacific Surf & Sport,West,P-SPG-02-04,Climbing Pack,Equipment,20,447.94,8958.8,2024-07-16,REP-S-016-01
+SPG-00453,S-004,Harbor Run,Northeast,P-SPG-00-00,Trail Runner X,Footwear,1,41.82,41.82,2024-05-25,REP-S-004-01
+SPG-00454,S-011,Lakeside Sports,Midwest,P-SPG-00-02,Hiker Pro,Footwear,12,82.63,991.56,2024-11-04,REP-S-011-02
+SPG-00455,S-007,Gulf Coast Gear,Southeast,P-SPG-02-00,Carbon Bike,Equipment,9,517.42,4656.78,2024-04-18,REP-S-007-03
+SPG-00456,S-019,Coastal Outfitters,West,P-SPG-03-07,Ankle Brace,Accessories,30,57.77,1733.1,2024-09-26,REP-S-019-01
+SPG-00457,S-018,Canyon Sports,West,P-SPG-01-01,Rain Shell,Apparel,6,86.43,518.58,2024-04-21,REP-S-018-04
+SPG-00458,S-006,Bayou Fitness,Southeast,P-SPG-04-04,BCAAs,Nutrition,13,44.99,584.87,2024-02-22,REP-S-006-03
+SPG-00459,S-008,Palmetto Sports,Southeast,P-SPG-00-01,Court Ace,Footwear,12,60.38,724.56,2024-10-14,REP-S-008-01
+SPG-00460,S-005,Evergreen Athletics,Northeast,P-SPG-03-07,Ankle Brace,Accessories,13,40.77,530.01,2024-05-22,REP-S-005-01
+SPG-00461,S-019,Coastal Outfitters,West,P-SPG-02-03,Weight Set Pro,Equipment,55,478.93,26341.15,2024-11-07,REP-S-019-01
+SPG-00462,S-016,Pacific Surf & Sport,West,P-SPG-04-02,Electrolyte Mix,Nutrition,11,59.39,653.29,2024-12-09,REP-S-016-03
+SPG-00463,S-003,Summit Sports,Northeast,P-SPG-01-01,Rain Shell,Apparel,57,68.02,3877.14,2024-02-08,REP-S-003-02
+SPG-00464,S-004,Harbor Run,Northeast,P-SPG-01-02,Fleece Vest,Apparel,10,133.83,1338.3,2024-10-20,REP-S-004-01
+SPG-00465,S-012,Prairie Athletics,Midwest,P-SPG-04-03,Recovery Bar,Nutrition,1,41.09,41.09,2024-11-26,REP-S-012-04
+SPG-00466,S-006,Bayou Fitness,Southeast,P-SPG-02-02,Treadmill T500,Equipment,5,435.07,2175.35,2024-08-03,REP-S-006-01
+SPG-00467,S-016,Pacific Surf & Sport,West,P-SPG-02-01,Kayak Explorer,Equipment,2,537.05,1074.1,2024-12-15,REP-S-016-03
+SPG-00468,S-009,Magnolia Active,Southeast,P-SPG-03-06,Swim Goggles,Accessories,9,8.03,72.27,2024-08-10,REP-S-009-04
+SPG-00469,S-003,Summit Sports,Northeast,P-SPG-02-04,Climbing Pack,Equipment,6,147.99,887.94,2024-06-11,REP-S-003-01
+SPG-00470,S-019,Coastal Outfitters,West,P-SPG-00-02,Hiker Pro,Footwear,38,81.92,3112.96,2024-06-12,REP-S-019-04
+SPG-00471,S-002,Trailhead NE,Northeast,P-SPG-02-03,Weight Set Pro,Equipment,11,325.1,3576.1,2024-04-11,REP-S-002-04
+SPG-00472,S-014,River Trail Gear,Midwest,P-SPG-02-01,Kayak Explorer,Equipment,12,589.34,7072.08,2024-04-10,REP-S-014-02
+SPG-00473,S-016,Pacific Surf & Sport,West,P-SPG-02-02,Treadmill T500,Equipment,3,735.02,2205.06,2024-01-26,REP-S-016-01
+SPG-00474,S-011,Lakeside Sports,Midwest,P-SPG-04-00,Whey Protein,Nutrition,1,50.54,50.54,2024-09-09,REP-S-011-01
+SPG-00475,S-008,Palmetto Sports,Southeast,P-SPG-00-01,Court Ace,Footwear,9,53.64,482.76,2024-09-12,REP-S-008-02
+SPG-00476,S-003,Summit Sports,Northeast,P-SPG-00-00,Trail Runner X,Footwear,2,194.67,389.34,2024-01-24,REP-S-003-01
+SPG-00477,S-005,Evergreen Athletics,Northeast,P-SPG-04-03,Recovery Bar,Nutrition,11,49.31,542.41,2024-05-20,REP-S-005-01
+SPG-00478,S-020,Mountain Peak Gear,West,P-SPG-00-00,Trail Runner X,Footwear,5,81.9,409.5,2024-08-03,REP-S-020-01
+SPG-00479,S-006,Bayou Fitness,Southeast,P-SPG-00-00,Trail Runner X,Footwear,1,130.92,130.92,2024-03-02,REP-S-006-02
+SPG-00480,S-007,Gulf Coast Gear,Southeast,P-SPG-00-00,Trail Runner X,Footwear,10,107.29,1072.9,2024-03-04,REP-S-007-02
+SPG-00481,S-016,Pacific Surf & Sport,West,P-SPG-01-03,Running Short,Apparel,20,133.0,2660.0,2024-08-19,REP-S-016-04
+SPG-00482,S-010,Delta Outfitters,Southeast,P-SPG-04-00,Whey Protein,Nutrition,12,19.25,231.0,2024-03-28,REP-S-010-01
+SPG-00483,S-003,Summit Sports,Northeast,P-SPG-01-01,Rain Shell,Apparel,27,43.02,1161.54,2024-11-03,REP-S-003-02
+SPG-00484,S-004,Harbor Run,Northeast,P-SPG-00-01,Court Ace,Footwear,6,218.21,1309.26,2024-06-16,REP-S-004-02
+SPG-00485,S-006,Bayou Fitness,Southeast,P-SPG-03-09,Foam Roller,Accessories,8,50.12,400.96,2024-10-29,REP-S-006-03
+SPG-00486,S-007,Gulf Coast Gear,Southeast,P-SPG-03-04,Sport Towel,Accessories,9,60.16,541.44,2024-07-15,REP-S-007-01
+SPG-00487,S-009,Magnolia Active,Southeast,P-SPG-02-01,Kayak Explorer,Equipment,2,96.21,192.42,2024-05-01,REP-S-009-04
+SPG-00488,S-012,Prairie Athletics,Midwest,P-SPG-00-04,Cross Train V2,Footwear,14,56.79,795.06,2024-10-22,REP-S-012-04
+SPG-00489,S-001,Alpine Outfitters,Northeast,P-SPG-00-02,Hiker Pro,Footwear,19,201.99,3837.81,2024-01-11,REP-S-001-03
+SPG-00490,S-020,Mountain Peak Gear,West,P-SPG-00-04,Cross Train V2,Footwear,9,192.7,1734.3,2024-05-25,REP-S-020-03
+SPG-00491,S-015,Crossroads Sports,Midwest,P-SPG-02-03,Weight Set Pro,Equipment,12,424.77,5097.24,2024-01-10,REP-S-015-04
+SPG-00492,S-011,Lakeside Sports,Midwest,P-SPG-04-01,Energy Gel Pack,Nutrition,8,39.36,314.88,2024-11-25,REP-S-011-01
+SPG-00493,S-012,Prairie Athletics,Midwest,P-SPG-03-07,Ankle Brace,Accessories,15,29.33,439.95,2024-10-21,REP-S-012-04
+SPG-00494,S-015,Crossroads Sports,Midwest,P-SPG-03-07,Ankle Brace,Accessories,5,15.66,78.3,2024-01-03,REP-S-015-04
+SPG-00495,S-014,River Trail Gear,Midwest,P-SPG-00-01,Court Ace,Footwear,11,120.11,1321.21,2024-08-24,REP-S-014-02
+SPG-00496,S-013,Heartland Fitness,Midwest,P-SPG-02-00,Carbon Bike,Equipment,14,643.53,9009.42,2024-05-25,REP-S-013-02
+SPG-00497,S-005,Evergreen Athletics,Northeast,P-SPG-04-01,Energy Gel Pack,Nutrition,7,14.74,103.18,2024-03-08,REP-S-005-04
+SPG-00498,S-016,Pacific Surf & Sport,West,P-SPG-01-02,Fleece Vest,Apparel,11,51.64,568.04,2024-07-25,REP-S-016-04
+SPG-00499,S-013,Heartland Fitness,Midwest,P-SPG-01-02,Fleece Vest,Apparel,18,64.43,1159.74,2024-01-19,REP-S-013-02
+SPG-00500,S-016,Pacific Surf & Sport,West,P-SPG-04-03,Recovery Bar,Nutrition,14,31.76,444.64,2024-09-30,REP-S-016-02
+SPG-00501,S-016,Pacific Surf & Sport,West,P-SPG-00-02,Hiker Pro,Footwear,4,54.05,216.2,2024-09-27,REP-S-016-03
+SPG-00502,S-016,Pacific Surf & Sport,West,P-SPG-04-02,Electrolyte Mix,Nutrition,5,21.76,108.8,2024-01-21,REP-S-016-04
+SPG-00503,S-007,Gulf Coast Gear,Southeast,P-SPG-03-07,Ankle Brace,Accessories,1,76.76,76.76,2024-06-21,REP-S-007-02
+SPG-00504,S-011,Lakeside Sports,Midwest,P-SPG-02-04,Climbing Pack,Equipment,14,508.72,7122.08,2024-11-26,REP-S-011-02
+SPG-00505,S-017,Redwood Athletics,West,P-SPG-02-02,Treadmill T500,Equipment,12,655.34,7864.08,2024-01-09,REP-S-017-02
+SPG-00506,S-012,Prairie Athletics,Midwest,P-SPG-04-03,Recovery Bar,Nutrition,3,10.89,32.67,2024-02-05,REP-S-012-03
+SPG-00507,S-014,River Trail Gear,Midwest,P-SPG-01-01,Rain Shell,Apparel,11,130.13,1431.43,2024-08-28,REP-S-014-03
+SPG-00508,S-016,Pacific Surf & Sport,West,P-SPG-02-04,Climbing Pack,Equipment,11,482.91,5312.01,2024-02-18,REP-S-016-03
+SPG-00509,S-007,Gulf Coast Gear,Southeast,P-SPG-01-02,Fleece Vest,Apparel,15,175.38,2630.7,2024-07-31,REP-S-007-02
+SPG-00510,S-019,Coastal Outfitters,West,P-SPG-04-01,Energy Gel Pack,Nutrition,23,34.43,791.89,2024-06-03,REP-S-019-01
+SPG-00511,S-011,Lakeside Sports,Midwest,P-SPG-04-00,Whey Protein,Nutrition,13,47.51,617.63,2024-05-20,REP-S-011-03
+SPG-00512,S-003,Summit Sports,Northeast,P-SPG-04-03,Recovery Bar,Nutrition,50,40.13,2006.5,2024-06-11,REP-S-003-03
+SPG-00513,S-003,Summit Sports,Northeast,P-SPG-03-06,Swim Goggles,Accessories,19,64.35,1222.65,2024-06-26,REP-S-003-02
+SPG-00514,S-012,Prairie Athletics,Midwest,P-SPG-00-03,Sprint Elite,Footwear,8,86.9,695.2,2024-07-23,REP-S-012-01
+SPG-00515,S-011,Lakeside Sports,Midwest,P-SPG-02-04,Climbing Pack,Equipment,16,471.41,7542.56,2024-02-10,REP-S-011-03
+SPG-00516,S-011,Lakeside Sports,Midwest,P-SPG-03-05,Grip Tape,Accessories,20,71.24,1424.8,2024-10-11,REP-S-011-02
+SPG-00517,S-007,Gulf Coast Gear,Southeast,P-SPG-04-04,BCAAs,Nutrition,3,24.78,74.34,2024-06-09,REP-S-007-01
+SPG-00518,S-007,Gulf Coast Gear,Southeast,P-SPG-04-04,BCAAs,Nutrition,8,22.41,179.28,2024-09-09,REP-S-007-04
+SPG-00519,S-014,River Trail Gear,Midwest,P-SPG-00-02,Hiker Pro,Footwear,9,82.89,746.01,2024-11-09,REP-S-014-03
+SPG-00520,S-001,Alpine Outfitters,Northeast,P-SPG-00-03,Sprint Elite,Footwear,3,117.41,352.23,2024-01-25,REP-S-001-02
+SPG-00521,S-015,Crossroads Sports,Midwest,P-SPG-03-08,Jump Rope,Accessories,6,49.54,297.24,2024-07-20,REP-S-015-03
+SPG-00522,S-004,Harbor Run,Northeast,P-SPG-02-03,Weight Set Pro,Equipment,9,198.34,1785.06,2024-06-01,REP-S-004-04
+SPG-00523,S-010,Delta Outfitters,Southeast,P-SPG-01-04,Base Layer,Apparel,4,71.65,286.6,2024-12-22,REP-S-010-01
+SPG-00524,S-004,Harbor Run,Northeast,P-SPG-00-02,Hiker Pro,Footwear,18,140.19,2523.42,2024-08-20,REP-S-004-02
+SPG-00525,S-011,Lakeside Sports,Midwest,P-SPG-03-08,Jump Rope,Accessories,1,52.17,52.17,2024-09-09,REP-S-011-03
+SPG-00526,S-013,Heartland Fitness,Midwest,P-SPG-01-02,Fleece Vest,Apparel,20,153.77,3075.4,2024-11-24,REP-S-013-01
+SPG-00527,S-010,Delta Outfitters,Southeast,P-SPG-02-04,Climbing Pack,Equipment,15,79.54,1193.1,2024-03-03,REP-S-010-01
+SPG-00528,S-005,Evergreen Athletics,Northeast,P-SPG-03-01,Fitness Band,Accessories,3,15.49,46.47,2024-07-10,REP-S-005-01
+SPG-00529,S-017,Redwood Athletics,West,P-SPG-01-01,Rain Shell,Apparel,3,140.75,422.25,2024-11-12,REP-S-017-03
+SPG-00530,S-011,Lakeside Sports,Midwest,P-SPG-00-03,Sprint Elite,Footwear,11,197.68,2174.48,2024-02-22,REP-S-011-04
+SPG-00531,S-013,Heartland Fitness,Midwest,P-SPG-04-00,Whey Protein,Nutrition,17,30.82,523.94,2024-01-15,REP-S-013-04
+SPG-00532,S-005,Evergreen Athletics,Northeast,P-SPG-04-00,Whey Protein,Nutrition,7,32.42,226.94,2024-04-24,REP-S-005-01
+SPG-00533,S-009,Magnolia Active,Southeast,P-SPG-01-01,Rain Shell,Apparel,1,123.16,123.16,2024-01-25,REP-S-009-01
+SPG-00534,S-002,Trailhead NE,Northeast,P-SPG-01-03,Running Short,Apparel,2,26.75,53.5,2024-01-06,REP-S-002-02
+SPG-00535,S-005,Evergreen Athletics,Northeast,P-SPG-01-04,Base Layer,Apparel,11,71.67,788.37,2024-03-12,REP-S-005-04
+SPG-00536,S-001,Alpine Outfitters,Northeast,P-SPG-04-02,Electrolyte Mix,Nutrition,16,11.18,178.88,2024-02-23,REP-S-001-04
+SPG-00537,S-018,Canyon Sports,West,P-SPG-00-00,Trail Runner X,Footwear,7,163.83,1146.81,2024-06-14,REP-S-018-02
+SPG-00538,S-008,Palmetto Sports,Southeast,P-SPG-04-03,Recovery Bar,Nutrition,1,27.47,27.47,2024-12-18,REP-S-008-01
+SPG-00539,S-019,Coastal Outfitters,West,P-SPG-02-04,Climbing Pack,Equipment,15,347.89,5218.35,2024-08-11,REP-S-019-01
+SPG-00540,S-020,Mountain Peak Gear,West,P-SPG-02-02,Treadmill T500,Equipment,18,330.73,5953.14,2024-04-25,REP-S-020-04
+SPG-00541,S-006,Bayou Fitness,Southeast,P-SPG-01-04,Base Layer,Apparel,7,73.52,514.64,2024-03-28,REP-S-006-03
+SPG-00542,S-009,Magnolia Active,Southeast,P-SPG-03-01,Fitness Band,Accessories,8,38.87,310.96,2024-02-15,REP-S-009-04
+SPG-00543,S-020,Mountain Peak Gear,West,P-SPG-04-03,Recovery Bar,Nutrition,7,19.24,134.68,2024-04-07,REP-S-020-01
+SPG-00544,S-013,Heartland Fitness,Midwest,P-SPG-00-01,Court Ace,Footwear,7,199.55,1396.85,2024-07-07,REP-S-013-03
+SPG-00545,S-007,Gulf Coast Gear,Southeast,P-SPG-04-02,Electrolyte Mix,Nutrition,9,33.19,298.71,2024-10-02,REP-S-007-02
+SPG-00546,S-019,Coastal Outfitters,West,P-SPG-02-01,Kayak Explorer,Equipment,42,67.86,2850.12,2024-01-03,REP-S-019-02
+SPG-00547,S-011,Lakeside Sports,Midwest,P-SPG-01-03,Running Short,Apparel,13,135.2,1757.6,2024-12-18,REP-S-011-04
+SPG-00548,S-013,Heartland Fitness,Midwest,P-SPG-04-01,Energy Gel Pack,Nutrition,16,34.01,544.16,2024-01-27,REP-S-013-03
+SPG-00549,S-008,Palmetto Sports,Southeast,P-SPG-00-04,Cross Train V2,Footwear,3,225.73,677.19,2024-05-12,REP-S-008-01
+SPG-00550,S-020,Mountain Peak Gear,West,P-SPG-00-00,Trail Runner X,Footwear,9,235.33,2117.97,2024-01-23,REP-S-020-03
+SPG-00551,S-015,Crossroads Sports,Midwest,P-SPG-03-09,Foam Roller,Accessories,6,12.29,73.74,2024-02-26,REP-S-015-03
+SPG-00552,S-007,Gulf Coast Gear,Southeast,P-SPG-01-03,Running Short,Apparel,9,32.18,289.62,2024-01-25,REP-S-007-04
+SPG-00553,S-001,Alpine Outfitters,Northeast,P-SPG-02-00,Carbon Bike,Equipment,4,276.54,1106.16,2024-06-04,REP-S-001-03
+SPG-00554,S-015,Crossroads Sports,Midwest,P-SPG-01-00,Compression Tee,Apparel,1,160.85,160.85,2024-02-08,REP-S-015-04
+SPG-00555,S-006,Bayou Fitness,Southeast,P-SPG-00-00,Trail Runner X,Footwear,2,192.21,384.42,2024-05-15,REP-S-006-04
+SPG-00556,S-019,Coastal Outfitters,West,P-SPG-04-02,Electrolyte Mix,Nutrition,27,11.13,300.51,2024-06-17,REP-S-019-01
+SPG-00557,S-005,Evergreen Athletics,Northeast,P-SPG-01-00,Compression Tee,Apparel,13,128.48,1670.24,2024-12-18,REP-S-005-01
+SPG-00558,S-002,Trailhead NE,Northeast,P-SPG-03-06,Swim Goggles,Accessories,15,35.93,538.95,2024-11-09,REP-S-002-01
+SPG-00559,S-019,Coastal Outfitters,West,P-SPG-00-00,Trail Runner X,Footwear,28,189.08,5294.24,2024-07-13,REP-S-019-02
+SPG-00560,S-009,Magnolia Active,Southeast,P-SPG-00-02,Hiker Pro,Footwear,5,89.31,446.55,2024-05-18,REP-S-009-04
+SPG-00561,S-001,Alpine Outfitters,Northeast,P-SPG-00-04,Cross Train V2,Footwear,14,157.38,2203.32,2024-12-23,REP-S-001-04
+SPG-00562,S-008,Palmetto Sports,Southeast,P-SPG-00-02,Hiker Pro,Footwear,9,58.57,527.13,2024-03-28,REP-S-008-03
+SPG-00563,S-015,Crossroads Sports,Midwest,P-SPG-03-08,Jump Rope,Accessories,6,33.0,198.0,2024-03-11,REP-S-015-03
+SPG-00564,S-018,Canyon Sports,West,P-SPG-04-01,Energy Gel Pack,Nutrition,11,46.76,514.36,2024-10-25,REP-S-018-03
+SPG-00565,S-014,River Trail Gear,Midwest,P-SPG-01-04,Base Layer,Apparel,13,79.54,1034.02,2024-08-23,REP-S-014-03
+SPG-00566,S-010,Delta Outfitters,Southeast,P-SPG-01-03,Running Short,Apparel,14,85.25,1193.5,2024-03-02,REP-S-010-04
+SPG-00567,S-003,Summit Sports,Northeast,P-SPG-04-02,Electrolyte Mix,Nutrition,14,26.64,372.96,2024-03-05,REP-S-003-04
+SPG-00568,S-015,Crossroads Sports,Midwest,P-SPG-04-01,Energy Gel Pack,Nutrition,2,27.17,54.34,2024-06-12,REP-S-015-02
+SPG-00569,S-020,Mountain Peak Gear,West,P-SPG-02-04,Climbing Pack,Equipment,6,688.32,4129.92,2024-03-16,REP-S-020-02
+SPG-00570,S-007,Gulf Coast Gear,Southeast,P-SPG-03-01,Fitness Band,Accessories,11,71.05,781.55,2024-10-26,REP-S-007-01
+SPG-00571,S-017,Redwood Athletics,West,P-SPG-00-04,Cross Train V2,Footwear,1,93.49,93.49,2024-07-30,REP-S-017-02
+SPG-00572,S-008,Palmetto Sports,Southeast,P-SPG-02-03,Weight Set Pro,Equipment,3,294.12,882.36,2024-11-22,REP-S-008-03
+SPG-00573,S-018,Canyon Sports,West,P-SPG-03-08,Jump Rope,Accessories,13,21.43,278.59,2024-08-16,REP-S-018-03
+SPG-00574,S-014,River Trail Gear,Midwest,P-SPG-00-01,Court Ace,Footwear,15,72.7,1090.5,2024-12-08,REP-S-014-02
+SPG-00575,S-001,Alpine Outfitters,Northeast,P-SPG-04-00,Whey Protein,Nutrition,16,17.22,275.52,2024-03-03,REP-S-001-01
+SPG-00576,S-010,Delta Outfitters,Southeast,P-SPG-01-03,Running Short,Apparel,8,152.04,1216.32,2024-09-24,REP-S-010-01
+SPG-00577,S-007,Gulf Coast Gear,Southeast,P-SPG-00-00,Trail Runner X,Footwear,1,102.11,102.11,2024-09-27,REP-S-007-02
+SPG-00578,S-006,Bayou Fitness,Southeast,P-SPG-00-00,Trail Runner X,Footwear,7,135.05,945.35,2024-05-03,REP-S-006-01
+SPG-00579,S-014,River Trail Gear,Midwest,P-SPG-02-03,Weight Set Pro,Equipment,1,573.36,573.36,2024-10-22,REP-S-014-03
+SPG-00580,S-011,Lakeside Sports,Midwest,P-SPG-03-05,Grip Tape,Accessories,7,27.78,194.46,2024-09-01,REP-S-011-04
+SPG-00581,S-020,Mountain Peak Gear,West,P-SPG-04-00,Whey Protein,Nutrition,16,58.85,941.6,2024-12-04,REP-S-020-04
+SPG-00582,S-011,Lakeside Sports,Midwest,P-SPG-02-00,Carbon Bike,Equipment,9,575.47,5179.23,2024-09-07,REP-S-011-04
+SPG-00583,S-018,Canyon Sports,West,P-SPG-00-03,Sprint Elite,Footwear,19,170.25,3234.75,2024-05-23,REP-S-018-03
+SPG-00584,S-016,Pacific Surf & Sport,West,P-SPG-00-03,Sprint Elite,Footwear,2,242.18,484.36,2024-06-13,REP-S-016-01
+SPG-00585,S-016,Pacific Surf & Sport,West,P-SPG-02-04,Climbing Pack,Equipment,3,112.22,336.66,2024-09-04,REP-S-016-01
+SPG-00586,S-015,Crossroads Sports,Midwest,P-SPG-03-05,Grip Tape,Accessories,8,50.27,402.16,2024-04-25,REP-S-015-04
+SPG-00587,S-002,Trailhead NE,Northeast,P-SPG-02-02,Treadmill T500,Equipment,18,632.87,11391.66,2024-02-17,REP-S-002-04
+SPG-00588,S-007,Gulf Coast Gear,Southeast,P-SPG-04-03,Recovery Bar,Nutrition,3,10.51,31.53,2024-05-15,REP-S-007-02
+SPG-00589,S-019,Coastal Outfitters,West,P-SPG-00-04,Cross Train V2,Footwear,40,54.51,2180.4,2024-05-31,REP-S-019-03
+SPG-00590,S-019,Coastal Outfitters,West,P-SPG-03-08,Jump Rope,Accessories,5,23.99,119.95,2024-12-30,REP-S-019-04
+SPG-00591,S-006,Bayou Fitness,Southeast,P-SPG-03-04,Sport Towel,Accessories,4,7.99,31.96,2024-02-12,REP-S-006-03
+SPG-00592,S-014,River Trail Gear,Midwest,P-SPG-00-01,Court Ace,Footwear,3,81.82,245.46,2024-06-29,REP-S-014-04
+SPG-00593,S-008,Palmetto Sports,Southeast,P-SPG-00-03,Sprint Elite,Footwear,4,202.22,808.88,2024-10-12,REP-S-008-01
+SPG-00594,S-010,Delta Outfitters,Southeast,P-SPG-01-01,Rain Shell,Apparel,9,158.49,1426.41,2024-05-04,REP-S-010-04
+SPG-00595,S-008,Palmetto Sports,Southeast,P-SPG-03-01,Fitness Band,Accessories,3,17.33,51.99,2024-12-03,REP-S-008-02
+SPG-00596,S-020,Mountain Peak Gear,West,P-SPG-04-00,Whey Protein,Nutrition,15,34.81,522.15,2024-11-27,REP-S-020-04
+SPG-00597,S-001,Alpine Outfitters,Northeast,P-SPG-04-02,Electrolyte Mix,Nutrition,18,15.32,275.76,2024-04-15,REP-S-001-04
+SPG-00598,S-002,Trailhead NE,Northeast,P-SPG-02-03,Weight Set Pro,Equipment,18,576.54,10377.72,2024-12-21,REP-S-002-01
+SPG-00599,S-003,Summit Sports,Northeast,P-SPG-00-02,Hiker Pro,Footwear,36,139.67,5028.12,2024-02-09,REP-S-003-02
+SPG-00600,S-005,Evergreen Athletics,Northeast,P-SPG-00-00,Trail Runner X,Footwear,6,58.14,348.84,2024-02-08,REP-S-005-02
+SPG-00601,S-007,Gulf Coast Gear,Southeast,P-SPG-03-08,Jump Rope,Accessories,9,46.8,421.2,2024-09-10,REP-S-007-04
+SPG-00602,S-003,Summit Sports,Northeast,P-SPG-01-04,Base Layer,Apparel,35,38.54,1348.9,2024-01-31,REP-S-003-02
+SPG-00603,S-005,Evergreen Athletics,Northeast,P-SPG-02-01,Kayak Explorer,Equipment,13,58.4,759.2,2024-04-18,REP-S-005-01
+SPG-00604,S-017,Redwood Athletics,West,P-SPG-00-00,Trail Runner X,Footwear,17,179.84,3057.28,2024-01-07,REP-S-017-01
+SPG-00605,S-010,Delta Outfitters,Southeast,P-SPG-01-02,Fleece Vest,Apparel,6,157.69,946.14,2024-12-09,REP-S-010-02
+SPG-00606,S-007,Gulf Coast Gear,Southeast,P-SPG-03-07,Ankle Brace,Accessories,13,21.06,273.78,2024-04-20,REP-S-007-02
+SPG-00607,S-013,Heartland Fitness,Midwest,P-SPG-04-04,BCAAs,Nutrition,3,17.31,51.93,2024-08-27,REP-S-013-02
+SPG-00608,S-017,Redwood Athletics,West,P-SPG-01-00,Compression Tee,Apparel,16,102.14,1634.24,2024-07-16,REP-S-017-01
+SPG-00609,S-019,Coastal Outfitters,West,P-SPG-01-01,Rain Shell,Apparel,40,154.36,6174.4,2024-04-06,REP-S-019-02
+SPG-00610,S-009,Magnolia Active,Southeast,P-SPG-03-00,Water Bottle,Accessories,11,8.22,90.42,2024-09-06,REP-S-009-03
+SPG-00611,S-013,Heartland Fitness,Midwest,P-SPG-00-01,Court Ace,Footwear,12,122.06,1464.72,2024-02-23,REP-S-013-02
+SPG-00612,S-005,Evergreen Athletics,Northeast,P-SPG-03-09,Foam Roller,Accessories,17,71.66,1218.22,2024-06-23,REP-S-005-02
+SPG-00613,S-008,Palmetto Sports,Southeast,P-SPG-04-04,BCAAs,Nutrition,8,34.86,278.88,2024-04-16,REP-S-008-01
+SPG-00614,S-014,River Trail Gear,Midwest,P-SPG-04-00,Whey Protein,Nutrition,14,13.32,186.48,2024-10-29,REP-S-014-01
+SPG-00615,S-005,Evergreen Athletics,Northeast,P-SPG-00-02,Hiker Pro,Footwear,9,122.59,1103.31,2024-09-27,REP-S-005-04
+SPG-00616,S-011,Lakeside Sports,Midwest,P-SPG-02-04,Climbing Pack,Equipment,20,295.32,5906.4,2024-09-20,REP-S-011-03
+SPG-00617,S-016,Pacific Surf & Sport,West,P-SPG-04-03,Recovery Bar,Nutrition,13,47.87,622.31,2024-06-09,REP-S-016-02
+SPG-00618,S-016,Pacific Surf & Sport,West,P-SPG-02-00,Carbon Bike,Equipment,16,781.42,12502.72,2024-06-08,REP-S-016-01
+SPG-00619,S-009,Magnolia Active,Southeast,P-SPG-02-02,Treadmill T500,Equipment,8,495.83,3966.64,2024-12-28,REP-S-009-02
+SPG-00620,S-011,Lakeside Sports,Midwest,P-SPG-02-01,Kayak Explorer,Equipment,19,193.45,3675.55,2024-08-20,REP-S-011-03
+SPG-00621,S-007,Gulf Coast Gear,Southeast,P-SPG-02-04,Climbing Pack,Equipment,11,258.89,2847.79,2024-12-01,REP-S-007-04
+SPG-00622,S-007,Gulf Coast Gear,Southeast,P-SPG-04-01,Energy Gel Pack,Nutrition,8,19.5,156.0,2024-03-19,REP-S-007-03
+SPG-00623,S-018,Canyon Sports,West,P-SPG-04-02,Electrolyte Mix,Nutrition,7,49.9,349.3,2024-09-15,REP-S-018-02
+SPG-00624,S-004,Harbor Run,Northeast,P-SPG-02-01,Kayak Explorer,Equipment,7,498.6,3490.2,2024-02-24,REP-S-004-03
+SPG-00625,S-006,Bayou Fitness,Southeast,P-SPG-03-05,Grip Tape,Accessories,6,34.37,206.22,2024-03-07,REP-S-006-03
+SPG-00626,S-019,Coastal Outfitters,West,P-SPG-03-08,Jump Rope,Accessories,34,15.98,543.32,2024-04-22,REP-S-019-03
+SPG-00627,S-004,Harbor Run,Northeast,P-SPG-03-08,Jump Rope,Accessories,13,5.25,68.25,2024-07-05,REP-S-004-02
+SPG-00628,S-009,Magnolia Active,Southeast,P-SPG-03-07,Ankle Brace,Accessories,14,48.77,682.78,2024-07-16,REP-S-009-03
+SPG-00629,S-017,Redwood Athletics,West,P-SPG-04-03,Recovery Bar,Nutrition,7,23.29,163.03,2024-08-19,REP-S-017-04
+SPG-00630,S-016,Pacific Surf & Sport,West,P-SPG-04-00,Whey Protein,Nutrition,16,31.86,509.76,2024-11-13,REP-S-016-03
+SPG-00631,S-004,Harbor Run,Northeast,P-SPG-01-01,Rain Shell,Apparel,4,77.81,311.24,2024-09-19,REP-S-004-01
+SPG-00632,S-002,Trailhead NE,Northeast,P-SPG-00-02,Hiker Pro,Footwear,4,155.18,620.72,2024-04-13,REP-S-002-03
+SPG-00633,S-005,Evergreen Athletics,Northeast,P-SPG-00-03,Sprint Elite,Footwear,7,48.39,338.73,2024-07-23,REP-S-005-01
+SPG-00634,S-001,Alpine Outfitters,Northeast,P-SPG-00-02,Hiker Pro,Footwear,20,191.11,3822.2,2024-04-06,REP-S-001-03
+SPG-00635,S-014,River Trail Gear,Midwest,P-SPG-01-01,Rain Shell,Apparel,8,118.93,951.44,2024-02-05,REP-S-014-03
+SPG-00636,S-018,Canyon Sports,West,P-SPG-02-01,Kayak Explorer,Equipment,5,67.22,336.1,2024-05-22,REP-S-018-03
+SPG-00637,S-008,Palmetto Sports,Southeast,P-SPG-01-03,Running Short,Apparel,5,106.67,533.35,2024-08-04,REP-S-008-01
+SPG-00638,S-006,Bayou Fitness,Southeast,P-SPG-00-04,Cross Train V2,Footwear,16,245.52,3928.32,2024-03-25,REP-S-006-03
+SPG-00639,S-016,Pacific Surf & Sport,West,P-SPG-00-00,Trail Runner X,Footwear,8,217.53,1740.24,2024-12-17,REP-S-016-02
+SPG-00640,S-008,Palmetto Sports,Southeast,P-SPG-03-09,Foam Roller,Accessories,4,71.89,287.56,2024-06-06,REP-S-008-02
+SPG-00641,S-009,Magnolia Active,Southeast,P-SPG-00-00,Trail Runner X,Footwear,6,180.94,1085.64,2024-10-22,REP-S-009-04
+SPG-00642,S-019,Coastal Outfitters,West,P-SPG-04-03,Recovery Bar,Nutrition,39,20.67,806.13,2024-11-27,REP-S-019-01
+SPG-00643,S-014,River Trail Gear,Midwest,P-SPG-03-07,Ankle Brace,Accessories,5,60.44,302.2,2024-02-22,REP-S-014-04
+SPG-00644,S-020,Mountain Peak Gear,West,P-SPG-03-00,Water Bottle,Accessories,18,62.38,1122.84,2024-03-16,REP-S-020-02
+SPG-00645,S-016,Pacific Surf & Sport,West,P-SPG-03-08,Jump Rope,Accessories,11,29.16,320.76,2024-08-24,REP-S-016-04
+SPG-00646,S-017,Redwood Athletics,West,P-SPG-04-03,Recovery Bar,Nutrition,15,40.33,604.95,2024-02-24,REP-S-017-03
+SPG-00647,S-005,Evergreen Athletics,Northeast,P-SPG-00-04,Cross Train V2,Footwear,13,75.36,979.68,2024-02-26,REP-S-005-04
+SPG-00648,S-007,Gulf Coast Gear,Southeast,P-SPG-01-02,Fleece Vest,Apparel,9,84.82,763.38,2024-05-03,REP-S-007-02
+SPG-00649,S-010,Delta Outfitters,Southeast,P-SPG-01-03,Running Short,Apparel,16,160.44,2567.04,2024-01-09,REP-S-010-01
+SPG-00650,S-019,Coastal Outfitters,West,P-SPG-01-00,Compression Tee,Apparel,37,134.09,4961.33,2024-08-23,REP-S-019-03
+SPG-00651,S-012,Prairie Athletics,Midwest,P-SPG-03-00,Water Bottle,Accessories,16,37.72,603.52,2024-04-05,REP-S-012-04
+SPG-00652,S-014,River Trail Gear,Midwest,P-SPG-00-03,Sprint Elite,Footwear,9,113.13,1018.17,2024-05-16,REP-S-014-03
+SPG-00653,S-012,Prairie Athletics,Midwest,P-SPG-02-03,Weight Set Pro,Equipment,6,176.41,1058.46,2024-01-15,REP-S-012-02
+SPG-00654,S-002,Trailhead NE,Northeast,P-SPG-03-05,Grip Tape,Accessories,2,62.05,124.1,2024-08-31,REP-S-002-01
+SPG-00655,S-006,Bayou Fitness,Southeast,P-SPG-00-04,Cross Train V2,Footwear,14,50.51,707.14,2024-12-04,REP-S-006-01
+SPG-00656,S-017,Redwood Athletics,West,P-SPG-02-03,Weight Set Pro,Equipment,5,269.86,1349.3,2024-09-28,REP-S-017-04
+SPG-00657,S-009,Magnolia Active,Southeast,P-SPG-01-01,Rain Shell,Apparel,11,69.86,768.46,2024-08-19,REP-S-009-01
+SPG-00658,S-008,Palmetto Sports,Southeast,P-SPG-00-04,Cross Train V2,Footwear,1,160.25,160.25,2024-06-29,REP-S-008-02
+SPG-00659,S-010,Delta Outfitters,Southeast,P-SPG-04-03,Recovery Bar,Nutrition,11,54.75,602.25,2024-05-15,REP-S-010-02
+SPG-00660,S-001,Alpine Outfitters,Northeast,P-SPG-01-04,Base Layer,Apparel,3,30.78,92.34,2024-03-01,REP-S-001-01
+SPG-00661,S-009,Magnolia Active,Southeast,P-SPG-01-04,Base Layer,Apparel,3,144.65,433.95,2024-10-08,REP-S-009-03
+SPG-00662,S-006,Bayou Fitness,Southeast,P-SPG-01-04,Base Layer,Apparel,4,59.3,237.2,2024-02-13,REP-S-006-01
+SPG-00663,S-011,Lakeside Sports,Midwest,P-SPG-01-02,Fleece Vest,Apparel,17,150.13,2552.21,2024-06-30,REP-S-011-01
+SPG-00664,S-013,Heartland Fitness,Midwest,P-SPG-01-01,Rain Shell,Apparel,2,95.05,190.1,2024-08-08,REP-S-013-02
+SPG-00665,S-008,Palmetto Sports,Southeast,P-SPG-04-02,Electrolyte Mix,Nutrition,15,49.16,737.4,2024-04-18,REP-S-008-04
+SPG-00666,S-008,Palmetto Sports,Southeast,P-SPG-03-02,Yoga Mat,Accessories,3,58.51,175.53,2024-03-18,REP-S-008-02
+SPG-00667,S-020,Mountain Peak Gear,West,P-SPG-00-00,Trail Runner X,Footwear,13,68.54,891.02,2024-07-22,REP-S-020-03
+SPG-00668,S-015,Crossroads Sports,Midwest,P-SPG-04-03,Recovery Bar,Nutrition,13,37.52,487.76,2024-09-14,REP-S-015-04
+SPG-00669,S-017,Redwood Athletics,West,P-SPG-03-08,Jump Rope,Accessories,12,63.98,767.76,2024-08-08,REP-S-017-04
+SPG-00670,S-009,Magnolia Active,Southeast,P-SPG-04-03,Recovery Bar,Nutrition,4,35.16,140.64,2024-09-17,REP-S-009-04
+SPG-00671,S-005,Evergreen Athletics,Northeast,P-SPG-00-01,Court Ace,Footwear,3,165.96,497.88,2024-06-19,REP-S-005-03
+SPG-00672,S-010,Delta Outfitters,Southeast,P-SPG-00-04,Cross Train V2,Footwear,11,120.34,1323.74,2024-01-28,REP-S-010-03
+SPG-00673,S-012,Prairie Athletics,Midwest,P-SPG-00-02,Hiker Pro,Footwear,16,81.73,1307.68,2024-08-13,REP-S-012-01
+SPG-00674,S-007,Gulf Coast Gear,Southeast,P-SPG-03-02,Yoga Mat,Accessories,12,69.89,838.68,2024-05-19,REP-S-007-02
+SPG-00675,S-010,Delta Outfitters,Southeast,P-SPG-03-03,Resistance Bands,Accessories,4,6.23,24.92,2024-07-08,REP-S-010-02
+SPG-00676,S-015,Crossroads Sports,Midwest,P-SPG-02-03,Weight Set Pro,Equipment,13,399.76,5196.88,2024-02-20,REP-S-015-04
+SPG-00677,S-012,Prairie Athletics,Midwest,P-SPG-01-03,Running Short,Apparel,5,86.53,432.65,2024-01-26,REP-S-012-01
+SPG-00678,S-008,Palmetto Sports,Southeast,P-SPG-01-00,Compression Tee,Apparel,8,79.85,638.8,2024-11-28,REP-S-008-03
+SPG-00679,S-015,Crossroads Sports,Midwest,P-SPG-03-06,Swim Goggles,Accessories,3,49.87,149.61,2024-07-14,REP-S-015-03
+SPG-00680,S-017,Redwood Athletics,West,P-SPG-04-03,Recovery Bar,Nutrition,2,56.7,113.4,2024-08-04,REP-S-017-04
+SPG-00681,S-003,Summit Sports,Northeast,P-SPG-02-02,Treadmill T500,Equipment,21,282.76,5937.96,2024-04-09,REP-S-003-01
+SPG-00682,S-004,Harbor Run,Northeast,P-SPG-01-04,Base Layer,Apparel,9,29.58,266.22,2024-05-30,REP-S-004-02
+SPG-00683,S-017,Redwood Athletics,West,P-SPG-02-00,Carbon Bike,Equipment,15,352.56,5288.4,2024-04-06,REP-S-017-04
+SPG-00684,S-012,Prairie Athletics,Midwest,P-SPG-04-02,Electrolyte Mix,Nutrition,10,28.4,284.0,2024-07-25,REP-S-012-01
+SPG-00685,S-015,Crossroads Sports,Midwest,P-SPG-03-06,Swim Goggles,Accessories,17,7.71,131.07,2024-03-31,REP-S-015-01
+SPG-00686,S-005,Evergreen Athletics,Northeast,P-SPG-03-05,Grip Tape,Accessories,15,59.86,897.9,2024-10-31,REP-S-005-03
+SPG-00687,S-005,Evergreen Athletics,Northeast,P-SPG-01-01,Rain Shell,Apparel,3,118.7,356.1,2024-05-21,REP-S-005-03
+SPG-00688,S-013,Heartland Fitness,Midwest,P-SPG-01-00,Compression Tee,Apparel,2,68.47,136.94,2024-09-28,REP-S-013-02
+SPG-00689,S-007,Gulf Coast Gear,Southeast,P-SPG-03-09,Foam Roller,Accessories,5,36.32,181.6,2024-11-07,REP-S-007-02
+SPG-00690,S-014,River Trail Gear,Midwest,P-SPG-04-04,BCAAs,Nutrition,9,59.52,535.68,2024-09-09,REP-S-014-02
+SPG-00691,S-001,Alpine Outfitters,Northeast,P-SPG-00-01,Court Ace,Footwear,2,95.76,191.52,2024-09-22,REP-S-001-04
+SPG-00692,S-003,Summit Sports,Northeast,P-SPG-01-03,Running Short,Apparel,17,167.97,2855.49,2024-08-09,REP-S-003-01
+SPG-00693,S-015,Crossroads Sports,Midwest,P-SPG-02-04,Climbing Pack,Equipment,12,687.95,8255.4,2024-02-25,REP-S-015-03
+SPG-00694,S-019,Coastal Outfitters,West,P-SPG-04-04,BCAAs,Nutrition,31,41.58,1288.98,2024-12-14,REP-S-019-02
+SPG-00695,S-019,Coastal Outfitters,West,P-SPG-04-02,Electrolyte Mix,Nutrition,54,48.91,2641.14,2024-01-26,REP-S-019-01
+SPG-00696,S-014,River Trail Gear,Midwest,P-SPG-03-04,Sport Towel,Accessories,11,75.5,830.5,2024-11-26,REP-S-014-03
+SPG-00697,S-016,Pacific Surf & Sport,West,P-SPG-03-00,Water Bottle,Accessories,19,27.53,523.07,2024-05-07,REP-S-016-03
+SPG-00698,S-004,Harbor Run,Northeast,P-SPG-01-04,Base Layer,Apparel,8,155.12,1240.96,2024-02-26,REP-S-004-02
+SPG-00699,S-008,Palmetto Sports,Southeast,P-SPG-03-02,Yoga Mat,Accessories,3,57.3,171.9,2024-04-22,REP-S-008-03
+SPG-00700,S-014,River Trail Gear,Midwest,P-SPG-03-06,Swim Goggles,Accessories,19,29.84,566.96,2024-02-28,REP-S-014-01
+SPG-00701,S-008,Palmetto Sports,Southeast,P-SPG-01-04,Base Layer,Apparel,13,171.76,2232.88,2024-01-28,REP-S-008-01
+SPG-00702,S-011,Lakeside Sports,Midwest,P-SPG-00-03,Sprint Elite,Footwear,13,211.16,2745.08,2024-01-19,REP-S-011-02
+SPG-00703,S-014,River Trail Gear,Midwest,P-SPG-03-00,Water Bottle,Accessories,11,75.32,828.52,2024-10-21,REP-S-014-01
+SPG-00704,S-010,Delta Outfitters,Southeast,P-SPG-01-03,Running Short,Apparel,13,168.45,2189.85,2024-05-16,REP-S-010-04
+SPG-00705,S-019,Coastal Outfitters,West,P-SPG-01-03,Running Short,Apparel,39,155.91,6080.49,2024-05-02,REP-S-019-02
+SPG-00706,S-011,Lakeside Sports,Midwest,P-SPG-01-04,Base Layer,Apparel,11,114.95,1264.45,2024-02-03,REP-S-011-01
+SPG-00707,S-004,Harbor Run,Northeast,P-SPG-00-00,Trail Runner X,Footwear,1,71.51,71.51,2024-09-29,REP-S-004-04
+SPG-00708,S-016,Pacific Surf & Sport,West,P-SPG-00-01,Court Ace,Footwear,2,40.44,80.88,2024-02-21,REP-S-016-02
+SPG-00709,S-002,Trailhead NE,Northeast,P-SPG-01-02,Fleece Vest,Apparel,12,128.6,1543.2,2024-05-21,REP-S-002-03
+SPG-00710,S-019,Coastal Outfitters,West,P-SPG-00-00,Trail Runner X,Footwear,16,227.5,3640.0,2024-04-25,REP-S-019-01
+SPG-00711,S-019,Coastal Outfitters,West,P-SPG-00-00,Trail Runner X,Footwear,68,40.04,2722.72,2024-11-13,REP-S-019-02
+SPG-00712,S-013,Heartland Fitness,Midwest,P-SPG-03-01,Fitness Band,Accessories,9,49.5,445.5,2024-12-24,REP-S-013-01
+SPG-00713,S-020,Mountain Peak Gear,West,P-SPG-02-01,Kayak Explorer,Equipment,3,396.75,1190.25,2024-07-26,REP-S-020-03
+SPG-00714,S-006,Bayou Fitness,Southeast,P-SPG-04-00,Whey Protein,Nutrition,13,40.32,524.16,2024-07-19,REP-S-006-03
+SPG-00715,S-002,Trailhead NE,Northeast,P-SPG-03-05,Grip Tape,Accessories,6,57.12,342.72,2024-07-20,REP-S-002-04
+SPG-00716,S-012,Prairie Athletics,Midwest,P-SPG-04-02,Electrolyte Mix,Nutrition,10,42.67,426.7,2024-02-21,REP-S-012-04
+SPG-00717,S-014,River Trail Gear,Midwest,P-SPG-01-02,Fleece Vest,Apparel,11,53.69,590.59,2024-04-22,REP-S-014-04
+SPG-00718,S-005,Evergreen Athletics,Northeast,P-SPG-01-00,Compression Tee,Apparel,3,29.4,88.2,2024-12-20,REP-S-005-01
+SPG-00719,S-005,Evergreen Athletics,Northeast,P-SPG-00-03,Sprint Elite,Footwear,5,71.36,356.8,2024-05-17,REP-S-005-01
+SPG-00720,S-010,Delta Outfitters,Southeast,P-SPG-02-02,Treadmill T500,Equipment,15,229.44,3441.6,2024-09-10,REP-S-010-04
+SPG-00721,S-014,River Trail Gear,Midwest,P-SPG-03-01,Fitness Band,Accessories,18,59.7,1074.6,2024-04-15,REP-S-014-03
+SPG-00722,S-007,Gulf Coast Gear,Southeast,P-SPG-03-00,Water Bottle,Accessories,9,16.74,150.66,2024-03-28,REP-S-007-02
+SPG-00723,S-012,Prairie Athletics,Midwest,P-SPG-00-00,Trail Runner X,Footwear,2,216.64,433.28,2024-04-14,REP-S-012-03
+SPG-00724,S-013,Heartland Fitness,Midwest,P-SPG-01-03,Running Short,Apparel,15,125.33,1879.95,2024-06-26,REP-S-013-04
+SPG-00725,S-011,Lakeside Sports,Midwest,P-SPG-03-02,Yoga Mat,Accessories,11,60.9,669.9,2024-11-22,REP-S-011-04
+SPG-00726,S-011,Lakeside Sports,Midwest,P-SPG-04-01,Energy Gel Pack,Nutrition,1,53.46,53.46,2024-05-27,REP-S-011-02
+SPG-00727,S-009,Magnolia Active,Southeast,P-SPG-03-01,Fitness Band,Accessories,13,70.66,918.58,2024-12-27,REP-S-009-03
+SPG-00728,S-005,Evergreen Athletics,Northeast,P-SPG-00-01,Court Ace,Footwear,8,147.68,1181.44,2024-11-01,REP-S-005-04
+SPG-00729,S-009,Magnolia Active,Southeast,P-SPG-01-01,Rain Shell,Apparel,11,26.15,287.65,2024-05-27,REP-S-009-01
+SPG-00730,S-012,Prairie Athletics,Midwest,P-SPG-02-04,Climbing Pack,Equipment,12,302.88,3634.56,2024-01-02,REP-S-012-01
+SPG-00731,S-016,Pacific Surf & Sport,West,P-SPG-04-01,Energy Gel Pack,Nutrition,7,17.39,121.73,2024-02-18,REP-S-016-03
+SPG-00732,S-017,Redwood Athletics,West,P-SPG-03-08,Jump Rope,Accessories,19,50.93,967.67,2024-04-04,REP-S-017-02
+SPG-00733,S-014,River Trail Gear,Midwest,P-SPG-00-03,Sprint Elite,Footwear,19,154.9,2943.1,2024-09-14,REP-S-014-04
+SPG-00734,S-002,Trailhead NE,Northeast,P-SPG-02-02,Treadmill T500,Equipment,1,355.5,355.5,2024-12-24,REP-S-002-01
+SPG-00735,S-016,Pacific Surf & Sport,West,P-SPG-03-07,Ankle Brace,Accessories,20,47.89,957.8,2024-11-14,REP-S-016-03
+SPG-00736,S-019,Coastal Outfitters,West,P-SPG-01-03,Running Short,Apparel,28,68.05,1905.4,2024-09-01,REP-S-019-01
+SPG-00737,S-008,Palmetto Sports,Southeast,P-SPG-04-02,Electrolyte Mix,Nutrition,10,23.27,232.7,2024-06-05,REP-S-008-02
+SPG-00738,S-002,Trailhead NE,Northeast,P-SPG-01-03,Running Short,Apparel,8,83.52,668.16,2024-12-18,REP-S-002-04
+SPG-00739,S-002,Trailhead NE,Northeast,P-SPG-00-02,Hiker Pro,Footwear,18,211.03,3798.54,2024-05-02,REP-S-002-04
+SPG-00740,S-001,Alpine Outfitters,Northeast,P-SPG-04-02,Electrolyte Mix,Nutrition,20,43.17,863.4,2024-03-28,REP-S-001-04
+SPG-00741,S-019,Coastal Outfitters,West,P-SPG-01-04,Base Layer,Apparel,47,66.01,3102.47,2024-06-10,REP-S-019-02
+SPG-00742,S-013,Heartland Fitness,Midwest,P-SPG-04-02,Electrolyte Mix,Nutrition,6,37.25,223.5,2024-12-14,REP-S-013-02
+SPG-00743,S-001,Alpine Outfitters,Northeast,P-SPG-03-01,Fitness Band,Accessories,11,53.51,588.61,2024-02-05,REP-S-001-04
+SPG-00744,S-001,Alpine Outfitters,Northeast,P-SPG-00-01,Court Ace,Footwear,9,75.49,679.41,2024-03-26,REP-S-001-03
+SPG-00745,S-009,Magnolia Active,Southeast,P-SPG-03-02,Yoga Mat,Accessories,11,20.31,223.41,2024-04-05,REP-S-009-02
+SPG-00746,S-012,Prairie Athletics,Midwest,P-SPG-00-02,Hiker Pro,Footwear,10,249.56,2495.6,2024-06-19,REP-S-012-01
+SPG-00747,S-003,Summit Sports,Northeast,P-SPG-01-00,Compression Tee,Apparel,2,172.57,345.14,2024-08-21,REP-S-003-03
+SPG-00748,S-006,Bayou Fitness,Southeast,P-SPG-00-03,Sprint Elite,Footwear,9,65.5,589.5,2024-03-13,REP-S-006-04
+SPG-00749,S-017,Redwood Athletics,West,P-SPG-00-03,Sprint Elite,Footwear,20,98.44,1968.8,2024-01-07,REP-S-017-01
+SPG-00750,S-012,Prairie Athletics,Midwest,P-SPG-00-02,Hiker Pro,Footwear,6,121.45,728.7,2024-12-07,REP-S-012-02
+SPG-00751,S-018,Canyon Sports,West,P-SPG-02-00,Carbon Bike,Equipment,20,653.28,13065.6,2024-08-30,REP-S-018-01
+SPG-00752,S-003,Summit Sports,Northeast,P-SPG-01-01,Rain Shell,Apparel,36,45.65,1643.4,2024-08-07,REP-S-003-02
+SPG-00753,S-016,Pacific Surf & Sport,West,P-SPG-02-00,Carbon Bike,Equipment,11,690.13,7591.43,2024-06-20,REP-S-016-04
+SPG-00754,S-004,Harbor Run,Northeast,P-SPG-04-03,Recovery Bar,Nutrition,7,18.38,128.66,2024-01-11,REP-S-004-04
+SPG-00755,S-019,Coastal Outfitters,West,P-SPG-00-01,Court Ace,Footwear,47,157.07,7382.29,2024-03-31,REP-S-019-03
+SPG-00756,S-012,Prairie Athletics,Midwest,P-SPG-01-00,Compression Tee,Apparel,2,92.47,184.94,2024-05-15,REP-S-012-01
+SPG-00757,S-019,Coastal Outfitters,West,P-SPG-02-00,Carbon Bike,Equipment,34,536.54,18242.36,2024-02-09,REP-S-019-01
+SPG-00758,S-011,Lakeside Sports,Midwest,P-SPG-03-01,Fitness Band,Accessories,5,68.23,341.15,2024-03-28,REP-S-011-01
+SPG-00759,S-019,Coastal Outfitters,West,P-SPG-01-03,Running Short,Apparel,48,108.57,5211.36,2024-12-13,REP-S-019-03
+SPG-00760,S-004,Harbor Run,Northeast,P-SPG-04-00,Whey Protein,Nutrition,11,22.3,245.3,2024-01-05,REP-S-004-04
+SPG-00761,S-010,Delta Outfitters,Southeast,P-SPG-00-00,Trail Runner X,Footwear,1,237.2,237.2,2024-10-31,REP-S-010-02
+SPG-00762,S-009,Magnolia Active,Southeast,P-SPG-03-02,Yoga Mat,Accessories,7,30.5,213.5,2024-06-29,REP-S-009-04
+SPG-00763,S-003,Summit Sports,Northeast,P-SPG-04-02,Electrolyte Mix,Nutrition,9,34.91,314.19,2024-08-30,REP-S-003-04
+SPG-00764,S-001,Alpine Outfitters,Northeast,P-SPG-00-02,Hiker Pro,Footwear,11,78.8,866.8,2024-10-25,REP-S-001-01
+SPG-00765,S-005,Evergreen Athletics,Northeast,P-SPG-04-04,BCAAs,Nutrition,20,52.58,1051.6,2024-01-01,REP-S-005-03
+SPG-00766,S-004,Harbor Run,Northeast,P-SPG-00-02,Hiker Pro,Footwear,11,106.85,1175.35,2024-09-07,REP-S-004-01
+SPG-00767,S-006,Bayou Fitness,Southeast,P-SPG-04-01,Energy Gel Pack,Nutrition,15,50.02,750.3,2024-05-06,REP-S-006-02
+SPG-00768,S-002,Trailhead NE,Northeast,P-SPG-02-02,Treadmill T500,Equipment,18,616.13,11090.34,2024-08-29,REP-S-002-01
+SPG-00769,S-018,Canyon Sports,West,P-SPG-04-04,BCAAs,Nutrition,10,55.32,553.2,2024-02-26,REP-S-018-03
+SPG-00770,S-004,Harbor Run,Northeast,P-SPG-03-00,Water Bottle,Accessories,10,73.91,739.1,2024-01-24,REP-S-004-04
+SPG-00771,S-003,Summit Sports,Northeast,P-SPG-02-02,Treadmill T500,Equipment,5,152.67,763.35,2024-01-09,REP-S-003-01
+SPG-00772,S-004,Harbor Run,Northeast,P-SPG-03-00,Water Bottle,Accessories,16,65.71,1051.36,2024-10-17,REP-S-004-04
+SPG-00773,S-018,Canyon Sports,West,P-SPG-00-02,Hiker Pro,Footwear,6,164.08,984.48,2024-12-14,REP-S-018-02
+SPG-00774,S-003,Summit Sports,Northeast,P-SPG-02-01,Kayak Explorer,Equipment,18,536.36,9654.48,2024-05-28,REP-S-003-01
+SPG-00775,S-001,Alpine Outfitters,Northeast,P-SPG-03-03,Resistance Bands,Accessories,5,17.7,88.5,2024-04-26,REP-S-001-02
+SPG-00776,S-014,River Trail Gear,Midwest,P-SPG-00-04,Cross Train V2,Footwear,9,161.11,1449.99,2024-09-25,REP-S-014-02
+SPG-00777,S-016,Pacific Surf & Sport,West,P-SPG-04-01,Energy Gel Pack,Nutrition,2,31.49,62.98,2024-09-14,REP-S-016-04
+SPG-00778,S-007,Gulf Coast Gear,Southeast,P-SPG-04-02,Electrolyte Mix,Nutrition,9,16.81,151.29,2024-03-26,REP-S-007-04
+SPG-00779,S-019,Coastal Outfitters,West,P-SPG-02-02,Treadmill T500,Equipment,27,512.29,13831.83,2024-03-16,REP-S-019-04
+SPG-00780,S-009,Magnolia Active,Southeast,P-SPG-04-03,Recovery Bar,Nutrition,1,58.89,58.89,2024-02-18,REP-S-009-04
+SPG-00781,S-019,Coastal Outfitters,West,P-SPG-01-02,Fleece Vest,Apparel,16,112.26,1796.16,2024-02-21,REP-S-019-01
+SPG-00782,S-008,Palmetto Sports,Southeast,P-SPG-01-00,Compression Tee,Apparel,6,179.7,1078.2,2024-06-04,REP-S-008-01
+SPG-00783,S-003,Summit Sports,Northeast,P-SPG-03-02,Yoga Mat,Accessories,18,25.74,463.32,2024-06-20,REP-S-003-01
+SPG-00784,S-007,Gulf Coast Gear,Southeast,P-SPG-00-00,Trail Runner X,Footwear,11,62.46,687.06,2024-08-19,REP-S-007-02
+SPG-00785,S-015,Crossroads Sports,Midwest,P-SPG-01-01,Rain Shell,Apparel,4,159.01,636.04,2024-09-08,REP-S-015-03
+SPG-00786,S-014,River Trail Gear,Midwest,P-SPG-03-08,Jump Rope,Accessories,9,38.26,344.34,2024-06-28,REP-S-014-02
+SPG-00787,S-005,Evergreen Athletics,Northeast,P-SPG-01-03,Running Short,Apparel,12,50.08,600.96,2024-10-06,REP-S-005-02
+SPG-00788,S-016,Pacific Surf & Sport,West,P-SPG-03-04,Sport Towel,Accessories,14,8.67,121.38,2024-05-11,REP-S-016-01
+SPG-00789,S-014,River Trail Gear,Midwest,P-SPG-03-02,Yoga Mat,Accessories,2,63.6,127.2,2024-12-05,REP-S-014-01
+SPG-00790,S-015,Crossroads Sports,Midwest,P-SPG-04-02,Electrolyte Mix,Nutrition,7,30.67,214.69,2024-09-06,REP-S-015-03
+SPG-00791,S-005,Evergreen Athletics,Northeast,P-SPG-02-02,Treadmill T500,Equipment,6,369.61,2217.66,2024-05-09,REP-S-005-01
+SPG-00792,S-016,Pacific Surf & Sport,West,P-SPG-04-00,Whey Protein,Nutrition,19,32.72,621.68,2024-07-05,REP-S-016-03
+SPG-00793,S-008,Palmetto Sports,Southeast,P-SPG-03-03,Resistance Bands,Accessories,7,67.96,475.72,2024-08-22,REP-S-008-04
+SPG-00794,S-009,Magnolia Active,Southeast,P-SPG-01-03,Running Short,Apparel,6,90.1,540.6,2024-01-07,REP-S-009-02
+SPG-00795,S-001,Alpine Outfitters,Northeast,P-SPG-01-03,Running Short,Apparel,13,55.02,715.26,2024-06-29,REP-S-001-02
+SPG-00796,S-004,Harbor Run,Northeast,P-SPG-02-02,Treadmill T500,Equipment,17,241.11,4098.87,2024-06-03,REP-S-004-01
+SPG-00797,S-009,Magnolia Active,Southeast,P-SPG-04-02,Electrolyte Mix,Nutrition,10,11.01,110.1,2024-12-29,REP-S-009-01
+SPG-00798,S-008,Palmetto Sports,Southeast,P-SPG-02-02,Treadmill T500,Equipment,6,618.3,3709.8,2024-06-19,REP-S-008-02
+SPG-00799,S-016,Pacific Surf & Sport,West,P-SPG-04-00,Whey Protein,Nutrition,5,57.93,289.65,2024-09-22,REP-S-016-03
+SPG-00800,S-018,Canyon Sports,West,P-SPG-03-09,Foam Roller,Accessories,11,5.11,56.21,2024-12-05,REP-S-018-02
+SPG-00801,S-006,Bayou Fitness,Southeast,P-SPG-00-02,Hiker Pro,Footwear,11,92.75,1020.25,2024-11-01,REP-S-006-03
+SPG-00802,S-019,Coastal Outfitters,West,P-SPG-01-03,Running Short,Apparel,57,110.43,6294.51,2024-09-04,REP-S-019-04
+SPG-00803,S-016,Pacific Surf & Sport,West,P-SPG-04-01,Energy Gel Pack,Nutrition,8,26.24,209.92,2024-02-27,REP-S-016-03
+SPG-00804,S-012,Prairie Athletics,Midwest,P-SPG-03-03,Resistance Bands,Accessories,18,30.01,540.18,2024-05-18,REP-S-012-02
+SPG-00805,S-014,River Trail Gear,Midwest,P-SPG-04-00,Whey Protein,Nutrition,3,15.16,45.48,2024-12-17,REP-S-014-02
+SPG-00806,S-008,Palmetto Sports,Southeast,P-SPG-03-00,Water Bottle,Accessories,5,40.03,200.15,2024-09-22,REP-S-008-01
+SPG-00807,S-004,Harbor Run,Northeast,P-SPG-04-03,Recovery Bar,Nutrition,5,21.04,105.2,2024-11-23,REP-S-004-02
+SPG-00808,S-007,Gulf Coast Gear,Southeast,P-SPG-02-00,Carbon Bike,Equipment,1,242.34,242.34,2024-01-11,REP-S-007-04
+SPG-00809,S-004,Harbor Run,Northeast,P-SPG-02-04,Climbing Pack,Equipment,15,719.83,10797.45,2024-03-16,REP-S-004-01
+SPG-00810,S-011,Lakeside Sports,Midwest,P-SPG-01-04,Base Layer,Apparel,4,34.96,139.84,2024-07-29,REP-S-011-03
+SPG-00811,S-020,Mountain Peak Gear,West,P-SPG-04-01,Energy Gel Pack,Nutrition,2,33.8,67.6,2024-04-22,REP-S-020-03
+SPG-00812,S-018,Canyon Sports,West,P-SPG-01-00,Compression Tee,Apparel,16,150.73,2411.68,2024-12-03,REP-S-018-02
+SPG-00813,S-014,River Trail Gear,Midwest,P-SPG-02-00,Carbon Bike,Equipment,3,427.78,1283.34,2024-03-13,REP-S-014-02
+SPG-00814,S-019,Coastal Outfitters,West,P-SPG-02-00,Carbon Bike,Equipment,48,572.28,27469.44,2024-07-01,REP-S-019-04
+SPG-00815,S-018,Canyon Sports,West,P-SPG-01-00,Compression Tee,Apparel,4,176.91,707.64,2024-09-11,REP-S-018-01
+SPG-00816,S-009,Magnolia Active,Southeast,P-SPG-01-01,Rain Shell,Apparel,4,57.48,229.92,2024-01-16,REP-S-009-01
+SPG-00817,S-006,Bayou Fitness,Southeast,P-SPG-01-01,Rain Shell,Apparel,5,41.22,206.1,2024-05-05,REP-S-006-04
+SPG-00818,S-002,Trailhead NE,Northeast,P-SPG-03-03,Resistance Bands,Accessories,20,15.09,301.8,2024-10-22,REP-S-002-01
+SPG-00819,S-007,Gulf Coast Gear,Southeast,P-SPG-02-02,Treadmill T500,Equipment,11,165.45,1819.95,2024-12-22,REP-S-007-01
+SPG-00820,S-006,Bayou Fitness,Southeast,P-SPG-03-06,Swim Goggles,Accessories,1,17.85,17.85,2024-08-08,REP-S-006-01
+SPG-00821,S-018,Canyon Sports,West,P-SPG-01-03,Running Short,Apparel,4,33.57,134.28,2024-07-03,REP-S-018-02
+SPG-00822,S-007,Gulf Coast Gear,Southeast,P-SPG-00-01,Court Ace,Footwear,11,62.77,690.47,2024-04-15,REP-S-007-02
+SPG-00823,S-006,Bayou Fitness,Southeast,P-SPG-02-04,Climbing Pack,Equipment,14,712.87,9980.18,2024-02-15,REP-S-006-03
+SPG-00824,S-015,Crossroads Sports,Midwest,P-SPG-01-04,Base Layer,Apparel,18,125.68,2262.24,2024-04-09,REP-S-015-02
+SPG-00825,S-015,Crossroads Sports,Midwest,P-SPG-03-02,Yoga Mat,Accessories,20,67.75,1355.0,2024-07-12,REP-S-015-04
+SPG-00826,S-009,Magnolia Active,Southeast,P-SPG-02-02,Treadmill T500,Equipment,16,210.61,3369.76,2024-11-23,REP-S-009-01
+SPG-00827,S-007,Gulf Coast Gear,Southeast,P-SPG-03-04,Sport Towel,Accessories,10,62.94,629.4,2024-02-25,REP-S-007-04
+SPG-00828,S-003,Summit Sports,Northeast,P-SPG-04-00,Whey Protein,Nutrition,13,55.04,715.52,2024-05-20,REP-S-003-01
+SPG-00829,S-018,Canyon Sports,West,P-SPG-03-06,Swim Goggles,Accessories,19,58.43,1110.17,2024-11-16,REP-S-018-02
+SPG-00830,S-002,Trailhead NE,Northeast,P-SPG-04-01,Energy Gel Pack,Nutrition,18,53.79,968.22,2024-12-13,REP-S-002-02
+SPG-00831,S-008,Palmetto Sports,Southeast,P-SPG-00-04,Cross Train V2,Footwear,16,154.17,2466.72,2024-10-05,REP-S-008-01
+SPG-00832,S-008,Palmetto Sports,Southeast,P-SPG-04-04,BCAAs,Nutrition,2,26.96,53.92,2024-08-18,REP-S-008-01
+SPG-00833,S-009,Magnolia Active,Southeast,P-SPG-02-02,Treadmill T500,Equipment,14,152.13,2129.82,2024-09-26,REP-S-009-02
+SPG-00834,S-002,Trailhead NE,Northeast,P-SPG-03-07,Ankle Brace,Accessories,7,15.48,108.36,2024-03-30,REP-S-002-02
+SPG-00835,S-003,Summit Sports,Northeast,P-SPG-04-01,Energy Gel Pack,Nutrition,58,32.12,1862.96,2024-05-15,REP-S-003-01
+SPG-00836,S-011,Lakeside Sports,Midwest,P-SPG-03-02,Yoga Mat,Accessories,9,79.46,715.14,2024-12-13,REP-S-011-03
+SPG-00837,S-001,Alpine Outfitters,Northeast,P-SPG-00-00,Trail Runner X,Footwear,1,202.81,202.81,2024-06-27,REP-S-001-01
+SPG-00838,S-001,Alpine Outfitters,Northeast,P-SPG-00-02,Hiker Pro,Footwear,6,199.09,1194.54,2024-06-18,REP-S-001-01
+SPG-00839,S-003,Summit Sports,Northeast,P-SPG-01-03,Running Short,Apparel,13,90.24,1173.12,2024-07-19,REP-S-003-03
+SPG-00840,S-002,Trailhead NE,Northeast,P-SPG-04-00,Whey Protein,Nutrition,5,59.42,297.1,2024-10-28,REP-S-002-03
+SPG-00841,S-013,Heartland Fitness,Midwest,P-SPG-00-04,Cross Train V2,Footwear,10,198.03,1980.3,2024-08-01,REP-S-013-03
+SPG-00842,S-006,Bayou Fitness,Southeast,P-SPG-00-04,Cross Train V2,Footwear,4,166.07,664.28,2024-05-21,REP-S-006-04
+SPG-00843,S-010,Delta Outfitters,Southeast,P-SPG-03-08,Jump Rope,Accessories,2,16.29,32.58,2024-06-07,REP-S-010-03
+SPG-00844,S-017,Redwood Athletics,West,P-SPG-04-00,Whey Protein,Nutrition,11,28.97,318.67,2024-04-07,REP-S-017-01
+SPG-00845,S-017,Redwood Athletics,West,P-SPG-03-07,Ankle Brace,Accessories,1,8.31,8.31,2024-01-22,REP-S-017-01
+SPG-00846,S-001,Alpine Outfitters,Northeast,P-SPG-02-01,Kayak Explorer,Equipment,13,309.01,4017.13,2024-10-23,REP-S-001-03
+SPG-00847,S-003,Summit Sports,Northeast,P-SPG-02-04,Climbing Pack,Equipment,26,447.53,11635.78,2024-09-23,REP-S-003-01
+SPG-00848,S-008,Palmetto Sports,Southeast,P-SPG-03-02,Yoga Mat,Accessories,7,43.38,303.66,2024-12-25,REP-S-008-03
+SPG-00849,S-012,Prairie Athletics,Midwest,P-SPG-00-02,Hiker Pro,Footwear,10,212.53,2125.3,2024-06-24,REP-S-012-04
+SPG-00850,S-002,Trailhead NE,Northeast,P-SPG-04-00,Whey Protein,Nutrition,16,12.65,202.4,2024-11-09,REP-S-002-02
+SPG-00851,S-008,Palmetto Sports,Southeast,P-SPG-03-09,Foam Roller,Accessories,16,46.87,749.92,2024-03-03,REP-S-008-03
+SPG-00852,S-001,Alpine Outfitters,Northeast,P-SPG-04-04,BCAAs,Nutrition,6,16.29,97.74,2024-08-09,REP-S-001-01
+SPG-00853,S-009,Magnolia Active,Southeast,P-SPG-00-00,Trail Runner X,Footwear,10,93.09,930.9,2024-08-20,REP-S-009-01
+SPG-00854,S-018,Canyon Sports,West,P-SPG-04-00,Whey Protein,Nutrition,9,41.28,371.52,2024-10-17,REP-S-018-03
+SPG-00855,S-006,Bayou Fitness,Southeast,P-SPG-04-03,Recovery Bar,Nutrition,13,54.02,702.26,2024-06-26,REP-S-006-02
+SPG-00856,S-017,Redwood Athletics,West,P-SPG-01-03,Running Short,Apparel,7,104.53,731.71,2024-05-27,REP-S-017-01
+SPG-00857,S-013,Heartland Fitness,Midwest,P-SPG-02-01,Kayak Explorer,Equipment,5,554.75,2773.75,2024-02-26,REP-S-013-02
+SPG-00858,S-013,Heartland Fitness,Midwest,P-SPG-04-02,Electrolyte Mix,Nutrition,6,36.09,216.54,2024-01-05,REP-S-013-03
+SPG-00859,S-014,River Trail Gear,Midwest,P-SPG-02-01,Kayak Explorer,Equipment,1,232.04,232.04,2024-09-12,REP-S-014-04
+SPG-00860,S-005,Evergreen Athletics,Northeast,P-SPG-02-04,Climbing Pack,Equipment,14,210.41,2945.74,2024-12-16,REP-S-005-03
+SPG-00861,S-009,Magnolia Active,Southeast,P-SPG-00-03,Sprint Elite,Footwear,1,212.63,212.63,2024-03-16,REP-S-009-03
+SPG-00862,S-013,Heartland Fitness,Midwest,P-SPG-01-02,Fleece Vest,Apparel,12,141.23,1694.76,2024-08-26,REP-S-013-01
+SPG-00863,S-006,Bayou Fitness,Southeast,P-SPG-03-03,Resistance Bands,Accessories,9,30.49,274.41,2024-12-14,REP-S-006-02
+SPG-00864,S-010,Delta Outfitters,Southeast,P-SPG-01-00,Compression Tee,Apparel,2,95.17,190.34,2024-03-17,REP-S-010-03
+SPG-00865,S-014,River Trail Gear,Midwest,P-SPG-02-02,Treadmill T500,Equipment,17,481.78,8190.26,2024-09-24,REP-S-014-01
+SPG-00866,S-008,Palmetto Sports,Southeast,P-SPG-00-02,Hiker Pro,Footwear,6,156.78,940.68,2024-05-28,REP-S-008-02
+SPG-00867,S-009,Magnolia Active,Southeast,P-SPG-02-01,Kayak Explorer,Equipment,12,507.57,6090.84,2024-11-15,REP-S-009-01
+SPG-00868,S-011,Lakeside Sports,Midwest,P-SPG-00-02,Hiker Pro,Footwear,2,248.56,497.12,2024-10-12,REP-S-011-03
+SPG-00869,S-008,Palmetto Sports,Southeast,P-SPG-01-01,Rain Shell,Apparel,5,175.16,875.8,2024-12-06,REP-S-008-03
+SPG-00870,S-007,Gulf Coast Gear,Southeast,P-SPG-04-02,Electrolyte Mix,Nutrition,15,25.75,386.25,2024-03-24,REP-S-007-01
+SPG-00871,S-013,Heartland Fitness,Midwest,P-SPG-01-01,Rain Shell,Apparel,4,34.41,137.64,2024-06-04,REP-S-013-04
+SPG-00872,S-017,Redwood Athletics,West,P-SPG-03-01,Fitness Band,Accessories,18,8.62,155.16,2024-09-06,REP-S-017-02
+SPG-00873,S-008,Palmetto Sports,Southeast,P-SPG-04-00,Whey Protein,Nutrition,5,34.63,173.15,2024-05-27,REP-S-008-02
+SPG-00874,S-013,Heartland Fitness,Midwest,P-SPG-02-01,Kayak Explorer,Equipment,2,711.79,1423.58,2024-02-03,REP-S-013-01
+SPG-00875,S-003,Summit Sports,Northeast,P-SPG-00-04,Cross Train V2,Footwear,58,144.3,8369.4,2024-05-30,REP-S-003-04
+SPG-00876,S-004,Harbor Run,Northeast,P-SPG-03-08,Jump Rope,Accessories,14,63.42,887.88,2024-01-08,REP-S-004-01
+SPG-00877,S-001,Alpine Outfitters,Northeast,P-SPG-01-01,Rain Shell,Apparel,1,179.56,179.56,2024-08-20,REP-S-001-01
+SPG-00878,S-019,Coastal Outfitters,West,P-SPG-00-02,Hiker Pro,Footwear,36,63.52,2286.72,2024-01-21,REP-S-019-01
+SPG-00879,S-008,Palmetto Sports,Southeast,P-SPG-03-05,Grip Tape,Accessories,13,52.76,685.88,2024-04-21,REP-S-008-04
+SPG-00880,S-009,Magnolia Active,Southeast,P-SPG-02-04,Climbing Pack,Equipment,3,770.28,2310.84,2024-05-24,REP-S-009-04
+SPG-00881,S-001,Alpine Outfitters,Northeast,P-SPG-04-01,Energy Gel Pack,Nutrition,13,28.4,369.2,2024-10-30,REP-S-001-03
+SPG-00882,S-005,Evergreen Athletics,Northeast,P-SPG-00-00,Trail Runner X,Footwear,10,166.78,1667.8,2024-03-04,REP-S-005-01
+SPG-00883,S-017,Redwood Athletics,West,P-SPG-04-02,Electrolyte Mix,Nutrition,4,36.96,147.84,2024-01-28,REP-S-017-02
+SPG-00884,S-008,Palmetto Sports,Southeast,P-SPG-03-08,Jump Rope,Accessories,13,30.72,399.36,2024-09-07,REP-S-008-01
+SPG-00885,S-019,Coastal Outfitters,West,P-SPG-01-03,Running Short,Apparel,22,47.3,1040.6,2024-06-05,REP-S-019-02
+SPG-00886,S-020,Mountain Peak Gear,West,P-SPG-04-04,BCAAs,Nutrition,5,13.68,68.4,2024-01-03,REP-S-020-04
+SPG-00887,S-009,Magnolia Active,Southeast,P-SPG-02-02,Treadmill T500,Equipment,11,107.56,1183.16,2024-08-08,REP-S-009-03
+SPG-00888,S-002,Trailhead NE,Northeast,P-SPG-02-01,Kayak Explorer,Equipment,17,452.08,7685.36,2024-06-29,REP-S-002-01
+SPG-00889,S-012,Prairie Athletics,Midwest,P-SPG-00-02,Hiker Pro,Footwear,8,143.4,1147.2,2024-12-04,REP-S-012-04
+SPG-00890,S-014,River Trail Gear,Midwest,P-SPG-03-00,Water Bottle,Accessories,17,57.03,969.51,2024-01-01,REP-S-014-01
+SPG-00891,S-005,Evergreen Athletics,Northeast,P-SPG-03-00,Water Bottle,Accessories,2,75.79,151.58,2024-01-26,REP-S-005-01
+SPG-00892,S-017,Redwood Athletics,West,P-SPG-01-02,Fleece Vest,Apparel,13,83.65,1087.45,2024-05-08,REP-S-017-01
+SPG-00893,S-001,Alpine Outfitters,Northeast,P-SPG-03-02,Yoga Mat,Accessories,15,10.45,156.75,2024-03-11,REP-S-001-02
+SPG-00894,S-004,Harbor Run,Northeast,P-SPG-01-01,Rain Shell,Apparel,9,163.6,1472.4,2024-06-28,REP-S-004-03
+SPG-00895,S-002,Trailhead NE,Northeast,P-SPG-03-08,Jump Rope,Accessories,18,18.76,337.68,2024-05-25,REP-S-002-01
+SPG-00896,S-016,Pacific Surf & Sport,West,P-SPG-03-06,Swim Goggles,Accessories,18,53.31,959.58,2024-09-14,REP-S-016-02
+SPG-00897,S-020,Mountain Peak Gear,West,P-SPG-01-04,Base Layer,Apparel,9,66.46,598.14,2024-12-06,REP-S-020-01
+SPG-00898,S-004,Harbor Run,Northeast,P-SPG-01-02,Fleece Vest,Apparel,18,20.79,374.22,2024-10-14,REP-S-004-04
+SPG-00899,S-007,Gulf Coast Gear,Southeast,P-SPG-02-02,Treadmill T500,Equipment,6,407.67,2446.02,2024-03-20,REP-S-007-02
+SPG-00900,S-014,River Trail Gear,Midwest,P-SPG-00-01,Court Ace,Footwear,8,175.48,1403.84,2024-02-14,REP-S-014-01
+SPG-00901,S-002,Trailhead NE,Northeast,P-SPG-00-02,Hiker Pro,Footwear,15,185.13,2776.95,2024-12-31,REP-S-002-01
+SPG-00902,S-020,Mountain Peak Gear,West,P-SPG-00-04,Cross Train V2,Footwear,12,248.57,2982.84,2024-05-18,REP-S-020-01
+SPG-00903,S-010,Delta Outfitters,Southeast,P-SPG-02-04,Climbing Pack,Equipment,4,751.22,3004.88,2024-03-14,REP-S-010-04
+SPG-00904,S-009,Magnolia Active,Southeast,P-SPG-04-01,Energy Gel Pack,Nutrition,10,47.81,478.1,2024-04-10,REP-S-009-04
+SPG-00905,S-020,Mountain Peak Gear,West,P-SPG-04-03,Recovery Bar,Nutrition,10,51.51,515.1,2024-08-09,REP-S-020-04
+SPG-00906,S-003,Summit Sports,Northeast,P-SPG-04-02,Electrolyte Mix,Nutrition,14,36.76,514.64,2024-10-26,REP-S-003-04
+SPG-00907,S-019,Coastal Outfitters,West,P-SPG-01-01,Rain Shell,Apparel,30,110.45,3313.5,2024-02-11,REP-S-019-03
+SPG-00908,S-019,Coastal Outfitters,West,P-SPG-04-01,Energy Gel Pack,Nutrition,15,54.53,817.95,2024-05-28,REP-S-019-02
+SPG-00909,S-010,Delta Outfitters,Southeast,P-SPG-01-03,Running Short,Apparel,10,110.23,1102.3,2024-04-22,REP-S-010-01
+SPG-00910,S-014,River Trail Gear,Midwest,P-SPG-04-00,Whey Protein,Nutrition,18,33.65,605.7,2024-01-17,REP-S-014-04
+SPG-00911,S-004,Harbor Run,Northeast,P-SPG-03-06,Swim Goggles,Accessories,1,53.15,53.15,2024-08-30,REP-S-004-02
+SPG-00912,S-007,Gulf Coast Gear,Southeast,P-SPG-02-04,Climbing Pack,Equipment,6,440.0,2640.0,2024-06-30,REP-S-007-02
+SPG-00913,S-011,Lakeside Sports,Midwest,P-SPG-04-02,Electrolyte Mix,Nutrition,8,54.93,439.44,2024-05-07,REP-S-011-02
+SPG-00914,S-018,Canyon Sports,West,P-SPG-00-02,Hiker Pro,Footwear,1,228.42,228.42,2024-12-13,REP-S-018-04
+SPG-00915,S-004,Harbor Run,Northeast,P-SPG-01-04,Base Layer,Apparel,20,89.46,1789.2,2024-11-22,REP-S-004-01
+SPG-00916,S-018,Canyon Sports,West,P-SPG-01-03,Running Short,Apparel,19,142.1,2699.9,2024-07-16,REP-S-018-02
+SPG-00917,S-014,River Trail Gear,Midwest,P-SPG-02-00,Carbon Bike,Equipment,18,336.83,6062.94,2024-08-04,REP-S-014-04
+SPG-00918,S-012,Prairie Athletics,Midwest,P-SPG-03-01,Fitness Band,Accessories,7,6.12,42.84,2024-07-23,REP-S-012-04
+SPG-00919,S-014,River Trail Gear,Midwest,P-SPG-00-01,Court Ace,Footwear,7,209.52,1466.64,2024-02-20,REP-S-014-03
+SPG-00920,S-019,Coastal Outfitters,West,P-SPG-02-00,Carbon Bike,Equipment,29,682.48,19791.92,2024-05-13,REP-S-019-04
+SPG-00921,S-018,Canyon Sports,West,P-SPG-01-01,Rain Shell,Apparel,19,147.41,2800.79,2024-06-03,REP-S-018-03
+SPG-00922,S-017,Redwood Athletics,West,P-SPG-02-00,Carbon Bike,Equipment,1,674.4,674.4,2024-11-01,REP-S-017-02
+SPG-00923,S-016,Pacific Surf & Sport,West,P-SPG-01-00,Compression Tee,Apparel,1,126.83,126.83,2024-06-08,REP-S-016-04
+SPG-00924,S-020,Mountain Peak Gear,West,P-SPG-03-06,Swim Goggles,Accessories,3,79.88,239.64,2024-03-29,REP-S-020-01
+SPG-00925,S-013,Heartland Fitness,Midwest,P-SPG-04-01,Energy Gel Pack,Nutrition,3,14.06,42.18,2024-10-15,REP-S-013-02
+SPG-00926,S-020,Mountain Peak Gear,West,P-SPG-02-00,Carbon Bike,Equipment,2,759.01,1518.02,2024-08-11,REP-S-020-04
+SPG-00927,S-017,Redwood Athletics,West,P-SPG-00-04,Cross Train V2,Footwear,9,56.82,511.38,2024-12-13,REP-S-017-01
+SPG-00928,S-011,Lakeside Sports,Midwest,P-SPG-00-03,Sprint Elite,Footwear,14,202.47,2834.58,2024-06-14,REP-S-011-02
+SPG-00929,S-019,Coastal Outfitters,West,P-SPG-03-06,Swim Goggles,Accessories,14,8.77,122.78,2024-10-23,REP-S-019-03
+SPG-00930,S-009,Magnolia Active,Southeast,P-SPG-00-03,Sprint Elite,Footwear,12,132.97,1595.64,2024-03-12,REP-S-009-03
+SPG-00931,S-013,Heartland Fitness,Midwest,P-SPG-01-00,Compression Tee,Apparel,15,161.67,2425.05,2024-12-15,REP-S-013-04
+SPG-00932,S-014,River Trail Gear,Midwest,P-SPG-01-04,Base Layer,Apparel,5,75.13,375.65,2024-04-12,REP-S-014-01
+SPG-00933,S-016,Pacific Surf & Sport,West,P-SPG-03-06,Swim Goggles,Accessories,2,78.65,157.3,2024-05-08,REP-S-016-01
+SPG-00934,S-009,Magnolia Active,Southeast,P-SPG-00-03,Sprint Elite,Footwear,13,181.67,2361.71,2024-03-10,REP-S-009-03
+SPG-00935,S-003,Summit Sports,Northeast,P-SPG-01-01,Rain Shell,Apparel,18,92.62,1667.16,2024-08-01,REP-S-003-02
+SPG-00936,S-011,Lakeside Sports,Midwest,P-SPG-02-01,Kayak Explorer,Equipment,7,308.56,2159.92,2024-10-10,REP-S-011-04
+SPG-00937,S-004,Harbor Run,Northeast,P-SPG-03-08,Jump Rope,Accessories,3,39.82,119.46,2024-04-12,REP-S-004-02
+SPG-00938,S-006,Bayou Fitness,Southeast,P-SPG-00-00,Trail Runner X,Footwear,16,74.31,1188.96,2024-06-03,REP-S-006-04
+SPG-00939,S-004,Harbor Run,Northeast,P-SPG-01-03,Running Short,Apparel,8,152.03,1216.24,2024-06-05,REP-S-004-03
+SPG-00940,S-005,Evergreen Athletics,Northeast,P-SPG-03-07,Ankle Brace,Accessories,18,48.01,864.18,2024-02-13,REP-S-005-03
+SPG-00941,S-013,Heartland Fitness,Midwest,P-SPG-00-01,Court Ace,Footwear,7,133.97,937.79,2024-06-01,REP-S-013-03
+SPG-00942,S-010,Delta Outfitters,Southeast,P-SPG-02-04,Climbing Pack,Equipment,1,594.49,594.49,2024-10-17,REP-S-010-02
+SPG-00943,S-019,Coastal Outfitters,West,P-SPG-02-00,Carbon Bike,Equipment,13,698.09,9075.17,2024-11-17,REP-S-019-01
+SPG-00944,S-004,Harbor Run,Northeast,P-SPG-03-04,Sport Towel,Accessories,10,79.62,796.2,2024-08-24,REP-S-004-02
+SPG-00945,S-015,Crossroads Sports,Midwest,P-SPG-01-02,Fleece Vest,Apparel,4,83.74,334.96,2024-10-06,REP-S-015-01
+SPG-00946,S-005,Evergreen Athletics,Northeast,P-SPG-03-07,Ankle Brace,Accessories,17,17.77,302.09,2024-04-03,REP-S-005-02
+SPG-00947,S-003,Summit Sports,Northeast,P-SPG-00-01,Court Ace,Footwear,10,224.42,2244.2,2024-07-11,REP-S-003-02
+SPG-00948,S-004,Harbor Run,Northeast,P-SPG-01-02,Fleece Vest,Apparel,17,168.89,2871.13,2024-08-11,REP-S-004-04
+SPG-00949,S-006,Bayou Fitness,Southeast,P-SPG-04-04,BCAAs,Nutrition,9,46.73,420.57,2024-02-19,REP-S-006-04
+SPG-00950,S-020,Mountain Peak Gear,West,P-SPG-03-03,Resistance Bands,Accessories,14,69.99,979.86,2024-03-11,REP-S-020-02
+SPG-00951,S-018,Canyon Sports,West,P-SPG-01-00,Compression Tee,Apparel,17,48.35,821.95,2024-09-26,REP-S-018-03
+SPG-00952,S-014,River Trail Gear,Midwest,P-SPG-00-02,Hiker Pro,Footwear,8,160.21,1281.68,2024-08-14,REP-S-014-04
+SPG-00953,S-001,Alpine Outfitters,Northeast,P-SPG-03-09,Foam Roller,Accessories,18,58.94,1060.92,2024-12-21,REP-S-001-04
+SPG-00954,S-013,Heartland Fitness,Midwest,P-SPG-00-03,Sprint Elite,Footwear,16,187.02,2992.32,2024-06-09,REP-S-013-04
+SPG-00955,S-016,Pacific Surf & Sport,West,P-SPG-01-03,Running Short,Apparel,17,144.78,2461.26,2024-09-14,REP-S-016-02
+SPG-00956,S-001,Alpine Outfitters,Northeast,P-SPG-02-00,Carbon Bike,Equipment,13,455.47,5921.11,2024-12-16,REP-S-001-01
+SPG-00957,S-006,Bayou Fitness,Southeast,P-SPG-01-01,Rain Shell,Apparel,9,72.46,652.14,2024-12-30,REP-S-006-02
+SPG-00958,S-003,Summit Sports,Northeast,P-SPG-03-05,Grip Tape,Accessories,3,63.3,189.9,2024-07-02,REP-S-003-04
+SPG-00959,S-004,Harbor Run,Northeast,P-SPG-02-03,Weight Set Pro,Equipment,19,162.76,3092.44,2024-08-27,REP-S-004-01
+SPG-00960,S-017,Redwood Athletics,West,P-SPG-01-00,Compression Tee,Apparel,19,42.2,801.8,2024-06-30,REP-S-017-04
+SPG-00961,S-015,Crossroads Sports,Midwest,P-SPG-04-00,Whey Protein,Nutrition,18,39.53,711.54,2024-08-06,REP-S-015-03
+SPG-00962,S-008,Palmetto Sports,Southeast,P-SPG-03-09,Foam Roller,Accessories,16,45.64,730.24,2024-08-26,REP-S-008-01
+SPG-00963,S-006,Bayou Fitness,Southeast,P-SPG-01-00,Compression Tee,Apparel,9,147.74,1329.66,2024-08-03,REP-S-006-02
+SPG-00964,S-018,Canyon Sports,West,P-SPG-03-09,Foam Roller,Accessories,9,43.05,387.45,2024-07-29,REP-S-018-03
+SPG-00965,S-005,Evergreen Athletics,Northeast,P-SPG-02-04,Climbing Pack,Equipment,11,684.6,7530.6,2024-08-24,REP-S-005-01
+SPG-00966,S-003,Summit Sports,Northeast,P-SPG-02-02,Treadmill T500,Equipment,45,519.55,23379.75,2024-01-15,REP-S-003-01
+SPG-00967,S-015,Crossroads Sports,Midwest,P-SPG-00-02,Hiker Pro,Footwear,6,89.41,536.46,2024-10-13,REP-S-015-04
+SPG-00968,S-015,Crossroads Sports,Midwest,P-SPG-03-07,Ankle Brace,Accessories,7,45.45,318.15,2024-01-14,REP-S-015-02
+SPG-00969,S-001,Alpine Outfitters,Northeast,P-SPG-04-03,Recovery Bar,Nutrition,9,29.02,261.18,2024-08-03,REP-S-001-01
+SPG-00970,S-020,Mountain Peak Gear,West,P-SPG-00-03,Sprint Elite,Footwear,16,168.19,2691.04,2024-02-15,REP-S-020-04
+SPG-00971,S-013,Heartland Fitness,Midwest,P-SPG-04-01,Energy Gel Pack,Nutrition,20,38.73,774.6,2024-03-12,REP-S-013-04
+SPG-00972,S-017,Redwood Athletics,West,P-SPG-03-02,Yoga Mat,Accessories,5,29.01,145.05,2024-11-10,REP-S-017-02
+SPG-00973,S-016,Pacific Surf & Sport,West,P-SPG-00-04,Cross Train V2,Footwear,11,183.13,2014.43,2024-06-03,REP-S-016-01
+SPG-00974,S-013,Heartland Fitness,Midwest,P-SPG-01-01,Rain Shell,Apparel,12,28.3,339.6,2024-05-04,REP-S-013-03
+SPG-00975,S-001,Alpine Outfitters,Northeast,P-SPG-02-03,Weight Set Pro,Equipment,13,595.77,7745.01,2024-10-24,REP-S-001-03
+SPG-00976,S-015,Crossroads Sports,Midwest,P-SPG-04-00,Whey Protein,Nutrition,1,43.65,43.65,2024-09-19,REP-S-015-02
+SPG-00977,S-009,Magnolia Active,Southeast,P-SPG-04-01,Energy Gel Pack,Nutrition,9,52.62,473.58,2024-07-10,REP-S-009-03
+SPG-00978,S-009,Magnolia Active,Southeast,P-SPG-01-04,Base Layer,Apparel,10,93.71,937.1,2024-03-06,REP-S-009-04
+SPG-00979,S-007,Gulf Coast Gear,Southeast,P-SPG-01-02,Fleece Vest,Apparel,16,67.07,1073.12,2024-11-13,REP-S-007-02
+SPG-00980,S-005,Evergreen Athletics,Northeast,P-SPG-04-04,BCAAs,Nutrition,9,49.48,445.32,2024-10-05,REP-S-005-02
+SPG-00981,S-007,Gulf Coast Gear,Southeast,P-SPG-04-04,BCAAs,Nutrition,3,27.01,81.03,2024-10-16,REP-S-007-02
+SPG-00982,S-009,Magnolia Active,Southeast,P-SPG-00-02,Hiker Pro,Footwear,4,151.94,607.76,2024-05-30,REP-S-009-03
+SPG-00983,S-016,Pacific Surf & Sport,West,P-SPG-01-02,Fleece Vest,Apparel,13,46.83,608.79,2024-01-28,REP-S-016-02
+SPG-00984,S-013,Heartland Fitness,Midwest,P-SPG-04-01,Energy Gel Pack,Nutrition,8,27.17,217.36,2024-07-20,REP-S-013-03
+SPG-00985,S-004,Harbor Run,Northeast,P-SPG-01-04,Base Layer,Apparel,4,109.59,438.36,2024-03-05,REP-S-004-04
+SPG-00986,S-012,Prairie Athletics,Midwest,P-SPG-02-00,Carbon Bike,Equipment,16,439.2,7027.2,2024-07-25,REP-S-012-04
+SPG-00987,S-018,Canyon Sports,West,P-SPG-02-00,Carbon Bike,Equipment,20,290.33,5806.6,2024-12-09,REP-S-018-04
+SPG-00988,S-010,Delta Outfitters,Southeast,P-SPG-02-01,Kayak Explorer,Equipment,1,195.62,195.62,2024-01-04,REP-S-010-01
+SPG-00989,S-017,Redwood Athletics,West,P-SPG-04-00,Whey Protein,Nutrition,4,55.69,222.76,2024-08-24,REP-S-017-04
+SPG-00990,S-006,Bayou Fitness,Southeast,P-SPG-00-01,Court Ace,Footwear,13,214.94,2794.22,2024-09-22,REP-S-006-03
+SPG-00991,S-019,Coastal Outfitters,West,P-SPG-01-02,Fleece Vest,Apparel,5,33.76,168.8,2024-08-23,REP-S-019-04
+SPG-00992,S-010,Delta Outfitters,Southeast,P-SPG-00-02,Hiker Pro,Footwear,8,135.27,1082.16,2024-01-28,REP-S-010-03
+SPG-00993,S-011,Lakeside Sports,Midwest,P-SPG-01-00,Compression Tee,Apparel,7,136.63,956.41,2024-02-13,REP-S-011-03
+SPG-00994,S-020,Mountain Peak Gear,West,P-SPG-01-03,Running Short,Apparel,16,136.45,2183.2,2024-01-29,REP-S-020-01
+SPG-00995,S-008,Palmetto Sports,Southeast,P-SPG-03-07,Ankle Brace,Accessories,9,8.43,75.87,2024-05-18,REP-S-008-03
+SPG-00996,S-005,Evergreen Athletics,Northeast,P-SPG-00-02,Hiker Pro,Footwear,3,47.39,142.17,2024-11-28,REP-S-005-03
+SPG-00997,S-006,Bayou Fitness,Southeast,P-SPG-03-06,Swim Goggles,Accessories,16,44.69,715.04,2024-02-24,REP-S-006-01
+SPG-00998,S-019,Coastal Outfitters,West,P-SPG-04-03,Recovery Bar,Nutrition,58,13.01,754.58,2024-06-19,REP-S-019-02
+SPG-00999,S-016,Pacific Surf & Sport,West,P-SPG-00-02,Hiker Pro,Footwear,12,67.25,807.0,2024-10-31,REP-S-016-03
+SPG-01000,S-013,Heartland Fitness,Midwest,P-SPG-01-01,Rain Shell,Apparel,11,109.19,1201.09,2024-02-19,REP-S-013-04
+SPG-01001,S-014,River Trail Gear,Midwest,P-SPG-00-02,Hiker Pro,Footwear,19,146.35,2780.65,2024-05-28,REP-S-014-04
+SPG-01002,S-018,Canyon Sports,West,P-SPG-03-04,Sport Towel,Accessories,10,69.69,696.9,2024-10-16,REP-S-018-02
+SPG-01003,S-016,Pacific Surf & Sport,West,P-SPG-02-04,Climbing Pack,Equipment,11,787.37,8661.07,2024-09-03,REP-S-016-03
+SPG-01004,S-018,Canyon Sports,West,P-SPG-02-04,Climbing Pack,Equipment,14,773.4,10827.6,2024-12-19,REP-S-018-03
+SPG-01005,S-020,Mountain Peak Gear,West,P-SPG-02-01,Kayak Explorer,Equipment,17,146.67,2493.39,2024-06-18,REP-S-020-01
+SPG-01006,S-003,Summit Sports,Northeast,P-SPG-03-05,Grip Tape,Accessories,3,15.21,45.63,2024-02-01,REP-S-003-01
+SPG-01007,S-002,Trailhead NE,Northeast,P-SPG-01-02,Fleece Vest,Apparel,12,122.27,1467.24,2024-03-03,REP-S-002-02
+SPG-01008,S-003,Summit Sports,Northeast,P-SPG-01-01,Rain Shell,Apparel,13,147.89,1922.57,2024-10-26,REP-S-003-01
+SPG-01009,S-007,Gulf Coast Gear,Southeast,P-SPG-00-02,Hiker Pro,Footwear,9,140.91,1268.19,2024-12-11,REP-S-007-02
+SPG-01010,S-014,River Trail Gear,Midwest,P-SPG-04-01,Energy Gel Pack,Nutrition,4,24.2,96.8,2024-09-18,REP-S-014-03
+SPG-01011,S-017,Redwood Athletics,West,P-SPG-04-04,BCAAs,Nutrition,13,29.29,380.77,2024-01-28,REP-S-017-04
+SPG-01012,S-005,Evergreen Athletics,Northeast,P-SPG-03-03,Resistance Bands,Accessories,14,38.68,541.52,2024-12-25,REP-S-005-04
+SPG-01013,S-010,Delta Outfitters,Southeast,P-SPG-03-02,Yoga Mat,Accessories,1,14.73,14.73,2024-04-14,REP-S-010-02
+SPG-01014,S-012,Prairie Athletics,Midwest,P-SPG-02-01,Kayak Explorer,Equipment,3,444.37,1333.11,2024-09-21,REP-S-012-02
+SPG-01015,S-018,Canyon Sports,West,P-SPG-00-01,Court Ace,Footwear,7,215.63,1509.41,2024-03-14,REP-S-018-02
+SPG-01016,S-007,Gulf Coast Gear,Southeast,P-SPG-04-01,Energy Gel Pack,Nutrition,1,41.35,41.35,2024-10-14,REP-S-007-01
+SPG-01017,S-002,Trailhead NE,Northeast,P-SPG-03-00,Water Bottle,Accessories,3,43.97,131.91,2024-09-10,REP-S-002-04
+SPG-01018,S-009,Magnolia Active,Southeast,P-SPG-03-02,Yoga Mat,Accessories,5,58.82,294.1,2024-03-10,REP-S-009-04
+SPG-01019,S-012,Prairie Athletics,Midwest,P-SPG-00-04,Cross Train V2,Footwear,6,201.06,1206.36,2024-04-24,REP-S-012-04
+SPG-01020,S-017,Redwood Athletics,West,P-SPG-00-03,Sprint Elite,Footwear,6,205.25,1231.5,2024-12-11,REP-S-017-03
+SPG-01021,S-016,Pacific Surf & Sport,West,P-SPG-03-05,Grip Tape,Accessories,9,61.01,549.09,2024-11-23,REP-S-016-03
+SPG-01022,S-018,Canyon Sports,West,P-SPG-02-03,Weight Set Pro,Equipment,5,334.18,1670.9,2024-03-20,REP-S-018-01
+SPG-01023,S-011,Lakeside Sports,Midwest,P-SPG-01-04,Base Layer,Apparel,3,101.75,305.25,2024-06-03,REP-S-011-04
+SPG-01024,S-013,Heartland Fitness,Midwest,P-SPG-04-01,Energy Gel Pack,Nutrition,4,29.62,118.48,2024-11-17,REP-S-013-02
+SPG-01025,S-015,Crossroads Sports,Midwest,P-SPG-00-03,Sprint Elite,Footwear,6,53.3,319.8,2024-06-08,REP-S-015-02
+SPG-01026,S-007,Gulf Coast Gear,Southeast,P-SPG-03-03,Resistance Bands,Accessories,15,54.15,812.25,2024-01-04,REP-S-007-02
+SPG-01027,S-001,Alpine Outfitters,Northeast,P-SPG-02-01,Kayak Explorer,Equipment,6,166.39,998.34,2024-09-05,REP-S-001-02
+SPG-01028,S-014,River Trail Gear,Midwest,P-SPG-01-00,Compression Tee,Apparel,14,147.9,2070.6,2024-11-15,REP-S-014-01
+SPG-01029,S-010,Delta Outfitters,Southeast,P-SPG-01-04,Base Layer,Apparel,14,43.02,602.28,2024-12-18,REP-S-010-02
+SPG-01030,S-011,Lakeside Sports,Midwest,P-SPG-02-01,Kayak Explorer,Equipment,19,691.77,13143.63,2024-04-12,REP-S-011-02
+SPG-01031,S-011,Lakeside Sports,Midwest,P-SPG-04-02,Electrolyte Mix,Nutrition,9,30.89,278.01,2024-02-28,REP-S-011-04
+SPG-01032,S-015,Crossroads Sports,Midwest,P-SPG-03-03,Resistance Bands,Accessories,6,65.62,393.72,2024-02-04,REP-S-015-03
+SPG-01033,S-008,Palmetto Sports,Southeast,P-SPG-00-04,Cross Train V2,Footwear,9,94.82,853.38,2024-01-01,REP-S-008-03
+SPG-01034,S-019,Coastal Outfitters,West,P-SPG-03-09,Foam Roller,Accessories,11,18.53,203.83,2024-03-19,REP-S-019-04
+SPG-01035,S-001,Alpine Outfitters,Northeast,P-SPG-01-04,Base Layer,Apparel,6,90.42,542.52,2024-11-05,REP-S-001-02
+SPG-01036,S-002,Trailhead NE,Northeast,P-SPG-02-01,Kayak Explorer,Equipment,20,401.38,8027.6,2024-03-02,REP-S-002-04
+SPG-01037,S-004,Harbor Run,Northeast,P-SPG-01-03,Running Short,Apparel,11,42.12,463.32,2024-09-23,REP-S-004-02
+SPG-01038,S-005,Evergreen Athletics,Northeast,P-SPG-01-00,Compression Tee,Apparel,4,41.55,166.2,2024-02-19,REP-S-005-03
+SPG-01039,S-013,Heartland Fitness,Midwest,P-SPG-00-04,Cross Train V2,Footwear,7,76.39,534.73,2024-05-06,REP-S-013-01
+SPG-01040,S-009,Magnolia Active,Southeast,P-SPG-04-03,Recovery Bar,Nutrition,16,50.54,808.64,2024-04-14,REP-S-009-04
+SPG-01041,S-017,Redwood Athletics,West,P-SPG-04-04,BCAAs,Nutrition,19,31.92,606.48,2024-02-23,REP-S-017-02
+SPG-01042,S-012,Prairie Athletics,Midwest,P-SPG-04-02,Electrolyte Mix,Nutrition,6,21.84,131.04,2024-08-30,REP-S-012-04
+SPG-01043,S-002,Trailhead NE,Northeast,P-SPG-00-01,Court Ace,Footwear,1,98.41,98.41,2024-01-13,REP-S-002-03
+SPG-01044,S-008,Palmetto Sports,Southeast,P-SPG-03-01,Fitness Band,Accessories,15,69.14,1037.1,2024-09-15,REP-S-008-03
+SPG-01045,S-004,Harbor Run,Northeast,P-SPG-03-01,Fitness Band,Accessories,12,67.64,811.68,2024-08-15,REP-S-004-02
+SPG-01046,S-007,Gulf Coast Gear,Southeast,P-SPG-04-00,Whey Protein,Nutrition,1,48.95,48.95,2024-07-19,REP-S-007-02
+SPG-01047,S-019,Coastal Outfitters,West,P-SPG-02-00,Carbon Bike,Equipment,8,277.09,2216.72,2024-01-29,REP-S-019-02
+SPG-01048,S-002,Trailhead NE,Northeast,P-SPG-04-01,Energy Gel Pack,Nutrition,1,38.83,38.83,2024-03-03,REP-S-002-04
+SPG-01049,S-003,Summit Sports,Northeast,P-SPG-01-04,Base Layer,Apparel,55,34.87,1917.85,2024-06-02,REP-S-003-02
+SPG-01050,S-013,Heartland Fitness,Midwest,P-SPG-00-01,Court Ace,Footwear,5,64.27,321.35,2024-07-26,REP-S-013-02
+SPG-01051,S-004,Harbor Run,Northeast,P-SPG-03-06,Swim Goggles,Accessories,15,61.45,921.75,2024-09-04,REP-S-004-02
+SPG-01052,S-002,Trailhead NE,Northeast,P-SPG-00-04,Cross Train V2,Footwear,3,64.35,193.05,2024-04-04,REP-S-002-04
+SPG-01053,S-013,Heartland Fitness,Midwest,P-SPG-00-01,Court Ace,Footwear,6,48.79,292.74,2024-04-30,REP-S-013-01
+SPG-01054,S-015,Crossroads Sports,Midwest,P-SPG-01-02,Fleece Vest,Apparel,17,141.59,2407.03,2024-10-06,REP-S-015-02
+SPG-01055,S-007,Gulf Coast Gear,Southeast,P-SPG-04-01,Energy Gel Pack,Nutrition,1,24.68,24.68,2024-05-13,REP-S-007-02
+SPG-01056,S-014,River Trail Gear,Midwest,P-SPG-03-05,Grip Tape,Accessories,7,45.21,316.47,2024-11-09,REP-S-014-02
+SPG-01057,S-015,Crossroads Sports,Midwest,P-SPG-02-04,Climbing Pack,Equipment,4,162.22,648.88,2024-12-14,REP-S-015-03
+SPG-01058,S-006,Bayou Fitness,Southeast,P-SPG-00-00,Trail Runner X,Footwear,8,44.77,358.16,2024-08-12,REP-S-006-04
+SPG-01059,S-017,Redwood Athletics,West,P-SPG-01-02,Fleece Vest,Apparel,1,112.23,112.23,2024-12-02,REP-S-017-03
+SPG-01060,S-005,Evergreen Athletics,Northeast,P-SPG-01-04,Base Layer,Apparel,10,80.09,800.9,2024-11-11,REP-S-005-01
+SPG-01061,S-019,Coastal Outfitters,West,P-SPG-01-02,Fleece Vest,Apparel,40,135.45,5418.0,2024-03-04,REP-S-019-01
+SPG-01062,S-001,Alpine Outfitters,Northeast,P-SPG-01-04,Base Layer,Apparel,20,75.24,1504.8,2024-08-09,REP-S-001-04
+SPG-01063,S-001,Alpine Outfitters,Northeast,P-SPG-00-01,Court Ace,Footwear,15,64.92,973.8,2024-03-15,REP-S-001-03
+SPG-01064,S-007,Gulf Coast Gear,Southeast,P-SPG-03-05,Grip Tape,Accessories,14,29.5,413.0,2024-11-21,REP-S-007-03
+SPG-01065,S-013,Heartland Fitness,Midwest,P-SPG-02-01,Kayak Explorer,Equipment,7,684.76,4793.32,2024-01-12,REP-S-013-03
+SPG-01066,S-003,Summit Sports,Northeast,P-SPG-01-00,Compression Tee,Apparel,17,178.42,3033.14,2024-04-04,REP-S-003-04
+SPG-01067,S-004,Harbor Run,Northeast,P-SPG-02-04,Climbing Pack,Equipment,6,409.48,2456.88,2024-03-13,REP-S-004-04
+SPG-01068,S-009,Magnolia Active,Southeast,P-SPG-00-01,Court Ace,Footwear,16,170.08,2721.28,2024-12-02,REP-S-009-04
+SPG-01069,S-003,Summit Sports,Northeast,P-SPG-03-06,Swim Goggles,Accessories,51,6.68,340.68,2024-05-03,REP-S-003-02
+SPG-01070,S-010,Delta Outfitters,Southeast,P-SPG-04-00,Whey Protein,Nutrition,9,25.97,233.73,2024-03-28,REP-S-010-02
+SPG-01071,S-001,Alpine Outfitters,Northeast,P-SPG-01-02,Fleece Vest,Apparel,2,59.95,119.9,2024-09-18,REP-S-001-01
+SPG-01072,S-001,Alpine Outfitters,Northeast,P-SPG-04-02,Electrolyte Mix,Nutrition,13,57.83,751.79,2024-12-24,REP-S-001-04
+SPG-01073,S-012,Prairie Athletics,Midwest,P-SPG-03-04,Sport Towel,Accessories,20,9.87,197.4,2024-10-06,REP-S-012-04
+SPG-01074,S-019,Coastal Outfitters,West,P-SPG-02-02,Treadmill T500,Equipment,26,368.88,9590.88,2024-04-12,REP-S-019-02
+SPG-01075,S-009,Magnolia Active,Southeast,P-SPG-03-01,Fitness Band,Accessories,4,67.76,271.04,2024-08-31,REP-S-009-03
+SPG-01076,S-015,Crossroads Sports,Midwest,P-SPG-03-00,Water Bottle,Accessories,4,8.31,33.24,2024-09-02,REP-S-015-01
+SPG-01077,S-004,Harbor Run,Northeast,P-SPG-04-00,Whey Protein,Nutrition,2,20.36,40.72,2024-05-28,REP-S-004-04
+SPG-01078,S-018,Canyon Sports,West,P-SPG-01-00,Compression Tee,Apparel,15,83.78,1256.7,2024-05-28,REP-S-018-01
+SPG-01079,S-016,Pacific Surf & Sport,West,P-SPG-01-03,Running Short,Apparel,17,26.82,455.94,2024-12-07,REP-S-016-01
+SPG-01080,S-017,Redwood Athletics,West,P-SPG-00-02,Hiker Pro,Footwear,15,62.55,938.25,2024-02-21,REP-S-017-01
+SPG-01081,S-004,Harbor Run,Northeast,P-SPG-02-00,Carbon Bike,Equipment,15,113.33,1699.95,2024-10-28,REP-S-004-01
+SPG-01082,S-014,River Trail Gear,Midwest,P-SPG-03-01,Fitness Band,Accessories,8,9.04,72.32,2024-09-09,REP-S-014-02
+SPG-01083,S-011,Lakeside Sports,Midwest,P-SPG-00-00,Trail Runner X,Footwear,10,115.84,1158.4,2024-07-07,REP-S-011-03
+SPG-01084,S-016,Pacific Surf & Sport,West,P-SPG-02-01,Kayak Explorer,Equipment,13,181.24,2356.12,2024-12-07,REP-S-016-02
+SPG-01085,S-001,Alpine Outfitters,Northeast,P-SPG-00-04,Cross Train V2,Footwear,14,78.16,1094.24,2024-05-20,REP-S-001-03
+SPG-01086,S-015,Crossroads Sports,Midwest,P-SPG-03-06,Swim Goggles,Accessories,20,24.03,480.6,2024-07-19,REP-S-015-01
+SPG-01087,S-007,Gulf Coast Gear,Southeast,P-SPG-00-04,Cross Train V2,Footwear,1,110.09,110.09,2024-07-16,REP-S-007-02
+SPG-01088,S-020,Mountain Peak Gear,West,P-SPG-03-02,Yoga Mat,Accessories,15,74.15,1112.25,2024-12-23,REP-S-020-04
+SPG-01089,S-013,Heartland Fitness,Midwest,P-SPG-03-02,Yoga Mat,Accessories,3,31.49,94.47,2024-02-24,REP-S-013-01
+SPG-01090,S-017,Redwood Athletics,West,P-SPG-01-01,Rain Shell,Apparel,16,23.04,368.64,2024-08-25,REP-S-017-01
+SPG-01091,S-009,Magnolia Active,Southeast,P-SPG-03-06,Swim Goggles,Accessories,11,12.51,137.61,2024-08-01,REP-S-009-03
+SPG-01092,S-019,Coastal Outfitters,West,P-SPG-00-00,Trail Runner X,Footwear,12,50.62,607.44,2024-08-05,REP-S-019-04
+SPG-01093,S-004,Harbor Run,Northeast,P-SPG-02-00,Carbon Bike,Equipment,1,611.77,611.77,2024-03-16,REP-S-004-03
+SPG-01094,S-019,Coastal Outfitters,West,P-SPG-01-04,Base Layer,Apparel,57,30.87,1759.59,2024-01-15,REP-S-019-03
+SPG-01095,S-019,Coastal Outfitters,West,P-SPG-00-02,Hiker Pro,Footwear,25,180.22,4505.5,2024-05-25,REP-S-019-03
+SPG-01096,S-006,Bayou Fitness,Southeast,P-SPG-00-02,Hiker Pro,Footwear,16,167.86,2685.76,2024-08-22,REP-S-006-01
+SPG-01097,S-019,Coastal Outfitters,West,P-SPG-02-04,Climbing Pack,Equipment,46,746.95,34359.7,2024-03-02,REP-S-019-04
+SPG-01098,S-008,Palmetto Sports,Southeast,P-SPG-00-01,Court Ace,Footwear,12,163.97,1967.64,2024-10-15,REP-S-008-01
+SPG-01099,S-014,River Trail Gear,Midwest,P-SPG-03-09,Foam Roller,Accessories,18,61.24,1102.32,2024-07-18,REP-S-014-01
+SPG-01100,S-014,River Trail Gear,Midwest,P-SPG-03-01,Fitness Band,Accessories,5,21.22,106.1,2024-01-06,REP-S-014-03
+SPG-01101,S-002,Trailhead NE,Northeast,P-SPG-03-07,Ankle Brace,Accessories,19,24.96,474.24,2024-10-24,REP-S-002-02
+SPG-01102,S-006,Bayou Fitness,Southeast,P-SPG-02-03,Weight Set Pro,Equipment,4,208.2,832.8,2024-06-04,REP-S-006-03
+SPG-01103,S-019,Coastal Outfitters,West,P-SPG-04-00,Whey Protein,Nutrition,50,32.3,1615.0,2024-01-18,REP-S-019-03
+SPG-01104,S-006,Bayou Fitness,Southeast,P-SPG-03-02,Yoga Mat,Accessories,1,21.08,21.08,2024-11-26,REP-S-006-01
+SPG-01105,S-017,Redwood Athletics,West,P-SPG-03-08,Jump Rope,Accessories,6,12.93,77.58,2024-11-29,REP-S-017-04
+SPG-01106,S-002,Trailhead NE,Northeast,P-SPG-01-00,Compression Tee,Apparel,9,35.21,316.89,2024-12-02,REP-S-002-01
+SPG-01107,S-008,Palmetto Sports,Southeast,P-SPG-02-04,Climbing Pack,Equipment,15,434.72,6520.8,2024-11-13,REP-S-008-04
+SPG-01108,S-005,Evergreen Athletics,Northeast,P-SPG-00-00,Trail Runner X,Footwear,15,242.13,3631.95,2024-08-15,REP-S-005-03
+SPG-01109,S-017,Redwood Athletics,West,P-SPG-00-00,Trail Runner X,Footwear,18,234.9,4228.2,2024-01-22,REP-S-017-03
+SPG-01110,S-010,Delta Outfitters,Southeast,P-SPG-04-01,Energy Gel Pack,Nutrition,4,47.89,191.56,2024-06-30,REP-S-010-04
+SPG-01111,S-012,Prairie Athletics,Midwest,P-SPG-04-04,BCAAs,Nutrition,8,38.55,308.4,2024-03-12,REP-S-012-04
+SPG-01112,S-017,Redwood Athletics,West,P-SPG-02-03,Weight Set Pro,Equipment,1,454.32,454.32,2024-08-27,REP-S-017-01
+SPG-01113,S-001,Alpine Outfitters,Northeast,P-SPG-02-04,Climbing Pack,Equipment,2,364.09,728.18,2024-08-22,REP-S-001-03
+SPG-01114,S-016,Pacific Surf & Sport,West,P-SPG-00-01,Court Ace,Footwear,7,119.85,838.95,2024-05-21,REP-S-016-01
+SPG-01115,S-010,Delta Outfitters,Southeast,P-SPG-04-03,Recovery Bar,Nutrition,2,48.23,96.46,2024-01-05,REP-S-010-01
+SPG-01116,S-006,Bayou Fitness,Southeast,P-SPG-04-03,Recovery Bar,Nutrition,15,23.52,352.8,2024-03-22,REP-S-006-02
+SPG-01117,S-020,Mountain Peak Gear,West,P-SPG-03-08,Jump Rope,Accessories,17,16.28,276.76,2024-07-02,REP-S-020-04
+SPG-01118,S-019,Coastal Outfitters,West,P-SPG-03-00,Water Bottle,Accessories,25,8.24,206.0,2024-09-13,REP-S-019-01
+SPG-01119,S-009,Magnolia Active,Southeast,P-SPG-00-04,Cross Train V2,Footwear,11,63.62,699.82,2024-09-14,REP-S-009-04
+SPG-01120,S-002,Trailhead NE,Northeast,P-SPG-03-08,Jump Rope,Accessories,8,18.28,146.24,2024-04-17,REP-S-002-03
+SPG-01121,S-018,Canyon Sports,West,P-SPG-04-01,Energy Gel Pack,Nutrition,11,46.14,507.54,2024-06-27,REP-S-018-03
+SPG-01122,S-004,Harbor Run,Northeast,P-SPG-03-09,Foam Roller,Accessories,13,18.63,242.19,2024-12-27,REP-S-004-01
+SPG-01123,S-020,Mountain Peak Gear,West,P-SPG-03-04,Sport Towel,Accessories,20,33.22,664.4,2024-09-25,REP-S-020-02
+SPG-01124,S-009,Magnolia Active,Southeast,P-SPG-04-03,Recovery Bar,Nutrition,1,23.28,23.28,2024-07-18,REP-S-009-03
+SPG-01125,S-005,Evergreen Athletics,Northeast,P-SPG-00-03,Sprint Elite,Footwear,1,72.12,72.12,2024-09-19,REP-S-005-03
+SPG-01126,S-004,Harbor Run,Northeast,P-SPG-03-02,Yoga Mat,Accessories,6,78.59,471.54,2024-02-02,REP-S-004-03
+SPG-01127,S-019,Coastal Outfitters,West,P-SPG-01-03,Running Short,Apparel,23,106.82,2456.86,2024-03-30,REP-S-019-02
+SPG-01128,S-009,Magnolia Active,Southeast,P-SPG-04-03,Recovery Bar,Nutrition,14,44.83,627.62,2024-12-01,REP-S-009-02
+SPG-01129,S-020,Mountain Peak Gear,West,P-SPG-00-03,Sprint Elite,Footwear,5,246.85,1234.25,2024-03-18,REP-S-020-04
+SPG-01130,S-016,Pacific Surf & Sport,West,P-SPG-01-04,Base Layer,Apparel,15,116.31,1744.65,2024-06-29,REP-S-016-01
+SPG-01131,S-014,River Trail Gear,Midwest,P-SPG-00-04,Cross Train V2,Footwear,3,58.73,176.19,2024-12-01,REP-S-014-01
+SPG-01132,S-007,Gulf Coast Gear,Southeast,P-SPG-00-04,Cross Train V2,Footwear,6,115.13,690.78,2024-10-15,REP-S-007-02
+SPG-01133,S-007,Gulf Coast Gear,Southeast,P-SPG-03-01,Fitness Band,Accessories,6,21.0,126.0,2024-06-22,REP-S-007-04
+SPG-01134,S-001,Alpine Outfitters,Northeast,P-SPG-02-01,Kayak Explorer,Equipment,8,82.84,662.72,2024-08-23,REP-S-001-03
+SPG-01135,S-011,Lakeside Sports,Midwest,P-SPG-04-04,BCAAs,Nutrition,4,30.03,120.12,2024-03-12,REP-S-011-01
+SPG-01136,S-006,Bayou Fitness,Southeast,P-SPG-02-02,Treadmill T500,Equipment,8,421.69,3373.52,2024-05-22,REP-S-006-03
+SPG-01137,S-004,Harbor Run,Northeast,P-SPG-04-00,Whey Protein,Nutrition,14,25.89,362.46,2024-12-03,REP-S-004-01
+SPG-01138,S-007,Gulf Coast Gear,Southeast,P-SPG-02-02,Treadmill T500,Equipment,1,640.77,640.77,2024-06-04,REP-S-007-04
+SPG-01139,S-013,Heartland Fitness,Midwest,P-SPG-00-03,Sprint Elite,Footwear,16,228.28,3652.48,2024-07-20,REP-S-013-01
+SPG-01140,S-017,Redwood Athletics,West,P-SPG-01-02,Fleece Vest,Apparel,20,106.12,2122.4,2024-02-04,REP-S-017-01
+SPG-01141,S-018,Canyon Sports,West,P-SPG-04-00,Whey Protein,Nutrition,13,33.09,430.17,2024-11-26,REP-S-018-02
+SPG-01142,S-004,Harbor Run,Northeast,P-SPG-02-00,Carbon Bike,Equipment,15,253.15,3797.25,2024-09-04,REP-S-004-01
+SPG-01143,S-008,Palmetto Sports,Southeast,P-SPG-02-04,Climbing Pack,Equipment,4,739.34,2957.36,2024-07-11,REP-S-008-04
+SPG-01144,S-009,Magnolia Active,Southeast,P-SPG-04-03,Recovery Bar,Nutrition,16,43.16,690.56,2024-08-29,REP-S-009-02
+SPG-01145,S-019,Coastal Outfitters,West,P-SPG-03-09,Foam Roller,Accessories,61,38.03,2319.83,2024-11-06,REP-S-019-04
+SPG-01146,S-019,Coastal Outfitters,West,P-SPG-02-00,Carbon Bike,Equipment,30,305.21,9156.3,2024-12-03,REP-S-019-03
+SPG-01147,S-002,Trailhead NE,Northeast,P-SPG-00-00,Trail Runner X,Footwear,20,68.3,1366.0,2024-04-02,REP-S-002-02
+SPG-01148,S-002,Trailhead NE,Northeast,P-SPG-03-05,Grip Tape,Accessories,8,57.27,458.16,2024-10-21,REP-S-002-04
+SPG-01149,S-002,Trailhead NE,Northeast,P-SPG-02-00,Carbon Bike,Equipment,3,405.86,1217.58,2024-12-28,REP-S-002-04
+SPG-01150,S-002,Trailhead NE,Northeast,P-SPG-01-04,Base Layer,Apparel,18,140.43,2527.74,2024-09-16,REP-S-002-04
+SPG-01151,S-007,Gulf Coast Gear,Southeast,P-SPG-03-05,Grip Tape,Accessories,6,35.81,214.86,2024-12-03,REP-S-007-02
+SPG-01152,S-004,Harbor Run,Northeast,P-SPG-04-04,BCAAs,Nutrition,9,26.38,237.42,2024-09-26,REP-S-004-01
+SPG-01153,S-013,Heartland Fitness,Midwest,P-SPG-03-00,Water Bottle,Accessories,2,6.86,13.72,2024-05-12,REP-S-013-03
+SPG-01154,S-005,Evergreen Athletics,Northeast,P-SPG-02-04,Climbing Pack,Equipment,19,237.66,4515.54,2024-03-07,REP-S-005-01
+SPG-01155,S-010,Delta Outfitters,Southeast,P-SPG-03-06,Swim Goggles,Accessories,7,63.91,447.37,2024-12-23,REP-S-010-04
+SPG-01156,S-014,River Trail Gear,Midwest,P-SPG-03-06,Swim Goggles,Accessories,2,29.52,59.04,2024-06-14,REP-S-014-04
+SPG-01157,S-009,Magnolia Active,Southeast,P-SPG-01-00,Compression Tee,Apparel,8,70.36,562.88,2024-10-28,REP-S-009-03
+SPG-01158,S-016,Pacific Surf & Sport,West,P-SPG-03-05,Grip Tape,Accessories,18,71.93,1294.74,2024-10-24,REP-S-016-04
+SPG-01159,S-010,Delta Outfitters,Southeast,P-SPG-02-01,Kayak Explorer,Equipment,5,635.94,3179.7,2024-06-27,REP-S-010-01
+SPG-01160,S-014,River Trail Gear,Midwest,P-SPG-01-01,Rain Shell,Apparel,12,61.29,735.48,2024-10-26,REP-S-014-04
+SPG-01161,S-013,Heartland Fitness,Midwest,P-SPG-01-01,Rain Shell,Apparel,14,73.84,1033.76,2024-11-12,REP-S-013-03
+SPG-01162,S-002,Trailhead NE,Northeast,P-SPG-00-03,Sprint Elite,Footwear,11,166.77,1834.47,2024-07-25,REP-S-002-03
+SPG-01163,S-008,Palmetto Sports,Southeast,P-SPG-00-00,Trail Runner X,Footwear,11,73.66,810.26,2024-02-04,REP-S-008-02
+SPG-01164,S-004,Harbor Run,Northeast,P-SPG-01-01,Rain Shell,Apparel,10,48.97,489.7,2024-01-24,REP-S-004-04
+SPG-01165,S-014,River Trail Gear,Midwest,P-SPG-03-07,Ankle Brace,Accessories,10,35.09,350.9,2024-01-16,REP-S-014-03
+SPG-01166,S-020,Mountain Peak Gear,West,P-SPG-00-03,Sprint Elite,Footwear,1,61.77,61.77,2024-03-22,REP-S-020-02
+SPG-01167,S-009,Magnolia Active,Southeast,P-SPG-00-00,Trail Runner X,Footwear,9,231.25,2081.25,2024-04-28,REP-S-009-03
+SPG-01168,S-018,Canyon Sports,West,P-SPG-04-03,Recovery Bar,Nutrition,2,10.31,20.62,2024-02-19,REP-S-018-01
+SPG-01169,S-004,Harbor Run,Northeast,P-SPG-03-09,Foam Roller,Accessories,17,78.65,1337.05,2024-12-06,REP-S-004-04
+SPG-01170,S-016,Pacific Surf & Sport,West,P-SPG-04-01,Energy Gel Pack,Nutrition,7,53.73,376.11,2024-02-24,REP-S-016-02
+SPG-01171,S-019,Coastal Outfitters,West,P-SPG-04-02,Electrolyte Mix,Nutrition,50,56.54,2827.0,2024-09-12,REP-S-019-03
+SPG-01172,S-015,Crossroads Sports,Midwest,P-SPG-01-03,Running Short,Apparel,9,156.44,1407.96,2024-12-13,REP-S-015-04
+SPG-01173,S-003,Summit Sports,Northeast,P-SPG-01-00,Compression Tee,Apparel,18,28.56,514.08,2024-08-31,REP-S-003-02
+SPG-01174,S-016,Pacific Surf & Sport,West,P-SPG-02-01,Kayak Explorer,Equipment,14,309.29,4330.06,2024-06-14,REP-S-016-04
+SPG-01175,S-018,Canyon Sports,West,P-SPG-00-03,Sprint Elite,Footwear,18,113.57,2044.26,2024-04-28,REP-S-018-02
+SPG-01176,S-012,Prairie Athletics,Midwest,P-SPG-02-04,Climbing Pack,Equipment,6,282.32,1693.92,2024-05-01,REP-S-012-01
+SPG-01177,S-018,Canyon Sports,West,P-SPG-01-04,Base Layer,Apparel,11,160.58,1766.38,2024-02-23,REP-S-018-03
+SPG-01178,S-009,Magnolia Active,Southeast,P-SPG-00-00,Trail Runner X,Footwear,11,93.44,1027.84,2024-03-30,REP-S-009-03
+SPG-01179,S-010,Delta Outfitters,Southeast,P-SPG-03-05,Grip Tape,Accessories,4,70.24,280.96,2024-07-15,REP-S-010-01
+SPG-01180,S-004,Harbor Run,Northeast,P-SPG-01-01,Rain Shell,Apparel,5,169.54,847.7,2024-08-03,REP-S-004-04
+SPG-01181,S-010,Delta Outfitters,Southeast,P-SPG-04-04,BCAAs,Nutrition,13,44.11,573.43,2024-02-02,REP-S-010-01
+SPG-01182,S-015,Crossroads Sports,Midwest,P-SPG-03-06,Swim Goggles,Accessories,7,23.22,162.54,2024-02-01,REP-S-015-03
+SPG-01183,S-006,Bayou Fitness,Southeast,P-SPG-03-02,Yoga Mat,Accessories,1,19.37,19.37,2024-11-09,REP-S-006-04
+SPG-01184,S-006,Bayou Fitness,Southeast,P-SPG-00-03,Sprint Elite,Footwear,9,189.99,1709.91,2024-05-08,REP-S-006-01
+SPG-01185,S-003,Summit Sports,Northeast,P-SPG-04-03,Recovery Bar,Nutrition,22,51.34,1129.48,2024-02-28,REP-S-003-02
+SPG-01186,S-002,Trailhead NE,Northeast,P-SPG-03-09,Foam Roller,Accessories,8,29.37,234.96,2024-01-20,REP-S-002-02
+SPG-01187,S-009,Magnolia Active,Southeast,P-SPG-04-01,Energy Gel Pack,Nutrition,9,52.39,471.51,2024-02-07,REP-S-009-03
+SPG-01188,S-001,Alpine Outfitters,Northeast,P-SPG-00-00,Trail Runner X,Footwear,17,54.52,926.84,2024-08-14,REP-S-001-04
+SPG-01189,S-015,Crossroads Sports,Midwest,P-SPG-03-08,Jump Rope,Accessories,10,43.56,435.6,2024-07-10,REP-S-015-01
+SPG-01190,S-014,River Trail Gear,Midwest,P-SPG-02-01,Kayak Explorer,Equipment,9,240.58,2165.22,2024-11-06,REP-S-014-03
+SPG-01191,S-009,Magnolia Active,Southeast,P-SPG-02-03,Weight Set Pro,Equipment,1,669.39,669.39,2024-11-19,REP-S-009-02
+SPG-01192,S-018,Canyon Sports,West,P-SPG-02-00,Carbon Bike,Equipment,16,502.08,8033.28,2024-01-16,REP-S-018-02
+SPG-01193,S-015,Crossroads Sports,Midwest,P-SPG-04-00,Whey Protein,Nutrition,1,42.09,42.09,2024-03-30,REP-S-015-03
+SPG-01194,S-008,Palmetto Sports,Southeast,P-SPG-04-00,Whey Protein,Nutrition,4,36.83,147.32,2024-06-13,REP-S-008-03
+SPG-01195,S-018,Canyon Sports,West,P-SPG-03-09,Foam Roller,Accessories,19,48.45,920.55,2024-02-25,REP-S-018-02
+SPG-01196,S-020,Mountain Peak Gear,West,P-SPG-00-02,Hiker Pro,Footwear,11,141.06,1551.66,2024-12-23,REP-S-020-02
+SPG-01197,S-016,Pacific Surf & Sport,West,P-SPG-00-02,Hiker Pro,Footwear,15,183.01,2745.15,2024-08-18,REP-S-016-03
+SPG-01198,S-013,Heartland Fitness,Midwest,P-SPG-01-00,Compression Tee,Apparel,3,157.9,473.7,2024-07-12,REP-S-013-04
+SPG-01199,S-009,Magnolia Active,Southeast,P-SPG-01-02,Fleece Vest,Apparel,4,164.73,658.92,2024-03-09,REP-S-009-02
+SPG-01200,S-019,Coastal Outfitters,West,P-SPG-03-02,Yoga Mat,Accessories,52,22.66,1178.32,2024-11-22,REP-S-019-01
+SPG-01201,S-005,Evergreen Athletics,Northeast,P-SPG-00-04,Cross Train V2,Footwear,16,46.32,741.12,2024-10-20,REP-S-005-02
+SPG-01202,S-019,Coastal Outfitters,West,P-SPG-01-01,Rain Shell,Apparel,58,158.71,9205.18,2024-10-11,REP-S-019-02
+SPG-01203,S-006,Bayou Fitness,Southeast,P-SPG-01-00,Compression Tee,Apparel,1,150.59,150.59,2024-04-12,REP-S-006-01
+SPG-01204,S-006,Bayou Fitness,Southeast,P-SPG-01-01,Rain Shell,Apparel,1,22.6,22.6,2024-04-10,REP-S-006-04
+SPG-01205,S-015,Crossroads Sports,Midwest,P-SPG-03-06,Swim Goggles,Accessories,4,8.4,33.6,2024-05-09,REP-S-015-01
+SPG-01206,S-017,Redwood Athletics,West,P-SPG-04-04,BCAAs,Nutrition,16,45.74,731.84,2024-09-08,REP-S-017-01
+SPG-01207,S-001,Alpine Outfitters,Northeast,P-SPG-04-00,Whey Protein,Nutrition,10,19.47,194.7,2024-08-12,REP-S-001-04
+SPG-01208,S-003,Summit Sports,Northeast,P-SPG-02-00,Carbon Bike,Equipment,22,723.31,15912.82,2024-12-13,REP-S-003-03
+SPG-01209,S-008,Palmetto Sports,Southeast,P-SPG-00-04,Cross Train V2,Footwear,13,198.57,2581.41,2024-05-26,REP-S-008-04
+SPG-01210,S-009,Magnolia Active,Southeast,P-SPG-03-08,Jump Rope,Accessories,4,19.62,78.48,2024-04-25,REP-S-009-03
+SPG-01211,S-014,River Trail Gear,Midwest,P-SPG-04-02,Electrolyte Mix,Nutrition,4,11.74,46.96,2024-04-13,REP-S-014-02
+SPG-01212,S-001,Alpine Outfitters,Northeast,P-SPG-03-06,Swim Goggles,Accessories,6,5.26,31.56,2024-03-23,REP-S-001-03
+SPG-01213,S-011,Lakeside Sports,Midwest,P-SPG-04-03,Recovery Bar,Nutrition,15,51.7,775.5,2024-08-10,REP-S-011-03
+SPG-01214,S-001,Alpine Outfitters,Northeast,P-SPG-00-03,Sprint Elite,Footwear,14,244.21,3418.94,2024-09-27,REP-S-001-04
+SPG-01215,S-014,River Trail Gear,Midwest,P-SPG-02-00,Carbon Bike,Equipment,3,59.78,179.34,2024-04-08,REP-S-014-04
+SPG-01216,S-012,Prairie Athletics,Midwest,P-SPG-02-00,Carbon Bike,Equipment,3,578.06,1734.18,2024-02-14,REP-S-012-02
+SPG-01217,S-010,Delta Outfitters,Southeast,P-SPG-00-03,Sprint Elite,Footwear,14,108.03,1512.42,2024-10-25,REP-S-010-04
+SPG-01218,S-020,Mountain Peak Gear,West,P-SPG-04-02,Electrolyte Mix,Nutrition,20,33.47,669.4,2024-01-13,REP-S-020-01
+SPG-01219,S-012,Prairie Athletics,Midwest,P-SPG-04-01,Energy Gel Pack,Nutrition,14,30.98,433.72,2024-11-18,REP-S-012-02
+SPG-01220,S-010,Delta Outfitters,Southeast,P-SPG-04-01,Energy Gel Pack,Nutrition,10,36.71,367.1,2024-12-08,REP-S-010-04
+SPG-01221,S-006,Bayou Fitness,Southeast,P-SPG-03-09,Foam Roller,Accessories,12,63.87,766.44,2024-02-19,REP-S-006-02
+SPG-01222,S-018,Canyon Sports,West,P-SPG-03-08,Jump Rope,Accessories,18,44.0,792.0,2024-04-14,REP-S-018-01
+SPG-01223,S-016,Pacific Surf & Sport,West,P-SPG-04-03,Recovery Bar,Nutrition,20,13.63,272.6,2024-01-18,REP-S-016-01
+SPG-01224,S-012,Prairie Athletics,Midwest,P-SPG-04-03,Recovery Bar,Nutrition,6,28.15,168.9,2024-03-12,REP-S-012-01
+SPG-01225,S-019,Coastal Outfitters,West,P-SPG-03-06,Swim Goggles,Accessories,2,56.99,113.98,2024-01-03,REP-S-019-01
+SPG-01226,S-003,Summit Sports,Northeast,P-SPG-01-03,Running Short,Apparel,41,92.73,3801.93,2024-07-03,REP-S-003-02
+SPG-01227,S-013,Heartland Fitness,Midwest,P-SPG-00-02,Hiker Pro,Footwear,3,156.19,468.57,2024-07-27,REP-S-013-01
+SPG-01228,S-019,Coastal Outfitters,West,P-SPG-02-01,Kayak Explorer,Equipment,8,637.97,5103.76,2024-10-17,REP-S-019-03
+SPG-01229,S-004,Harbor Run,Northeast,P-SPG-03-07,Ankle Brace,Accessories,15,26.81,402.15,2024-10-06,REP-S-004-01
+SPG-01230,S-005,Evergreen Athletics,Northeast,P-SPG-03-04,Sport Towel,Accessories,13,50.16,652.08,2024-02-06,REP-S-005-01
+SPG-01231,S-004,Harbor Run,Northeast,P-SPG-04-04,BCAAs,Nutrition,5,24.02,120.1,2024-06-23,REP-S-004-04
+SPG-01232,S-005,Evergreen Athletics,Northeast,P-SPG-03-04,Sport Towel,Accessories,6,17.2,103.2,2024-04-04,REP-S-005-04
+SPG-01233,S-011,Lakeside Sports,Midwest,P-SPG-04-04,BCAAs,Nutrition,3,32.46,97.38,2024-12-15,REP-S-011-03
+SPG-01234,S-012,Prairie Athletics,Midwest,P-SPG-02-01,Kayak Explorer,Equipment,4,667.48,2669.92,2024-11-24,REP-S-012-03
+SPG-01235,S-010,Delta Outfitters,Southeast,P-SPG-02-03,Weight Set Pro,Equipment,1,289.22,289.22,2024-09-27,REP-S-010-02
+SPG-01236,S-001,Alpine Outfitters,Northeast,P-SPG-04-01,Energy Gel Pack,Nutrition,5,52.23,261.15,2024-09-11,REP-S-001-03
+SPG-01237,S-016,Pacific Surf & Sport,West,P-SPG-00-04,Cross Train V2,Footwear,1,237.0,237.0,2024-04-07,REP-S-016-01
+SPG-01238,S-003,Summit Sports,Northeast,P-SPG-03-03,Resistance Bands,Accessories,37,35.75,1322.75,2024-04-16,REP-S-003-04
+SPG-01239,S-006,Bayou Fitness,Southeast,P-SPG-01-01,Rain Shell,Apparel,7,155.62,1089.34,2024-10-19,REP-S-006-04
+SPG-01240,S-006,Bayou Fitness,Southeast,P-SPG-04-01,Energy Gel Pack,Nutrition,14,40.55,567.7,2024-08-30,REP-S-006-03
+SPG-01241,S-001,Alpine Outfitters,Northeast,P-SPG-00-00,Trail Runner X,Footwear,16,149.24,2387.84,2024-09-13,REP-S-001-02
+SPG-01242,S-006,Bayou Fitness,Southeast,P-SPG-02-03,Weight Set Pro,Equipment,6,117.57,705.42,2024-06-29,REP-S-006-04
+SPG-01243,S-003,Summit Sports,Northeast,P-SPG-03-08,Jump Rope,Accessories,30,5.47,164.1,2024-07-01,REP-S-003-03
+SPG-01244,S-018,Canyon Sports,West,P-SPG-00-00,Trail Runner X,Footwear,4,160.62,642.48,2024-11-12,REP-S-018-01
+SPG-01245,S-020,Mountain Peak Gear,West,P-SPG-01-03,Running Short,Apparel,4,176.97,707.88,2024-10-13,REP-S-020-01
+SPG-01246,S-011,Lakeside Sports,Midwest,P-SPG-01-03,Running Short,Apparel,3,139.61,418.83,2024-03-11,REP-S-011-01
+SPG-01247,S-012,Prairie Athletics,Midwest,P-SPG-01-03,Running Short,Apparel,2,151.33,302.66,2024-02-04,REP-S-012-02
+SPG-01248,S-007,Gulf Coast Gear,Southeast,P-SPG-00-00,Trail Runner X,Footwear,12,54.88,658.56,2024-08-12,REP-S-007-04
+SPG-01249,S-019,Coastal Outfitters,West,P-SPG-02-00,Carbon Bike,Equipment,2,767.74,1535.48,2024-08-06,REP-S-019-01
+SPG-01250,S-017,Redwood Athletics,West,P-SPG-04-02,Electrolyte Mix,Nutrition,18,45.57,820.26,2024-11-16,REP-S-017-03
+SPG-01251,S-008,Palmetto Sports,Southeast,P-SPG-01-04,Base Layer,Apparel,13,94.93,1234.09,2024-07-11,REP-S-008-02
+SPG-01252,S-014,River Trail Gear,Midwest,P-SPG-02-01,Kayak Explorer,Equipment,20,242.82,4856.4,2024-02-06,REP-S-014-04
+SPG-01253,S-004,Harbor Run,Northeast,P-SPG-03-01,Fitness Band,Accessories,20,64.48,1289.6,2024-10-18,REP-S-004-02
+SPG-01254,S-016,Pacific Surf & Sport,West,P-SPG-01-02,Fleece Vest,Apparel,18,33.22,597.96,2024-02-10,REP-S-016-01
+SPG-01255,S-002,Trailhead NE,Northeast,P-SPG-02-02,Treadmill T500,Equipment,2,165.3,330.6,2024-03-06,REP-S-002-04
+SPG-01256,S-008,Palmetto Sports,Southeast,P-SPG-01-00,Compression Tee,Apparel,12,162.78,1953.36,2024-09-21,REP-S-008-02
+SPG-01257,S-012,Prairie Athletics,Midwest,P-SPG-03-04,Sport Towel,Accessories,17,62.3,1059.1,2024-06-01,REP-S-012-02
+SPG-01258,S-011,Lakeside Sports,Midwest,P-SPG-01-03,Running Short,Apparel,17,29.68,504.56,2024-02-21,REP-S-011-03
+SPG-01259,S-018,Canyon Sports,West,P-SPG-03-00,Water Bottle,Accessories,14,38.59,540.26,2024-03-01,REP-S-018-02
+SPG-01260,S-009,Magnolia Active,Southeast,P-SPG-02-04,Climbing Pack,Equipment,13,196.42,2553.46,2024-09-12,REP-S-009-03
+SPG-01261,S-006,Bayou Fitness,Southeast,P-SPG-02-01,Kayak Explorer,Equipment,10,740.85,7408.5,2024-04-28,REP-S-006-03
+SPG-01262,S-013,Heartland Fitness,Midwest,P-SPG-01-04,Base Layer,Apparel,2,72.94,145.88,2024-01-27,REP-S-013-01
+SPG-01263,S-015,Crossroads Sports,Midwest,P-SPG-03-04,Sport Towel,Accessories,2,34.51,69.02,2024-11-03,REP-S-015-04
+SPG-01264,S-020,Mountain Peak Gear,West,P-SPG-02-02,Treadmill T500,Equipment,3,323.17,969.51,2024-10-03,REP-S-020-04
+SPG-01265,S-006,Bayou Fitness,Southeast,P-SPG-01-04,Base Layer,Apparel,4,136.67,546.68,2024-06-18,REP-S-006-01
+SPG-01266,S-020,Mountain Peak Gear,West,P-SPG-00-04,Cross Train V2,Footwear,11,229.49,2524.39,2024-01-12,REP-S-020-03
+SPG-01267,S-004,Harbor Run,Northeast,P-SPG-00-03,Sprint Elite,Footwear,10,193.43,1934.3,2024-04-24,REP-S-004-01
+SPG-01268,S-008,Palmetto Sports,Southeast,P-SPG-00-00,Trail Runner X,Footwear,3,137.17,411.51,2024-05-28,REP-S-008-04
+SPG-01269,S-004,Harbor Run,Northeast,P-SPG-04-00,Whey Protein,Nutrition,5,26.43,132.15,2024-05-08,REP-S-004-03
+SPG-01270,S-015,Crossroads Sports,Midwest,P-SPG-03-00,Water Bottle,Accessories,6,17.61,105.66,2024-07-18,REP-S-015-01
+SPG-01271,S-013,Heartland Fitness,Midwest,P-SPG-04-02,Electrolyte Mix,Nutrition,8,25.76,206.08,2024-12-26,REP-S-013-03
+SPG-01272,S-003,Summit Sports,Northeast,P-SPG-01-00,Compression Tee,Apparel,8,126.7,1013.6,2024-07-02,REP-S-003-03
+SPG-01273,S-019,Coastal Outfitters,West,P-SPG-02-00,Carbon Bike,Equipment,2,168.43,336.86,2024-02-04,REP-S-019-01
+SPG-01274,S-003,Summit Sports,Northeast,P-SPG-02-00,Carbon Bike,Equipment,35,210.95,7383.25,2024-03-21,REP-S-003-02
+SPG-01275,S-012,Prairie Athletics,Midwest,P-SPG-04-02,Electrolyte Mix,Nutrition,15,41.69,625.35,2024-05-27,REP-S-012-03
+SPG-01276,S-002,Trailhead NE,Northeast,P-SPG-03-04,Sport Towel,Accessories,2,76.69,153.38,2024-02-08,REP-S-002-04
+SPG-01277,S-004,Harbor Run,Northeast,P-SPG-03-03,Resistance Bands,Accessories,5,39.78,198.9,2024-09-30,REP-S-004-01
+SPG-01278,S-012,Prairie Athletics,Midwest,P-SPG-04-02,Electrolyte Mix,Nutrition,1,55.67,55.67,2024-10-21,REP-S-012-01
+SPG-01279,S-002,Trailhead NE,Northeast,P-SPG-00-03,Sprint Elite,Footwear,10,241.05,2410.5,2024-05-03,REP-S-002-02
+SPG-01280,S-010,Delta Outfitters,Southeast,P-SPG-00-01,Court Ace,Footwear,15,64.89,973.35,2024-09-22,REP-S-010-03
+SPG-01281,S-012,Prairie Athletics,Midwest,P-SPG-01-00,Compression Tee,Apparel,7,88.55,619.85,2024-11-08,REP-S-012-03
+SPG-01282,S-003,Summit Sports,Northeast,P-SPG-00-04,Cross Train V2,Footwear,34,171.64,5835.76,2024-09-13,REP-S-003-02
+SPG-01283,S-011,Lakeside Sports,Midwest,P-SPG-04-04,BCAAs,Nutrition,6,57.99,347.94,2024-06-08,REP-S-011-03
+SPG-01284,S-012,Prairie Athletics,Midwest,P-SPG-01-02,Fleece Vest,Apparel,19,74.47,1414.93,2024-07-23,REP-S-012-01
+SPG-01285,S-012,Prairie Athletics,Midwest,P-SPG-03-01,Fitness Band,Accessories,2,9.45,18.9,2024-11-12,REP-S-012-04
+SPG-01286,S-019,Coastal Outfitters,West,P-SPG-04-00,Whey Protein,Nutrition,2,29.89,59.78,2024-01-30,REP-S-019-01
+SPG-01287,S-003,Summit Sports,Northeast,P-SPG-04-03,Recovery Bar,Nutrition,38,33.88,1287.44,2024-10-06,REP-S-003-02
+SPG-01288,S-016,Pacific Surf & Sport,West,P-SPG-04-02,Electrolyte Mix,Nutrition,5,45.83,229.15,2024-12-23,REP-S-016-02
+SPG-01289,S-007,Gulf Coast Gear,Southeast,P-SPG-04-02,Electrolyte Mix,Nutrition,8,39.05,312.4,2024-02-26,REP-S-007-03
+SPG-01290,S-008,Palmetto Sports,Southeast,P-SPG-00-00,Trail Runner X,Footwear,10,143.06,1430.6,2024-10-25,REP-S-008-04
+SPG-01291,S-006,Bayou Fitness,Southeast,P-SPG-02-02,Treadmill T500,Equipment,1,213.47,213.47,2024-08-29,REP-S-006-03
+SPG-01292,S-001,Alpine Outfitters,Northeast,P-SPG-00-03,Sprint Elite,Footwear,7,246.93,1728.51,2024-05-14,REP-S-001-03
+SPG-01293,S-009,Magnolia Active,Southeast,P-SPG-01-03,Running Short,Apparel,4,65.74,262.96,2024-11-30,REP-S-009-04
+SPG-01294,S-018,Canyon Sports,West,P-SPG-02-01,Kayak Explorer,Equipment,19,95.86,1821.34,2024-01-16,REP-S-018-02
+SPG-01295,S-019,Coastal Outfitters,West,P-SPG-01-01,Rain Shell,Apparel,26,69.23,1799.98,2024-01-17,REP-S-019-01
+SPG-01296,S-001,Alpine Outfitters,Northeast,P-SPG-00-04,Cross Train V2,Footwear,2,175.06,350.12,2024-06-22,REP-S-001-04
+SPG-01297,S-002,Trailhead NE,Northeast,P-SPG-02-01,Kayak Explorer,Equipment,1,527.91,527.91,2024-08-03,REP-S-002-04
+SPG-01298,S-017,Redwood Athletics,West,P-SPG-02-01,Kayak Explorer,Equipment,1,163.6,163.6,2024-05-13,REP-S-017-01
+SPG-01299,S-003,Summit Sports,Northeast,P-SPG-03-06,Swim Goggles,Accessories,39,21.5,838.5,2024-04-12,REP-S-003-01
+SPG-01300,S-010,Delta Outfitters,Southeast,P-SPG-02-03,Weight Set Pro,Equipment,9,615.68,5541.12,2024-06-20,REP-S-010-04
+SPG-01301,S-011,Lakeside Sports,Midwest,P-SPG-04-01,Energy Gel Pack,Nutrition,3,18.55,55.65,2024-01-31,REP-S-011-04
+SPG-01302,S-010,Delta Outfitters,Southeast,P-SPG-01-03,Running Short,Apparel,1,56.95,56.95,2024-03-12,REP-S-010-02
+SPG-01303,S-014,River Trail Gear,Midwest,P-SPG-01-00,Compression Tee,Apparel,5,93.21,466.05,2024-04-14,REP-S-014-03
+SPG-01304,S-017,Redwood Athletics,West,P-SPG-01-00,Compression Tee,Apparel,9,93.91,845.19,2024-10-07,REP-S-017-04
+SPG-01305,S-001,Alpine Outfitters,Northeast,P-SPG-04-01,Energy Gel Pack,Nutrition,1,55.37,55.37,2024-06-17,REP-S-001-01
+SPG-01306,S-003,Summit Sports,Northeast,P-SPG-02-01,Kayak Explorer,Equipment,24,585.27,14046.48,2024-12-05,REP-S-003-02
+SPG-01307,S-007,Gulf Coast Gear,Southeast,P-SPG-03-02,Yoga Mat,Accessories,3,53.53,160.59,2024-02-01,REP-S-007-02
+SPG-01308,S-003,Summit Sports,Northeast,P-SPG-02-04,Climbing Pack,Equipment,13,441.69,5741.97,2024-04-30,REP-S-003-01
+SPG-01309,S-012,Prairie Athletics,Midwest,P-SPG-04-00,Whey Protein,Nutrition,14,15.32,214.48,2024-09-09,REP-S-012-01
+SPG-01310,S-017,Redwood Athletics,West,P-SPG-03-03,Resistance Bands,Accessories,18,32.86,591.48,2024-02-07,REP-S-017-01
+SPG-01311,S-019,Coastal Outfitters,West,P-SPG-02-04,Climbing Pack,Equipment,44,567.7,24978.8,2024-10-15,REP-S-019-01
+SPG-01312,S-013,Heartland Fitness,Midwest,P-SPG-04-04,BCAAs,Nutrition,2,45.44,90.88,2024-11-08,REP-S-013-03
+SPG-01313,S-008,Palmetto Sports,Southeast,P-SPG-03-08,Jump Rope,Accessories,16,69.36,1109.76,2024-12-25,REP-S-008-01
+SPG-01314,S-018,Canyon Sports,West,P-SPG-03-09,Foam Roller,Accessories,5,43.14,215.7,2024-01-19,REP-S-018-04
+SPG-01315,S-006,Bayou Fitness,Southeast,P-SPG-04-02,Electrolyte Mix,Nutrition,9,58.07,522.63,2024-06-26,REP-S-006-03
+SPG-01316,S-002,Trailhead NE,Northeast,P-SPG-00-04,Cross Train V2,Footwear,5,75.31,376.55,2024-02-06,REP-S-002-04
+SPG-01317,S-006,Bayou Fitness,Southeast,P-SPG-00-00,Trail Runner X,Footwear,4,155.75,623.0,2024-08-01,REP-S-006-03
+SPG-01318,S-018,Canyon Sports,West,P-SPG-01-01,Rain Shell,Apparel,5,126.0,630.0,2024-11-02,REP-S-018-02
+SPG-01319,S-002,Trailhead NE,Northeast,P-SPG-02-00,Carbon Bike,Equipment,9,259.06,2331.54,2024-11-09,REP-S-002-03
+SPG-01320,S-007,Gulf Coast Gear,Southeast,P-SPG-01-04,Base Layer,Apparel,3,30.57,91.71,2024-02-11,REP-S-007-03
+SPG-01321,S-019,Coastal Outfitters,West,P-SPG-04-01,Energy Gel Pack,Nutrition,3,43.66,130.98,2024-10-09,REP-S-019-01
+SPG-01322,S-005,Evergreen Athletics,Northeast,P-SPG-00-01,Court Ace,Footwear,2,98.17,196.34,2024-09-02,REP-S-005-02
+SPG-01323,S-008,Palmetto Sports,Southeast,P-SPG-01-01,Rain Shell,Apparel,12,99.68,1196.16,2024-03-07,REP-S-008-02
+SPG-01324,S-004,Harbor Run,Northeast,P-SPG-01-02,Fleece Vest,Apparel,7,26.63,186.41,2024-05-18,REP-S-004-02
+SPG-01325,S-017,Redwood Athletics,West,P-SPG-00-03,Sprint Elite,Footwear,11,226.13,2487.43,2024-01-22,REP-S-017-04
+SPG-01326,S-009,Magnolia Active,Southeast,P-SPG-03-03,Resistance Bands,Accessories,1,56.16,56.16,2024-02-23,REP-S-009-01
+SPG-01327,S-012,Prairie Athletics,Midwest,P-SPG-04-01,Energy Gel Pack,Nutrition,15,32.85,492.75,2024-01-19,REP-S-012-03
+SPG-01328,S-013,Heartland Fitness,Midwest,P-SPG-04-00,Whey Protein,Nutrition,20,36.86,737.2,2024-09-11,REP-S-013-02
+SPG-01329,S-003,Summit Sports,Northeast,P-SPG-00-01,Court Ace,Footwear,63,58.83,3706.29,2024-09-16,REP-S-003-01
+SPG-01330,S-016,Pacific Surf & Sport,West,P-SPG-02-03,Weight Set Pro,Equipment,20,80.66,1613.2,2024-04-25,REP-S-016-02
+SPG-01331,S-019,Coastal Outfitters,West,P-SPG-04-01,Energy Gel Pack,Nutrition,10,57.21,572.1,2024-11-28,REP-S-019-02
+SPG-01332,S-018,Canyon Sports,West,P-SPG-02-00,Carbon Bike,Equipment,20,340.32,6806.4,2024-06-28,REP-S-018-02
+SPG-01333,S-005,Evergreen Athletics,Northeast,P-SPG-04-00,Whey Protein,Nutrition,7,56.94,398.58,2024-08-08,REP-S-005-04
+SPG-01334,S-016,Pacific Surf & Sport,West,P-SPG-00-04,Cross Train V2,Footwear,2,117.05,234.1,2024-09-01,REP-S-016-03
+SPG-01335,S-014,River Trail Gear,Midwest,P-SPG-03-07,Ankle Brace,Accessories,2,33.74,67.48,2024-06-04,REP-S-014-04
+SPG-01336,S-005,Evergreen Athletics,Northeast,P-SPG-00-04,Cross Train V2,Footwear,17,208.88,3550.96,2024-04-26,REP-S-005-03
+SPG-01337,S-012,Prairie Athletics,Midwest,P-SPG-00-02,Hiker Pro,Footwear,19,100.26,1904.94,2024-01-11,REP-S-012-03
+SPG-01338,S-010,Delta Outfitters,Southeast,P-SPG-00-03,Sprint Elite,Footwear,11,122.22,1344.42,2024-01-29,REP-S-010-02
+SPG-01339,S-010,Delta Outfitters,Southeast,P-SPG-04-01,Energy Gel Pack,Nutrition,6,38.38,230.28,2024-01-14,REP-S-010-03
+SPG-01340,S-001,Alpine Outfitters,Northeast,P-SPG-02-04,Climbing Pack,Equipment,13,175.46,2280.98,2024-04-10,REP-S-001-02
+SPG-01341,S-005,Evergreen Athletics,Northeast,P-SPG-01-03,Running Short,Apparel,5,89.41,447.05,2024-09-30,REP-S-005-01
+SPG-01342,S-003,Summit Sports,Northeast,P-SPG-02-01,Kayak Explorer,Equipment,26,212.33,5520.58,2024-11-07,REP-S-003-02
+SPG-01343,S-011,Lakeside Sports,Midwest,P-SPG-04-02,Electrolyte Mix,Nutrition,9,43.68,393.12,2024-07-13,REP-S-011-01
+SPG-01344,S-017,Redwood Athletics,West,P-SPG-04-00,Whey Protein,Nutrition,18,46.75,841.5,2024-12-15,REP-S-017-01
+SPG-01345,S-020,Mountain Peak Gear,West,P-SPG-03-02,Yoga Mat,Accessories,8,59.33,474.64,2024-12-16,REP-S-020-01
+SPG-01346,S-020,Mountain Peak Gear,West,P-SPG-04-03,Recovery Bar,Nutrition,9,21.03,189.27,2024-01-10,REP-S-020-03
+SPG-01347,S-008,Palmetto Sports,Southeast,P-SPG-01-02,Fleece Vest,Apparel,12,175.86,2110.32,2024-10-09,REP-S-008-02
+SPG-01348,S-012,Prairie Athletics,Midwest,P-SPG-00-02,Hiker Pro,Footwear,18,89.53,1611.54,2024-09-03,REP-S-012-02
+SPG-01349,S-009,Magnolia Active,Southeast,P-SPG-01-00,Compression Tee,Apparel,6,32.41,194.46,2024-01-27,REP-S-009-03
+SPG-01350,S-017,Redwood Athletics,West,P-SPG-03-06,Swim Goggles,Accessories,1,33.04,33.04,2024-07-17,REP-S-017-03
+SPG-01351,S-012,Prairie Athletics,Midwest,P-SPG-03-06,Swim Goggles,Accessories,19,55.64,1057.16,2024-07-12,REP-S-012-04
+SPG-01352,S-011,Lakeside Sports,Midwest,P-SPG-03-06,Swim Goggles,Accessories,19,58.41,1109.79,2024-12-22,REP-S-011-03
+SPG-01353,S-011,Lakeside Sports,Midwest,P-SPG-01-02,Fleece Vest,Apparel,8,89.85,718.8,2024-03-05,REP-S-011-04
+SPG-01354,S-009,Magnolia Active,Southeast,P-SPG-03-06,Swim Goggles,Accessories,16,63.27,1012.32,2024-08-08,REP-S-009-04
+SPG-01355,S-003,Summit Sports,Northeast,P-SPG-03-03,Resistance Bands,Accessories,24,14.49,347.76,2024-12-25,REP-S-003-03
+SPG-01356,S-012,Prairie Athletics,Midwest,P-SPG-00-04,Cross Train V2,Footwear,1,160.26,160.26,2024-08-06,REP-S-012-03
+SPG-01357,S-017,Redwood Athletics,West,P-SPG-00-02,Hiker Pro,Footwear,6,199.69,1198.14,2024-10-08,REP-S-017-02
+SPG-01358,S-011,Lakeside Sports,Midwest,P-SPG-02-04,Climbing Pack,Equipment,13,347.81,4521.53,2024-03-11,REP-S-011-04
+SPG-01359,S-006,Bayou Fitness,Southeast,P-SPG-00-01,Court Ace,Footwear,1,135.17,135.17,2024-02-29,REP-S-006-03
+SPG-01360,S-005,Evergreen Athletics,Northeast,P-SPG-01-02,Fleece Vest,Apparel,19,177.97,3381.43,2024-08-12,REP-S-005-03
+SPG-01361,S-006,Bayou Fitness,Southeast,P-SPG-03-01,Fitness Band,Accessories,8,8.95,71.6,2024-03-01,REP-S-006-03
+SPG-01362,S-018,Canyon Sports,West,P-SPG-04-01,Energy Gel Pack,Nutrition,8,49.63,397.04,2024-11-11,REP-S-018-02
+SPG-01363,S-014,River Trail Gear,Midwest,P-SPG-00-02,Hiker Pro,Footwear,11,226.09,2486.99,2024-07-07,REP-S-014-02
+SPG-01364,S-002,Trailhead NE,Northeast,P-SPG-03-09,Foam Roller,Accessories,14,21.5,301.0,2024-06-29,REP-S-002-04
+SPG-01365,S-008,Palmetto Sports,Southeast,P-SPG-00-00,Trail Runner X,Footwear,1,152.17,152.17,2024-04-09,REP-S-008-01
+SPG-01366,S-016,Pacific Surf & Sport,West,P-SPG-04-02,Electrolyte Mix,Nutrition,6,17.1,102.6,2024-06-24,REP-S-016-01
+SPG-01367,S-003,Summit Sports,Northeast,P-SPG-02-04,Climbing Pack,Equipment,51,119.28,6083.28,2024-08-11,REP-S-003-03
+SPG-01368,S-011,Lakeside Sports,Midwest,P-SPG-01-01,Rain Shell,Apparel,12,150.5,1806.0,2024-01-30,REP-S-011-03
+SPG-01369,S-006,Bayou Fitness,Southeast,P-SPG-03-08,Jump Rope,Accessories,12,24.48,293.76,2024-05-01,REP-S-006-04
+SPG-01370,S-002,Trailhead NE,Northeast,P-SPG-00-03,Sprint Elite,Footwear,7,174.99,1224.93,2024-04-28,REP-S-002-02
+SPG-01371,S-001,Alpine Outfitters,Northeast,P-SPG-04-03,Recovery Bar,Nutrition,11,53.77,591.47,2024-02-17,REP-S-001-02
+SPG-01372,S-008,Palmetto Sports,Southeast,P-SPG-03-07,Ankle Brace,Accessories,12,14.9,178.8,2024-10-28,REP-S-008-04
+SPG-01373,S-013,Heartland Fitness,Midwest,P-SPG-02-03,Weight Set Pro,Equipment,7,196.23,1373.61,2024-01-06,REP-S-013-01
+SPG-01374,S-004,Harbor Run,Northeast,P-SPG-02-00,Carbon Bike,Equipment,2,743.75,1487.5,2024-04-26,REP-S-004-03
+SPG-01375,S-005,Evergreen Athletics,Northeast,P-SPG-03-08,Jump Rope,Accessories,3,6.84,20.52,2024-07-30,REP-S-005-03
+SPG-01376,S-011,Lakeside Sports,Midwest,P-SPG-04-00,Whey Protein,Nutrition,2,11.27,22.54,2024-10-01,REP-S-011-02
+SPG-01377,S-016,Pacific Surf & Sport,West,P-SPG-01-01,Rain Shell,Apparel,3,69.47,208.41,2024-10-17,REP-S-016-03
+SPG-01378,S-015,Crossroads Sports,Midwest,P-SPG-01-00,Compression Tee,Apparel,14,24.24,339.36,2024-01-24,REP-S-015-03
+SPG-01379,S-008,Palmetto Sports,Southeast,P-SPG-04-00,Whey Protein,Nutrition,5,48.15,240.75,2024-01-08,REP-S-008-01
+SPG-01380,S-016,Pacific Surf & Sport,West,P-SPG-01-00,Compression Tee,Apparel,7,39.46,276.22,2024-05-07,REP-S-016-04
+SPG-01381,S-020,Mountain Peak Gear,West,P-SPG-02-02,Treadmill T500,Equipment,5,438.57,2192.85,2024-01-30,REP-S-020-04
+SPG-01382,S-006,Bayou Fitness,Southeast,P-SPG-00-04,Cross Train V2,Footwear,4,160.88,643.52,2024-02-09,REP-S-006-04
+SPG-01383,S-008,Palmetto Sports,Southeast,P-SPG-02-01,Kayak Explorer,Equipment,9,774.77,6972.93,2024-01-30,REP-S-008-03
+SPG-01384,S-007,Gulf Coast Gear,Southeast,P-SPG-01-01,Rain Shell,Apparel,4,44.12,176.48,2024-03-05,REP-S-007-04
+SPG-01385,S-008,Palmetto Sports,Southeast,P-SPG-04-01,Energy Gel Pack,Nutrition,13,40.17,522.21,2024-08-12,REP-S-008-02
+SPG-01386,S-001,Alpine Outfitters,Northeast,P-SPG-02-02,Treadmill T500,Equipment,16,568.39,9094.24,2024-04-02,REP-S-001-02
+SPG-01387,S-012,Prairie Athletics,Midwest,P-SPG-01-01,Rain Shell,Apparel,8,87.72,701.76,2024-05-24,REP-S-012-01
+SPG-01388,S-017,Redwood Athletics,West,P-SPG-02-00,Carbon Bike,Equipment,16,347.82,5565.12,2024-01-23,REP-S-017-01
+SPG-01389,S-018,Canyon Sports,West,P-SPG-03-00,Water Bottle,Accessories,17,19.06,324.02,2024-06-09,REP-S-018-04
+SPG-01390,S-004,Harbor Run,Northeast,P-SPG-04-01,Energy Gel Pack,Nutrition,7,29.06,203.42,2024-06-28,REP-S-004-01
+SPG-01391,S-001,Alpine Outfitters,Northeast,P-SPG-03-01,Fitness Band,Accessories,5,34.73,173.65,2024-11-04,REP-S-001-03
+SPG-01392,S-018,Canyon Sports,West,P-SPG-01-04,Base Layer,Apparel,18,121.14,2180.52,2024-12-01,REP-S-018-02
+SPG-01393,S-003,Summit Sports,Northeast,P-SPG-03-06,Swim Goggles,Accessories,24,45.06,1081.44,2024-05-05,REP-S-003-04
+SPG-01394,S-016,Pacific Surf & Sport,West,P-SPG-01-02,Fleece Vest,Apparel,15,140.6,2109.0,2024-05-29,REP-S-016-02
+SPG-01395,S-005,Evergreen Athletics,Northeast,P-SPG-01-01,Rain Shell,Apparel,5,42.66,213.3,2024-03-07,REP-S-005-02
+SPG-01396,S-017,Redwood Athletics,West,P-SPG-00-00,Trail Runner X,Footwear,20,101.33,2026.6,2024-11-06,REP-S-017-02
+SPG-01397,S-012,Prairie Athletics,Midwest,P-SPG-04-04,BCAAs,Nutrition,5,45.87,229.35,2024-07-22,REP-S-012-02
+SPG-01398,S-006,Bayou Fitness,Southeast,P-SPG-02-03,Weight Set Pro,Equipment,1,332.77,332.77,2024-09-02,REP-S-006-03
+SPG-01399,S-007,Gulf Coast Gear,Southeast,P-SPG-02-00,Carbon Bike,Equipment,10,231.68,2316.8,2024-12-02,REP-S-007-04
+SPG-01400,S-008,Palmetto Sports,Southeast,P-SPG-00-00,Trail Runner X,Footwear,14,51.64,722.96,2024-03-03,REP-S-008-04
+SPG-01401,S-016,Pacific Surf & Sport,West,P-SPG-02-00,Carbon Bike,Equipment,8,54.73,437.84,2024-12-02,REP-S-016-03
+SPG-01402,S-008,Palmetto Sports,Southeast,P-SPG-04-02,Electrolyte Mix,Nutrition,3,42.66,127.98,2024-02-09,REP-S-008-03
+SPG-01403,S-005,Evergreen Athletics,Northeast,P-SPG-00-00,Trail Runner X,Footwear,8,202.7,1621.6,2024-02-09,REP-S-005-02
+SPG-01404,S-013,Heartland Fitness,Midwest,P-SPG-00-04,Cross Train V2,Footwear,10,179.43,1794.3,2024-05-08,REP-S-013-02
+SPG-01405,S-019,Coastal Outfitters,West,P-SPG-03-05,Grip Tape,Accessories,41,9.74,399.34,2024-10-05,REP-S-019-04
+SPG-01406,S-002,Trailhead NE,Northeast,P-SPG-02-02,Treadmill T500,Equipment,9,476.51,4288.59,2024-04-15,REP-S-002-02
+SPG-01407,S-003,Summit Sports,Northeast,P-SPG-02-00,Carbon Bike,Equipment,38,783.02,29754.76,2024-09-10,REP-S-003-01
+SPG-01408,S-019,Coastal Outfitters,West,P-SPG-02-02,Treadmill T500,Equipment,42,253.71,10655.82,2024-12-27,REP-S-019-01
+SPG-01409,S-019,Coastal Outfitters,West,P-SPG-03-09,Foam Roller,Accessories,20,49.32,986.4,2024-07-01,REP-S-019-04
+SPG-01410,S-012,Prairie Athletics,Midwest,P-SPG-01-00,Compression Tee,Apparel,16,148.55,2376.8,2024-04-22,REP-S-012-02
+SPG-01411,S-001,Alpine Outfitters,Northeast,P-SPG-02-01,Kayak Explorer,Equipment,14,782.3,10952.2,2024-08-15,REP-S-001-01
+SPG-01412,S-003,Summit Sports,Northeast,P-SPG-04-03,Recovery Bar,Nutrition,12,16.8,201.6,2024-12-31,REP-S-003-02
+SPG-01413,S-010,Delta Outfitters,Southeast,P-SPG-00-01,Court Ace,Footwear,15,91.17,1367.55,2024-06-03,REP-S-010-04
+SPG-01414,S-020,Mountain Peak Gear,West,P-SPG-03-07,Ankle Brace,Accessories,18,47.49,854.82,2024-07-06,REP-S-020-04
+SPG-01415,S-013,Heartland Fitness,Midwest,P-SPG-00-04,Cross Train V2,Footwear,17,139.66,2374.22,2024-10-09,REP-S-013-01
+SPG-01416,S-006,Bayou Fitness,Southeast,P-SPG-03-07,Ankle Brace,Accessories,13,22.35,290.55,2024-05-29,REP-S-006-02
+SPG-01417,S-005,Evergreen Athletics,Northeast,P-SPG-03-06,Swim Goggles,Accessories,1,39.53,39.53,2024-11-30,REP-S-005-03
+SPG-01418,S-019,Coastal Outfitters,West,P-SPG-04-04,BCAAs,Nutrition,60,33.76,2025.6,2024-05-05,REP-S-019-03
+SPG-01419,S-008,Palmetto Sports,Southeast,P-SPG-01-04,Base Layer,Apparel,8,52.48,419.84,2024-09-26,REP-S-008-01
+SPG-01420,S-013,Heartland Fitness,Midwest,P-SPG-02-02,Treadmill T500,Equipment,7,73.16,512.12,2024-05-16,REP-S-013-03
+SPG-01421,S-006,Bayou Fitness,Southeast,P-SPG-01-00,Compression Tee,Apparel,4,27.31,109.24,2024-06-12,REP-S-006-01
+SPG-01422,S-019,Coastal Outfitters,West,P-SPG-00-02,Hiker Pro,Footwear,2,202.67,405.34,2024-12-23,REP-S-019-04
+SPG-01423,S-009,Magnolia Active,Southeast,P-SPG-02-04,Climbing Pack,Equipment,12,649.66,7795.92,2024-10-04,REP-S-009-03
+SPG-01424,S-016,Pacific Surf & Sport,West,P-SPG-00-00,Trail Runner X,Footwear,1,69.46,69.46,2024-09-14,REP-S-016-04
+SPG-01425,S-013,Heartland Fitness,Midwest,P-SPG-02-02,Treadmill T500,Equipment,18,549.04,9882.72,2024-02-23,REP-S-013-04
+SPG-01426,S-016,Pacific Surf & Sport,West,P-SPG-03-04,Sport Towel,Accessories,19,38.59,733.21,2024-01-28,REP-S-016-04
+SPG-01427,S-010,Delta Outfitters,Southeast,P-SPG-00-03,Sprint Elite,Footwear,5,120.99,604.95,2024-06-26,REP-S-010-03
+SPG-01428,S-014,River Trail Gear,Midwest,P-SPG-00-02,Hiker Pro,Footwear,11,46.94,516.34,2024-07-29,REP-S-014-04
+SPG-01429,S-008,Palmetto Sports,Southeast,P-SPG-02-02,Treadmill T500,Equipment,6,402.69,2416.14,2024-12-27,REP-S-008-01
+SPG-01430,S-019,Coastal Outfitters,West,P-SPG-03-04,Sport Towel,Accessories,51,37.0,1887.0,2024-11-14,REP-S-019-04
+SPG-01431,S-015,Crossroads Sports,Midwest,P-SPG-00-00,Trail Runner X,Footwear,19,176.52,3353.88,2024-09-05,REP-S-015-02
+SPG-01432,S-019,Coastal Outfitters,West,P-SPG-03-03,Resistance Bands,Accessories,35,20.44,715.4,2024-05-23,REP-S-019-04
+SPG-01433,S-001,Alpine Outfitters,Northeast,P-SPG-01-02,Fleece Vest,Apparel,12,37.62,451.44,2024-02-10,REP-S-001-02
+SPG-01434,S-015,Crossroads Sports,Midwest,P-SPG-03-03,Resistance Bands,Accessories,14,27.48,384.72,2024-04-14,REP-S-015-01
+SPG-01435,S-011,Lakeside Sports,Midwest,P-SPG-04-02,Electrolyte Mix,Nutrition,17,41.04,697.68,2024-03-11,REP-S-011-03
+SPG-01436,S-020,Mountain Peak Gear,West,P-SPG-03-05,Grip Tape,Accessories,10,36.05,360.5,2024-09-23,REP-S-020-04
+SPG-01437,S-008,Palmetto Sports,Southeast,P-SPG-02-02,Treadmill T500,Equipment,7,705.99,4941.93,2024-04-28,REP-S-008-03
+SPG-01438,S-008,Palmetto Sports,Southeast,P-SPG-02-02,Treadmill T500,Equipment,2,643.78,1287.56,2024-06-05,REP-S-008-03
+SPG-01439,S-020,Mountain Peak Gear,West,P-SPG-00-03,Sprint Elite,Footwear,19,234.88,4462.72,2024-10-10,REP-S-020-02
+SPG-01440,S-020,Mountain Peak Gear,West,P-SPG-01-02,Fleece Vest,Apparel,9,112.53,1012.77,2024-04-17,REP-S-020-03
+SPG-01441,S-008,Palmetto Sports,Southeast,P-SPG-04-02,Electrolyte Mix,Nutrition,11,23.19,255.09,2024-03-03,REP-S-008-02
+SPG-01442,S-005,Evergreen Athletics,Northeast,P-SPG-01-00,Compression Tee,Apparel,19,72.51,1377.69,2024-07-09,REP-S-005-04
+SPG-01443,S-005,Evergreen Athletics,Northeast,P-SPG-04-03,Recovery Bar,Nutrition,7,59.42,415.94,2024-03-13,REP-S-005-03
+SPG-01444,S-004,Harbor Run,Northeast,P-SPG-01-01,Rain Shell,Apparel,4,174.77,699.08,2024-01-19,REP-S-004-04
+SPG-01445,S-005,Evergreen Athletics,Northeast,P-SPG-00-01,Court Ace,Footwear,4,220.69,882.76,2024-04-30,REP-S-005-01
+SPG-01446,S-016,Pacific Surf & Sport,West,P-SPG-02-02,Treadmill T500,Equipment,17,310.81,5283.77,2024-12-23,REP-S-016-03
+SPG-01447,S-014,River Trail Gear,Midwest,P-SPG-02-02,Treadmill T500,Equipment,16,650.26,10404.16,2024-08-13,REP-S-014-02
+SPG-01448,S-005,Evergreen Athletics,Northeast,P-SPG-00-01,Court Ace,Footwear,1,49.01,49.01,2024-11-28,REP-S-005-03
+SPG-01449,S-019,Coastal Outfitters,West,P-SPG-03-04,Sport Towel,Accessories,34,74.67,2538.78,2024-08-20,REP-S-019-02
+SPG-01450,S-019,Coastal Outfitters,West,P-SPG-00-00,Trail Runner X,Footwear,16,228.42,3654.72,2024-02-28,REP-S-019-01
+SPG-01451,S-005,Evergreen Athletics,Northeast,P-SPG-00-01,Court Ace,Footwear,15,110.0,1650.0,2024-01-11,REP-S-005-04
+SPG-01452,S-012,Prairie Athletics,Midwest,P-SPG-04-04,BCAAs,Nutrition,13,19.52,253.76,2024-09-12,REP-S-012-03
+SPG-01453,S-016,Pacific Surf & Sport,West,P-SPG-00-04,Cross Train V2,Footwear,14,243.88,3414.32,2024-01-18,REP-S-016-01
+SPG-01454,S-019,Coastal Outfitters,West,P-SPG-04-01,Energy Gel Pack,Nutrition,8,23.05,184.4,2024-05-18,REP-S-019-03
+SPG-01455,S-007,Gulf Coast Gear,Southeast,P-SPG-02-02,Treadmill T500,Equipment,10,340.91,3409.1,2024-05-22,REP-S-007-01
+SPG-01456,S-003,Summit Sports,Northeast,P-SPG-01-04,Base Layer,Apparel,60,79.36,4761.6,2024-10-28,REP-S-003-03
+SPG-01457,S-006,Bayou Fitness,Southeast,P-SPG-01-03,Running Short,Apparel,4,169.25,677.0,2024-07-15,REP-S-006-02
+SPG-01458,S-002,Trailhead NE,Northeast,P-SPG-01-01,Rain Shell,Apparel,10,93.2,932.0,2024-06-02,REP-S-002-02
+SPG-01459,S-009,Magnolia Active,Southeast,P-SPG-03-03,Resistance Bands,Accessories,3,6.4,19.2,2024-02-13,REP-S-009-02
+SPG-01460,S-015,Crossroads Sports,Midwest,P-SPG-04-03,Recovery Bar,Nutrition,17,47.07,800.19,2024-01-31,REP-S-015-04
+SPG-01461,S-018,Canyon Sports,West,P-SPG-00-00,Trail Runner X,Footwear,18,206.21,3711.78,2024-05-22,REP-S-018-03
+SPG-01462,S-005,Evergreen Athletics,Northeast,P-SPG-04-02,Electrolyte Mix,Nutrition,13,47.66,619.58,2024-11-08,REP-S-005-01
+SPG-01463,S-005,Evergreen Athletics,Northeast,P-SPG-00-03,Sprint Elite,Footwear,15,226.75,3401.25,2024-07-15,REP-S-005-01
+SPG-01464,S-015,Crossroads Sports,Midwest,P-SPG-02-01,Kayak Explorer,Equipment,2,276.57,553.14,2024-09-10,REP-S-015-03
+SPG-01465,S-002,Trailhead NE,Northeast,P-SPG-01-01,Rain Shell,Apparel,18,147.03,2646.54,2024-01-10,REP-S-002-03
+SPG-01466,S-002,Trailhead NE,Northeast,P-SPG-01-01,Rain Shell,Apparel,18,117.52,2115.36,2024-07-14,REP-S-002-03
+SPG-01467,S-014,River Trail Gear,Midwest,P-SPG-03-05,Grip Tape,Accessories,6,38.63,231.78,2024-07-15,REP-S-014-03
+SPG-01468,S-006,Bayou Fitness,Southeast,P-SPG-01-01,Rain Shell,Apparel,4,103.25,413.0,2024-08-15,REP-S-006-02
+SPG-01469,S-020,Mountain Peak Gear,West,P-SPG-01-00,Compression Tee,Apparel,5,22.6,113.0,2024-01-23,REP-S-020-03
+SPG-01470,S-013,Heartland Fitness,Midwest,P-SPG-04-00,Whey Protein,Nutrition,7,20.22,141.54,2024-04-24,REP-S-013-01
+SPG-01471,S-008,Palmetto Sports,Southeast,P-SPG-00-01,Court Ace,Footwear,5,93.26,466.3,2024-04-15,REP-S-008-04
+SPG-01472,S-015,Crossroads Sports,Midwest,P-SPG-00-00,Trail Runner X,Footwear,14,204.5,2863.0,2024-07-13,REP-S-015-03
+SPG-01473,S-001,Alpine Outfitters,Northeast,P-SPG-03-06,Swim Goggles,Accessories,5,63.19,315.95,2024-04-04,REP-S-001-03
+SPG-01474,S-011,Lakeside Sports,Midwest,P-SPG-01-00,Compression Tee,Apparel,6,64.48,386.88,2024-12-03,REP-S-011-03
+SPG-01475,S-007,Gulf Coast Gear,Southeast,P-SPG-00-00,Trail Runner X,Footwear,4,231.15,924.6,2024-08-08,REP-S-007-03
+SPG-01476,S-016,Pacific Surf & Sport,West,P-SPG-01-01,Rain Shell,Apparel,1,54.69,54.69,2024-09-29,REP-S-016-02
+SPG-01477,S-002,Trailhead NE,Northeast,P-SPG-01-04,Base Layer,Apparel,10,93.35,933.5,2024-01-27,REP-S-002-01
+SPG-01478,S-003,Summit Sports,Northeast,P-SPG-03-02,Yoga Mat,Accessories,15,54.64,819.6,2024-12-04,REP-S-003-01
+SPG-01479,S-012,Prairie Athletics,Midwest,P-SPG-00-03,Sprint Elite,Footwear,14,232.42,3253.88,2024-06-05,REP-S-012-03
+SPG-01480,S-018,Canyon Sports,West,P-SPG-03-01,Fitness Band,Accessories,16,53.16,850.56,2024-01-17,REP-S-018-04
+SPG-01481,S-011,Lakeside Sports,Midwest,P-SPG-02-03,Weight Set Pro,Equipment,4,516.72,2066.88,2024-10-04,REP-S-011-02
+SPG-01482,S-009,Magnolia Active,Southeast,P-SPG-00-03,Sprint Elite,Footwear,9,174.36,1569.24,2024-06-27,REP-S-009-02
+SPG-01483,S-018,Canyon Sports,West,P-SPG-03-02,Yoga Mat,Accessories,16,52.17,834.72,2024-01-14,REP-S-018-03
+SPG-01484,S-017,Redwood Athletics,West,P-SPG-00-01,Court Ace,Footwear,5,106.5,532.5,2024-11-07,REP-S-017-01
+SPG-01485,S-019,Coastal Outfitters,West,P-SPG-02-03,Weight Set Pro,Equipment,36,618.69,22272.84,2024-06-21,REP-S-019-03
+SPG-01486,S-017,Redwood Athletics,West,P-SPG-01-01,Rain Shell,Apparel,16,59.86,957.76,2024-05-14,REP-S-017-02
+SPG-01487,S-015,Crossroads Sports,Midwest,P-SPG-04-00,Whey Protein,Nutrition,6,14.99,89.94,2024-10-29,REP-S-015-01
+SPG-01488,S-003,Summit Sports,Northeast,P-SPG-00-00,Trail Runner X,Footwear,51,136.16,6944.16,2024-04-20,REP-S-003-02
+SPG-01489,S-012,Prairie Athletics,Midwest,P-SPG-04-03,Recovery Bar,Nutrition,20,12.5,250.0,2024-01-15,REP-S-012-01
+SPG-01490,S-015,Crossroads Sports,Midwest,P-SPG-00-03,Sprint Elite,Footwear,10,185.65,1856.5,2024-06-23,REP-S-015-02
+SPG-01491,S-020,Mountain Peak Gear,West,P-SPG-01-02,Fleece Vest,Apparel,4,114.04,456.16,2024-11-14,REP-S-020-03
+SPG-01492,S-012,Prairie Athletics,Midwest,P-SPG-01-04,Base Layer,Apparel,11,137.63,1513.93,2024-08-10,REP-S-012-01
+SPG-01493,S-016,Pacific Surf & Sport,West,P-SPG-00-01,Court Ace,Footwear,6,69.84,419.04,2024-08-06,REP-S-016-04
+SPG-01494,S-013,Heartland Fitness,Midwest,P-SPG-02-01,Kayak Explorer,Equipment,8,468.17,3745.36,2024-01-30,REP-S-013-02
+SPG-01495,S-006,Bayou Fitness,Southeast,P-SPG-00-02,Hiker Pro,Footwear,8,71.43,571.44,2024-02-25,REP-S-006-01
+SPG-01496,S-013,Heartland Fitness,Midwest,P-SPG-01-03,Running Short,Apparel,11,129.62,1425.82,2024-10-10,REP-S-013-03
+SPG-01497,S-019,Coastal Outfitters,West,P-SPG-03-03,Resistance Bands,Accessories,17,60.5,1028.5,2024-07-17,REP-S-019-02
+SPG-01498,S-007,Gulf Coast Gear,Southeast,P-SPG-02-02,Treadmill T500,Equipment,8,382.11,3056.88,2024-12-13,REP-S-007-01
+SPG-01499,S-010,Delta Outfitters,Southeast,P-SPG-04-04,BCAAs,Nutrition,13,35.43,460.59,2024-05-27,REP-S-010-03
+SPG-01500,S-001,Alpine Outfitters,Northeast,P-SPG-02-03,Weight Set Pro,Equipment,1,653.33,653.33,2024-09-30,REP-S-001-01

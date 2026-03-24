@@ -34,11 +34,13 @@
 - Workflow replay engine — COMPLETE (v1.15.0) — Step Through, Run All, Resume modes; session isolation
 - Multi-reference restore — COMPLETE (v1.15.0) — 3-tier fallback: disk → library → example cases
 - Session save full state — COMPLETE (v1.15.0) — all_datasets + all_references in resume_state
-- PyInstaller packaging fix — COMPLETE (v1.15.0) — python313.dll bundled, upx_exclude for DLLs
+- PyInstaller packaging fix — COMPLETE (v1.17.0) — python313.dll force-bundled from base Python, full upx_exclude (14 entries), build script wipes dist/build before every build, post-build DLL verification
+- Tutorial #6 Parameterized Workflow — COMPLETE (v1.17.0) — Retail Sales Performance, Edit panel dataset+reference swap demo
+- Natural language queries in tutorials — COMPLETE (v1.17.0) — 22 query_run steps converted to ai_ask across 7 demos
 
-**Current version:** v1.16.0 — demo-ready for Farragut/McDermott meeting
+**Current version:** v1.17.0 — demo-ready for Farragut/McDermott meeting
 
-**Test suite:** 611 automated tests, all passing (zero xfail), runs under 14 seconds.
+**Test suite:** 611 automated tests, all passing (zero xfail), runs under 12 seconds.
 Pre-commit and pre-push git hooks enforce green suite on every commit and push.
 
 **Validated at scale:** 220M rows, DuckDB local execution, sub-second import.
@@ -369,6 +371,15 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-24] [CODE] — Tutorial #6 Parameterized Workflow Retail built (electronics + sporting goods,
+  4 CSVs, 13-step session with Edit panel dataset+reference swap, all baselines validated). PyInstaller
+  build hardened: python313.dll force-bundled from sys.base_prefix, upx_exclude expanded to 14 entries
+  (all .pyd files), BUILD_RELEASE.bat rewrites (process kill, dist/build wipe, post-build DLL verification),
+  graceful shutdown handlers (atexit + SIGTERM/SIGINT). 3 consecutive clean builds verified. 22 query_run
+  steps converted to ai_ask across 7 example cases (taxi, logistics, retail, SaaS, Part D, Part B,
+  Medicaid). Features Exercised section added for Tutorial #6 About panel. Clear Workspace now closes
+  Insights panel. Library button matched to Reference Table style (same class, same height). 611 tests.
+  v1.17.0.
 [2026-03-24] [CODE] — Tutorial #5 Real Estate Market Analysis built and committed. About button on
   workflow cards (expandable description with purple accent). Library button re-added next to Reference
   Table import. awPrompt enhanced with optional second textarea (workflow description on save). Reference

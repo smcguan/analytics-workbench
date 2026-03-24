@@ -113,17 +113,15 @@
       }
     },
     {
-      "event_type": "query_run",
+      "event_type": "ai_ask",
       "timestamp": "2026-03-23T10:04:30.000000+00:00",
       "details": {
         "dataset": "tx_medicaid_claims",
-        "sql": "SELECT\n    MCO_NAME,\n    COUNT(*) AS claim_count,\n    ROUND(SUM(BILL_AMT), 0) AS total_billed,\n    ROUND(SUM(PAID_AMT), 0) AS total_paid\nFROM dataset\nGROUP BY MCO_NAME\nORDER BY total_paid DESC",
-        "row_count": 3,
-        "elapsed_seconds": 0.018
+        "question": "What are the claim count, total billed, and total paid amounts by MCO?"
       },
       "narration": {
-        "pre": "First analytical query: total billed and paid amounts by MCO for Texas. This is the starting point for concentration analysis — we need to know how revenue is distributed across managed care organizations before we can assess single-MCO dependency risk.",
-        "post": "Three MCOs in the Texas portfolio. Lone Star Health leads by a significant margin. The dollar differential between MCOs tells us how much revenue is at risk if the top MCO exits or renegotiates rates. We will quantify the concentration percentage in the next query."
+        "pre": "First analytical question in plain English: 'What are the claim count, total billed, and total paid amounts by MCO?' This is the starting point for concentration analysis — we need to know how revenue is distributed across managed care organizations.",
+        "post": "Three MCOs in the Texas portfolio. Lone Star Health leads by a significant margin. The AI wrote the GROUP BY query from a plain English question. We will quantify the concentration percentage in the next query."
       },
       "baseline": {
         "expected_row_count": 3

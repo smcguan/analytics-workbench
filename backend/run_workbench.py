@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import atexit
 import io
 import logging
 import logging.config
 import os
 import re
+import signal
 import socket
 import subprocess
 import sys
@@ -246,6 +248,22 @@ def main() -> int:
 
     boot_log(f"Starting uvicorn on {host}:{port}")
     logging.getLogger("app").info("Starting uvicorn on %s:%s", host, port)
+
+    # Ensure clean process termination on any exit path — prevents file locks
+    # that corrupt subsequent PyInstaller builds on Windows.
+    def _cleanup():
+        boot_log("atexit cleanup — terminating process")
+        os._exit(0)
+
+    atexit.register(_cleanup)
+
+    # Handle SIGTERM/SIGINT so the process doesn't leave orphan handles
+    def _signal_handler(signum, frame):
+        boot_log(f"Signal {signum} received — shutting down")
+        os._exit(0)
+
+    signal.signal(signal.SIGTERM, _signal_handler)
+    signal.signal(signal.SIGINT, _signal_handler)
 
     try:
         uvicorn.run(
