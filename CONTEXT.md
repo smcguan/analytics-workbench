@@ -36,7 +36,7 @@
 - Session save full state — COMPLETE (v1.15.0) — all_datasets + all_references in resume_state
 - PyInstaller packaging fix — COMPLETE (v1.15.0) — python313.dll bundled, upx_exclude for DLLs
 
-**Current version:** v1.15.0
+**Current version:** v1.15.0 — demo-ready for Farragut/McDermott meeting
 
 **Test suite:** 603 automated tests, all passing (zero xfail), runs under 11 seconds.
 Pre-commit and pre-push git hooks enforce green suite on every commit and push.
@@ -369,6 +369,15 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-23] [CODE] — Four targeted fixes. Bug 1: startup workspace not clean — init() was calling
+  loadReferences() which fetched leftover reference tables from disk; replaced with explicit empty state
+  (loadedReferences=[], renderReferences()). Bug 2: SQL editor collapsed after Run SQL — removed
+  _collapseEditorWithPreview() call from runSqlQuery(); editor now stays open after execution (only
+  collapses on manual chevron click or Clear Workspace). Fix 3: Session Log checkbox spacing — changed
+  justify-content:space-between to gap:6px so checkbox sits immediately adjacent to label text.
+  Fix 4: Clear Workspace now closes Step Through panel — added _tutorialAborted flag checked in
+  tutorialRunAll() loop, Clear Workspace calls tutorialClose() to stop running workflows and hide
+  the narration panel. 603 tests passing.
 [2026-03-23] [CODE] — M5 Demo Sprint complete. Major session: unified Workflows dialog (Stored + Example
   Workflows in one EC-style overlay with Step Through/Run All/Resume/Edit/Delete per entry). Session
   isolation fix (loadAndResume now filters datasets to selected case only). Workflow replay engine
@@ -399,6 +408,22 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
   switches to step's details.dataset before running. Also: /import_reference accepts ?filename=
   for step-by-step reference loading; export endpoint now resolves additional_datasets +
   additional_references; session_end tutorial step now opens Session Log view. 603 tests.
+[2026-03-23] [BD+CODE] — M5 demo sprint complete. AW v1.15.0 demo-ready for
+  Farragut/McDermott meeting. Tutorial #4 (Multi-State Medicaid Diligence) built and
+  validated end-to-end — TX/FL/OH synthetic datasets (13K rows), 4 reference tables,
+  all 10 queries passing. Unified Workflows dialog shipped: Stored Workflows + Example
+  Workflows, Step Through / Run All / Resume modes, Edit panel for file remapping,
+  session isolation fixed. Session Log Viewer wired — events capture in real time
+  during playback. SQL editor stays open during and after query execution. Reference
+  tables display as individual selectable sidebar items with REF badge. Clean startup
+  state on fresh build. Suggestion chips auto-generate SQL. Schema/Preview panels
+  persist on dataset switch. Ask Your Data and SQL persist on dataset switch. Step
+  Through panel closes on Clear Workspace. Import progress bar added for large datasets.
+  Refresh and Library buttons removed. Import Dataset and Reference Table buttons
+  expanded to full column width. Farragut demo script (Word doc) built for Casey with
+  talking points, step-by-step guide, and Stan Q&A. All major demo flows tested and
+  working. Remaining open: workflow step parity (occasional failures), Analysis Summary
+  Artifact (M5 Priority 2), AI Mode Switch (M5 Priority 3). 603 tests. v1.15.0.
 [2026-03-23] [CODE] — Tutorial #4 Multi-State Medicaid Diligence built and in Session Library. v1.14.0.
   500-row samples for TX/FL/OH + all 4 reference tables packaged. 12-step narrated session JSON:
   3 dataset imports, 4 reference loads (schema_map, audit_risk_flags, service_category_map, mco_lookup),
@@ -526,6 +551,8 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 ## NEXT ACTIONS
 
 **Business development (Claude.ai):**
+- Casey dry run of Farragut demo script before meeting
+- Confirm meeting date and attendees with Farragut
 - Await Farragut follow-up to Casey's three discovery questions
 - Brief Casey on Stan conversation before McDermott meeting
 - Ask Farragut for sanitized multi-state Medicaid sample file
@@ -535,6 +562,10 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 - Draft proposal and contract template skeleton
 
 **Product / code (Claude Code):**
+- Do one clean dry run of Tutorial #4 from scratch before Farragut meeting
+- Fix workflow step parity — occasional Step Through failures remaining
+- Spec and build Analysis Summary Artifact (M5 Priority 2)
+- Spec and build AI Mode Switch (M5 Priority 3)
 - ~~Spec M5 Priority 1: Multi-State Medicaid Normalization~~ COMPLETE — multi-dataset UNION built (v1.13.0)
 - ~~Phase 1: Validate multi-dataset simultaneous load~~ COMPLETE — TX/FL/OH all load correctly (v1.13.0)
 - ~~Phase 2: Validate schema normalization JOIN~~ COMPLETE — medicaid_schema_map validated, title-case UPPER() fix documented (v1.13.0)

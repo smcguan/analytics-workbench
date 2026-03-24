@@ -1,0 +1,24 @@
+{
+  "id": "real_estate_market_analysis",
+  "name": "Multi-Market Real Estate Analysis",
+  "description": "Analyze residential listing data across Austin and Denver to compare pricing, inventory velocity, and neighborhood tier performance. Demonstrates the Edit Workflow feature — record an analysis once, swap the dataset, rerun on a new market.",
+  "tagline": "Record a market analysis workflow once. Run it on any city in minutes.",
+  "category": "Real Estate",
+  "subcategory": "Market Analysis",
+  "difficulty": "Intermediate",
+  "estimated_minutes": 20,
+  "dataset_file": "austin_listings.csv",
+  "dataset_display_name": "Austin Listings (2,000 rows)",
+  "additional_datasets": [
+    {
+      "file": "denver_listings.csv",
+      "display_name": "Denver Listings (1,800 rows)"
+    }
+  ],
+  "reference_tables": [
+    "neighborhood_tier_map",
+    "property_benchmarks"
+  ],
+  "has_session": true,
+  "version": "1.0"
+}

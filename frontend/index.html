@@ -414,6 +414,23 @@
             0%{background-position:200% 0;}
             100%{background-position:-200% 0;}
         }
+        /* Shimmer loading state for buttons — reuses the same @keyframes shimmer.
+           Uses accent-tinted gradient so the sweep is visible against dark btn backgrounds. */
+        .btn-shimmering{
+            position:relative;
+            overflow:hidden;
+            pointer-events:none;
+        }
+        .btn-shimmering::after{
+            content:"";
+            position:absolute;
+            inset:0;
+            background:linear-gradient(90deg,transparent 25%,rgba(79,140,255,.18) 50%,transparent 75%);
+            background-size:200% 100%;
+            animation:shimmer 1.4s infinite linear;
+            border-radius:inherit;
+            pointer-events:none;
+        }
         .insights-synopsis{
             background:rgba(79,140,255,.06);
             border:1px solid rgba(79,140,255,.14);
@@ -650,9 +667,8 @@
         }
 
         /* Import in-progress state:
-           Applied to both the Import label-button and the Refresh button
-           while an upload is active. Prevents double-import and signals
-           to the user that the system is working. */
+           Applied to the Import label-button while an upload is active.
+           Prevents double-import and signals that the system is working. */
         .import-btn.busy,
         .sidebar-btn-secondary.busy{
             opacity:.55;
@@ -660,20 +676,8 @@
             pointer-events:none;
         }
 
-        /* Persistent import status bar shown below the buttons during upload.
-           Hidden by default; shown only while an import is in flight. */
-        #importStatus{
-            display:none;
-            margin-top:8px;
-            padding:9px 12px;
-            border-radius:12px;
-            border:1px solid rgba(79,140,255,.28);
-            background:rgba(79,140,255,.08);
-            color:#bfd6ff;
-            font-size:12px;
-            line-height:1.4;
-            word-break:break-word;
-        }
+        /* Import status bar — permanently hidden. Replaced by button shimmer. */
+        #importStatus{ display:none !important; }
 
         .content{
             display:grid;
@@ -1585,6 +1589,29 @@
         }
         .wf-edit-choose:hover{ background:#6ba3ff; }
         .wf-edit-use-orig{ font-size:11px; color:var(--muted2); display:flex; align-items:center; gap:4px; }
+        /* Column check detail grid — shown during tutorial Edit panel steps */
+        .wf-edit-col-grid{
+            display:grid; grid-template-columns:repeat(2, 1fr); gap:4px 12px;
+            margin-top:10px; padding:10px 12px;
+            background:rgba(79,140,255,.06); border:1px solid rgba(79,140,255,.14);
+            border-radius:10px;
+        }
+        .wf-edit-col-item{
+            display:flex; align-items:center; gap:6px;
+            font-size:12px; color:var(--muted2); padding:3px 0;
+            transition:color .3s ease;
+        }
+        .wf-edit-col-item.matched{ color:#6ee7b7; font-weight:600; }
+        .wf-edit-col-item .col-check-icon{
+            font-size:14px; opacity:0; transition:opacity .3s ease;
+        }
+        .wf-edit-col-item.matched .col-check-icon{ opacity:1; }
+        .wf-edit-col-summary{
+            margin-top:8px; font-size:12px; font-weight:600;
+            color:#6ee7b7; text-align:center;
+            opacity:0; transition:opacity .4s ease;
+        }
+        .wf-edit-col-summary.visible{ opacity:1; }
         .wf-edit-footer{
             padding:12px 20px; border-top:1px solid var(--stroke); flex-shrink:0;
             display:flex; justify-content:flex-end; gap:8px;
@@ -2043,7 +2070,7 @@
                         <button class="nav-item" id="sidebarSaveAsBtn" style="flex:0 0 60px; min-width:0;" title="Save the current session with a name">Save</button>
                     </div>
                     <div style="display:flex; gap:5px;">
-                        <label class="nav-item" style="cursor:pointer; display:flex; justify-content:space-between; align-items:center; flex:1; min-width:0;" title="Toggle the Session Log drawer">
+                        <label class="nav-item" style="cursor:pointer; display:flex; align-items:center; gap:6px; flex:1; min-width:0;" title="Toggle the Session Log drawer">
                             <span>Session Log</span>
                             <input type="checkbox" id="sessionLogToggle" style="margin:0;">
                         </label>
@@ -2346,8 +2373,8 @@ LIMIT 100</textarea>
 
                             <h3>Workflows</h3>
                             <div style="display:flex; gap:8px; margin-bottom:10px;">
-                                <button class="btn primary" id="welcomeStoredBtn" style="flex:1;" title="Browse saved workflows">Stored Workflows</button>
-                                <button class="btn" id="welcomeExampleBtn" style="flex:1;" title="Browse example workflows with sample data">Example Workflows</button>
+                                <button class="btn primary" id="welcomeExampleBtn" style="flex:1;" title="Browse example workflows with sample data">Example Workflows</button>
+                                <button class="btn" id="welcomeStoredBtn" style="flex:1;" title="Browse saved workflows">Stored Workflows</button>
                             </div>
 
                             <hr>
@@ -2559,8 +2586,9 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 
 <hr>
 <h3>Example Cases</h3>
-<p>Curated, documented analytical workflows you can run inside AW. 8 cases across 5 domains:</p>
+<p>Curated, documented analytical workflows you can run inside AW. 9 cases across 6 domains:</p>
 <ul>
+<li><strong>Real Estate</strong> — Multi-Market Real Estate Analysis (Austin/Denver neighborhood pricing, outlier detection, tier performance, Edit Workflow demo)</li>
 <li><strong>Healthcare Policy — PE Diligence</strong> — Multi-State Medicaid Diligence (TX/FL/OH schema normalization, MCO concentration, audit risk, cross-state reimbursement comparison)</li>
 <li><strong>Medicare &amp; Drug Policy</strong> — Part D IRA Exclusion, Part B GLOBE Candidates, USP Classification</li>
 <li><strong>Transportation &amp; Operations</strong> — NYC Taxi Trip Analysis</li>
@@ -2653,6 +2681,26 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 
     <script>
         const $ = (id) => document.getElementById(id);
+
+        // ---------------------------------------------------------------
+        // Shimmer loading state for buttons
+        // ---------------------------------------------------------------
+        function setButtonShimmering(btn, loadingLabel) {
+            if (!btn) return;
+            if (!btn._origLabel) btn._origLabel = btn.textContent;
+            btn.textContent = loadingLabel || "Loading\u2026";
+            btn.disabled = true;
+            btn.classList.add("btn-shimmering");
+        }
+        function clearButtonShimmering(btn) {
+            if (!btn) return;
+            btn.classList.remove("btn-shimmering");
+            btn.disabled = false;
+            if (btn._origLabel) {
+                btn.textContent = btn._origLabel;
+                delete btn._origLabel;
+            }
+        }
 
         function toast(msg, durationMs) {
             const el = $("toast");
@@ -2856,12 +2904,20 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                     renderDatasets();
                     updateSelectedDatasetSummary();
                     await loadDatasetMeta(selectedDataset);
+                    // If a Schema or Preview panel is open, refresh it for
+                    // the new dataset instead of closing it.  Otherwise just
+                    // reset the inspect area as before.
+                    const prevMode = inspectMode;
                     resetInspectState();
-                    // Clear the prompt and SQL editor so the user starts
-                    // fresh with the new dataset — old questions and queries
-                    // from a previous dataset are misleading in this context.
-                    $("askPrompt").value = "";
-                    $("sqlEditor").value = "SELECT *\nFROM dataset\nLIMIT 100";
+                    if (prevMode === "schema") {
+                        await inspectSchema();
+                    } else if (prevMode === "preview") {
+                        await inspectPreview();
+                    }
+                    // Preserve the analyst's Ask Your Data question and SQL
+                    // editor contents — they are work-in-progress and must
+                    // survive dataset switching.  Only clear results, which
+                    // are dataset-specific.
                     $("resultsMeta").textContent = "No query executed yet.";
                     $("resultsCount").textContent = "0 rows";
                     $("resultsHead").innerHTML = "";
@@ -3067,35 +3123,16 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 
         async function _doImport(file, datasetName, fileTypeHint, overwrite = false, stripChars = false) {
             const importLabel = $("importDatasetBtn");
-            const refreshBtn  = $("refreshDatasetsBtn");
-            const statusBar   = $("importStatus");
 
-            // --- Lock UI and show persistent status ---
+            // --- Lock UI: shimmer on button is the only loading indicator ---
             importLabel.classList.add("busy");
-            refreshBtn.classList.add("busy");
-
-            function setStatus(msg) {
-                statusBar.textContent = msg;
-                statusBar.style.display = "block";
-            }
-
-            function clearStatus() {
-                statusBar.style.display = "none";
-                statusBar.textContent = "";
-            }
+            setButtonShimmering(importLabel, "Importing\u2026");
 
             function unlockUi() {
                 importLabel.classList.remove("busy");
-                refreshBtn.classList.remove("busy");
+                clearButtonShimmering(importLabel);
+                importLabel.textContent = "+ Import Dataset";
             }
-
-            const sizeLabel = file.size > 0
-                ? (file.size >= 1048576
-                    ? (file.size / 1048576).toFixed(1) + " MB"
-                    : (file.size / 1024).toFixed(0) + " KB")
-                : "";
-
-            setStatus(`Uploading ${file.name}${sizeLabel ? " (" + sizeLabel + ")" : ""}… this may take a moment for large files.`);
 
             try {
                 const form = new FormData();
@@ -3125,7 +3162,6 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                     // The backend does not support deregister or overwrite yet,
                     // so the only working path is for the user to choose a new name.
                     if (response.status === 409 || msg.toLowerCase().includes("already exists")) {
-                        clearStatus();
                         unlockUi();
                         const newName = await awPrompt(
                             "Dataset Already Exists",
@@ -3156,7 +3192,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                     data.dataset_name ||
                     datasetName;
 
-                setStatus(`Processing "${returnedName}"… waiting for backend registration.`);
+                // Button continues shimmering while metadata is built
 
                 // Poll using a TARGETED meta check on just this one dataset.
                 // Do NOT call loadDatasets() here — that hits /api/datasets and
@@ -3191,7 +3227,6 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                     } catch (_) {
                         // Meta not ready yet — keep polling
                     }
-                    setStatus(`Processing "${returnedName}"… (attempt ${i + 2} of 10)`);
                     await new Promise(resolve => setTimeout(resolve, 600));
                 }
 
@@ -3225,7 +3260,6 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 $("resultsHead").innerHTML = "";
                 $("resultsBody").innerHTML = "";
 
-                clearStatus();
                 toast(`Imported: ${returnedName}`);
                 _onDatasetImported();
 
@@ -3243,7 +3277,6 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 } catch (_) {}
 
             } catch (e) {
-                clearStatus();
                 toast("Import failed: " + e.message, 8000);
             } finally {
                 unlockUi();
@@ -3270,8 +3303,10 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 formData.append("reference_name", maybeName.trim());
             }
 
+            const refBtn = $("importReferenceBtn");
             try {
-                $("importReferenceBtn").classList.add("busy");
+                refBtn.classList.add("busy");
+                setButtonShimmering(refBtn, "Loading\u2026");
                 const data = await apiJson("/api/references/import", {
                     method: "POST",
                     body: formData,
@@ -3286,7 +3321,9 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             } catch (e) {
                 toast("Reference import failed: " + e.message, 8000);
             } finally {
-                $("importReferenceBtn").classList.remove("busy");
+                refBtn.classList.remove("busy");
+                clearButtonShimmering(refBtn);
+                refBtn.textContent = "+ Reference Table";
             }
         }
 
@@ -4122,6 +4159,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         let _replayMode = false;
         let _replaySessionData = null;
         let _replayRequiredDatasets = [];
+        let _tutorialAborted = false;
 
         function _renderReplayDatasets(dsList) {
             const container = $("workflowMapList");
@@ -4249,79 +4287,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 
             const container = document.createElement("div");
 
-            // ── Section 1: Stored Workflows (user-saved sessions) ──
-            try {
-                const storedHeader = document.createElement("div");
-                storedHeader.className = "ec-group-header" + (_focus !== "stored" ? " collapsed" : "");
-                storedHeader.innerHTML = '<span class="ec-group-toggle">&#9660;</span> Stored Workflows';
-                const storedBody = document.createElement("div");
-                storedBody.className = "ec-group-body" + (_focus !== "stored" ? " collapsed" : "");
-                storedHeader.addEventListener("click", () => {
-                    storedHeader.classList.toggle("collapsed");
-                    storedBody.classList.toggle("collapsed");
-                });
-
-                const data = await apiJson("/api/sessions/saved");
-                const sessions = data.sessions || [];
-
-                if (sessions.length === 0) {
-                    storedBody.innerHTML = '<div style="color:var(--muted); font-size:12px; padding:8px 0;">No saved workflows yet. Run an example workflow and save it.</div>';
-                } else {
-                    for (const s of sessions) {
-                        const card = document.createElement("div");
-                        card.className = "wf-card";
-                        const date = s.started_at ? new Date(s.started_at).toLocaleDateString() : "";
-                        const evCount = s.event_count || 0;
-
-                        card.innerHTML =
-                            '<div class="wf-card-header">' +
-                                '<span class="wf-card-name">' + (s.name || s.filename) + '</span>' +
-                                '<span class="wf-card-meta">' + date + '</span>' +
-                            '</div>' +
-                            '<div class="wf-card-meta">' + evCount + ' events' +
-                                (s.description ? ' — ' + s.description : '') +
-                            '</div>' +
-                            '<div class="wf-card-actions">' +
-                                '<button class="btn" data-mode="edit" data-fn="' + s.filename + '">Edit</button>' +
-                                '<button class="btn" data-mode="stepthrough" data-fn="' + s.filename + '">Step Through</button>' +
-                                '<button class="btn" data-mode="runall" data-fn="' + s.filename + '">Run All</button>' +
-                                '<button class="btn primary" data-mode="resume" data-fn="' + s.filename + '">Resume</button>' +
-                                '<button class="btn" data-mode="delete" data-fn="' + s.filename + '" data-name="' + (s.name || s.filename).replace(/"/g, '&quot;') + '" style="background:rgba(231,76,60,.15);color:#e74c3c;border-color:rgba(231,76,60,.3);">Delete</button>' +
-                            '</div>';
-
-                        card.querySelectorAll("[data-mode]").forEach(btn => {
-                            btn.addEventListener("click", async () => {
-                                if (btn.dataset.mode === "edit") {
-                                    _openWorkflowEditPanel(btn.dataset.fn);
-                                    return;
-                                }
-                                if (btn.dataset.mode === "delete") {
-                                    const confirmed = await awConfirm(
-                                        "Delete " + btn.dataset.name + "?",
-                                        "This cannot be undone."
-                                    );
-                                    if (!confirmed) return;
-                                    try {
-                                        await apiJson("/api/sessions/" + encodeURIComponent(btn.dataset.fn) + "/delete", { method: "POST" });
-                                        card.remove();
-                                        toast("Workflow deleted.");
-                                    } catch (e) {
-                                        toast("Delete failed: " + (e.message || ""), 6000);
-                                    }
-                                    return;
-                                }
-                                overlay.classList.remove("visible");
-                                _executeWorkflowMode(btn.dataset.mode, btn.dataset.fn);
-                            });
-                        });
-                        storedBody.appendChild(card);
-                    }
-                }
-                container.appendChild(storedHeader);
-                container.appendChild(storedBody);
-            } catch (_) {}
-
-            // ── Section 2: Example Workflows (built-in cases) ──
+            // ── Section 1: Example Workflows (built-in cases) ──
             try {
                 const exHeader = document.createElement("div");
                 exHeader.className = "ec-group-header" + (_focus !== "examples" ? " collapsed" : "");
@@ -4396,6 +4362,78 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 
                 container.appendChild(exHeader);
                 container.appendChild(exBody);
+            } catch (_) {}
+
+            // ── Section 2: Stored Workflows (user-saved sessions) ──
+            try {
+                const storedHeader = document.createElement("div");
+                storedHeader.className = "ec-group-header" + (_focus !== "stored" ? " collapsed" : "");
+                storedHeader.innerHTML = '<span class="ec-group-toggle">&#9660;</span> Stored Workflows';
+                const storedBody = document.createElement("div");
+                storedBody.className = "ec-group-body" + (_focus !== "stored" ? " collapsed" : "");
+                storedHeader.addEventListener("click", () => {
+                    storedHeader.classList.toggle("collapsed");
+                    storedBody.classList.toggle("collapsed");
+                });
+
+                const data = await apiJson("/api/sessions/saved");
+                const sessions = data.sessions || [];
+
+                if (sessions.length === 0) {
+                    storedBody.innerHTML = '<div style="color:var(--muted); font-size:12px; padding:8px 0;">No saved workflows yet. Run an example workflow and save it.</div>';
+                } else {
+                    for (const s of sessions) {
+                        const card = document.createElement("div");
+                        card.className = "wf-card";
+                        const date = s.started_at ? new Date(s.started_at).toLocaleDateString() : "";
+                        const evCount = s.event_count || 0;
+
+                        card.innerHTML =
+                            '<div class="wf-card-header">' +
+                                '<span class="wf-card-name">' + (s.name || s.filename) + '</span>' +
+                                '<span class="wf-card-meta">' + date + '</span>' +
+                            '</div>' +
+                            '<div class="wf-card-meta">' + evCount + ' events' +
+                                (s.description ? ' — ' + s.description : '') +
+                            '</div>' +
+                            '<div class="wf-card-actions">' +
+                                '<button class="btn" data-mode="edit" data-fn="' + s.filename + '">Edit</button>' +
+                                '<button class="btn" data-mode="stepthrough" data-fn="' + s.filename + '">Step Through</button>' +
+                                '<button class="btn" data-mode="runall" data-fn="' + s.filename + '">Run All</button>' +
+                                '<button class="btn primary" data-mode="resume" data-fn="' + s.filename + '">Resume</button>' +
+                                '<button class="btn" data-mode="delete" data-fn="' + s.filename + '" data-name="' + (s.name || s.filename).replace(/"/g, '&quot;') + '" style="background:rgba(231,76,60,.15);color:#e74c3c;border-color:rgba(231,76,60,.3);">Delete</button>' +
+                            '</div>';
+
+                        card.querySelectorAll("[data-mode]").forEach(btn => {
+                            btn.addEventListener("click", async () => {
+                                if (btn.dataset.mode === "edit") {
+                                    _openWorkflowEditPanel(btn.dataset.fn);
+                                    return;
+                                }
+                                if (btn.dataset.mode === "delete") {
+                                    const confirmed = await awConfirm(
+                                        "Delete " + btn.dataset.name + "?",
+                                        "This cannot be undone."
+                                    );
+                                    if (!confirmed) return;
+                                    try {
+                                        await apiJson("/api/sessions/" + encodeURIComponent(btn.dataset.fn) + "/delete", { method: "POST" });
+                                        card.remove();
+                                        toast("Workflow deleted.");
+                                    } catch (e) {
+                                        toast("Delete failed: " + (e.message || ""), 6000);
+                                    }
+                                    return;
+                                }
+                                overlay.classList.remove("visible");
+                                _executeWorkflowMode(btn.dataset.mode, btn.dataset.fn);
+                            });
+                        });
+                        storedBody.appendChild(card);
+                    }
+                }
+                container.appendChild(storedHeader);
+                container.appendChild(storedBody);
             } catch (_) {}
 
             $("workflowsContent").innerHTML = "";
@@ -4661,11 +4699,16 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             if (t === "insights_generated") return "Generate insights for " + (d.dataset || "");
             if (t === "suggestions_generated") return "Suggestions generated";
             if (t === "ai_sql_generated") return "AI SQL generated";
+            if (t === "edit_panel_open") return "Open Edit panel: " + (d.workflow_name || "");
+            if (t === "edit_panel_choose") return "Swap dataset: " + (d.original_file || "") + " \u2192 " + (d.new_file || "");
+            if (t === "edit_panel_check") return "Column check: " + (d.columns_matched || 0) + "/" + (d.columns_checked || 0) + " matched";
+            if (t === "edit_panel_run") return "Run workflow from Edit panel";
             return t.replace(/_/g, " ");
         }
 
         function _isReplayableStep(eventType) {
-            return ["dataset_import", "query_run", "reference_load", "reference_delete", "export", "session_end"].includes(eventType);
+            return ["dataset_import", "query_run", "reference_load", "reference_delete", "export", "session_end",
+                    "edit_panel_open", "edit_panel_choose", "edit_panel_check", "edit_panel_run"].includes(eventType);
         }
 
         async function openTutorial(filename) {
@@ -5091,6 +5134,172 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 toast("Session complete — review the audit trail below.");
                 return;
             }
+
+            // ---------------------------------------------------------------
+            // Edit panel tutorial steps — drive the real Edit panel UI
+            // ---------------------------------------------------------------
+
+            if (step.event_type === "edit_panel_open") {
+                // Build and open the Edit panel with tutorial data (no stored workflow file needed)
+                _wfEditFilename = "";
+                _wfEditMappings = {};
+                _wfEditPrepData = {
+                    session_name: d.workflow_name || "Workflow",
+                    events: tutorialSteps,
+                    event_count: tutorialSteps.length,
+                    replayable_count: tutorialSteps.filter(s => _isReplayableStep(s.event_type)).length,
+                    required_datasets: (d.datasets || []).map(ds => ({
+                        name: ds.name, exists: true, row_count: ds.row_count
+                    })),
+                    required_references: (d.references || []).map(r => ({
+                        name: r.name, exists: true
+                    }))
+                };
+
+                $("wfEditName").value = d.workflow_name || "Workflow";
+                $("wfEditMeta").textContent =
+                    _wfEditPrepData.replayable_count + " steps \u2022 " + _wfEditPrepData.event_count + " events";
+
+                // Render datasets section
+                const dsC = $("wfEditDatasets");
+                dsC.innerHTML = "";
+                for (const ds of (d.datasets || [])) {
+                    const row = document.createElement("div");
+                    row.className = "wf-edit-row";
+                    row.dataset.dsName = ds.name;
+                    row.innerHTML =
+                        '<span class="wf-edit-orig">' + (ds.original_file || ds.name) + '</span>' +
+                        '<span class="wf-edit-mapped" id="wfed-mapped-' + ds.name + '">' + (ds.original_file || ds.name) + '</span>' +
+                        '<span class="wf-edit-rows" id="wfed-rows-' + ds.name + '">' + (ds.row_count ? num(ds.row_count) + " rows" : "") + '</span>' +
+                        '<span class="wf-edit-check" id="wfed-check-' + ds.name + '">\u2705</span>' +
+                        '<label class="wf-edit-choose">Choose File<input type="file" accept=".csv,.tsv,.xlsx,.parquet" style="display:none;" data-ds="' + ds.name + '"></label>';
+                    row.querySelector('input[type="file"]').addEventListener("change", (e) => {
+                        const file = e.target.files && e.target.files[0];
+                        if (file) _wfEditImportFile(file, ds.name);
+                    });
+                    dsC.appendChild(row);
+                }
+
+                // Render references section
+                const refC = $("wfEditRefs");
+                refC.innerHTML = "";
+                for (const ref of (d.references || [])) {
+                    const row = document.createElement("div");
+                    row.className = "wf-edit-row";
+                    row.innerHTML =
+                        '<span class="wf-edit-orig">' + ref.name + '</span>' +
+                        '<span class="wf-edit-check">\u2705</span>' +
+                        '<label class="wf-edit-use-orig"><input type="checkbox" checked disabled> Use original</label>';
+                    refC.appendChild(row);
+                }
+
+                // Column check area and Run Now start hidden/disabled
+                $("wfEditColWarnings").style.display = "none";
+                $("wfEditColWarnings").innerHTML = "";
+                $("wfEditRunNowBtn").disabled = true;
+                $("wfEditRunNowBtn").style.opacity = "0.4";
+
+                // Open drawer
+                closeSessionLogDrawer();
+                $("sessionLogToggle").checked = false;
+                $("refGuideDrawer").classList.remove("open");
+                $("wfEditDrawer").classList.add("open");
+                toast("Edit panel opened.");
+                return;
+            }
+
+            if (step.event_type === "edit_panel_choose") {
+                // Simulate choosing a new file — update the mapped name, row count, show loading
+                const targetName = d.target_dataset || "";
+                const mappedEl = document.getElementById("wfed-mapped-" + targetName);
+                const rowsEl = document.getElementById("wfed-rows-" + targetName);
+                const checkEl = document.getElementById("wfed-check-" + targetName);
+
+                if (mappedEl) mappedEl.textContent = d.new_file || "new file";
+                if (rowsEl) rowsEl.textContent = d.new_row_count ? num(d.new_row_count) + " rows" : "";
+                if (checkEl) checkEl.textContent = "\u23F3"; // hourglass — checking
+
+                // Actually import the new file so subsequent queries work
+                if (_tutorialCaseId && d.new_source_file) {
+                    try {
+                        let importUrl = "/api/example_cases/" + encodeURIComponent(_tutorialCaseId) + "/import_dataset";
+                        importUrl += "?filename=" + encodeURIComponent(d.new_source_file);
+                        const result = await apiJson(importUrl, { method: "POST" });
+                        if (result.dataset) {
+                            if (!datasets.find(ds => ds.name === result.dataset)) {
+                                datasets.push({ name: result.dataset, row_count: result.row_count, column_count: result.column_count });
+                            }
+                            if (rowsEl) rowsEl.textContent = num(result.row_count) + " rows";
+                        }
+                    } catch (_) {}
+                }
+                toast("File selected: " + (d.new_file || ""));
+                return;
+            }
+
+            if (step.event_type === "edit_panel_check") {
+                // Animate the column check results inside the Edit panel
+                const columns = d.column_list || [];
+                const matched = d.columns_matched || columns.length;
+                const total = d.columns_checked || columns.length;
+                const targetName = d.target_dataset || "";
+                const checkEl = document.getElementById("wfed-check-" + targetName);
+
+                // Build the column check grid inside wfEditColWarnings
+                const container = $("wfEditColWarnings");
+                container.style.display = "block";
+                container.innerHTML = "";
+
+                const grid = document.createElement("div");
+                grid.className = "wf-edit-col-grid";
+                for (const col of columns) {
+                    const item = document.createElement("div");
+                    item.className = "wf-edit-col-item";
+                    item.innerHTML = '<span class="col-check-icon">\u2714</span> ' + col;
+                    grid.appendChild(item);
+                }
+                container.appendChild(grid);
+
+                const summary = document.createElement("div");
+                summary.className = "wf-edit-col-summary";
+                summary.textContent = matched + " of " + total + " columns matched \u2014 workflow ready to run";
+                container.appendChild(summary);
+
+                // Animate: light up each column one by one
+                const items = grid.querySelectorAll(".wf-edit-col-item");
+                for (let i = 0; i < items.length; i++) {
+                    await new Promise(r => setTimeout(r, 120));
+                    items[i].classList.add("matched");
+                }
+
+                // Update the row check icon to green
+                if (checkEl) checkEl.textContent = "\u2705";
+
+                // Show summary line with a brief pause
+                await new Promise(r => setTimeout(r, 400));
+                summary.classList.add("visible");
+
+                // Activate Run Now button
+                await new Promise(r => setTimeout(r, 600));
+                $("wfEditRunNowBtn").disabled = false;
+                $("wfEditRunNowBtn").style.opacity = "1";
+
+                toast(matched + " of " + total + " columns matched.");
+                return;
+            }
+
+            if (step.event_type === "edit_panel_run") {
+                // Close the Edit panel and prepare for Denver queries
+                _closeWorkflowEditPanel();
+
+                // Switch to the new dataset if specified
+                if (d.dataset) {
+                    selectedDataset = d.dataset;
+                    renderDatasets();
+                }
+                toast("Running workflow against new dataset...");
+                return;
+            }
         }
 
         function _tutorialPause(ms) {
@@ -5098,16 +5307,17 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         }
 
         async function tutorialRunAll() {
-            $("tutorialRunAllBtn").disabled = true;
+            _tutorialAborted = false;
+            setButtonShimmering($("tutorialRunAllBtn"), "Running\u2026");
             $("tutorialNextBtn").disabled = true;
             $("tutorialPrevBtn").disabled = true;
-            $("tutorialRunAllBtn").textContent = "Running...";
             $("tutorialStatus").textContent = "Running full replay...";
 
             let passed = 0, failed = 0, skipped = 0;
 
             try {
                 for (let i = 0; i < tutorialSteps.length; i++) {
+                    if (_tutorialAborted) break;
                     tutorialCurrentStep = i;
                     const step = tutorialSteps[i];
 
@@ -5174,10 +5384,9 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 $("tutorialStatus").textContent = "Replay failed: " + (e.message || "Unknown error");
                 toast("Replay failed: " + (e.message || ""), 6000);
             } finally {
-                $("tutorialRunAllBtn").disabled = false;
+                clearButtonShimmering($("tutorialRunAllBtn"));
                 $("tutorialNextBtn").disabled = false;
                 $("tutorialPrevBtn").disabled = false;
-                $("tutorialRunAllBtn").textContent = "Run All";
                 tutorialUpdateDisplay();
             }
         }
@@ -5296,14 +5505,11 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 chip.textContent = q;
                 chip.addEventListener("click", () => {
                     $("askPrompt").value = q;
-                    // Clear the SQL editor so the user doesn't see stale SQL
-                    // from a previous question and mistake it for output
-                    // generated for this new suggestion.
-                    $("sqlEditor").value = "SELECT *\nFROM dataset\nLIMIT 100";
                     $("suggestionsPopover").style.display = "none";
                     suggestionsVisible = false;
-                    // Move focus to Generate SQL so user can hit it immediately
-                    $("generateSqlBtn").focus();
+                    // Auto-trigger SQL generation — clicking a suggestion is
+                    // a complete action; no extra Generate SQL click needed.
+                    generateAiSql();
                 });
                 $("suggestionsChips").appendChild(chip);
             }
@@ -5343,8 +5549,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             $("suggestionsPopover").style.display = "block";
             suggestionsVisible = true;
 
-            $("suggestionsBtn").disabled = true;
-            $("suggestionsBtn").textContent = "Loading…";
+            setButtonShimmering($("suggestionsBtn"), "Loading\u2026");
 
             try {
                 const url = "/api/ai/suggest_questions?dataset=" +
@@ -5364,8 +5569,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 $("suggestionsChips").innerHTML =
                     '<span class="suggestions-empty">Could not load suggestions: ' + e.message + '</span>';
             } finally {
-                $("suggestionsBtn").disabled = false;
-                $("suggestionsBtn").textContent = "Suggestions";
+                clearButtonShimmering($("suggestionsBtn"));
             }
         }
 
@@ -5666,6 +5870,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 
             $("explainText").textContent = "Explaining…";
             panel.style.display = "block";
+            setButtonShimmering($("explainBtn"), "Explaining\u2026");
 
             try {
                 const data = await apiJson("/api/ai/explain", {
@@ -5681,6 +5886,8 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 $("explainText").textContent = data.explanation || "(No explanation returned.)";
             } catch (e) {
                 $("explainText").textContent = "Could not generate explanation: " + e.message;
+            } finally {
+                clearButtonShimmering($("explainBtn"));
             }
         }
 
@@ -5736,8 +5943,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             let lastError = null;
 
             try {
-                $("generateSqlBtn").disabled = true;
-                $("generateSqlBtn").textContent = "Generating...";
+                setButtonShimmering($("generateSqlBtn"), "Generating\u2026");
                 $("explainPanel").style.display = "none";
                 $("explainText").textContent = "";
 
@@ -5787,8 +5993,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 toast("Generate SQL failed. Loaded starter SQL instead.", 8000);
                 console.error("Generate SQL failed:", e);
             } finally {
-                $("generateSqlBtn").disabled = false;
-                $("generateSqlBtn").textContent = "Generate SQL";
+                clearButtonShimmering($("generateSqlBtn"));
             }
         }
 
@@ -6007,6 +6212,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             if (!dataset) { toast("Select a dataset first."); return; }
             if (!sql) { toast("Enter a SQL query first."); return; }
 
+            setButtonShimmering($("runSqlBtn"), "Running\u2026");
             try {
                 $("resultsMeta").textContent = "Running SQL...";
                 $("chartTab").disabled = true;
@@ -6047,12 +6253,13 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 $("resultsMeta").textContent = metaText;
                 toast("SQL executed.");
                 _onQueryExecuted();
-                _collapseEditorWithPreview(sql);
             } catch (e) {
                 const errMsg = e.message || "Unknown error";
                 $("resultsMeta").textContent = "ERROR: " + errMsg;
                 toast("SQL failed: " + errMsg, 8000);
                 console.error("SQL execution error:", errMsg);
+            } finally {
+                clearButtonShimmering($("runSqlBtn"));
             }
         }
 
@@ -6061,10 +6268,8 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 toast("Run a query first.");
                 return;
             }
+            setButtonShimmering($("copyResultSummaryBtn"), "Copying\u2026");
             try {
-                $("copyResultSummaryBtn").disabled = true;
-                $("copyResultSummaryBtn").textContent = "Generating...";
-
                 const data = await apiJson("/api/results/passport", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -6082,8 +6287,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             } catch (e) {
                 toast("Result summary failed: " + (e.message || "Unknown error"), 8000);
             } finally {
-                $("copyResultSummaryBtn").disabled = false;
-                $("copyResultSummaryBtn").textContent = "Copy Result Summary";
+                clearButtonShimmering($("copyResultSummaryBtn"));
             }
         }
 
@@ -6093,6 +6297,9 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 
             if (!dataset) { toast("Select a dataset first."); return; }
             if (!sql) { toast("Run or edit a SQL query first."); return; }
+
+            const exportBtn = format === "xlsx" ? $("exportExcelBtn") : $("exportTsvBtn");
+            setButtonShimmering(exportBtn, "Exporting\u2026");
 
             try {
                 const exportBody = { dataset, sql, format };
@@ -6130,6 +6337,8 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 toast(`${format.toUpperCase()} export started.`);
             } catch (e) {
                 toast("Export failed: " + e.message);
+            } finally {
+                clearButtonShimmering(exportBtn);
             }
         }
 
@@ -6231,9 +6440,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             if (!selectedDataset) { toast("Select a dataset first."); return; }
 
             const btn = $("exportPassportBtn");
-            const origText = btn.textContent;
-            btn.disabled = true;
-            btn.textContent = "Generating…";
+            setButtonShimmering(btn, "Generating\u2026");
 
             try {
                 const data = await apiJson(
@@ -6258,8 +6465,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             } catch (e) {
                 toast("Export Passport failed: " + e.message);
             } finally {
-                btn.disabled = false;
-                btn.textContent = origText;
+                clearButtonShimmering(btn);
             }
         }
 
@@ -6637,6 +6843,9 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         });
 
         $("sidebarClearWorkspaceBtn").addEventListener("click", async () => {
+            // Stop any running Step Through / Run All workflow
+            _tutorialAborted = true;
+            tutorialClose();
             datasets = [];
             selectedDataset = "";
             currentReference = "";
@@ -6798,8 +7007,10 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 
             datasets = [];
             selectedDataset = "";
+            currentReference = "";
+            loadedReferences = [];
             renderDatasets();
-            loadReferences();
+            renderReferences();
             updateSelectedDatasetSummary();
             setActiveTab("table");
 

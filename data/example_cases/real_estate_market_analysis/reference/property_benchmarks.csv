@@ -1,0 +1,9 @@
+property_type,city,median_list_price,median_price_sqft,median_dom
+Single Family,Austin,520000,800,23
+Condo,Austin,380000,720,28
+Townhouse,Austin,440000,760,25
+Multi-Family,Austin,680000,650,20
+Single Family,Denver,590000,850,15
+Condo,Denver,420000,790,18
+Townhouse,Denver,480000,820,16
+Multi-Family,Denver,740000,700,14

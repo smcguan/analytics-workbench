@@ -1,0 +1,21 @@
+zip_code,city,neighborhood,tier,notes
+78701,Austin,Downtown,Tier 1,"Urban core — high demand, low inventory"
+78702,Austin,East Austin,Tier 1,"Rapidly appreciating, high investor activity"
+78703,Austin,Tarrytown,Tier 1,Established wealth corridor
+78704,Austin,South Congress,Tier 2,"Strong lifestyle amenities, mixed inventory"
+78705,Austin,UT Area,Tier 2,Student/young professional demand driver
+78731,Austin,Northwest Hills,Tier 2,"Family-oriented, stable appreciation"
+78745,Austin,South Austin,Tier 3,"Emerging, price-sensitive buyers"
+78750,Austin,Northwest,Tier 2,Tech corridor spillover
+78759,Austin,Great Hills,Tier 2,Suburban professional
+78741,Austin,Southeast,Tier 3,"Entry-level, highest days on market"
+80202,Denver,Downtown,Tier 1,"Urban core — condo-heavy, fast moving"
+80203,Denver,Capitol Hill,Tier 2,"Mixed use, historic stock"
+80204,Denver,West Colfax,Tier 3,"Gentrifying, entry-level opportunity"
+80205,Denver,Five Points,Tier 2,"Historic, appreciating rapidly"
+80206,Denver,Cherry Creek,Tier 1,"Premium retail corridor, highest $/sqft"
+80207,Denver,Park Hill,Tier 2,"Family demand, stable"
+80209,Denver,Washington Park,Tier 1,"Top family neighborhood, low DOM"
+80210,Denver,University,Tier 1,"High demand, near DU"
+80218,Denver,Congress Park,Tier 2,"Bungalow stock, strong appreciation"
+80220,Denver,Montclair,Tier 2,"Quiet, steady family market"
