@@ -33,10 +33,22 @@
       }
     },
     {
+      "event_type": "inspect_schema",
+      "timestamp": "2026-03-20T21:00:07.000000+00:00",
+      "details": { "dataset": "logistics_shipments_sample" },
+      "narration": {
+        "pre": "Inspect the schema to understand the column layout before querying.",
+        "post": "18 columns. freight_cost, surcharge, and total_cost are the monetary fields. transport_mode and carrier are categorical — good for GROUP BY. delay_hours is numeric. The on_time column is boolean for filtering."
+      }
+    },
+    {
       "event_type": "insights_generated",
       "timestamp": "2026-03-20T21:00:12.000000+00:00",
       "details": { "dataset": "logistics_shipments_sample", "insight_count": 5 },
-      "narration": { "pre": "Generating insights.", "post": "Insights ready. Let's explore the data." }
+      "narration": {
+        "pre": "AI generates automatic insights from the column structure.",
+        "post": "Insights ready — cost concentration by transport mode and delay outliers flagged. Each card has Explore in Query. Let's run our own queries."
+      }
     },
     {
       "event_type": "query_run",

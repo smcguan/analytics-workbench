@@ -33,6 +33,15 @@
       }
     },
     {
+      "event_type": "inspect_schema",
+      "timestamp": "2026-03-20T18:00:07.000000+00:00",
+      "details": { "dataset": "part_b_spending_sample" },
+      "narration": {
+        "pre": "Inspect the schema first. Part B has a different structure than Part D — it uses HCPCS billing codes instead of brand/generic name pairs, and has no manufacturer column.",
+        "post": "47 columns. Key difference from Part D: HCPCS_Cd and HCPCS_Desc identify the drug instead of Brnd_Name alone. Spending columns follow the same Tot_Spndng / Avg_Spndng pattern. The Avg_DY23_ASP_Price column is the Average Sales Price — a Part B-specific pricing metric."
+      }
+    },
+    {
       "event_type": "insights_generated",
       "timestamp": "2026-03-20T18:00:12.000000+00:00",
       "details": {
@@ -41,7 +50,7 @@
       },
       "narration": {
         "pre": "AI is analyzing the dataset structure to generate automatic insights.",
-        "post": "Insights generated. Now let's explore the spending distribution before applying GLOBE criteria."
+        "post": "Insights generated. The AI identified spending concentration and year-over-year trends. Each card has Explore in Query to load the SQL. Now let's explore the spending distribution before applying GLOBE criteria."
       }
     },
     {

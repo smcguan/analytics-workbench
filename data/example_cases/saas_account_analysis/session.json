@@ -33,10 +33,22 @@
       }
     },
     {
+      "event_type": "inspect_schema",
+      "timestamp": "2026-03-20T22:00:07.000000+00:00",
+      "details": { "dataset": "saas_accounts_sample" },
+      "narration": {
+        "pre": "Inspect the schema to see the column types. SaaS data mixes financial metrics (ARR), usage metrics (seats, adoption), and risk categories.",
+        "post": "20 columns. annual_recurring_revenue is the monetary field — it will display as formatted currency. plan_tier, industry, and churn_risk are categorical segmentation columns. seat_utilization and feature_adoption_rate are percentages."
+      }
+    },
+    {
       "event_type": "insights_generated",
       "timestamp": "2026-03-20T22:00:12.000000+00:00",
       "details": { "dataset": "saas_accounts_sample", "insight_count": 5 },
-      "narration": { "pre": "Generating insights.", "post": "Insights ready." }
+      "narration": {
+        "pre": "AI generates automatic insights from the column structure.",
+        "post": "Insights ready — ARR concentration by plan tier, churn risk distribution, and seat utilization patterns identified. Each insight card has Explore in Query."
+      }
     },
     {
       "event_type": "query_run",

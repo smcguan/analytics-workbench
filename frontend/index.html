@@ -1693,6 +1693,26 @@
         .wf-card-actions .btn{
             font-size:11px; padding:5px 12px; border-radius:6px;
         }
+        .wf-card-actions .btn-about{
+            background:rgba(168,130,255,.15); border-color:rgba(168,130,255,.35);
+            color:#c4a8ff; font-weight:700; letter-spacing:.3px;
+        }
+        .wf-card-actions .btn-about:hover{
+            background:rgba(168,130,255,.25);
+        }
+        .wf-card-about{
+            display:none; margin-top:8px; padding:10px 14px;
+            background:rgba(168,130,255,.06); border:1px solid rgba(168,130,255,.18);
+            border-radius:8px; font-size:12px; color:var(--text); line-height:1.5;
+        }
+        .wf-card-about.open{ display:block; }
+        .wf-card-about .about-tagline{
+            font-style:italic; color:var(--muted2); margin-bottom:6px;
+        }
+        .wf-card-about .about-detail{
+            font-size:12px; color:var(--text);
+        }
+        .wf-card-about ul{ line-height:1.6; }
 
         /* ---- Replay wizard dataset rows ---- */
         .replay-ds-row{
@@ -2029,10 +2049,11 @@
 
                     <div class="dataset-list" id="referenceTableList" style="margin-top:8px;"></div>
 
-                    <div>
-                        <label for="importReferenceFile" class="btn import-btn" id="importReferenceBtn" style="display:block; width:100%; text-align:center; box-sizing:border-box;" title="Import a reference table to JOIN with your dataset">
+                    <div style="display:flex; gap:6px;">
+                        <label for="importReferenceFile" class="btn import-btn" id="importReferenceBtn" style="flex:1; text-align:center; box-sizing:border-box;" title="Import a reference table to JOIN with your dataset">
                             + Reference Table
                         </label>
+                        <button class="btn" id="refLibraryBtn" style="flex:0 0 auto; font-size:12px;" title="Browse pre-built reference tables">Library</button>
                     </div>
                     <input
                         id="importReferenceFile"
@@ -2420,6 +2441,7 @@ LIMIT 100</textarea>
             <h3 id="awPromptTitle">Enter value</h3>
             <p id="awPromptMessage" style="font-size:12px; color:var(--fg2); margin:0 0 10px 0; display:none;"></p>
             <input type="text" id="awPromptInput" placeholder="" />
+            <textarea id="awPromptExtra" placeholder="" rows="3" style="display:none; width:100%; box-sizing:border-box; margin-top:8px; padding:8px 10px; border:1px solid var(--stroke-strong); border-radius:8px; background:var(--bg0); color:var(--text); font-size:13px; font-family:inherit; resize:vertical;"></textarea>
             <div class="save-session-btns">
                 <button class="btn sidebar-btn-secondary" id="awPromptCancel">Cancel</button>
                 <button class="btn primary" id="awPromptConfirm">OK</button>
@@ -2599,6 +2621,50 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 <p><strong>Tutorial mode:</strong> Step-by-step live replay. Each action (import, reference load, query) executes in real time with narration explaining what's happening and why.</p>
 <p><strong>Resume mode:</strong> Loads the dataset and reference tables, restores the last query, drops you into a live working session.</p>
 <p><strong>Run All mode:</strong> Automated replay of all steps with baseline validation — used for regression testing.</p>
+<p><strong>About button:</strong> Click <strong>About</strong> on any Example Workflow card to see a detailed description, the data files included, and which AW features that tutorial exercises.</p>
+
+<hr>
+<h3>Workflows — Record, Edit, Reuse</h3>
+<p>Workflows turn a one-time analysis into a reusable, auditable methodology. Record your analysis once, save it, then rerun it on new data without rebuilding queries from scratch.</p>
+
+<h4>Saving a Workflow</h4>
+<p>Click <strong>Save As</strong> in the sidebar footer (or <strong>Save &amp; Exit</strong>). Enter a name and an optional description. Every action from your session — imports, reference loads, queries, exports — is saved as an ordered sequence of steps. The description appears when someone clicks <strong>About</strong> on your workflow card.</p>
+
+<h4>Stored Workflows</h4>
+<p>Open the <strong>Workflows</strong> dialog (sidebar or Welcome card) to see your saved workflows. Each card shows:</p>
+<ul>
+<li><strong>About</strong> — description you entered when saving</li>
+<li><strong>Edit</strong> — open the Edit panel to swap datasets or reference tables before running</li>
+<li><strong>Step Through</strong> — replay one step at a time with narrated results</li>
+<li><strong>Run All</strong> — automated replay of every step with baseline validation</li>
+<li><strong>Resume</strong> — restore the session state and continue working interactively</li>
+</ul>
+
+<h4>The Edit Panel — Swapping Datasets</h4>
+<p>The Edit panel is how you reuse a workflow on new data. Click <strong>Edit</strong> on any stored workflow to open it. The panel shows:</p>
+<ul>
+<li><strong>Datasets</strong> — each dataset the workflow uses, with the original filename on the left and a <strong>Choose File</strong> button on the right to swap in a replacement</li>
+<li><strong>Reference Tables</strong> — each reference table, with a checkbox to keep the original or swap in a new one</li>
+<li><strong>Column Check</strong> — when you select a new file, AW verifies that its columns match what the workflow's queries expect. Green checkmarks mean every query will run without modification. Missing columns are flagged so you know what to fix.</li>
+<li><strong>Run Now</strong> — activates once the column check passes. Runs the full workflow against the new data.</li>
+</ul>
+
+<h4>Reusable Analysis Patterns</h4>
+<p>This is the core workflow for recurring analyses:</p>
+<ol>
+<li><strong>Build once</strong> — import data, load references, run queries, review results</li>
+<li><strong>Save</strong> — capture the full methodology as a stored workflow</li>
+<li><strong>Edit &amp; rerun</strong> — open Edit, swap the dataset file, verify columns, click Run Now</li>
+<li><strong>Audit</strong> — every run is independently logged in the Session Log with its own timestamps</li>
+</ol>
+<p><strong>Example:</strong> The <em>Multi-Market Real Estate Analysis</em> tutorial demonstrates this pattern. An Austin market analysis is recorded as a workflow, then rerun on Denver data by swapping a single file. The reference table (neighborhood tier map) stays the same — it covers both cities. Four queries, two markets, zero queries rewritten.</p>
+<p><strong>When to use workflows:</strong></p>
+<ul>
+<li>Monthly or quarterly reports on updated data</li>
+<li>Diligence analyses applied to new acquisition targets</li>
+<li>Standardized methodologies shared across team members</li>
+<li>Regression testing — Run All validates that updated data still produces expected results</li>
+</ul>
 
 <hr>
 <h3>Sessions</h3>
@@ -2752,7 +2818,17 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         // ---------------------------------------------------------------
         // Generic AW modals — replace all native browser dialogs
         // ---------------------------------------------------------------
-        function awPrompt(title, placeholder, defaultValue, message) {
+        /**
+         * awPrompt — single-dialog prompt with optional second field.
+         * @param {string} title
+         * @param {string} placeholder
+         * @param {string} [defaultValue]
+         * @param {string} [message]
+         * @param {object} [extra] — {placeholder, defaultValue} for a second textarea field.
+         *   When extra is provided, resolves with {value, extra} instead of a plain string.
+         *   Cancel still resolves null.
+         */
+        function awPrompt(title, placeholder, defaultValue, message, extra) {
             return new Promise((resolve) => {
                 $("awPromptTitle").textContent = title;
                 $("awPromptInput").placeholder = placeholder || "";
@@ -2763,6 +2839,17 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 } else {
                     $("awPromptMessage").style.display = "none";
                 }
+
+                const extraEl = $("awPromptExtra");
+                if (extra) {
+                    extraEl.placeholder = extra.placeholder || "";
+                    extraEl.value = extra.defaultValue || "";
+                    extraEl.style.display = "";
+                } else {
+                    extraEl.style.display = "none";
+                    extraEl.value = "";
+                }
+
                 $("awPromptOverlay").classList.add("visible");
                 $("awPromptInput").focus();
 
@@ -2773,8 +2860,15 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                     $("awPromptInput").removeEventListener("keydown", onKey);
                 }
                 function onCancel() { cleanup(); resolve(null); }
-                function onOk() { cleanup(); resolve($("awPromptInput").value); }
-                function onKey(e) { if (e.key === "Enter") { e.preventDefault(); onOk(); } if (e.key === "Escape") { onCancel(); } }
+                function onOk() {
+                    cleanup();
+                    if (extra) {
+                        resolve({ value: $("awPromptInput").value, extra: extraEl.value });
+                    } else {
+                        resolve($("awPromptInput").value);
+                    }
+                }
+                function onKey(e) { if (e.key === "Enter" && !extra) { e.preventDefault(); onOk(); } if (e.key === "Escape") { onCancel(); } }
 
                 $("awPromptCancel").addEventListener("click", onCancel);
                 $("awPromptConfirm").addEventListener("click", onOk);
@@ -4254,21 +4348,147 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         }
 
         async function _saveSessionAs() {
-            const name = await awPrompt("Save Session", "Session name...");
-            if (!name || !name.trim()) return false;
+            const result = await awPrompt(
+                "Save Workflow",
+                "Workflow name...",
+                "",
+                null,
+                { placeholder: "Description (optional) \u2014 shown in the About panel" }
+            );
+            if (!result || !result.value.trim()) return false;
             try {
                 await apiJson("/api/session/name", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ name: name.trim() })
+                    body: JSON.stringify({ name: result.value.trim(), description: (result.extra || "").trim() })
                 });
                 await apiJson("/api/session/export");
-                toast("Session saved: " + name.trim());
+                toast("Session saved: " + result.value.trim());
                 return true;
             } catch (e) {
                 toast("Save failed.", 4000);
                 return false;
             }
+        }
+
+        // ---------------------------------------------------------------
+        // Example Workflow — rich About panel builder
+        // ---------------------------------------------------------------
+        function _buildExampleAbout(c, caseId) {
+            // Dataset summary
+            const dsFile = c.dataset_file || "";
+            const dsDisplay = c.dataset_display_name || dsFile;
+            const adds = c.additional_datasets || [];
+            const refs = c.reference_tables || [];
+
+            let html = "";
+
+            // Tagline
+            if (c.tagline) html += '<div class="about-tagline">' + c.tagline + '</div>';
+
+            // Description
+            if (c.description) html += '<div class="about-detail" style="margin-bottom:10px;">' + c.description + '</div>';
+
+            // Data section
+            html += '<div style="margin-bottom:8px;">';
+            html += '<strong style="color:var(--accent); font-size:11px; text-transform:uppercase; letter-spacing:.4px;">Data</strong><br>';
+            html += '<span style="color:var(--text);">' + dsDisplay + '</span>';
+            for (const a of adds) {
+                html += '<br><span style="color:var(--text);">' + (a.display_name || a.file) + '</span>';
+            }
+            if (refs.length > 0) {
+                html += '<br><span style="color:var(--muted2);">Reference tables: ' + refs.join(", ") + '</span>';
+            }
+            html += '</div>';
+
+            // Features exercised — per-case detail
+            const featureMap = {
+                real_estate_market_analysis: [
+                    "Multi-dataset import (Austin + Denver)",
+                    "Reference table JOIN (neighborhood tier map)",
+                    "Outlier detection via CTE subquery",
+                    "Window functions (percent of tier total)",
+                    "Edit Workflow panel with dataset swap",
+                    "Column compatibility check (14/14 green)",
+                    "Workflow rerun on new data without modification"
+                ],
+                medicaid_pe_diligence: [
+                    "Multi-dataset import (TX, FL, OH \u2014 3 state schemas)",
+                    "Schema normalization via reference table JOIN",
+                    "Multiple reference tables (schema map, audit flags, service categories, MCO lookup)",
+                    "Window functions (MCO concentration %)",
+                    "Cross-state UNION ALL with column remapping",
+                    "Compliance risk JOIN (audit risk flags)",
+                    "CTE with ROW_NUMBER ranking",
+                    "Excel export + Result Passport"
+                ],
+                part_d_ira_exclusion: [
+                    "Single dataset import (Medicare Part D)",
+                    "Reference table JOIN (IRA negotiated drug list)",
+                    "LIKE pattern matching (CMS asterisk handling)",
+                    "AI-generated SQL from natural language",
+                    "Auto-insights on import",
+                    "Excel export"
+                ],
+                part_b_globe_candidates: [
+                    "Single dataset import (Medicare Part B)",
+                    "Reference table JOIN (IRA negotiated drug list)",
+                    "Multi-condition filtering (spending + source criteria)",
+                    "AI-generated SQL from natural language",
+                    "Auto-insights on import",
+                    "Excel export"
+                ],
+                usp_category_classification: [
+                    "Single dataset import (Medicare Part D)",
+                    "Reference table JOIN (USP GUARD categories)",
+                    "Therapeutic classification via JOIN",
+                    "AI-generated SQL from natural language",
+                    "Auto-insights on import",
+                    "Excel export"
+                ],
+                taxi_trip_analysis: [
+                    "Single dataset import (NYC taxi trip data)",
+                    "AI-generated SQL from natural language",
+                    "Auto-insights on import",
+                    "Date/time bucketing with DuckDB functions",
+                    "Aggregation and distribution analysis",
+                    "Excel export"
+                ],
+                logistics_shipment_analysis: [
+                    "Single dataset import (10K shipment records)",
+                    "AI-generated SQL from natural language",
+                    "Auto-insights on import",
+                    "GROUP BY with multi-column aggregation",
+                    "Outlier detection (delay analysis)"
+                ],
+                retail_order_analysis: [
+                    "Single dataset import (10K retail orders)",
+                    "AI-generated SQL from natural language",
+                    "Auto-insights on import",
+                    "Revenue analysis by category and region",
+                    "Return rate and discount impact analysis"
+                ],
+                saas_account_analysis: [
+                    "Single dataset import (10K SaaS accounts)",
+                    "AI-generated SQL from natural language",
+                    "Auto-insights on import",
+                    "Churn risk segmentation",
+                    "Seat utilization and expansion analysis"
+                ]
+            };
+
+            const features = featureMap[caseId] || [];
+            if (features.length > 0) {
+                html += '<div>';
+                html += '<strong style="color:var(--accent); font-size:11px; text-transform:uppercase; letter-spacing:.4px;">Features Exercised</strong>';
+                html += '<ul style="margin:4px 0 0 16px; padding:0; list-style:disc;">';
+                for (const f of features) {
+                    html += '<li style="font-size:12px; color:var(--text); margin-bottom:2px;">' + f + '</li>';
+                }
+                html += '</ul></div>';
+            }
+
+            return html;
         }
 
         // ---------------------------------------------------------------
@@ -4332,17 +4552,28 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                         if (c.difficulty) metaText += c.difficulty;
                         if (c.estimated_minutes) metaText += (metaText ? " \u2022 " : "") + "~" + c.estimated_minutes + " min";
 
+                        // Build rich About content
+                        const aboutContent = _buildExampleAbout(c, caseId);
+
                         card.innerHTML =
                             '<div class="wf-card-header">' +
                                 '<span class="wf-card-name">' + (c.name || caseId) + '</span>' +
                                 (metaText ? '<span class="wf-card-meta">' + metaText + '</span>' : '') +
                             '</div>' +
-                            (c.description ? '<div class="wf-card-meta">' + c.description + '</div>' : '') +
                             '<div class="wf-card-actions">' +
+                                '<button class="btn btn-about">About</button>' +
                                 (c.has_session ? '<button class="btn ec-action-btn" data-ec-mode="stepthrough" data-ec-id="' + caseId + '">Step Through</button>' +
                                     '<button class="btn ec-action-btn" data-ec-mode="runall" data-ec-id="' + caseId + '">Run All</button>' : '') +
                                 '<button class="btn primary ec-action-btn" data-ec-mode="resume" data-ec-id="' + caseId + '">Resume</button>' +
-                            '</div>';
+                            '</div>' +
+                            '<div class="wf-card-about">' + aboutContent + '</div>';
+
+                        // About toggle
+                        const aboutBtn = card.querySelector(".btn-about");
+                        const aboutPanel = card.querySelector(".wf-card-about");
+                        if (aboutBtn && aboutPanel) {
+                            aboutBtn.addEventListener("click", () => aboutPanel.classList.toggle("open"));
+                        }
 
                         card.querySelectorAll("[data-ec-mode]").forEach(btn => {
                             btn.addEventListener("click", () => {
@@ -4393,16 +4624,23 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                                 '<span class="wf-card-name">' + (s.name || s.filename) + '</span>' +
                                 '<span class="wf-card-meta">' + date + '</span>' +
                             '</div>' +
-                            '<div class="wf-card-meta">' + evCount + ' events' +
-                                (s.description ? ' — ' + s.description : '') +
-                            '</div>' +
+                            '<div class="wf-card-meta">' + evCount + ' events</div>' +
                             '<div class="wf-card-actions">' +
+                                (s.description ? '<button class="btn btn-about">About</button>' : '') +
                                 '<button class="btn" data-mode="edit" data-fn="' + s.filename + '">Edit</button>' +
                                 '<button class="btn" data-mode="stepthrough" data-fn="' + s.filename + '">Step Through</button>' +
                                 '<button class="btn" data-mode="runall" data-fn="' + s.filename + '">Run All</button>' +
                                 '<button class="btn primary" data-mode="resume" data-fn="' + s.filename + '">Resume</button>' +
                                 '<button class="btn" data-mode="delete" data-fn="' + s.filename + '" data-name="' + (s.name || s.filename).replace(/"/g, '&quot;') + '" style="background:rgba(231,76,60,.15);color:#e74c3c;border-color:rgba(231,76,60,.3);">Delete</button>' +
-                            '</div>';
+                            '</div>' +
+                            (s.description ? '<div class="wf-card-about"><div class="about-detail">' + s.description + '</div></div>' : '');
+
+                        // About toggle for stored workflows
+                        const storedAboutBtn = card.querySelector(".btn-about");
+                        const storedAboutPanel = card.querySelector(".wf-card-about");
+                        if (storedAboutBtn && storedAboutPanel) {
+                            storedAboutBtn.addEventListener("click", () => storedAboutPanel.classList.toggle("open"));
+                        }
 
                         card.querySelectorAll("[data-mode]").forEach(btn => {
                             btn.addEventListener("click", async () => {
@@ -4703,12 +4941,16 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             if (t === "edit_panel_choose") return "Swap dataset: " + (d.original_file || "") + " \u2192 " + (d.new_file || "");
             if (t === "edit_panel_check") return "Column check: " + (d.columns_matched || 0) + "/" + (d.columns_checked || 0) + " matched";
             if (t === "edit_panel_run") return "Run workflow from Edit panel";
+            if (t === "inspect_schema") return "Inspect schema: " + (d.dataset || selectedDataset || "");
+            if (t === "inspect_preview") return "Preview data: " + (d.dataset || selectedDataset || "");
+            if (t === "ai_ask") return "Ask: " + (d.question || "").substring(0, 60);
             return t.replace(/_/g, " ");
         }
 
         function _isReplayableStep(eventType) {
             return ["dataset_import", "query_run", "reference_load", "reference_delete", "export", "session_end",
-                    "edit_panel_open", "edit_panel_choose", "edit_panel_check", "edit_panel_run"].includes(eventType);
+                    "edit_panel_open", "edit_panel_choose", "edit_panel_check", "edit_panel_run",
+                    "inspect_schema", "inspect_preview", "ai_ask", "insights_generated"].includes(eventType);
         }
 
         async function openTutorial(filename) {
@@ -4901,15 +5143,23 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                     // and add to sidebar, then log the event for session tracking.
                     try {
                         const meta = await apiJson("/api/datasets/" + encodeURIComponent(dsName) + "/meta");
-                        if (!datasets.find(ds => ds.name === dsName)) {
+                        const existing = datasets.find(ds => ds.name === dsName);
+                        if (!existing) {
                             datasets.push({
                                 name: dsName,
                                 row_count: meta.row_count || d.row_count,
                                 column_count: meta.column_count || d.column_count,
+                                file_size_bytes: meta.file_size_bytes || null,
+                                meta_source: meta.meta_source || null,
                             });
+                        } else {
+                            // Backfill missing fields
+                            if (!existing.file_size_bytes) existing.file_size_bytes = meta.file_size_bytes || null;
+                            if (!existing.meta_source) existing.meta_source = meta.meta_source || null;
                         }
                         selectedDataset = dsName;
                         renderDatasets();
+                        updateSelectedDatasetSummary();
                         // Log the event so session log captures it
                         try {
                             await apiJson("/api/session/log_event", {
@@ -4930,6 +5180,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                         }
                         selectedDataset = dsName;
                         renderDatasets();
+                        updateSelectedDatasetSummary();
                         lastRun = { ...lastRun, rowcount: d.row_count || 0 };
                         toast(`Dataset: ${dsName} (pre-imported)`);
                     }
@@ -4962,6 +5213,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                     selectedDataset = result.dataset;
                     renderDatasets();
                     await loadDatasetMeta(result.dataset);
+                    updateSelectedDatasetSummary();
                 }
                 // Update lastRun so baseline row count check works for import steps
                 lastRun = { ...lastRun, rowcount: result.row_count || 0 };
@@ -5132,6 +5384,120 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 // Show the Session Log so the analyst can see the audit trail
                 showSessionLog();
                 toast("Session complete — review the audit trail below.");
+                return;
+            }
+
+            // ---------------------------------------------------------------
+            // Insights — switch to Insights view and fetch AI insights
+            // ---------------------------------------------------------------
+            if (step.event_type === "insights_generated") {
+                if (d.dataset && d.dataset !== selectedDataset) {
+                    selectedDataset = d.dataset;
+                    renderDatasets();
+                    updateSelectedDatasetSummary();
+                }
+
+                // Enable AI consent so insights can fetch
+                if (selectedDataset) {
+                    try {
+                        await apiJson("/api/datasets/" + encodeURIComponent(selectedDataset) + "/ai_consent", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ ai_consent: true })
+                        });
+                    } catch (_) {}
+                }
+
+                // Switch to Insights view — this triggers fetchInsights automatically
+                switchView("insights");
+
+                // If cache miss, wait for fetch to complete
+                if (selectedDataset && !insightsCache[selectedDataset]) {
+                    await fetchInsights(false);
+                }
+
+                toast("Insights generated for " + selectedDataset);
+                return;
+            }
+
+            // ---------------------------------------------------------------
+            // Inspect schema — opens the Schema panel for the active dataset
+            // ---------------------------------------------------------------
+            if (step.event_type === "inspect_schema") {
+                if (d.dataset && d.dataset !== selectedDataset) {
+                    selectedDataset = d.dataset;
+                    renderDatasets();
+                    updateSelectedDatasetSummary();
+                }
+                await inspectSchema();
+                switchView("query");
+                toast("Schema displayed for " + selectedDataset);
+                return;
+            }
+
+            // ---------------------------------------------------------------
+            // Inspect preview — opens the Preview panel for the active dataset
+            // ---------------------------------------------------------------
+            if (step.event_type === "inspect_preview") {
+                if (d.dataset && d.dataset !== selectedDataset) {
+                    selectedDataset = d.dataset;
+                    renderDatasets();
+                    updateSelectedDatasetSummary();
+                }
+                await inspectPreview();
+                switchView("query");
+                toast("Preview displayed for " + selectedDataset);
+                return;
+            }
+
+            // ---------------------------------------------------------------
+            // AI Ask — types a question into Ask Your Data, generates SQL, and runs it
+            // ---------------------------------------------------------------
+            if (step.event_type === "ai_ask") {
+                const question = d.question || "";
+                if (d.dataset && d.dataset !== selectedDataset) {
+                    selectedDataset = d.dataset;
+                    renderDatasets();
+                    updateSelectedDatasetSummary();
+                }
+                switchView("query");
+
+                // Type the question into the Ask Your Data field
+                $("askPrompt").value = question;
+
+                // Generate SQL via AI
+                await generateAiSql();
+
+                // Run the generated SQL so results are visible
+                const generatedSql = $("sqlEditor").value.trim();
+                if (generatedSql && selectedDataset) {
+                    const sqlBody = { dataset: selectedDataset, sql: generatedSql };
+                    if (currentReference) sqlBody.reference = currentReference;
+
+                    const data = await apiJson("/api/sql", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(sqlBody)
+                    });
+
+                    lastRun = {
+                        columns: data.columns || [],
+                        rows: data.rows || [],
+                        rowcount: data.rowcount || 0,
+                        elapsed: data.elapsed_seconds || 0,
+                        sql: generatedSql,
+                        visualization: data.visualization || null
+                    };
+                    clearChart();
+                    $("explainPanel").style.display = "none";
+                    renderResults(lastRun.columns, lastRun.rows);
+                    $("resultsCount").textContent = `${num(lastRun.rowcount)} rows`;
+                    $("resultsMeta").textContent = `executed in ${lastRun.elapsed}s`;
+                    updateChartTab(lastRun.visualization);
+                    _onQueryExecuted();
+                }
+
+                toast("SQL generated and executed.");
                 return;
             }
 
@@ -6171,6 +6537,27 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 .replace(/\b\w/g, c => c.toUpperCase());
         }
 
+        const _cashColumnPattern = /price|cost|amount|revenue|spend|spnd|spndng|paid|billed|charge|reimb|salary|fee|budget|fare|toll|surcharge|net_rev|gross_rev|_amt$|^avg_.*price|^total_cost|^freight_cost|annual_recurring/i;
+
+        function _isCashColumn(colName, rows) {
+            if (!_cashColumnPattern.test(colName)) return false;
+            // Confirm at least one row has a finite number in this column
+            for (const r of rows) {
+                const v = r[colName];
+                if (v !== null && v !== undefined && typeof v === "number" && isFinite(v)) return true;
+            }
+            return false;
+        }
+
+        function _formatCash(val) {
+            if (val === null || val === undefined || val === "") return "";
+            const n = typeof val === "number" ? val : parseFloat(val);
+            if (!isFinite(n)) return String(val);
+            const abs = Math.abs(n);
+            const formatted = "$" + abs.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            return n < 0 ? "-" + formatted : formatted;
+        }
+
         function renderResults(columns, rows) {
             const head = $("resultsHead");
             const body = $("resultsBody");
@@ -6185,10 +6572,17 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 return;
             }
 
+            // Detect which columns should be formatted as currency
+            const cashCols = new Set();
+            for (const c of columns) {
+                if (_isCashColumn(c, rows || [])) cashCols.add(c);
+            }
+
             const trh = document.createElement("tr");
             for (const c of columns) {
                 const th = document.createElement("th");
                 th.textContent = c;
+                if (cashCols.has(c)) th.style.textAlign = "right";
                 trh.appendChild(th);
             }
             head.appendChild(trh);
@@ -6198,7 +6592,12 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 for (const c of columns) {
                     const td = document.createElement("td");
                     const val = r[c];
-                    td.textContent = (val === null || val === undefined) ? "" : String(val);
+                    if (cashCols.has(c) && val !== null && val !== undefined) {
+                        td.textContent = _formatCash(val);
+                        td.style.textAlign = "right";
+                    } else {
+                        td.textContent = (val === null || val === undefined) ? "" : String(val);
+                    }
                     tr.appendChild(td);
                 }
                 body.appendChild(tr);
@@ -6379,10 +6778,16 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             head.innerHTML = "";
             body.innerHTML = "";
 
+            const cashCols = new Set();
+            for (const c of columns) {
+                if (_isCashColumn(c, rows || [])) cashCols.add(c);
+            }
+
             const trh = document.createElement("tr");
             for (const c of columns) {
                 const th = document.createElement("th");
                 th.textContent = c;
+                if (cashCols.has(c)) th.style.textAlign = "right";
                 trh.appendChild(th);
             }
             head.appendChild(trh);
@@ -6392,7 +6797,12 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 for (const c of columns) {
                     const td = document.createElement("td");
                     const val = r[c];
-                    td.textContent = (val === null || val === undefined) ? "" : String(val);
+                    if (cashCols.has(c) && val !== null && val !== undefined) {
+                        td.textContent = _formatCash(val);
+                        td.style.textAlign = "right";
+                    } else {
+                        td.textContent = (val === null || val === undefined) ? "" : String(val);
+                    }
                     tr.appendChild(td);
                 }
                 body.appendChild(tr);
@@ -6685,7 +7095,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             if (file) importReferenceFile(file);
         });
         // clearReferenceBtn removed — per-item remove buttons in renderReferences()
-        // refLibraryBtn removed — reference tables imported directly
+        $("refLibraryBtn").addEventListener("click", toggleRefLibrary);
         $("navWelcome").addEventListener("click", () => switchView("welcome"));
         $("navReferenceGuide").addEventListener("click", () => {
             closeSessionLogDrawer(); // Close session log if open

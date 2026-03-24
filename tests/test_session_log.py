@@ -584,3 +584,211 @@ def test_example_cases_have_data_files():
         if ds_file:
             data_path = case_dir / "data" / ds_file
             assert data_path.exists(), f"Missing data file {ds_file} in {case_dir.name}/data/"
+
+
+def test_example_cases_additional_datasets_exist():
+    """Additional dataset files referenced in metadata must exist on disk."""
+    import json as _json
+    cases_dir = Path("data/example_cases")
+    if not cases_dir.exists():
+        pytest.skip("No example_cases directory")
+
+    for case_dir in cases_dir.iterdir():
+        if not case_dir.is_dir():
+            continue
+        meta_path = case_dir / "metadata.json"
+        if not meta_path.exists():
+            continue
+        meta = _json.loads(meta_path.read_text(encoding="utf-8"))
+        for ds in meta.get("additional_datasets", []):
+            data_path = case_dir / "data" / ds["file"]
+            assert data_path.exists(), f"Missing additional dataset {ds['file']} in {case_dir.name}/data/"
+
+
+def test_example_cases_reference_files_exist():
+    """Reference table files listed in metadata must exist in reference/ dir."""
+    import json as _json
+    cases_dir = Path("data/example_cases")
+    if not cases_dir.exists():
+        pytest.skip("No example_cases directory")
+
+    for case_dir in cases_dir.iterdir():
+        if not case_dir.is_dir():
+            continue
+        meta_path = case_dir / "metadata.json"
+        if not meta_path.exists():
+            continue
+        meta = _json.loads(meta_path.read_text(encoding="utf-8"))
+        ref_names = meta.get("reference_tables", [])
+        if not ref_names:
+            continue
+        ref_dir = case_dir / "reference"
+        assert ref_dir.exists(), f"reference/ dir missing in {case_dir.name} but reference_tables listed"
+        for ref_name in ref_names:
+            ref_file = ref_dir / (ref_name + ".csv")
+            assert ref_file.exists(), f"Missing reference file {ref_name}.csv in {case_dir.name}/reference/"
+
+
+def test_example_cases_session_event_types_valid():
+    """All event types in session JSONs must be from the known set."""
+    import json as _json
+    cases_dir = Path("data/example_cases")
+    if not cases_dir.exists():
+        pytest.skip("No example_cases directory")
+
+    valid_types = {
+        "session_start", "session_end", "dataset_import", "query_run",
+        "reference_load", "reference_delete", "export", "result_passport",
+        "insights_generated", "suggestions_generated", "ai_sql_generated",
+        "narration_only", "edit_panel_open", "edit_panel_choose",
+        "edit_panel_check", "edit_panel_run", "inspect_schema",
+        "inspect_preview", "ai_ask",
+    }
+
+    for case_dir in cases_dir.iterdir():
+        if not case_dir.is_dir():
+            continue
+        session_path = case_dir / "session.json"
+        if not session_path.exists():
+            continue
+        session = _json.loads(session_path.read_text(encoding="utf-8"))
+        for i, ev in enumerate(session.get("events", [])):
+            etype = ev.get("event_type", "")
+            assert etype in valid_types, (
+                f"Unknown event_type '{etype}' at step {i+1} in {case_dir.name}/session.json"
+            )
+
+
+def test_example_cases_session_query_sql_present():
+    """Every query_run event must have non-empty SQL in details."""
+    import json as _json
+    cases_dir = Path("data/example_cases")
+    if not cases_dir.exists():
+        pytest.skip("No example_cases directory")
+
+    for case_dir in cases_dir.iterdir():
+        if not case_dir.is_dir():
+            continue
+        session_path = case_dir / "session.json"
+        if not session_path.exists():
+            continue
+        session = _json.loads(session_path.read_text(encoding="utf-8"))
+        for i, ev in enumerate(session.get("events", [])):
+            if ev["event_type"] == "query_run":
+                sql = (ev.get("details") or {}).get("sql", "")
+                assert sql.strip(), (
+                    f"Empty SQL in query_run at step {i+1} in {case_dir.name}/session.json"
+                )
+
+
+def test_example_cases_ai_ask_events_have_question():
+    """Every ai_ask event must have a non-empty question."""
+    import json as _json
+    cases_dir = Path("data/example_cases")
+    if not cases_dir.exists():
+        pytest.skip("No example_cases directory")
+
+    for case_dir in cases_dir.iterdir():
+        if not case_dir.is_dir():
+            continue
+        session_path = case_dir / "session.json"
+        if not session_path.exists():
+            continue
+        session = _json.loads(session_path.read_text(encoding="utf-8"))
+        for i, ev in enumerate(session.get("events", [])):
+            if ev["event_type"] == "ai_ask":
+                question = (ev.get("details") or {}).get("question", "")
+                assert question.strip(), (
+                    f"Empty question in ai_ask at step {i+1} in {case_dir.name}/session.json"
+                )
+
+
+def test_real_estate_case_structure():
+    """Real estate example case has complete structure."""
+    import json as _json
+    case_dir = Path("data/example_cases/real_estate_market_analysis")
+    if not case_dir.exists():
+        pytest.skip("Real estate case not found")
+
+    # Metadata
+    meta = _json.loads((case_dir / "metadata.json").read_text(encoding="utf-8"))
+    assert meta["id"] == "real_estate_market_analysis"
+    assert meta["category"] == "Real Estate"
+    assert meta["has_session"] is True
+    assert len(meta.get("additional_datasets", [])) == 1
+    assert len(meta.get("reference_tables", [])) == 2
+
+    # Data files
+    assert (case_dir / "data" / "austin_listings.csv").exists()
+    assert (case_dir / "data" / "denver_listings.csv").exists()
+    assert (case_dir / "reference" / "neighborhood_tier_map.csv").exists()
+    assert (case_dir / "reference" / "property_benchmarks.csv").exists()
+
+    # Session structure
+    session = _json.loads((case_dir / "session.json").read_text(encoding="utf-8"))
+    events = session["events"]
+    types = [e["event_type"] for e in events]
+
+    # Must have the key step types
+    assert "inspect_schema" in types, "Missing inspect_schema step"
+    assert "insights_generated" in types, "Missing insights_generated step"
+    assert "ai_ask" in types, "Missing ai_ask step"
+    assert "edit_panel_open" in types, "Missing edit_panel_open step"
+    assert "edit_panel_check" in types, "Missing edit_panel_check step"
+    assert types.count("ai_ask") == 2, "Expected 2 ai_ask steps"
+    assert types.count("dataset_import") == 2, "Expected 2 dataset_import steps"
+
+
+def test_real_estate_query_sql_executable():
+    """All query_run SQL in the real estate session must execute against the CSV data."""
+    import json as _json
+    import duckdb
+
+    case_dir = Path("data/example_cases/real_estate_market_analysis")
+    if not case_dir.exists():
+        pytest.skip("Real estate case not found")
+
+    session = _json.loads((case_dir / "session.json").read_text(encoding="utf-8"))
+    austin_csv = str(case_dir / "data" / "austin_listings.csv")
+    denver_csv = str(case_dir / "data" / "denver_listings.csv")
+    tier_csv = str(case_dir / "reference" / "neighborhood_tier_map.csv")
+
+    con = duckdb.connect()
+
+    for i, ev in enumerate(session["events"]):
+        if ev["event_type"] != "query_run":
+            continue
+        d = ev["details"]
+        sql = d["sql"]
+        ds = d.get("dataset", "austin_listings")
+        csv_path = denver_csv if "denver" in ds else austin_csv
+
+        # Rewrite table names to CSV paths
+        test_sql = sql.replace("dataset", f"read_csv_auto('{csv_path}')")
+        test_sql = test_sql.replace("neighborhood_tier_map", f"read_csv_auto('{tier_csv}')")
+
+        result = con.execute(test_sql).fetchall()
+        expected = d.get("row_count") or ev.get("baseline", {}).get("expected_row_count")
+        if expected is not None:
+            assert len(result) == expected, (
+                f"Step {i+1} ({ds}): expected {expected} rows, got {len(result)}"
+            )
+
+
+def test_session_description_persists(endpoint_client):
+    """Session description set via /api/session/name persists in session."""
+    client = endpoint_client
+
+    # Set name and description
+    resp = client.post("/api/session/name", json={
+        "name": "Test Workflow",
+        "description": "A test description for the About panel"
+    })
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["description"] == "A test description for the About panel"
+
+    # Check it appears in /api/session
+    session_resp = client.get("/api/session")
+    session_data = session_resp.json()
+    assert session_data.get("description") == "A test description for the About panel"

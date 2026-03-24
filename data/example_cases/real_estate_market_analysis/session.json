@@ -1,7 +1,7 @@
 {
   "session_id": "tutorial-05-real-estate-market-analysis",
-  "started_at": "2026-03-23T14:00:00.000000+00:00",
-  "ended_at": "2026-03-23T14:25:00.000000+00:00",
+  "started_at": "2026-03-24T14:00:00.000000+00:00",
+  "ended_at": "2026-03-24T14:25:00.000000+00:00",
   "ai_mode": "cloud",
   "app_version": "1.15.0",
   "user": "tutorial",
@@ -11,16 +11,16 @@
   "events": [
     {
       "event_type": "session_start",
-      "timestamp": "2026-03-23T14:00:00.000000+00:00",
+      "timestamp": "2026-03-24T14:00:00.000000+00:00",
       "details": {},
       "narration": {
         "pre": "A real estate advisory firm evaluates residential markets for investment clients. Their analysts run the same market analysis on every new city. We start with Austin — 2,000 listings across 10 neighborhoods.",
-        "post": "Session initialized. Phase 1 analyzes Austin. Phase 2 saves the workflow, swaps to Denver, and reruns — demonstrating how a recorded analysis becomes a reusable template."
+        "post": "Session initialized. Phase 1 analyzes Austin using Ask Your Data for natural-language queries, Schema inspection, and a reference table JOIN. Phase 2 saves the workflow, swaps to Denver via the Edit panel, and reruns — demonstrating how a recorded analysis becomes a reusable template."
       }
     },
     {
       "event_type": "dataset_import",
-      "timestamp": "2026-03-23T14:00:30.000000+00:00",
+      "timestamp": "2026-03-24T14:00:30.000000+00:00",
       "details": {
         "dataset": "austin_listings",
         "row_count": 2000,
@@ -29,15 +29,38 @@
       },
       "narration": {
         "pre": "Importing Austin residential listings. 2,000 rows, 14 columns — LISTING_ID through AGENT_ID. Every listing has price, square footage, days on market, neighborhood, and status (Sold or Active).",
-        "post": "Austin data loaded. Notice the Insights card flagging price concentration — a small number of listings are pulling the average above the median. Tarrytown and Downtown carry the premium."
+        "post": "Austin data loaded. The summary cards at the top now show 2,000 rows, 14 columns, and the file source. Before we start querying, let's inspect the schema to see exactly what we're working with."
       },
       "baseline": {
         "expected_row_count": 2000
       }
     },
     {
+      "event_type": "inspect_schema",
+      "timestamp": "2026-03-24T14:00:45.000000+00:00",
+      "details": {
+        "dataset": "austin_listings"
+      },
+      "narration": {
+        "pre": "Click Schema to see every column name and data type in the dataset. This is the first thing an analyst should do after import — understand the structure before asking questions.",
+        "post": "14 columns displayed. LIST_PRICE and SALE_PRICE are numeric. NEIGHBORHOOD and PROPERTY_TYPE are categorical — good candidates for GROUP BY. DAYS_ON_MARKET is our velocity metric. ZIP_CODE is the join key we will use later to JOIN against a reference table. Now let's see what the AI finds interesting about this data."
+      }
+    },
+    {
+      "event_type": "insights_generated",
+      "timestamp": "2026-03-24T14:00:55.000000+00:00",
+      "details": {
+        "dataset": "austin_listings",
+        "insight_count": 5
+      },
+      "narration": {
+        "pre": "Switch to the Insights view. The AI reads the column names and statistics — never the actual row data — and generates 3-5 analytical observations automatically. This happens the moment you import a dataset. No prompting required.",
+        "post": "The AI flagged price concentration — a small number of listings pull the average well above the median. It also identified days-on-market variation across neighborhoods and the sold/active split. Each insight card has an Explore in Query button that loads the supporting SQL. These are starting points, not final answers. Now let's load a reference table and start querying."
+      }
+    },
+    {
       "event_type": "reference_load",
-      "timestamp": "2026-03-23T14:01:00.000000+00:00",
+      "timestamp": "2026-03-24T14:01:00.000000+00:00",
       "details": {
         "reference_name": "neighborhood_tier_map",
         "row_count": 20,
@@ -45,39 +68,35 @@
         "source": "neighborhood_tier_map.csv"
       },
       "narration": {
-        "pre": "The neighborhood tier map classifies each zip code by market tier — Tier 1 for premium high-demand areas, Tier 3 for entry-level and emerging. This is the firm's proprietary classification — it travels with every analysis.",
-        "post": "Reference table loaded. 20 rows covering both Austin and Denver zip codes. We can now JOIN listings against neighborhood tiers without any manual lookup."
+        "pre": "Now we load a reference table. Reference tables are small lookup files that enrich your dataset through SQL JOINs. This one classifies each ZIP code into a market tier — Tier 1 for premium, Tier 2 for mid-market, Tier 3 for entry-level. Click + Reference Table in the sidebar to import it.",
+        "post": "Reference table loaded: 20 rows, 5 columns — zip_code, city, neighborhood, tier, notes. It appears in the sidebar with a REF badge. In SQL, use the table name 'neighborhood_tier_map' in your JOIN clause. The join key is ZIP_CODE in the listings matched against zip_code in the reference table. We will use this in the last Austin query."
       }
     },
     {
-      "event_type": "query_run",
-      "timestamp": "2026-03-23T14:02:00.000000+00:00",
+      "event_type": "ai_ask",
+      "timestamp": "2026-03-24T14:02:00.000000+00:00",
       "details": {
         "dataset": "austin_listings",
-        "sql": "SELECT\n    NEIGHBORHOOD,\n    ROUND(AVG(LIST_PRICE), 0) AS avg_list_price,\n    ROUND(AVG(DAYS_ON_MARKET), 1) AS avg_days_on_market\nFROM dataset\nGROUP BY NEIGHBORHOOD\nORDER BY avg_list_price DESC",
-        "row_count": 10,
-        "elapsed_seconds": 0.015
+        "question": "What is the average list price and average days on market by neighborhood?"
       },
       "narration": {
-        "pre": "First analytical query: average list price and days on market by neighborhood. This is the baseline market profile — which neighborhoods command premium pricing and which move fastest.",
-        "post": "Tarrytown leads at $830K average. Southeast Austin has the highest days on market at 35 — nearly double Downtown. This spread is the concentration story: premium neighborhoods move fast, entry-level neighborhoods sit."
+        "pre": "Type a question in plain English into Ask Your Data: 'What is the average list price and average days on market by neighborhood?' The AI reads the column names and types — it never sees your actual data — and writes the SQL for you.",
+        "post": "SQL generated and executed. Tarrytown leads at $830K average. Southeast Austin has the highest days on market at 35 — nearly double Downtown. The AI picked the right columns, the right aggregation, and the right GROUP BY — all from a plain English question."
       },
       "baseline": {
         "expected_row_count": 10
       }
     },
     {
-      "event_type": "query_run",
-      "timestamp": "2026-03-23T14:03:00.000000+00:00",
+      "event_type": "ai_ask",
+      "timestamp": "2026-03-24T14:03:00.000000+00:00",
       "details": {
         "dataset": "austin_listings",
-        "sql": "SELECT\n    PROPERTY_TYPE,\n    ROUND(AVG(PRICE_PER_SQFT), 2) AS avg_price_per_sqft\nFROM dataset\nGROUP BY PROPERTY_TYPE\nORDER BY avg_price_per_sqft DESC",
-        "row_count": 4,
-        "elapsed_seconds": 0.012
+        "question": "What is the average price per square foot by property type?"
       },
       "narration": {
-        "pre": "Average price per square foot by property type. This tells us which housing segments carry the highest unit economics — and where investor capital is flowing.",
-        "post": "Townhouses lead on price per sqft. Condos and single family homes are close behind — the downtown high-rise condo stock pulls the condo average up. Multi-family is lowest, reflecting bulk pricing on larger units."
+        "pre": "Another plain-English question: 'What is the average price per square foot by property type?' The AI uses the PRICE_PER_SQFT column it saw in the schema.",
+        "post": "4 property types. Townhouses lead on price per sqft. Condos and single family homes are close behind — the downtown high-rise condo stock pulls the condo average up. Two questions, two results, zero SQL written by hand."
       },
       "baseline": {
         "expected_row_count": 4
@@ -85,7 +104,7 @@
     },
     {
       "event_type": "query_run",
-      "timestamp": "2026-03-23T14:04:00.000000+00:00",
+      "timestamp": "2026-03-24T14:04:00.000000+00:00",
       "details": {
         "dataset": "austin_listings",
         "sql": "WITH neighborhood_avg AS (\n    SELECT NEIGHBORHOOD, AVG(LIST_PRICE) AS avg_price\n    FROM dataset\n    GROUP BY NEIGHBORHOOD\n)\nSELECT\n    d.LISTING_ID,\n    d.NEIGHBORHOOD,\n    d.PROPERTY_TYPE,\n    d.LIST_PRICE,\n    ROUND(na.avg_price, 0) AS neighborhood_avg,\n    ROUND(100.0 * (d.LIST_PRICE - na.avg_price) / na.avg_price, 1) AS pct_above_avg\nFROM dataset d\nJOIN neighborhood_avg na ON d.NEIGHBORHOOD = na.NEIGHBORHOOD\nWHERE d.LIST_PRICE > na.avg_price * 1.8\nORDER BY d.LIST_PRICE DESC",
@@ -93,7 +112,7 @@
         "elapsed_seconds": 0.018
       },
       "narration": {
-        "pre": "Outlier detection: listings priced more than 80% above the average list price for their neighborhood. These are either premium properties, data errors, or mispriced listings. An investment analyst reviews each one before including it in a comp analysis.",
+        "pre": "Outlier detection: listings priced more than 80% above the average list price for their neighborhood. This uses a CTE subquery — more complex than what we'd type in plain English, so we use the SQL editor directly. The query calculates each neighborhood's average, then filters to listings 80% above it.",
         "post": "36 outlier listings found. Downtown and Tarrytown dominate — luxury construction pulling well above neighborhood averages. The top listing is nearly $2M in Downtown against a $660K neighborhood average. Each of these needs manual review before it enters a valuation model."
       },
       "baseline": {
@@ -102,7 +121,7 @@
     },
     {
       "event_type": "query_run",
-      "timestamp": "2026-03-23T14:05:30.000000+00:00",
+      "timestamp": "2026-03-24T14:05:30.000000+00:00",
       "details": {
         "dataset": "austin_listings",
         "sql": "SELECT\n    t.tier,\n    d.STATUS,\n    COUNT(*) AS listing_count,\n    ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER (PARTITION BY t.tier), 1) AS pct\nFROM dataset d\nJOIN neighborhood_tier_map t ON d.ZIP_CODE = t.zip_code\nGROUP BY t.tier, d.STATUS\nORDER BY t.tier, d.STATUS",
@@ -110,8 +129,8 @@
         "elapsed_seconds": 0.020
       },
       "narration": {
-        "pre": "Sold versus active percentage by neighborhood tier, using the reference table JOIN. This is the supply-demand signal — which tiers are clearing inventory and which are sitting.",
-        "post": "Tier 1 neighborhoods show 63% sold — fastest clearance. Tier 2 and Tier 3 follow similar patterns in Austin. The real differentiation will appear when we compare Denver, where Tier 1 clears at over 70%."
+        "pre": "This is the JOIN step — the key capability that reference tables unlock. Look at the SQL: FROM dataset d JOIN neighborhood_tier_map t ON d.ZIP_CODE = t.zip_code. The listings table has ZIP_CODE. The reference table has zip_code and tier. The JOIN connects them, so we can GROUP BY tier without ever adding a tier column to the original data. The window function OVER (PARTITION BY t.tier) calculates percentages within each tier.",
+        "post": "6 rows — 2 per tier (Sold and Active). Tier 1 neighborhoods show 63% sold, the fastest clearance rate. Without the reference table, you would need to manually classify 10 neighborhoods into tiers before running this query. The JOIN does it in one step. This is why reference tables matter: they let you enrich and segment your data without modifying the original file."
       },
       "baseline": {
         "expected_row_count": 6
@@ -119,7 +138,7 @@
     },
     {
       "event_type": "session_end",
-      "timestamp": "2026-03-23T14:06:30.000000+00:00",
+      "timestamp": "2026-03-24T14:06:30.000000+00:00",
       "details": {},
       "narration": {
         "pre": "The Austin analysis is complete. Before moving to the next market, we save this as a stored workflow. Every query, every reference table, every step — saved and replayable.",
@@ -128,7 +147,7 @@
     },
     {
       "event_type": "edit_panel_open",
-      "timestamp": "2026-03-23T14:07:00.000000+00:00",
+      "timestamp": "2026-03-24T14:07:00.000000+00:00",
       "details": {
         "workflow_name": "Market Analysis — Austin 2024",
         "datasets": [
@@ -149,7 +168,7 @@
     },
     {
       "event_type": "edit_panel_choose",
-      "timestamp": "2026-03-23T14:07:20.000000+00:00",
+      "timestamp": "2026-03-24T14:07:20.000000+00:00",
       "details": {
         "target_dataset": "austin_listings",
         "original_file": "austin_listings.csv",
@@ -164,7 +183,7 @@
     },
     {
       "event_type": "edit_panel_check",
-      "timestamp": "2026-03-23T14:07:40.000000+00:00",
+      "timestamp": "2026-03-24T14:07:40.000000+00:00",
       "details": {
         "target_dataset": "austin_listings",
         "columns_checked": 14,
@@ -178,18 +197,18 @@
     },
     {
       "event_type": "edit_panel_run",
-      "timestamp": "2026-03-23T14:07:55.000000+00:00",
+      "timestamp": "2026-03-24T14:07:55.000000+00:00",
       "details": {
         "dataset": "denver_listings"
       },
       "narration": {
-        "pre": "Click Run Now. Same 4 queries. Denver data. Watch the results change.",
+        "pre": "Click Run Now. Same queries. Denver data. Watch the results change.",
         "post": "The Edit panel closes. Every step from the Austin workflow now replays against the Denver dataset."
       }
     },
     {
       "event_type": "dataset_import",
-      "timestamp": "2026-03-23T14:08:00.000000+00:00",
+      "timestamp": "2026-03-24T14:08:00.000000+00:00",
       "details": {
         "dataset": "denver_listings",
         "row_count": 1800,
@@ -197,7 +216,7 @@
         "source_file": "denver_listings.csv"
       },
       "narration": {
-        "pre": "Denver data imported. The same 4 queries now run against 1,800 Denver listings.",
+        "pre": "Denver data imported. The same queries now run against 1,800 Denver listings.",
         "post": "Denver loaded: 1,800 rows, 14 columns. Same schema as Austin. The queries will execute identically — only the data changes."
       },
       "baseline": {
@@ -206,7 +225,7 @@
     },
     {
       "event_type": "query_run",
-      "timestamp": "2026-03-23T14:09:00.000000+00:00",
+      "timestamp": "2026-03-24T14:09:00.000000+00:00",
       "details": {
         "dataset": "denver_listings",
         "sql": "SELECT\n    NEIGHBORHOOD,\n    ROUND(AVG(LIST_PRICE), 0) AS avg_list_price,\n    ROUND(AVG(DAYS_ON_MARKET), 1) AS avg_days_on_market\nFROM dataset\nGROUP BY NEIGHBORHOOD\nORDER BY avg_list_price DESC",
@@ -223,7 +242,7 @@
     },
     {
       "event_type": "query_run",
-      "timestamp": "2026-03-23T14:10:00.000000+00:00",
+      "timestamp": "2026-03-24T14:10:00.000000+00:00",
       "details": {
         "dataset": "denver_listings",
         "sql": "WITH neighborhood_avg AS (\n    SELECT NEIGHBORHOOD, AVG(LIST_PRICE) AS avg_price\n    FROM dataset\n    GROUP BY NEIGHBORHOOD\n)\nSELECT\n    d.LISTING_ID,\n    d.NEIGHBORHOOD,\n    d.PROPERTY_TYPE,\n    d.LIST_PRICE,\n    ROUND(na.avg_price, 0) AS neighborhood_avg,\n    ROUND(100.0 * (d.LIST_PRICE - na.avg_price) / na.avg_price, 1) AS pct_above_avg\nFROM dataset d\nJOIN neighborhood_avg na ON d.NEIGHBORHOOD = na.NEIGHBORHOOD\nWHERE d.LIST_PRICE > na.avg_price * 1.8\nORDER BY d.LIST_PRICE DESC",
@@ -240,7 +259,7 @@
     },
     {
       "event_type": "session_end",
-      "timestamp": "2026-03-23T14:12:00.000000+00:00",
+      "timestamp": "2026-03-24T14:12:00.000000+00:00",
       "details": {},
       "narration": {
         "pre": "Open the Session Log. Both analyses — Austin and Denver — are documented with timestamps, SQL, and row counts.",

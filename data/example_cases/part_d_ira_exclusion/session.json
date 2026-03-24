@@ -33,6 +33,24 @@
       }
     },
     {
+      "event_type": "inspect_schema",
+      "timestamp": "2026-03-20T17:15:07.000000+00:00",
+      "details": { "dataset": "part_d_spending_sample" },
+      "narration": {
+        "pre": "Before querying, inspect the schema. Click Schema to see every column name and type. Medicare datasets have dense naming conventions — Tot_Spndng, Avg_Spnd_Per_Dsg_Unt_Wghtd — so reviewing the schema first saves time.",
+        "post": "46 columns. The spending columns (Tot_Spndng, Avg_Spnd_Per_Clm) are the monetary fields you will query. Brnd_Name and Gnrc_Name identify the drug. Tot_Mftr counts manufacturers — used later to approximate single-source status."
+      }
+    },
+    {
+      "event_type": "inspect_preview",
+      "timestamp": "2026-03-20T17:15:09.000000+00:00",
+      "details": { "dataset": "part_d_spending_sample" },
+      "narration": {
+        "pre": "Click Preview to see the first rows of actual data. This confirms the data loaded correctly and gives you a feel for the values — drug names, spending amounts, manufacturer counts.",
+        "post": "Data looks clean. Notice the dollar amounts in the spending columns — these are formatted as currency. The Brnd_Name column has trailing asterisks on some drugs (e.g. 'Stelara*') — AW handles this automatically with LIKE pattern matching."
+      }
+    },
+    {
       "event_type": "insights_generated",
       "timestamp": "2026-03-20T17:15:12.000000+00:00",
       "details": {
@@ -41,7 +59,7 @@
       },
       "narration": {
         "pre": "AI is analyzing the dataset structure to generate automatic insights. This uses column names and aggregate statistics only — no raw data leaves your machine.",
-        "post": "5 insight cards generated. These highlight spending concentration, outliers, and trends in the data. You can explore any insight card later — for now, we'll focus on the IRA exclusion analysis."
+        "post": "5 insight cards generated. These highlight spending concentration, outliers, and trends in the data. Each card has an Explore in Query button to load the supporting SQL. For now, we move to the IRA exclusion analysis."
       }
     },
     {

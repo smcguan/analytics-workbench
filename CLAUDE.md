@@ -188,7 +188,9 @@ Manufacturer data requires a supplemental source.
 - Default: GET STARTED expanded, DATA/WORKSPACE/WORKFLOWS collapsed
 - Smart auto-expand: DATA on import, WORKSPACE on first query, GET STARTED collapses on import
 - SQL editor collapsible — auto-expands on AI generate, stays open during playback
-- Import Dataset and Reference Table buttons are full-width (no Refresh/Library buttons)
+- Import Dataset is full-width; Reference Table + Library button share a row (flex layout)
+- Workflow cards have About button — expandable description panel with purple accent
+- Save workflow dialog has name + optional description (awPrompt with extra textarea)
 - Baseline mismatch during playback = warning, not failure
 - Export Excel and Export TSV are direct toolbar buttons (no Export tab)
 - Import uses <label for="file-input"> pattern, NOT programmatic .click()

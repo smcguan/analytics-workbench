@@ -33,10 +33,31 @@
       }
     },
     {
+      "event_type": "inspect_schema",
+      "timestamp": "2026-03-20T21:30:07.000000+00:00",
+      "details": { "dataset": "retail_orders_sample" },
+      "narration": {
+        "pre": "Inspect the schema to see the column structure before querying.",
+        "post": "20 columns. The financial columns — list_price, gross_revenue, net_revenue, cost — are all numeric and will display as currency. discount_pct is a percentage (0-1 range). The returned column is boolean. region and category are good GROUP BY candidates."
+      }
+    },
+    {
+      "event_type": "inspect_preview",
+      "timestamp": "2026-03-20T21:30:09.000000+00:00",
+      "details": { "dataset": "retail_orders_sample" },
+      "narration": {
+        "pre": "Preview the first rows to see actual order data with dollar formatting.",
+        "post": "Revenue and cost columns now show as formatted currency. Each row is one order with customer, product, pricing, and satisfaction data."
+      }
+    },
+    {
       "event_type": "insights_generated",
       "timestamp": "2026-03-20T21:30:12.000000+00:00",
       "details": { "dataset": "retail_orders_sample", "insight_count": 5 },
-      "narration": { "pre": "Generating insights.", "post": "Insights ready." }
+      "narration": {
+        "pre": "AI generates automatic insights from the column structure.",
+        "post": "Insights ready — revenue concentration, discount impact, and return rate patterns identified. Each card has Explore in Query to load the SQL."
+      }
     },
     {
       "event_type": "query_run",

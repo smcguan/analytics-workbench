@@ -10,7 +10,7 @@ stays on the analyst's machine — AI generates analysis instructions, not data 
 **Tech stack:** FastAPI backend, DuckDB query engine, OpenAI GPT-4.1-mini for AI,
 vanilla HTML/JS/CSS frontend, PyInstaller packaging for Windows desktop.
 
-**Current version:** v1.15.0 | **Total commits:** 120+ | **Test suite:** 603 tests (zero xfail)
+**Current version:** v1.16.0 | **Total commits:** 120+ | **Test suite:** 611 tests (zero xfail)
 
 ---
 
@@ -132,6 +132,7 @@ Building toward reproducible, auditable, shareable analytical sessions:
 | v1.10.2 | 2026-03-21 | Bug #18: Refresh was deleting disk files (root cause of restore loop); Clear SQL button; Sessions Save exits; SQL auto-clears on restore |
 | v1.10.3 | 2026-03-21 | Chart tab disabled until query returns chartable result; Sessions Save no longer exits; restore filters dataset list to session dataset only |
 | v1.11.0 | 2026-03-21 | SESSIONS sidebar removed; snapshots retired; Welcome card is session hub (Resume + Save); Reference Guide as slide-in drawer; 603 tests |
+| v1.16.0 | 2026-03-24 | Tutorial #5 Real Estate, About button, Library button, awPrompt extra field, Reference Guide workflow docs, shimmer buttons; 611 tests |
 | v1.15.0 | 2026-03-23 | M5 Demo Sprint: unified Workflows dialog, workflow replay engine, reference table sidebar items, Edit panel, session isolation, PyInstaller fix; 603 tests |
 | v1.14.0 | 2026-03-23 | Tutorial #4 Multi-State Medicaid Diligence; 8 example cases; 4 reference tables; narrated 12-step session; Farragut demo ready; 603 tests |
 | v1.13.0 | 2026-03-22 | Multi-dataset UNION/JOIN backend; schema normalization JOIN validated (TX/FL/OH); reference bleed-through fix on resume; 603 tests |
@@ -142,6 +143,14 @@ Building toward reproducible, auditable, shareable analytical sessions:
 
 ## Wrap Records
 <!-- Each /wrap appends a 3-line summary below. Most recent at top. -->
+
+**v1.16.0** | 2026-03-24
+Tutorial #5: Real Estate Market Analysis — multi-phase tutorial with Austin analysis + Denver workflow
+reuse via Edit panel. About button on workflow cards (expandable description panel). Library button
+re-added for reference tables. awPrompt enhanced with optional second textarea for workflow descriptions.
+Reference Guide expanded with full Workflows documentation (Record/Edit/Reuse, Edit Panel, Reusable
+Analysis Patterns). Shimmer button animations. 7 example case session.json files enriched with Schema
+inspect and Insights steps. 8 new tests for example case file validation. 611 tests.
 
 **v1.15.0** | 2026-03-23
 M5 Demo Sprint: unified Workflows dialog (Stored + Example Workflows with Step Through/Run All/Resume/

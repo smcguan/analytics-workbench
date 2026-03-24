@@ -33,6 +33,24 @@
       }
     },
     {
+      "event_type": "inspect_schema",
+      "timestamp": "2026-03-20T19:00:07.000000+00:00",
+      "details": { "dataset": "nyc_taxi_2023_03_sample" },
+      "narration": {
+        "pre": "Inspect the schema. Taxi data has both numeric fare columns and datetime columns — understanding the types helps you write better queries.",
+        "post": "19 columns. The fare breakdown is detailed: fare_amount, tip_amount, tolls_amount, improvement_surcharge, congestion_surcharge, Airport_fee, total_amount. All are numeric and will display as currency in results. The datetime columns (tpep_pickup_datetime, tpep_dropoff_datetime) support DuckDB date functions for time-of-day analysis."
+      }
+    },
+    {
+      "event_type": "inspect_preview",
+      "timestamp": "2026-03-20T19:00:09.000000+00:00",
+      "details": { "dataset": "nyc_taxi_2023_03_sample" },
+      "narration": {
+        "pre": "Preview the first rows to see actual trip data — fares, distances, pickup times.",
+        "post": "Each row is one taxi ride. Notice the fare columns are now formatted as dollars. The payment_type column uses codes (1=Credit, 2=Cash). PULocationID and DOLocationID are zone numbers — a reference table could map these to neighborhood names."
+      }
+    },
+    {
       "event_type": "insights_generated",
       "timestamp": "2026-03-20T19:00:12.000000+00:00",
       "details": {
@@ -41,7 +59,7 @@
       },
       "narration": {
         "pre": "AI is analyzing the dataset structure.",
-        "post": "Insights generated. Let's run our own queries to explore the data systematically."
+        "post": "Insights generated — fare distribution, tip patterns, and pickup concentration flagged. Each insight card has Explore in Query to load the supporting SQL. Let's run our own queries."
       }
     },
     {

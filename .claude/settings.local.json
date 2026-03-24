@@ -33,7 +33,11 @@
       "Bash(cp .env dist/AnalyticsWorkbench/)",
       "Bash(taskkill //F //IM AnalyticsWorkbench.exe)",
       "Bash(python -c \":*)",
-      "Bash(PYTHONPATH=backend .venv/Scripts/python -c \":*)"
+      "Bash(PYTHONPATH=backend .venv/Scripts/python -c \":*)",
+      "Bash(python -m pytest tests/ -x -q --tb=short)",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d[''''checks''''][''''frontend''''][''''path'''']\\)\")",
+      "Bash(.venv/Scripts/python -c \":*)",
+      "Bash(done)"
     ],
     "deny": [
       "Read(C:/dev/analytics-workbench/.env)",

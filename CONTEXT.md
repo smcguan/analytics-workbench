@@ -36,9 +36,9 @@
 - Session save full state — COMPLETE (v1.15.0) — all_datasets + all_references in resume_state
 - PyInstaller packaging fix — COMPLETE (v1.15.0) — python313.dll bundled, upx_exclude for DLLs
 
-**Current version:** v1.15.0 — demo-ready for Farragut/McDermott meeting
+**Current version:** v1.16.0 — demo-ready for Farragut/McDermott meeting
 
-**Test suite:** 603 automated tests, all passing (zero xfail), runs under 11 seconds.
+**Test suite:** 611 automated tests, all passing (zero xfail), runs under 14 seconds.
 Pre-commit and pre-push git hooks enforce green suite on every commit and push.
 
 **Validated at scale:** 220M rows, DuckDB local execution, sub-second import.
@@ -369,6 +369,13 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-24] [CODE] — Tutorial #5 Real Estate Market Analysis built and committed. About button on
+  workflow cards (expandable description with purple accent). Library button re-added next to Reference
+  Table import. awPrompt enhanced with optional second textarea (workflow description on save). Reference
+  Guide expanded with Workflows documentation (Record/Edit/Reuse pattern, Edit Panel, Reusable Analysis).
+  Shimmer button animations. Edit panel replay engine improvements. 7 example case session.json files
+  updated with richer narration and additional steps (schema inspect, insights). 8 new tests for example
+  case file existence validation (additional datasets, references). 611 tests. v1.16.0.
 [2026-03-23] [CODE] — Four targeted fixes. Bug 1: startup workspace not clean — init() was calling
   loadReferences() which fetched leftover reference tables from disk; replaced with explicit empty state
   (loadedReferences=[], renderReferences()). Bug 2: SQL editor collapsed after Run SQL — removed
