@@ -29,6 +29,7 @@ from PyInstaller.utils.hooks import collect_submodules
 
 datas = [
     ('backend\\app', 'app'),
+    ('src\\assets', 'assets'),
 ]
 
 import sys, pathlib

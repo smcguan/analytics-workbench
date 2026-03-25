@@ -644,6 +644,7 @@ def test_example_cases_session_event_types_valid():
         "narration_only", "edit_panel_open", "edit_panel_choose",
         "edit_panel_check", "edit_panel_run", "inspect_schema",
         "inspect_preview", "ai_ask",
+        "explain", "chart_view", "query_save", "query_load",
     }
 
     for case_dir in cases_dir.iterdir():

@@ -1991,11 +1991,8 @@
     <div class="app">
         <header class="topbar">
             <div class="brand">
-                <div class="logo" aria-hidden="true">
-                    <img src="/ui/logo.png" alt="Analytics Workbench Logo" />
-                </div>
+                <img src="/ui/assets/jetware_logo.png" alt="JetWare AI" style="height: 36px; width: auto; object-fit: contain;">
                 <div>
-                    <h1>Analytics Workbench</h1>
                     <div class="sub">Your data never leaves your machine.</div>
                 </div>
             </div>
@@ -2372,7 +2369,7 @@ LIMIT 100</textarea>
                     <section class="panel welcome-shell">
                         <!-- Default welcome -->
                         <div class="welcome-card" id="welcomeDefaultCard">
-                            <h2>Analytics Workbench</h2>
+                            <img src="/ui/assets/jetware_logo.png" alt="JetWare AI" style="height: 56px; width: auto; object-fit: contain; margin-bottom: 16px;">
                             <p class="subtitle">Local-first AI analytics for analysts who work with sensitive data.</p>
 
                             <h3>How It Works</h3>
@@ -2606,14 +2603,14 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 
 <hr>
 <h3>Example Cases</h3>
-<p>Curated, documented analytical workflows you can run inside AW. 9 cases across 6 domains:</p>
+<p>Curated, documented analytical workflows you can run inside AW. 10 cases across 6 domains:</p>
 <ul>
 <li><strong>Real Estate</strong> — Multi-Market Real Estate Analysis (Austin/Denver neighborhood pricing, outlier detection, tier performance, Edit Workflow demo)</li>
 <li><strong>Healthcare Policy — PE Diligence</strong> — Multi-State Medicaid Diligence (TX/FL/OH schema normalization, MCO concentration, audit risk, cross-state reimbursement comparison)</li>
 <li><strong>Medicare &amp; Drug Policy</strong> — Part D IRA Exclusion, Part B GLOBE Candidates, USP Classification</li>
 <li><strong>Transportation &amp; Operations</strong> — NYC Taxi Trip Analysis</li>
 <li><strong>Supply Chain &amp; Logistics</strong> — Logistics Shipment Analysis</li>
-<li><strong>Retail &amp; E-Commerce</strong> — Retail Order Analysis</li>
+<li><strong>Retail &amp; E-Commerce</strong> — Retail Order Analysis, Parameterized Workflow (build a store-performance analysis on electronics data, save it, then swap to sporting goods via the Edit panel — same queries, different vertical)</li>
 <li><strong>SaaS &amp; Technology</strong> — SaaS Account Health Analysis</li>
 </ul>
 <p><strong>Tutorial mode:</strong> Step-by-step live replay. Each action (import, reference load, query) executes in real time with narration explaining what's happening and why.</p>
@@ -2655,7 +2652,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 <li><strong>Edit &amp; rerun</strong> — open Edit, swap the dataset file, verify columns, click Run Now</li>
 <li><strong>Audit</strong> — every run is independently logged in the Session Log with its own timestamps</li>
 </ol>
-<p><strong>Example:</strong> The <em>Multi-Market Real Estate Analysis</em> tutorial demonstrates this pattern. An Austin market analysis is recorded as a workflow, then rerun on Denver data by swapping a single file. The reference table (neighborhood tier map) stays the same — it covers both cities. Four queries, two markets, zero queries rewritten.</p>
+<p><strong>Example:</strong> The <em>Multi-Market Real Estate Analysis</em> tutorial demonstrates this pattern. An Austin market analysis is recorded as a workflow, then rerun on Denver data by swapping a single file. Four queries, two markets, zero queries rewritten. The <em>Parameterized Workflow — Retail Sales Performance</em> tutorial takes it further: build a store-performance analysis on electronics sales, save it, then swap both the dataset and reference table to an entirely different retail vertical (sporting goods) via the Edit panel.</p>
 <p><strong>When to use workflows:</strong></p>
 <ul>
 <li>Monthly or quarterly reports on updated data</li>
@@ -4958,7 +4955,8 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         function _isReplayableStep(eventType) {
             return ["dataset_import", "query_run", "reference_load", "reference_delete", "export", "session_end",
                     "edit_panel_open", "edit_panel_choose", "edit_panel_check", "edit_panel_run",
-                    "inspect_schema", "inspect_preview", "ai_ask", "insights_generated"].includes(eventType);
+                    "inspect_schema", "inspect_preview", "ai_ask", "insights_generated",
+                    "explain", "chart_view", "query_save", "query_load"].includes(eventType);
         }
 
         async function openTutorial(filename) {
@@ -5143,6 +5141,31 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         async function _executeTutorialStep(step) {
             const d = step.details || {};
 
+            // ── Auto-close Insights ─────────────────────────────────
+            // If the Insights panel is visible from a prior step, close
+            // it and switch to Query view before executing anything.
+            // This is a global rule — no tutorial should leave Insights
+            // open when the next step expects Query view.
+            if (step.event_type !== "insights_generated" && currentView === "insights") {
+                switchView("query");
+            }
+
+            // ── Auto-restore Table tab after Chart ──────────────────
+            // If the Chart tab is active from a prior chart_view step,
+            // switch back to Table tab before executing the next step.
+            // Without this, query_run renders into a hidden tableWrap
+            // while the destroyed chart container stays visible.
+            if (step.event_type !== "chart_view" && $("chartTab").classList.contains("active")) {
+                setActiveTab("table");
+            }
+
+            // ── Auto-close Explain panel ────────────────────────────
+            // If the Explain panel is open from a prior explain step,
+            // close it before executing the next step.
+            if (step.event_type !== "explain") {
+                $("explainPanel").style.display = "none";
+            }
+
             if (step.event_type === "dataset_import") {
                 const dsName = d.dataset || "";
 
@@ -5313,6 +5336,9 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             }
 
             if (step.event_type === "reference_load") {
+                // Close Insights panel if open — reference loads are not insight actions
+                if (currentView === "insights") switchView("query");
+
                 const source = d.source;
                 if (source) {
                     // Try library first
@@ -5389,9 +5415,61 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             }
 
             if (step.event_type === "session_end") {
-                // Show the Session Log so the analyst can see the audit trail
-                showSessionLog();
-                toast("Session complete — review the audit trail below.");
+                // If narration mentions saving a workflow, do the save visibly
+                const preText = (step.narration && step.narration.pre) || "";
+                const isSaveStep = preText.toLowerCase().includes("save") &&
+                    (preText.toLowerCase().includes("workflow") || preText.toLowerCase().includes("stored"));
+                const isSessionLogStep = preText.toLowerCase().includes("session log");
+
+                if (isSaveStep) {
+                    // Extract workflow name from narration — look for quoted text
+                    let wfName = "";
+                    const nameMatch = preText.match(/['\u2018\u2019\u201C\u201D]([^'\u2018\u2019\u201C\u201D]+)['\u2018\u2019\u201C\u201D]/);
+                    if (nameMatch) wfName = nameMatch[1];
+                    const wfDesc = (d.description || d.workflow_description || "");
+
+                    // Expand WORKFLOWS sidebar section visibly
+                    const wfTitle = $("sidebarWorkflowsTitle");
+                    const wfBody = $("sidebarWorkflowsBody");
+                    if (wfTitle && wfTitle.classList.contains("collapsed")) {
+                        wfTitle.classList.remove("collapsed");
+                        if (wfBody) wfBody.classList.remove("collapsed");
+                    }
+                    // Scroll sidebar to WORKFLOWS
+                    if (wfTitle) wfTitle.scrollIntoView({ behavior: "smooth", block: "center" });
+                    await _tutorialPause(600);
+
+                    // Save session with the workflow name and description
+                    if (wfName) {
+                        try {
+                            await apiJson("/api/session/name", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ name: wfName, description: wfDesc })
+                            });
+                            await apiJson("/api/session/export");
+                            toast("Workflow saved: " + wfName);
+                        } catch (_) {
+                            toast("Workflow save completed.");
+                        }
+                    }
+                    await _tutorialPause(800);
+
+                    // Open Workflows dialog to show the saved workflow
+                    await openWorkflowsDialog("stored");
+                    await _tutorialPause(1500);
+
+                    // Close the dialog
+                    const overlay = $("exampleCasesOverlay");
+                    if (overlay) overlay.classList.add("hidden");
+                } else if (isSessionLogStep) {
+                    // Session Log step — open the Session Log drawer
+                    showSessionLog();
+                    toast("Session complete — review the audit trail.");
+                } else {
+                    // Default session_end
+                    toast("Session complete.");
+                }
                 return;
             }
 
@@ -5419,9 +5497,11 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 // Switch to Insights view — this triggers fetchInsights automatically
                 switchView("insights");
 
-                // If cache miss, wait for fetch to complete
-                if (selectedDataset && !insightsCache[selectedDataset]) {
-                    await fetchInsights(false);
+                // Clear JS-level cache and force a fresh fetch so insights
+                // always regenerate — even on second run after Clear Workspace
+                if (selectedDataset) {
+                    delete insightsCache[selectedDataset];
+                    await fetchInsights(true);
                 }
 
                 toast("Insights generated for " + selectedDataset);
@@ -5573,7 +5653,11 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 $("wfEditRunNowBtn").disabled = true;
                 $("wfEditRunNowBtn").style.opacity = "0.4";
 
-                // Open drawer
+                // Open Workflows dialog first so analyst sees the saved workflow
+                await openWorkflowsDialog("stored");
+                await _tutorialPause(1200);
+
+                // Open Edit drawer on top of the dialog
                 closeSessionLogDrawer();
                 $("sessionLogToggle").checked = false;
                 $("refGuideDrawer").classList.remove("open");
@@ -5663,15 +5747,188 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             }
 
             if (step.event_type === "edit_panel_run") {
-                // Close the Edit panel and prepare for Denver queries
+                // Close the Edit panel and Workflows dialog — clean workspace
                 _closeWorkflowEditPanel();
+                const ecOverlay = $("exampleCasesOverlay");
+                if (ecOverlay && !ecOverlay.classList.contains("hidden")) {
+                    ecOverlay.classList.add("hidden");
+                }
 
                 // Switch to the new dataset if specified
                 if (d.dataset) {
                     selectedDataset = d.dataset;
                     renderDatasets();
                 }
+
+                // Import all reference tables from the example case so
+                // the new domain's reference tables are registered in DuckDB.
+                // Without this, JOINs against swapped reference tables fail
+                // with "Table not found" because only the original references
+                // were loaded during the initial case load.
+                if (_tutorialCaseId) {
+                    try {
+                        await apiJson("/api/example_cases/" + encodeURIComponent(_tutorialCaseId) + "/import_reference", {
+                            method: "POST",
+                        });
+                        await loadReferences();
+                    } catch (_) {}
+                }
+
                 toast("Running workflow against new dataset...");
+                return;
+            }
+
+            // ── Explain ─────────────────────────────────────────────
+            // Shows the Explain panel with a canned explanation from
+            // the session event.  Falls back to the live AI endpoint
+            // when no canned text is provided.
+            if (step.event_type === "explain") {
+                switchView("query");
+                const panel = $("explainPanel");
+                const canned = d.explanation || "";
+                if (canned) {
+                    $("explainText").textContent = canned;
+                    panel.style.display = "block";
+                } else {
+                    // Live AI call — same as clicking the Explain button
+                    await explainSql();
+                }
+                return;
+            }
+
+            // ── Chart view ──────────────────────────────────────────
+            // Switches to the Chart tab so the chart renders visibly.
+            // Requires a preceding query_run/ai_ask that populated lastRun.
+            // If the backend didn't return a visualization recommendation,
+            // we build one from the step details and lastRun columns/rows.
+            if (step.event_type === "chart_view") {
+                switchView("query");
+
+                // Ensure lastRun has a usable visualization object
+                if (!lastRun.visualization || !lastRun.visualization.recommended) {
+                    // Auto-detect: first string-ish column = x, first numeric = y
+                    const cols = lastRun.columns || [];
+                    const rows = lastRun.rows || [];
+                    let xCol = cols[0] || "";
+                    let yCol = cols.length > 1 ? cols[1] : cols[0] || "";
+                    // Pick the first column whose first-row value is numeric as y
+                    for (const c of cols) {
+                        if (rows.length > 0 && typeof rows[0][c] === "number") { yCol = c; break; }
+                    }
+                    // Pick the first column whose first-row value is NOT numeric as x
+                    for (const c of cols) {
+                        if (rows.length > 0 && typeof rows[0][c] !== "number") { xCol = c; break; }
+                    }
+                    lastRun.visualization = {
+                        recommended: true,
+                        chart_type: d.chart_type || "bar",
+                        x_column: xCol,
+                        y_column: yCol,
+                        title: d.title || "",
+                        reason: "Tutorial chart step"
+                    };
+                }
+                // Override chart_type from step details if specified
+                if (d.chart_type) {
+                    lastRun.visualization.chart_type = d.chart_type;
+                }
+
+                // Activate the Chart tab — renderChart will run inside setActiveTab
+                $("chartTab").disabled = false;
+                setActiveTab("chart");
+                // Re-enable after renderChart's clearChart() disabled it
+                $("chartTab").disabled = false;
+                return;
+            }
+
+            // ── Save query ──────────────────────────────────────────
+            // Saves the current SQL editor content, then switches to
+            // the Saved Queries panel so the analyst can see it saved.
+            if (step.event_type === "query_save") {
+                const qName = d.name || "Untitled Query";
+                const sql = $("sqlEditor").value.trim();
+                const dataset = selectedDataset;
+                if (sql && dataset) {
+                    try {
+                        await apiJson("/api/queries/save", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ name: qName, type: "sql", dataset, sql })
+                        });
+                        toast(`Saved query: ${qName}`);
+
+                        // Show the Saved Queries panel so the save is visible
+                        const wsTitle = $("sidebarWorkspaceTitle");
+                        if (wsTitle && wsTitle.classList.contains("collapsed")) {
+                            wsTitle.click();
+                        }
+                        switchView("saved");
+                        await loadSavedQueries();
+                        await _tutorialPause(1000);
+
+                        // Highlight the newly saved query row
+                        const rows = $("savedQueriesBody").querySelectorAll("tr");
+                        for (const row of rows) {
+                            if (row.textContent.includes(qName)) {
+                                row.style.background = "rgba(79,140,255,0.18)";
+                                row.scrollIntoView({ behavior: "smooth", block: "center" });
+                                break;
+                            }
+                        }
+                        await _tutorialPause(1500);
+
+                        // Return to Query view
+                        switchView("query");
+                    } catch (e) {
+                        toast("Save failed: " + e.message);
+                    }
+                }
+                return;
+            }
+
+            // ── Load saved query ────────────────────────────────────
+            // Opens the Saved Queries panel visibly, highlights the
+            // named query, then loads it into the SQL editor.
+            if (step.event_type === "query_load") {
+                // 1. Expand the WORKSPACE sidebar section so Saved Queries nav is visible
+                const wsTitle = $("sidebarWorkspaceTitle");
+                if (wsTitle && wsTitle.classList.contains("collapsed")) {
+                    wsTitle.click();
+                }
+
+                // 2. Switch to Saved Queries view — panel opens visibly
+                switchView("saved");
+                await loadSavedQueries();
+                await _tutorialPause(2000);
+
+                // 3. Find the named query and highlight its row briefly
+                const qName = d.name || "";
+                if (qName) {
+                    try {
+                        const data = await apiJson("/api/queries");
+                        const match = (data.queries || []).find(q => q.name === qName);
+                        if (match) {
+                            // Highlight the matching row in the table
+                            const rows = $("savedQueriesBody").querySelectorAll("tr");
+                            for (const row of rows) {
+                                if (row.textContent.includes(qName)) {
+                                    row.style.background = "rgba(79,140,255,0.18)";
+                                    row.scrollIntoView({ behavior: "smooth", block: "center" });
+                                    break;
+                                }
+                            }
+                            await _tutorialPause(1500);
+
+                            // 4. Load the query — switches to Query view with SQL in editor
+                            await applySavedQuery(match);
+                            await _tutorialPause(800);
+                        } else {
+                            toast(`Saved query "${qName}" not found.`);
+                        }
+                    } catch (e) {
+                        toast("Could not load saved queries: " + e.message);
+                    }
+                }
                 return;
             }
         }
@@ -7272,6 +7529,8 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             renderReferences();
             updateSelectedDatasetSummary();
             resetInspectState();
+            // Clear insights cache so next run generates fresh
+            for (const k in insightsCache) delete insightsCache[k];
             // If Insights view is active, switch back to Welcome
             if (currentView === "insights") switchView("welcome");
             $("referenceIndicator").style.display = "none";

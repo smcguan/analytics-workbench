@@ -88,6 +88,17 @@
       }
     },
     {
+      "event_type": "chart_view",
+      "timestamp": "2026-03-24T16:02:30.000000+00:00",
+      "details": {
+        "chart_type": "bar"
+      },
+      "narration": {
+        "pre": "Four regions, one chart. Click Chart.",
+        "post": "West region underperformance is immediately visible. The chart makes the finding undeniable — this is the first slide in a retail performance presentation."
+      }
+    },
+    {
       "event_type": "query_run",
       "timestamp": "2026-03-24T16:03:00.000000+00:00",
       "details": {
@@ -105,6 +116,17 @@
       }
     },
     {
+      "event_type": "query_save",
+      "timestamp": "2026-03-24T16:03:30.000000+00:00",
+      "details": {
+        "name": "Revenue vs Target by Store"
+      },
+      "narration": {
+        "pre": "Save this query. On every retail engagement you will want to compare actuals against targets. This query becomes reusable the moment you save it.",
+        "post": "Saved to your query library. It will be there when you need it — for this client or the next one."
+      }
+    },
+    {
       "event_type": "ai_ask",
       "timestamp": "2026-03-24T16:04:00.000000+00:00",
       "details": {
@@ -117,6 +139,17 @@
       },
       "baseline": {
         "expected_row_count": 5
+      }
+    },
+    {
+      "event_type": "chart_view",
+      "timestamp": "2026-03-24T16:04:30.000000+00:00",
+      "details": {
+        "chart_type": "bar"
+      },
+      "narration": {
+        "pre": "Category breakdown as a chart. One click.",
+        "post": "Accessories stands out immediately. Visual confirmation of the margin story."
       }
     },
     {
@@ -137,9 +170,22 @@
       }
     },
     {
+      "event_type": "explain",
+      "timestamp": "2026-03-24T16:05:30.000000+00:00",
+      "details": {
+        "explanation": "This query uses a common table expression (CTE) to calculate each store's total revenue, then computes the average across all stores. The outer query filters to stores exceeding 1.5 times that average — statistical outliers that warrant investigation. The ratio_to_avg column shows how many multiples of the average each outlier generates. Two stores cleared the threshold: one at 2.2x and another at 1.7x the average. Before reporting these as outperformers, verify whether the revenue reflects genuine sales volume or a data artifact like duplicate transactions."
+      },
+      "narration": {
+        "pre": "Click Explain. This is the feature that turns a SQL query into a client-readable methodology note.",
+        "post": "Every query in this analysis can be explained in plain English on demand. No technical translation required."
+      }
+    },
+    {
       "event_type": "session_end",
       "timestamp": "2026-03-24T16:06:00.000000+00:00",
-      "details": {},
+      "details": {
+        "description": "Analyzes retail sales performance against targets. Parameterized — swap dataset and reference table for any new retail client."
+      },
       "narration": {
         "pre": "Save this as a stored workflow. Click Save As in the sidebar footer. Name it 'Retail Sales Performance — Electronics'. Every query, every JOIN, every step — locked in and replayable.",
         "post": "Workflow saved. Now a new client comes in. Sporting goods retailer. Same type of business, completely different stores, products, and targets. Watch what happens next."
@@ -158,7 +204,9 @@
           }
         ],
         "references": [
-          { "name": "electronics_targets" }
+          {
+            "name": "electronics_targets"
+          }
         ]
       },
       "narration": {
@@ -188,7 +236,20 @@
         "target_dataset": "electronics_sales",
         "columns_checked": 12,
         "columns_matched": 12,
-        "column_list": ["TRANSACTION_ID", "STORE_ID", "STORE_NAME", "REGION", "PRODUCT_ID", "PRODUCT_NAME", "CATEGORY", "UNITS_SOLD", "UNIT_PRICE", "REVENUE", "SALE_DATE", "SALES_REP_ID"]
+        "column_list": [
+          "TRANSACTION_ID",
+          "STORE_ID",
+          "STORE_NAME",
+          "REGION",
+          "PRODUCT_ID",
+          "PRODUCT_NAME",
+          "CATEGORY",
+          "UNITS_SOLD",
+          "UNIT_PRICE",
+          "REVENUE",
+          "SALE_DATE",
+          "SALES_REP_ID"
+        ]
       },
       "narration": {
         "pre": "Watch the column check — each column from the original workflow is verified against the new file.",
@@ -204,6 +265,17 @@
       "narration": {
         "pre": "Both files remapped. Both column checks green. Run Now is active. Click it. Same workflow. New client.",
         "post": "The Edit panel closes. Every step from the electronics workflow now replays against the sporting goods dataset. The reference table swap happens automatically — sporting_goods_targets replaces electronics_targets."
+      }
+    },
+    {
+      "event_type": "query_load",
+      "timestamp": "2026-03-24T16:08:30.000000+00:00",
+      "details": {
+        "name": "Revenue vs Target by Store"
+      },
+      "narration": {
+        "pre": "The saved query from the Electronics analysis is still here. When we run the Sporting Goods workflow, this query runs against the new data automatically — but you can also load and run it manually at any point.",
+        "post": "Saved queries travel with you across engagements. The query logic is yours — the data is just the input."
       }
     },
     {
@@ -230,7 +302,7 @@
         "dataset": "sporting_goods_sales",
         "sql": "SELECT\n    REGION,\n    ROUND(SUM(REVENUE), 2) AS total_revenue,\n    SUM(UNITS_SOLD) AS total_units\nFROM dataset\nGROUP BY REGION\nORDER BY total_revenue DESC",
         "row_count": 4,
-        "elapsed_seconds": 0.010
+        "elapsed_seconds": 0.01
       },
       "narration": {
         "pre": "Same regional revenue query, sporting goods data.",
@@ -264,7 +336,7 @@
         "dataset": "sporting_goods_sales",
         "sql": "SELECT\n    CATEGORY,\n    ROUND(SUM(REVENUE), 2) AS total_revenue,\n    ROUND(AVG(UNIT_PRICE), 2) AS avg_unit_price\nFROM dataset\nGROUP BY CATEGORY\nORDER BY total_revenue DESC",
         "row_count": 5,
-        "elapsed_seconds": 0.010
+        "elapsed_seconds": 0.01
       },
       "narration": {
         "pre": "Category breakdown for sporting goods.",

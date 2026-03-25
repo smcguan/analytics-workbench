@@ -152,6 +152,16 @@ Date and time functions (DuckDB argument order is OPPOSITE to SQLite):
   - CORRECT:   EXTRACT(year FROM order_date)         -- extract year
   - CORRECT:   order_date::DATE                      -- cast to date type
 
+DATE COLUMNS FROM CSV: Columns containing date values imported from CSV are
+often stored as VARCHAR, not DATE. Always cast to DATE before using date functions:
+  - CORRECT:   strftime('%Y-%m', CAST(date_col AS DATE))
+  - CORRECT:   DATE_TRUNC('month', CAST(date_col AS DATE))
+  - CORRECT:   EXTRACT(year FROM CAST(date_col AS DATE))
+  - WRONG:     strftime('%Y-%m', date_col)           -- fails if col is VARCHAR
+  - WRONG:     DATE_TRUNC('month', date_col)         -- fails if col is VARCHAR
+Never apply strftime, DATE_TRUNC, or EXTRACT directly to a column without
+CAST(col AS DATE) unless the column type is already DATE or TIMESTAMP.
+
 String functions:
   - Use || for string concatenation (not CONCAT in simple cases)
   - LIKE is case-sensitive by default; use ILIKE for case-insensitive
@@ -174,7 +184,7 @@ NULL handling:
 QUERY CONSTRUCTION GUIDELINES:
 - For "top N by X": use ORDER BY X DESC LIMIT N
 - For grouping/aggregation: always include GROUP BY for non-aggregated columns
-- For date trends: use DATE_TRUNC or strftime to bucket dates
+- For date trends: use DATE_TRUNC or strftime to bucket dates — always CAST(col AS DATE) first
 - For averages: use AVG(col), for totals use SUM(col), for counts use COUNT(*)
 - For comparisons across categories: GROUP BY the category column
 - Always add ORDER BY to make results meaningful when possible
@@ -577,8 +587,8 @@ INSIGHT TYPES (use in this priority order — pick whichever apply):
 6. correlation — two numeric columns that move together in an interesting way
 
 DUCKDB SYNTAX REMINDERS:
-- strftime('%Y-%m', col) — format string FIRST
-- DATE_TRUNC('month', col) for date bucketing
+- strftime('%Y-%m', CAST(col AS DATE)) — format string FIRST, always CAST date columns
+- DATE_TRUNC('month', CAST(col AS DATE)) for date bucketing — always CAST
 - col::INTEGER for type casting
 - ILIKE for case-insensitive string matching
 - No semicolons at end of SQL

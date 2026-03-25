@@ -38,7 +38,12 @@ Milestones 1–4 complete. Milestone 5 in active planning. See CONTEXT.md.
 ```
 /
 ├── frontend/
-│   └── index.html              # Entire frontend — single file
+│   ├── index.html              # Entire frontend — single file
+│   └── assets/
+│       └── jetware_logo.png    # JetWare AI logo (header + Welcome card)
+├── src/
+│   └── assets/
+│       └── jetware_logo.png    # Logo source (bundled via PyInstaller)
 ├── backend/
 │   └── app/
 │       ├── main.py             # FastAPI app, all core endpoints
@@ -64,6 +69,9 @@ Milestones 1–4 complete. Milestone 5 in active planning. See CONTEXT.md.
 │   │       ├── data/           # Sample dataset CSV
 │   │       └── reference/      # Reference table CSVs (if any)
 │   └── workspace.json          # Auto-snapshot on shutdown for resume
+├── tests/
+│   ├── test_tutorial_queries.py    # Integration: runs all tutorial SQL against sample data
+│   └── ...                         # 27 other test files (642 tests total)
 ├── exports/
 ├── .env                        # OPENAI_API_KEY (not committed)
 ├── CLAUDE.md                   # This file
@@ -296,8 +304,9 @@ Both rewrites happen before execution. AI always uses "dataset" as table name, n
 
 ### SQL Generation
 - DuckDB syntax only
-- strftime('%Y-%m', col) — format string FIRST
-- DATE_TRUNC('month', col) for date bucketing
+- strftime('%Y-%m', CAST(col AS DATE)) — format string FIRST, always CAST date columns
+- DATE_TRUNC('month', CAST(col AS DATE)) for date bucketing — always CAST
+- CSV date columns are stored as VARCHAR — never apply date functions without CAST
 - col::INTEGER for type casting
 - Never invent column names
 - Table name is always "dataset" (reference table is "reference" if loaded)

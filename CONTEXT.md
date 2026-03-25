@@ -371,6 +371,29 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-24] [CODE] — v1.18.0. JetWare AI logo replaces text header + Welcome card heading. Tutorial
+  integration test suite built (test_tutorial_queries.py — validates every query_run SQL against sample
+  data with baseline row counts). Fixed 3 bad baselines found by tests: part_d[8] 33→22, part_d[9]
+  243→202, retail[9] 4→2. 4 new tutorial event types: explain, chart_view, query_save, query_load —
+  handlers in playback engine with auto-detect visualization fallback for charts. Tutorial #4 +6 steps
+  (bar chart, explain, query_save, FL monthly trend query, line chart, query_load). Tutorial #6 +5 steps
+  (2 bar charts, explain, query_save, query_load). 3 engine-level guards: auto-close Insights, auto-restore
+  Table tab after Chart, auto-close Explain panel. DuckDB DATE CAST guidance added to AI SQL generation
+  prompt (CSV date columns are VARCHAR). Reference Guide updated for parameterized workflow tutorial.
+  PyInstaller spec updated with src/assets datas entry. 642 tests.
+[2026-03-24] [BD] — Extended BD session. Casey immersion program built: 5-module
+  self-paced guide (orientation, all example workflows, hands-on analysis, build your
+  own workflow, Farragut readiness). Casey email written — explains full business vision,
+  his role, and why immersion matters. Tutorial #5 Real Estate spec and 4 synthetic
+  datasets generated and validated (Austin 2,000 rows / Denver 1,800 rows, identical
+  schemas, $68K price delta, 8-day DOM delta). Tutorial #6 Parameterized Workflow spec
+  written — retail domain, electronics vs sporting goods, full Edit panel lifecycle.
+  Wyoming LLC company formation checklist built. Casey conversation guide and AW
+  onboarding guide built. Library button CSS fix in progress — two attempts, still
+  mismatched width vs Import Dataset. python313.dll packaging error recurring —
+  build script hardening spec written for Claude Code. Shimmer loading states spec
+  written — comprehensive, all async buttons. Outstanding: Library button fix,
+  shimmer implementation, workflow step parity.
 [2026-03-24] [CODE] — Tutorial #6 Parameterized Workflow Retail built (electronics + sporting goods,
   4 CSVs, 13-step session with Edit panel dataset+reference swap, all baselines validated). PyInstaller
   build hardened: python313.dll force-bundled from sys.base_prefix, upx_exclude expanded to 14 entries
@@ -552,7 +575,10 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 ## OPEN DECISIONS
 
 - [ ] Farragut/McDermott pricing — $3k–4.5k/seat + onboarding engagement. Confirm before proposal.
-- [ ] Stan conversation prep — Casey needs to be briefed before the McDermott meeting.
+- [ ] Stan conversation prep — Casey needs to be briefed. Casey immersion guide built — needs to complete it.
+- [x] Casey immersion program — COMPLETE. 5-module guide built March 2026.
+- [x] Casey email re: AW opportunity — COMPLETE. Sent March 2026.
+- [ ] Wyoming LLC formation — checklist built, filing not yet started.
 - [ ] Multi-state Medicaid sample file — ask Farragut for sanitized sample to validate schema mapping approach.
 - [ ] M5 P1 scope — schema mapping only, or include MCO lookup in same build?
 - [ ] Analysis Summary Artifact format — configurable template (Farragut memo style) vs. fixed output?
@@ -563,24 +589,27 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 - [ ] GUARD orphan drug and MFN flags — not yet applied to Part D candidate list.
 - [ ] Reference Table Library maintenance model — who updates, how distributed to customers?
 - [ ] University outreach — program, contact, ask?
+- [ ] Proposal and contract template — needed before first Farragut contract signing.
 
 ---
 
 ## NEXT ACTIONS
 
 **Business development (Claude.ai):**
-- Casey dry run of Farragut demo script before meeting
+- Send Casey immersion guide and motivational email
+- Casey completes immersion program — debrief after Module 5
+- Casey dry run of Tutorial #4 with you playing Stan
 - Confirm meeting date and attendees with Farragut
-- Await Farragut follow-up to Casey's three discovery questions
-- Brief Casey on Stan conversation before McDermott meeting
-- Ask Farragut for sanitized multi-state Medicaid sample file
+- Await Farragut follow-up to Casey's requirements email
+- File Wyoming LLC — name decision needed first
 - Draft proposal for Farragut/McDermott (team license + onboarding + library)
+- Draft proposal and contract template skeleton
 - Apply orphan drug + MFN flags to GUARD Part D candidate list
 - Draft one-pager for Tier 1 consultant outreach (COMPLETE — aw_consultant_onepager.docx)
-- Draft proposal and contract template skeleton
 
 **Product / code (Claude Code):**
-- Do one clean dry run of Tutorial #4 from scratch before Farragut meeting
+- Fix Library button width — still mismatched vs Import Dataset after two attempts
+- Fix shimmer loading states — upload bar still appearing, needs full removal
 - Fix workflow step parity — occasional Step Through failures remaining
 - Spec and build Analysis Summary Artifact (M5 Priority 2)
 - Spec and build AI Mode Switch (M5 Priority 3)

@@ -128,13 +128,24 @@
       }
     },
     {
+      "event_type": "chart_view",
+      "timestamp": "2026-03-23T10:05:00.000000+00:00",
+      "details": {
+        "chart_type": "bar"
+      },
+      "narration": {
+        "pre": "The results tell the story in numbers. The chart tells it visually. Click the Chart tab.",
+        "post": "Lone Star Health's bar dwarfs the others. Concentration risk is more immediately obvious in a chart than in a table. This is the visual you put in the slide deck."
+      }
+    },
+    {
       "event_type": "query_run",
       "timestamp": "2026-03-23T10:05:30.000000+00:00",
       "details": {
         "dataset": "tx_medicaid_claims",
         "sql": "SELECT\n    MCO_NAME,\n    COUNT(*) AS claim_count,\n    ROUND(SUM(PAID_AMT), 0) AS total_paid,\n    ROUND(100.0 * SUM(PAID_AMT) / SUM(SUM(PAID_AMT)) OVER (), 1) AS pct_of_total\nFROM dataset\nGROUP BY MCO_NAME\nORDER BY total_paid DESC",
         "row_count": 3,
-        "elapsed_seconds": 0.020
+        "elapsed_seconds": 0.02
       },
       "narration": {
         "pre": "Now the concentration calculation. We use a window function to compute each MCO's share of total paid claims. Any MCO above 40% is a material concentration risk in a PE diligence context — loss of that contract would create an immediate revenue shortfall the operator cannot easily replace.",
@@ -142,6 +153,17 @@
       },
       "baseline": {
         "expected_row_count": 3
+      }
+    },
+    {
+      "event_type": "explain",
+      "timestamp": "2026-03-23T10:06:00.000000+00:00",
+      "details": {
+        "explanation": "This query groups all Texas Medicaid claims by managed care organization (MCO_NAME) and calculates three metrics for each: total claim count, total paid amount, and that MCO's percentage share of overall paid claims. The window function SUM(SUM(PAID_AMT)) OVER () computes the grand total across all MCOs in a single pass, then each row divides its MCO's total by that grand total to get the concentration percentage. Results are sorted highest-paid first, so the dominant MCO appears at the top. A single MCO above 40% indicates material revenue concentration risk."
+      },
+      "narration": {
+        "pre": "Before moving on — notice the Explain button next to Run SQL. Click it.",
+        "post": "Explain translates the SQL into plain English. For a PE sponsor who is not technical, this is how you show your work. The query logic is documented in language anyone can read."
       }
     },
     {
@@ -207,6 +229,17 @@
       }
     },
     {
+      "event_type": "query_save",
+      "timestamp": "2026-03-23T10:10:30.000000+00:00",
+      "details": {
+        "name": "Cross-State Reimbursement Comparison"
+      },
+      "narration": {
+        "pre": "This query — comparing reimbursement rates across three states — is one you will run on every multi-state engagement. Save it.",
+        "post": "Saved. It now lives in Saved Queries in the sidebar. Any session, any dataset — load it and run it."
+      }
+    },
+    {
       "event_type": "query_run",
       "timestamp": "2026-03-23T10:11:30.000000+00:00",
       "details": {
@@ -221,6 +254,34 @@
       },
       "baseline": {
         "expected_row_count": 6
+      }
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-03-23T10:18:00.000000+00:00",
+      "details": {
+        "dataset": "fl_medicaid_claims",
+        "sql": "SELECT strftime('%Y-%m', CAST(DATE_OF_SERVICE AS DATE)) AS month, COUNT(*) AS claims, ROUND(SUM(ALLOWED_AMOUNT), 0) AS total_allowed FROM dataset GROUP BY month ORDER BY month",
+        "row_count": 12,
+        "elapsed_seconds": 0.018
+      },
+      "narration": {
+        "pre": "One more angle before we wrap up: claim volume over time. Are Florida claims trending up, down, or seasonal? This is a single GROUP BY on the date column — the kind of question that should take seconds, not hours.",
+        "post": "12 months of Florida Medicaid claims with monthly totals. Look for seasonality or trend breaks — either could signal operational changes, contract renewals, or staffing shifts that affect the diligence thesis."
+      },
+      "baseline": {
+        "expected_row_count": 12
+      }
+    },
+    {
+      "event_type": "chart_view",
+      "timestamp": "2026-03-23T10:18:30.000000+00:00",
+      "details": {
+        "chart_type": "line"
+      },
+      "narration": {
+        "pre": "Time series data becomes a line chart automatically. Click Chart.",
+        "post": "Month by month claim volume for Florida — rendered automatically. No configuration required. AW detects the date column and draws the trend."
       }
     },
     {
@@ -248,6 +309,17 @@
       "narration": {
         "pre": "Generating a Result Passport for the MCO concentration query. The passport captures the query text, SQL, row count, timestamp, AI mode, dataset name, and key result values — everything needed to document this finding in the methodology section of the diligence memo.",
         "post": "Result Passport generated and copied to clipboard. It includes: the natural language question, the exact SQL that ran, the result shape (3 rows, 4 columns), the dataset name and version, and the timestamp. This is your audit trail for the MCO concentration finding."
+      }
+    },
+    {
+      "event_type": "query_load",
+      "timestamp": "2026-03-23T10:22:00.000000+00:00",
+      "details": {
+        "name": "Cross-State Reimbursement Comparison"
+      },
+      "narration": {
+        "pre": "Saved Queries. Everything you have saved is here — across all sessions.",
+        "post": "One click to load any saved query. Run it against the current dataset or modify it for a new question. This is your personal query library."
       }
     },
     {

@@ -117,10 +117,10 @@
       },
       "narration": {
         "pre": "Now we JOIN the spending dataset against the IRA reference table. This INNER JOIN matches brand names between the two tables, showing us exactly which drugs in our dataset are on the IRA negotiated list. The reference table was title-cased on import so brand names match without needing LOWER() wrappers.",
-        "post": "33 drugs in our dataset match the IRA negotiated list. These span all 3 IRA rounds. This is the exclusion set — these drugs have negotiated prices and should be filtered out when identifying GUARD payment model candidates."
+        "post": "22 drugs in our dataset match the IRA negotiated list. These span all 3 IRA rounds. This is the exclusion set — these drugs have negotiated prices and should be filtered out when identifying GUARD payment model candidates."
       },
       "baseline": {
-        "expected_row_count": 33
+        "expected_row_count": 22
       }
     },
     {
@@ -129,15 +129,15 @@
       "details": {
         "dataset": "part_d_spending_sample",
         "sql": "SELECT COUNT(DISTINCT d.Brnd_Name) AS non_ira_drugs FROM dataset d LEFT JOIN reference r ON d.Brnd_Name = r.drug_name WHERE d.Mftr_Name != 'Overall' AND r.drug_name IS NULL",
-        "row_count": 243,
+        "row_count": 202,
         "elapsed_seconds": 0.019
       },
       "narration": {
         "pre": "Now the key query: how many drugs remain AFTER excluding IRA-negotiated drugs? We use a LEFT JOIN with a NULL check — any drug that doesn't match the reference table is a non-IRA drug. This is the standard exclusion pattern: LEFT JOIN + IS NULL.",
-        "post": "243 non-IRA drugs remain (272 total minus 33 IRA matches = 239, but some drugs match on variant names, giving us 243). These are the potential GUARD payment model candidates — drugs with Medicare spending that are not subject to IRA price negotiation."
+        "post": "202 non-IRA drugs remain after excluding IRA-negotiated brands. These are the potential GUARD payment model candidates — drugs with Medicare spending that are not subject to IRA price negotiation."
       },
       "baseline": {
-        "expected_row_count": 243
+        "expected_row_count": 202
       }
     },
     {

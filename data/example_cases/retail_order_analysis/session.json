@@ -117,14 +117,14 @@
       "details": {
         "dataset": "retail_orders_sample",
         "sql": "SELECT CASE WHEN discount_pct = 0 THEN 'No discount' WHEN discount_pct <= 10 THEN '1-10%' WHEN discount_pct <= 20 THEN '11-20%' ELSE '21%+' END AS discount_band, COUNT(*) AS orders, ROUND(AVG(margin), 2) AS avg_margin, ROUND(AVG(net_revenue), 2) AS avg_revenue FROM dataset GROUP BY discount_band ORDER BY avg_margin DESC",
-        "row_count": 4,
+        "row_count": 2,
         "elapsed_seconds": 0.016
       },
       "narration": {
         "pre": "Discount impact analysis: how do different discount levels affect margin and average order value? Discounts drive volume but erode margin — the question is where the breakeven point falls.",
-        "post": "4 discount bands with their margin and revenue impact. This is the data a pricing team needs: at what discount level does the volume lift stop compensating for the margin loss? Orders with no discount should have the highest margin but potentially lower volume."
+        "post": "2 discount bands — no discount and 1-10%. Orders with no discount have the highest margin. This is the data a pricing team needs to evaluate whether the volume lift from discounting compensates for the margin erosion."
       },
-      "baseline": { "expected_row_count": 4 }
+      "baseline": { "expected_row_count": 2 }
     },
     {
       "event_type": "session_end",
