@@ -27,19 +27,46 @@ from PyInstaller.utils.hooks import collect_submodules
 #   explicitly to reduce runtime packaging failures.
 # -----------------------------------------------------------------------------
 
+import sys
+import os
+
+# Dynamically find the correct Python DLL for this machine.
+# Avoids hardcoded python313.dll breaking on other Python versions.
+python_version = f"python{sys.version_info.major}{sys.version_info.minor}"
+python_dll_name = f"{python_version}.dll"
+
+python_dir = os.path.dirname(sys.executable)
+dll_search_paths = [
+    os.path.join(python_dir, python_dll_name),
+    os.path.join(sys.base_prefix, python_dll_name),
+    os.path.join(os.environ.get('SYSTEMROOT', 'C:\\Windows'), python_dll_name),
+    os.path.join(os.environ.get('SYSTEMROOT', 'C:\\Windows'), 'System32', python_dll_name),
+]
+
+python_dll_path = None
+for path in dll_search_paths:
+    if os.path.exists(path):
+        python_dll_path = path
+        break
+
+if python_dll_path is None:
+    raise RuntimeError(f"Cannot find {python_dll_name} — check your Python installation")
+
+print(f"Using Python DLL: {python_dll_path}")
+
 datas = [
     ('backend\\app', 'app'),
     ('src\\assets', 'assets'),
 ]
 
-import sys, pathlib
+import pathlib
 _py_base = pathlib.Path(sys.base_prefix)
 
 binaries = [
     # PyInstaller sometimes fails to bundle the core Python DLLs from the
     # base interpreter into a venv-based build.  Force-include them.
-    (str(_py_base / 'python313.dll'), '.'),
-    (str(_py_base / 'python3.dll'),   '.'),
+    (python_dll_path, '.'),
+    (str(_py_base / 'python3.dll'), '.'),
 ]
 
 hiddenimports = [
@@ -79,7 +106,7 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=[],
+    excludes=['pytest', 'pyarrow.tests', 'pyarrow.tests.parquet'],
     noarchive=False,
     optimize=0,
 )
@@ -111,8 +138,8 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=[
+        python_dll_name,
         'python3.dll',
-        'python313.dll',
         'vcruntime140.dll',
         'vcruntime140_1.dll',
         '_asyncio.pyd',

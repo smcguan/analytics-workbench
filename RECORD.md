@@ -132,6 +132,7 @@ Building toward reproducible, auditable, shareable analytical sessions:
 | v1.10.2 | 2026-03-21 | Bug #18: Refresh was deleting disk files (root cause of restore loop); Clear SQL button; Sessions Save exits; SQL auto-clears on restore |
 | v1.10.3 | 2026-03-21 | Chart tab disabled until query returns chartable result; Sessions Save no longer exits; restore filters dataset list to session dataset only |
 | v1.11.0 | 2026-03-21 | SESSIONS sidebar removed; snapshots retired; Welcome card is session hub (Resume + Save); Reference Guide as slide-in drawer; 603 tests |
+| v1.18.1 | 2026-03-24 | PyInstaller DLL portability fix — dynamic pythonXYZ.dll lookup, works on Python 3.13 and 3.14; pyarrow.tests excluded; BUILD_RELEASE.bat verification dynamic; 642 tests |
 | v1.18.0 | 2026-03-24 | JetWare AI logo, tutorial integration test suite, 4 new event types (explain/chart/save/load), Tutorial #4 +6 steps, Tutorial #6 +5 steps, 3 engine guards, DATE CAST AI prompt fix; 642 tests |
 | v1.17.0 | 2026-03-24 | Tutorial #6 Parameterized Workflow Retail, PyInstaller build hardening, 22 ai_ask conversions across 7 demos, Clear Workspace closes Insights, Library button style fix; 611 tests |
 | v1.16.0 | 2026-03-24 | Tutorial #5 Real Estate, About button, Library button, awPrompt extra field, Reference Guide workflow docs, shimmer buttons; 611 tests |
@@ -145,6 +146,13 @@ Building toward reproducible, auditable, shareable analytical sessions:
 
 ## Wrap Records
 <!-- Each /wrap appends a 3-line summary below. Most recent at top. -->
+
+**v1.18.1** | 2026-03-24
+PyInstaller Python DLL portability fix: AnalyticsWorkbench.spec now dynamically resolves the
+correct pythonXYZ.dll at build time (4-path search: python_dir → sys.base_prefix → SYSTEMROOT →
+System32) rather than hardcoding python313.dll. upx_exclude and binaries both use the dynamic name.
+BUILD_RELEASE.bat post-build verification now queries Python for the version-correct DLL name.
+Builds on Python 3.13 (desktop) and Python 3.14 (laptop). pyarrow.tests excluded from bundle.
 
 **v1.18.0** | 2026-03-24
 JetWare AI logo replaces text header + Welcome card heading. Tutorial integration test suite

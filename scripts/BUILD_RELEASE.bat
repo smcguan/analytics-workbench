@@ -106,16 +106,17 @@ REM ==========================================================
 
 echo Verifying build output...
 
-if not exist "dist\AnalyticsWorkbench\_internal\python313.dll" (
+FOR /F "tokens=*" %%i IN ('python -c "import sys; print(f'python{sys.version_info.major}{sys.version_info.minor}.dll')"') DO SET PYTHON_DLL=%%i
+IF NOT EXIST "dist\AnalyticsWorkbench\_internal\%PYTHON_DLL%" (
     echo.
     echo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    echo ERROR: python313.dll MISSING from build output
+    echo ERROR: %PYTHON_DLL% MISSING from build output
     echo Build failed — do not distribute
     echo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     pause
     exit /b 1
 )
-echo   python313.dll .... OK
+echo   %PYTHON_DLL% .... OK
 
 if not exist "dist\AnalyticsWorkbench\_internal\python3.dll" (
     echo.

@@ -371,6 +371,12 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-24] [CODE] — v1.18.1. PyInstaller Python DLL portability fix. AnalyticsWorkbench.spec
+  replaced hardcoded python313.dll with dynamic lookup (searches python_dir → sys.base_prefix →
+  SYSTEMROOT → System32; raises RuntimeError with clear message if not found). upx_exclude and
+  binaries now use python_dll_name variable. excludes gains pytest + pyarrow.tests. BUILD_RELEASE.bat
+  post-build DLL check replaced with dynamic python -c version query. Builds correctly on any
+  Python version (3.13 on desktop, 3.14 on laptop). 642 tests.
 [2026-03-24] [CODE] — v1.18.0. JetWare AI logo replaces text header + Welcome card heading. Tutorial
   integration test suite built (test_tutorial_queries.py — validates every query_run SQL against sample
   data with baseline row counts). Fixed 3 bad baselines found by tests: part_d[8] 33→22, part_d[9]
