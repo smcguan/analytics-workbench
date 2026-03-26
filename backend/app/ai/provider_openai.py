@@ -512,6 +512,50 @@ Result rows (up to 10):
     return prompt
 
 
+def generate_analysis_sequence(
+    *,
+    dataset_name: str,
+    columns: list[str],
+    synopsis: str = "",
+) -> list[str]:
+    """
+    Generate a 3-step analytical sequence for a dataset — a logical investigative
+    progression where each step builds on the prior finding.
+    Returns a list of exactly 3 plain-English question strings.
+    Falls back to an empty list if the AI response cannot be parsed.
+    """
+    col_list = ", ".join(columns[:20]) if columns else "(unknown)"
+    context = f"Synopsis: {synopsis}" if synopsis else ""
+
+    prompt = f"""You are a data analyst designing an investigative sequence for a new dataset.
+Suggest exactly 3 analytical questions that form a logical progression:
+- Step 1: broad distribution (e.g. "What is the overall distribution of X by Y?")
+- Step 2: concentration finding (e.g. "Which Y accounts for the highest share of X?")
+- Step 3: outlier or exception (e.g. "Are there any items more than 2x above the average X?")
+
+Rules:
+- Each question must be answerable with a single SQL query on this dataset
+- Be specific to the actual columns available
+- Plain English — no SQL, no technical terms
+- Return ONLY a JSON array of exactly 3 strings. No other text.
+
+Dataset: {dataset_name}
+Columns: {col_list}
+{context}""".strip()
+
+    try:
+        raw = generate_sql_response(prompt).strip()
+        if raw.startswith("```"):
+            lines = raw.split("\n")
+            raw = "\n".join(lines[1:]).rstrip("`").strip()
+        result = json.loads(raw)
+        if isinstance(result, list) and len(result) >= 3:
+            return [str(q) for q in result[:3]]
+    except Exception:
+        pass
+    return []
+
+
 def generate_column_aliases(
     *,
     columns: list[str],

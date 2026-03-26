@@ -918,6 +918,73 @@
             font-size:12px;
         }
 
+        /* ── Analysis Sequence view ──────────────────────────── */
+        .sequence-steps{
+            display:flex;
+            flex-direction:column;
+            gap:8px;
+            margin-bottom:12px;
+        }
+        .sequence-step{
+            display:flex;
+            align-items:flex-start;
+            gap:10px;
+            padding:8px 10px;
+            border-radius:8px;
+            background:rgba(79,140,255,.07);
+            border:1px solid rgba(79,140,255,.15);
+        }
+        .step-num{
+            font-size:13px;
+            font-weight:700;
+            color:#7eb8ff;
+            flex-shrink:0;
+            width:18px;
+            text-align:center;
+        }
+        .step-text{
+            font-size:13px;
+            color:#d6e6ff;
+            line-height:1.4;
+        }
+        .sequence-actions{
+            display:flex;
+            gap:8px;
+            flex-wrap:wrap;
+            margin-top:4px;
+        }
+        .sequence-toggle-link{
+            font-size:11px;
+            color:var(--muted);
+            background:none;
+            border:none;
+            cursor:pointer;
+            padding:0;
+            text-decoration:underline;
+            text-underline-offset:2px;
+            align-self:center;
+            margin-left:auto;
+        }
+        .sequence-toggle-link:hover{ color:#bfd6ff; }
+        .sequence-edit-inputs{
+            display:flex;
+            flex-direction:column;
+            gap:6px;
+            margin-bottom:10px;
+        }
+        .sequence-edit-input{
+            background:rgba(255,255,255,.06);
+            border:1px solid var(--stroke);
+            border-radius:8px;
+            color:var(--text);
+            font-size:12px;
+            padding:7px 10px;
+            width:100%;
+            box-sizing:border-box;
+            resize:vertical;
+        }
+        .sequence-edit-input:focus{ outline:none; border-color:rgba(79,140,255,.5); }
+
         .editor-shell{
             margin-top:14px;
         }
@@ -2304,11 +2371,35 @@ e.g. "Show revenue by region for 2024"'
                             -->
                             <div id="suggestionsPopover">
                                 <div class="suggestions-header">
-                                    <span>Suggested Questions</span>
+                                    <span id="suggestionsHeaderLabel">Suggested Questions</span>
                                     <button class="suggestions-refresh" id="suggestionsRefreshBtn" title="Regenerate suggestions">Refresh</button>
                                 </div>
-                                <div class="suggestions-chips" id="suggestionsChips">
+
+                                <!-- Sequence view: 3-step analytical narrative -->
+                                <div id="sequenceView" style="display:none;">
+                                    <div class="sequence-steps" id="sequenceSteps"></div>
+                                    <div class="sequence-actions">
+                                        <button class="btn primary small" id="runSequenceBtn">Run Sequence</button>
+                                        <button class="btn small" id="customizeSequenceBtn">Customize</button>
+                                        <button class="sequence-toggle-link" id="showChipsBtn">Show individual suggestions</button>
+                                    </div>
+                                </div>
+
+                                <!-- Customize panel: editable 3-step inputs -->
+                                <div id="sequenceCustomizePanel" style="display:none;">
+                                    <div class="sequence-edit-inputs" id="sequenceEditInputs"></div>
+                                    <div class="sequence-actions">
+                                        <button class="btn primary small" id="runCustomizedBtn">Run Customized</button>
+                                        <button class="btn small" id="cancelCustomizeBtn">Cancel</button>
+                                    </div>
+                                </div>
+
+                                <!-- Chips view: flat list of suggestions -->
+                                <div class="suggestions-chips" id="suggestionsChips" style="display:none;">
                                     <span class="suggestions-empty">Select a dataset to load suggestions.</span>
+                                </div>
+                                <div id="chipsBackRow" style="display:none;margin-top:8px;">
+                                    <button class="sequence-toggle-link" id="showSequenceBtn">Show analysis sequence instead</button>
                                 </div>
                             </div>
 
@@ -6276,16 +6367,48 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         // ---------------------------------------------------------------
         let suggestionsVisible = false;
         const suggestionsCache = {};   // dataset → questions[]
+        const sequenceCache = {};      // dataset → [q1, q2, q3]
+        let _suggestionsMode = "sequence"; // "sequence" | "chips"
 
-        function _renderSuggestionChips(questions) {
+        // ── Sequence view helpers ──────────────────────────────────────────
+
+        function _showSequencePanel(steps) {
+            const stepsEl = $("sequenceSteps");
+            stepsEl.innerHTML = "";
+            const nums = ["\u2460", "\u2461", "\u2462"];
+            steps.forEach((q, i) => {
+                const row = document.createElement("div");
+                row.className = "sequence-step";
+                const num = document.createElement("span");
+                num.className = "step-num";
+                num.textContent = nums[i] || String(i + 1);
+                const txt = document.createElement("span");
+                txt.className = "step-text";
+                txt.textContent = applyAliases(q);
+                row.appendChild(num);
+                row.appendChild(txt);
+                stepsEl.appendChild(row);
+            });
+            $("sequenceView").style.display = "block";
+            $("sequenceCustomizePanel").style.display = "none";
+            $("suggestionsChips").style.display = "none";
+            $("chipsBackRow").style.display = "none";
+            $("suggestionsHeaderLabel").textContent = "Suggested Analysis Sequence";
+        }
+
+        function _showChipsPanel(questions) {
+            $("sequenceView").style.display = "none";
+            $("sequenceCustomizePanel").style.display = "none";
+            $("suggestionsChips").style.display = "flex";
+            $("chipsBackRow").style.display = sequenceCache[selectedDataset] ? "block" : "none";
+            $("suggestionsHeaderLabel").textContent = "Suggested Questions";
+
+            const chipsEl = $("suggestionsChips");
             if (!questions.length) {
-                $("suggestionsChips").innerHTML =
-                    '<span class="suggestions-empty">No suggestions available for this dataset.</span>';
+                chipsEl.innerHTML = '<span class="suggestions-empty">No suggestions available for this dataset.</span>';
                 return;
             }
-
-            $("suggestionsChips").innerHTML = "";
-
+            chipsEl.innerHTML = "";
             for (const q of questions) {
                 const chip = document.createElement("button");
                 chip.className = "suggestion-chip";
@@ -6295,18 +6418,43 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                     $("askPrompt").value = q;
                     $("suggestionsPopover").style.display = "none";
                     suggestionsVisible = false;
-                    // Auto-trigger SQL generation — clicking a suggestion is
-                    // a complete action; no extra Generate SQL click needed.
                     generateAiSql();
                 });
-                $("suggestionsChips").appendChild(chip);
+                chipsEl.appendChild(chip);
             }
         }
 
+        // ── _renderSuggestionChips — preserved for internal callers ────────
+        function _renderSuggestionChips(questions) {
+            _showChipsPanel(questions);
+        }
+
+        // ── Run sequence: generate SQL + run for each step, in order ───────
+        let _sequenceRunning = false;
+        async function _runSequence(steps) {
+            if (_sequenceRunning) return;
+            _sequenceRunning = true;
+            $("suggestionsPopover").style.display = "none";
+            suggestionsVisible = false;
+            try {
+                for (const q of steps) {
+                    $("askPrompt").value = q;
+                    await generateAiSql();
+                    // Small pause to let SQL editor settle, then run
+                    await new Promise(r => setTimeout(r, 400));
+                    await runSqlQuery();
+                    // Wait for result + narrative before proceeding
+                    await new Promise(r => setTimeout(r, 2200));
+                }
+            } finally {
+                _sequenceRunning = false;
+            }
+        }
+
+        // ── fetchSuggestions — opens the popover, loads both sequence + chips
         async function fetchSuggestions(force = false) {
             const dataset = selectedDataset;
 
-            // Toggle off if already visible (only for normal open, not refresh)
             if (!force && suggestionsVisible) {
                 $("suggestionsPopover").style.display = "none";
                 suggestionsVisible = false;
@@ -6323,39 +6471,55 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 return;
             }
 
-            // JS cache hit — render instantly without any network call
-            if (!force && suggestionsCache[dataset]) {
-                _renderSuggestionChips(suggestionsCache[dataset]);
+            // JS cache hit — render instantly
+            if (!force && (sequenceCache[dataset] || suggestionsCache[dataset])) {
+                if (sequenceCache[dataset] && _suggestionsMode === "sequence") {
+                    _showSequencePanel(sequenceCache[dataset]);
+                } else if (suggestionsCache[dataset]) {
+                    _showChipsPanel(suggestionsCache[dataset]);
+                }
                 $("suggestionsPopover").style.display = "block";
                 suggestionsVisible = true;
                 return;
             }
 
-            // Show popover immediately with loading state
-            $("suggestionsChips").innerHTML =
-                '<span class="suggestions-empty">Loading suggestions…</span>';
+            // Show loading state
+            $("suggestionsChips").style.display = "flex";
+            $("sequenceView").style.display = "none";
+            $("sequenceCustomizePanel").style.display = "none";
+            $("suggestionsChips").innerHTML = '<span class="suggestions-empty">Loading…</span>';
             $("suggestionsPopover").style.display = "block";
             suggestionsVisible = true;
-
             setButtonShimmering($("suggestionsBtn"), "Loading\u2026");
 
+            const refreshParam = force ? "&refresh=true" : "";
+
             try {
-                const url = "/api/ai/suggest_questions?dataset=" +
-                    encodeURIComponent(dataset) +
-                    (force ? "&refresh=true" : "");
+                // Fetch sequence and chips in parallel
+                const [seqData, qData] = await Promise.allSettled([
+                    apiJson("/api/ai/analysis_sequence?dataset=" + encodeURIComponent(dataset) + refreshParam),
+                    apiJson("/api/ai/suggest_questions?dataset=" + encodeURIComponent(dataset) + refreshParam),
+                ]);
 
-                const data = await apiJson(url);
+                const steps = (seqData.status === "fulfilled" && seqData.value.steps?.length >= 3)
+                    ? seqData.value.steps : [];
+                const questions = (qData.status === "fulfilled")
+                    ? (qData.value.questions || []).filter(q => String(q).trim())
+                    : [];
 
-                const questions = (data.questions || []).filter(q => String(q).trim());
+                if (steps.length >= 3) sequenceCache[dataset] = steps;
+                if (questions.length) suggestionsCache[dataset] = questions;
 
-                // Store in JS cache for instant re-opens this session
-                suggestionsCache[dataset] = questions;
-
-                _renderSuggestionChips(questions);
-
+                // Show sequence by default if available, else chips
+                if (steps.length >= 3) {
+                    _suggestionsMode = "sequence";
+                    _showSequencePanel(steps);
+                } else {
+                    _suggestionsMode = "chips";
+                    _showChipsPanel(questions);
+                }
             } catch (e) {
-                $("suggestionsChips").innerHTML =
-                    '<span class="suggestions-empty">Could not load suggestions: ' + e.message + '</span>';
+                $("suggestionsChips").innerHTML = '<span class="suggestions-empty">Could not load: ' + e.message + '</span>';
             } finally {
                 clearButtonShimmering($("suggestionsBtn"));
             }
@@ -7836,9 +8000,50 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         $("infoBtn").addEventListener("click", toggleInfoPopover);
         $("suggestionsBtn").addEventListener("click", () => fetchSuggestions());
         $("suggestionsRefreshBtn").addEventListener("click", (e) => {
-            e.stopPropagation();  // don't trigger any parent handlers
+            e.stopPropagation();
             fetchSuggestions(true);
         });
+
+        // Sequence view buttons
+        $("runSequenceBtn").addEventListener("click", () => {
+            const steps = sequenceCache[selectedDataset] || [];
+            if (steps.length >= 3) _runSequence(steps);
+        });
+        $("customizeSequenceBtn").addEventListener("click", () => {
+            const steps = sequenceCache[selectedDataset] || [];
+            $("sequenceView").style.display = "none";
+            $("sequenceEditInputs").innerHTML = "";
+            steps.forEach((q, i) => {
+                const ta = document.createElement("textarea");
+                ta.className = "sequence-edit-input";
+                ta.rows = 2;
+                ta.value = q;
+                ta.dataset.index = i;
+                $("sequenceEditInputs").appendChild(ta);
+            });
+            $("sequenceCustomizePanel").style.display = "block";
+        });
+        $("runCustomizedBtn").addEventListener("click", () => {
+            const inputs = $("sequenceEditInputs").querySelectorAll(".sequence-edit-input");
+            const customSteps = [...inputs].map(t => t.value.trim()).filter(Boolean);
+            if (customSteps.length > 0) _runSequence(customSteps);
+        });
+        $("cancelCustomizeBtn").addEventListener("click", () => {
+            $("sequenceCustomizePanel").style.display = "none";
+            const steps = sequenceCache[selectedDataset] || [];
+            if (steps.length >= 3) _showSequencePanel(steps);
+        });
+        $("showChipsBtn").addEventListener("click", () => {
+            _suggestionsMode = "chips";
+            const qs = suggestionsCache[selectedDataset] || [];
+            _showChipsPanel(qs);
+        });
+        $("showSequenceBtn").addEventListener("click", () => {
+            _suggestionsMode = "sequence";
+            const steps = sequenceCache[selectedDataset] || [];
+            if (steps.length >= 3) _showSequencePanel(steps);
+        });
+
         $("generateSqlBtn").addEventListener("click", generateAiSql);
         $("runSqlBtn").addEventListener("click", runSqlQuery);
         $("explainBtn").addEventListener("click", explainSql);

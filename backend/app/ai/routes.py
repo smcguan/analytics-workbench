@@ -84,6 +84,7 @@ from .provider_openai import (
     generate_explanation,
     generate_result_narrative,
     generate_column_aliases,
+    generate_analysis_sequence,
 )
 from .context_builder import build_reference_context
 
@@ -102,6 +103,7 @@ from .schemas import (
     ResultNarrativeResponse,
     ColumnAliasResponse,
     UpdateColumnAliasRequest,
+    AnalysisSequenceResponse,
 )
 
 from .sql_validator import (
@@ -934,3 +936,74 @@ def save_column_aliases(payload: UpdateColumnAliasRequest) -> dict:
         logger.exception("save_column_aliases failed | dataset=%s | error=%s", payload.dataset, e)
         from fastapi import HTTPException
         raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}")
+
+
+# ============================================================
+# ANALYSIS SEQUENCE — cache helpers + endpoint
+# ============================================================
+
+def _read_sequence_cache(dataset: str) -> list[str] | None:
+    """Return cached analysis sequence (list of 3 strings), or None."""
+    try:
+        cache = json.loads(_suggestions_cache_path(dataset).read_text(encoding="utf-8"))
+        steps = cache.get("analysis_sequence")
+        if isinstance(steps, list) and len(steps) >= 3:
+            return steps[:3]
+    except Exception:
+        pass
+    return None
+
+
+def _write_sequence_cache(dataset: str, steps: list[str]) -> None:
+    try:
+        cache_path = _suggestions_cache_path(dataset)
+        existing: dict = {}
+        try:
+            existing = json.loads(cache_path.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+        existing["analysis_sequence"] = steps
+        cache_path.write_text(json.dumps(existing, indent=2), encoding="utf-8")
+    except Exception as exc:
+        logger.warning("Could not write sequence cache for %s: %s", dataset, exc)
+
+
+@router.get("/analysis_sequence", response_model=AnalysisSequenceResponse)
+def get_analysis_sequence(
+    dataset: str,
+    refresh: bool = Query(False, description="Force regeneration, ignoring cache"),
+) -> AnalysisSequenceResponse:
+    """Return a 3-step analytical sequence for the dataset.
+
+    Cache hit: returns instantly from dataset_context.json.
+    Cache miss or refresh=true: calls the AI, caches, and returns.
+    """
+    if not refresh:
+        cached = _read_sequence_cache(dataset)
+        if cached is not None:
+            return AnalysisSequenceResponse(dataset=dataset, steps=cached, cached=True)
+
+    columns = _get_dataset_columns(dataset)
+    if not columns:
+        return AnalysisSequenceResponse(dataset=dataset, steps=[], cached=False)
+
+    # Use insights synopsis as additional context if available
+    synopsis = ""
+    try:
+        ctx = json.loads(_suggestions_cache_path(dataset).read_text(encoding="utf-8"))
+        synopsis = ctx.get("insights_synopsis") or ctx.get("grain_description") or ""
+    except Exception:
+        pass
+
+    try:
+        steps = generate_analysis_sequence(
+            dataset_name=dataset,
+            columns=columns,
+            synopsis=synopsis,
+        )
+        if steps:
+            _write_sequence_cache(dataset, steps)
+        return AnalysisSequenceResponse(dataset=dataset, steps=steps, cached=False)
+    except Exception as e:
+        logger.exception("analysis_sequence failed | dataset=%s | error=%s", dataset, e)
+        return AnalysisSequenceResponse(dataset=dataset, steps=[], cached=False)

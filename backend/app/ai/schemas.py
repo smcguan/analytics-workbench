@@ -242,3 +242,15 @@ class ColumnAliasResponse(BaseModel):
 class UpdateColumnAliasRequest(BaseModel):
     dataset: str
     aliases: dict  # {original_col: display_alias}
+
+
+# ============================================================
+# ANALYSIS SEQUENCE MODEL
+# ============================================================
+# Used by GET /api/ai/analysis_sequence
+# ============================================================
+
+class AnalysisSequenceResponse(BaseModel):
+    dataset: str
+    steps: List[str]   # exactly 3 plain-English questions
+    cached: bool = False

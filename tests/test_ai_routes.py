@@ -942,3 +942,75 @@ def test_save_column_aliases_persists_to_cache(client, datasets_tmp):
     cache_path = datasets_tmp / DATASET / "dataset_context.json"
     cache = json.loads(cache_path.read_text(encoding="utf-8"))
     assert cache.get("column_aliases") == aliases
+
+
+# ---------------------------------------------------------------------------
+# GET /api/ai/analysis_sequence
+# ---------------------------------------------------------------------------
+
+MOCK_STEPS = [
+    "What is the overall distribution of total_paid by drug_name?",
+    "Which drug_name accounts for the highest concentration of total_paid?",
+    "Are there any drugs with total_paid more than 2x above the average?",
+]
+
+
+def test_analysis_sequence_returns_200(client):
+    with patch("app.ai.routes.generate_analysis_sequence", return_value=MOCK_STEPS):
+        resp = client.get("/api/ai/analysis_sequence?dataset=" + DATASET)
+    assert resp.status_code == 200
+
+
+def test_analysis_sequence_response_has_steps(client):
+    with patch("app.ai.routes.generate_analysis_sequence", return_value=MOCK_STEPS):
+        resp = client.get("/api/ai/analysis_sequence?dataset=" + DATASET)
+    body = resp.json()
+    assert "steps" in body
+    assert isinstance(body["steps"], list)
+
+
+def test_analysis_sequence_returns_three_steps(client):
+    with patch("app.ai.routes.generate_analysis_sequence", return_value=MOCK_STEPS):
+        resp = client.get("/api/ai/analysis_sequence?dataset=" + DATASET)
+    assert len(resp.json()["steps"]) == 3
+
+
+def test_analysis_sequence_cache_hit(client, datasets_tmp):
+    ds_dir = datasets_tmp / DATASET
+    cache_path = ds_dir / "dataset_context.json"
+    existing = json.loads(cache_path.read_text(encoding="utf-8"))
+    existing["analysis_sequence"] = MOCK_STEPS
+    cache_path.write_text(json.dumps(existing), encoding="utf-8")
+
+    resp = client.get("/api/ai/analysis_sequence?dataset=" + DATASET)
+    assert resp.status_code == 200
+    assert resp.json()["cached"] is True
+    assert resp.json()["steps"] == MOCK_STEPS
+
+
+def test_analysis_sequence_refresh_calls_provider(client):
+    with patch("app.ai.routes.generate_analysis_sequence", return_value=MOCK_STEPS) as mock_fn:
+        resp = client.get("/api/ai/analysis_sequence?dataset=" + DATASET + "&refresh=true")
+    assert resp.status_code == 200
+    mock_fn.assert_called_once()
+
+
+def test_analysis_sequence_nonexistent_dataset_returns_empty(client):
+    resp = client.get("/api/ai/analysis_sequence?dataset=nonexistent_xyz")
+    assert resp.status_code == 200
+    assert resp.json()["steps"] == []
+
+
+def test_analysis_sequence_cache_persists(client, datasets_tmp):
+    ds_dir = datasets_tmp / DATASET
+    cache_path = ds_dir / "dataset_context.json"
+    existing = json.loads(cache_path.read_text(encoding="utf-8"))
+    # Remove cached sequence to force generation
+    existing.pop("analysis_sequence", None)
+    cache_path.write_text(json.dumps(existing), encoding="utf-8")
+
+    with patch("app.ai.routes.generate_analysis_sequence", return_value=MOCK_STEPS):
+        client.get("/api/ai/analysis_sequence?dataset=" + DATASET + "&refresh=true")
+
+    updated = json.loads(cache_path.read_text(encoding="utf-8"))
+    assert updated.get("analysis_sequence") == MOCK_STEPS
