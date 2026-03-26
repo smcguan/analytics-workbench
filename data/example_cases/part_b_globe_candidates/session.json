@@ -30,16 +30,20 @@
       "narration": {
         "pre": "Importing the CMS Medicare Part B Drug Spending dataset. This is a 500-row sample containing HCPCS codes, brand names, generic names, and spending data across 5 years (2019-2023). Each row represents one drug identified by its HCPCS billing code.",
         "post": "Dataset loaded: 500 rows, 47 columns. Part B data includes HCPCS_Cd (billing code), HCPCS_Desc (procedure description), brand and generic names, and per-year spending metrics. Note: unlike Part D, there is no manufacturer name column — drug identification is by HCPCS code + brand name."
-      }
+      },
+      "container": "data"
     },
     {
       "event_type": "inspect_schema",
       "timestamp": "2026-03-20T18:00:07.000000+00:00",
-      "details": { "dataset": "part_b_spending_sample" },
+      "details": {
+        "dataset": "part_b_spending_sample"
+      },
       "narration": {
         "pre": "Inspect the schema first. Part B has a different structure than Part D — it uses HCPCS billing codes instead of brand/generic name pairs, and has no manufacturer column.",
         "post": "47 columns. Key difference from Part D: HCPCS_Cd and HCPCS_Desc identify the drug instead of Brnd_Name alone. Spending columns follow the same Tot_Spndng / Avg_Spndng pattern. The Avg_DY23_ASP_Price column is the Average Sales Price — a Part B-specific pricing metric."
-      }
+      },
+      "container": "data"
     },
     {
       "event_type": "insights_generated",
@@ -51,7 +55,8 @@
       "narration": {
         "pre": "AI is analyzing the dataset structure to generate automatic insights.",
         "post": "Insights generated. The AI identified spending concentration and year-over-year trends. Each card has Explore in Query to load the SQL. Now let's explore the spending distribution before applying GLOBE criteria."
-      }
+      },
+      "container": "view:insights"
     },
     {
       "event_type": "ai_ask",
@@ -66,7 +71,8 @@
       },
       "baseline": {
         "expected_row_count": 500
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "ai_ask",
@@ -81,7 +87,8 @@
       },
       "baseline": {
         "expected_row_count": 10
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "reference_load",
@@ -95,7 +102,8 @@
       "narration": {
         "pre": "Loading the IRA Negotiated Drugs reference table. We'll use this to identify which Part B drugs are already subject to IRA price negotiation — these must be excluded from GLOBE candidate lists.",
         "post": "Reference table loaded: 35 IRA drugs. Note that most IRA-negotiated drugs are Part D (oral/retail) drugs. Only a handful appear in Part B (physician-administered). The JOIN will tell us exactly how many."
-      }
+      },
+      "container": "data"
     },
     {
       "event_type": "query_run",
@@ -112,7 +120,8 @@
       },
       "baseline": {
         "expected_row_count": 6
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "query_run",
@@ -129,7 +138,8 @@
       },
       "baseline": {
         "expected_row_count": 89
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "query_run",
@@ -146,7 +156,8 @@
       },
       "baseline": {
         "expected_row_count": 20
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "export",
@@ -159,7 +170,8 @@
       "narration": {
         "pre": "Exporting the top 20 GLOBE candidates to Excel for further analysis.",
         "post": "Export complete. The Excel file contains the ranked candidate list ready for policy review and additional filtering (orphan drug status, biosimilar availability, USP category classification)."
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "session_end",

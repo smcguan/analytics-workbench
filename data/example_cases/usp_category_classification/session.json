@@ -30,7 +30,8 @@
       "narration": {
         "pre": "Importing the CMS Medicare Part D Drug Spending dataset — the same 500-row sample used in Tutorial 1. This time we'll focus on classification rather than exclusion.",
         "post": "Dataset loaded: 500 rows, 46 columns. Each row is a drug-manufacturer combination. We filter to Mftr_Name='Overall' rows for unique drug counts. Next: load the USP category reference table."
-      }
+      },
+      "container": "data"
     },
     {
       "event_type": "insights_generated",
@@ -42,7 +43,8 @@
       "narration": {
         "pre": "AI generating automatic insights.",
         "post": "Insights generated. Now let's load the classification reference table."
-      }
+      },
+      "container": "view:insights"
     },
     {
       "event_type": "reference_load",
@@ -56,7 +58,8 @@
       "narration": {
         "pre": "Loading the USP GUARD Categories reference table. This maps 102 generic drug names to one of 17 USP therapeutic categories (e.g., Cardiovascular, Antineoplastics, Metabolic/Endocrine). The USP Model Guidelines for Medicare categorize drugs for the GUARD payment model.",
         "post": "Reference table loaded: 102 drugs mapped to therapeutic categories. Columns: generic_name, usp_category, usp_category_code, notes. We'll JOIN this against the spending dataset on generic name to classify each drug."
-      }
+      },
+      "container": "data"
     },
     {
       "event_type": "query_run",
@@ -73,7 +76,8 @@
       },
       "baseline": {
         "expected_row_count": 272
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "query_run",
@@ -90,7 +94,8 @@
       },
       "baseline": {
         "expected_row_count": 10
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "query_run",
@@ -107,7 +112,8 @@
       },
       "baseline": {
         "expected_row_count": 68
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "query_run",
@@ -124,7 +130,8 @@
       },
       "baseline": {
         "expected_row_count": 9
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "query_run",
@@ -141,7 +148,8 @@
       },
       "baseline": {
         "expected_row_count": 50
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "export",
@@ -154,7 +162,8 @@
       "narration": {
         "pre": "Exporting the classified drug list for policy review.",
         "post": "Export complete. The Excel file contains drugs categorized by USP therapeutic class, ready for GUARD payment model analysis."
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "session_end",

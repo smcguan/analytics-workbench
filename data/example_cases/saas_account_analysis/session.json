@@ -30,25 +30,33 @@
       "narration": {
         "pre": "Importing SaaS account data: 10,000 accounts with plan tier, industry, ARR, seat utilization, churn risk, NPS score, support tickets, and expansion opportunity flags.",
         "post": "Dataset loaded: 10,000 accounts, 20 columns. Key metrics: annual_recurring_revenue, seat_utilization, churn_risk (High/Medium/Low), feature_adoption_rate, and expansion_opportunity flag."
-      }
+      },
+      "container": "data"
     },
     {
       "event_type": "inspect_schema",
       "timestamp": "2026-03-20T22:00:07.000000+00:00",
-      "details": { "dataset": "saas_accounts_sample" },
+      "details": {
+        "dataset": "saas_accounts_sample"
+      },
       "narration": {
         "pre": "Inspect the schema to see the column types. SaaS data mixes financial metrics (ARR), usage metrics (seats, adoption), and risk categories.",
         "post": "20 columns. annual_recurring_revenue is the monetary field — it will display as formatted currency. plan_tier, industry, and churn_risk are categorical segmentation columns. seat_utilization and feature_adoption_rate are percentages."
-      }
+      },
+      "container": "data"
     },
     {
       "event_type": "insights_generated",
       "timestamp": "2026-03-20T22:00:12.000000+00:00",
-      "details": { "dataset": "saas_accounts_sample", "insight_count": 5 },
+      "details": {
+        "dataset": "saas_accounts_sample",
+        "insight_count": 5
+      },
       "narration": {
         "pre": "AI generates automatic insights from the column structure.",
         "post": "Insights ready — ARR concentration by plan tier, churn risk distribution, and seat utilization patterns identified. Each insight card has Explore in Query."
-      }
+      },
+      "container": "view:insights"
     },
     {
       "event_type": "ai_ask",
@@ -61,7 +69,10 @@
         "pre": "ARR by plan tier: 'What are the account count, total ARR, average ARR, and average seat utilization by plan tier?' This reveals revenue concentration and tier adoption patterns.",
         "post": "4 plan tiers compared. Enterprise accounts typically drive the most ARR with highest average revenue per account. Utilization rates by tier show whether customers are getting value — low utilization is a leading indicator of churn."
       },
-      "baseline": { "expected_row_count": 4 }
+      "baseline": {
+        "expected_row_count": 4
+      },
+      "container": "view:query"
     },
     {
       "event_type": "ai_ask",
@@ -74,7 +85,10 @@
         "pre": "Churn risk segmentation: 'What are the account count, total at-risk ARR, average NPS, and average support tickets by churn risk level?'",
         "post": "3 risk segments. The critical number is at-risk ARR in the High churn bucket — that's the revenue the customer success team needs to protect this quarter. High-risk accounts with low NPS and high ticket volume are the most urgent cases."
       },
-      "baseline": { "expected_row_count": 3 }
+      "baseline": {
+        "expected_row_count": 3
+      },
+      "container": "view:query"
     },
     {
       "event_type": "ai_ask",
@@ -87,7 +101,10 @@
         "pre": "Industry breakdown: 'What are the top industries by total ARR, with account count and average feature adoption rate?' Industries with high ARR but low adoption may need vertical-specific enablement.",
         "post": "6 industries ranked. Feature adoption rate by industry reveals product-market fit differences — high adoption industries are natural expansion targets, while low adoption industries may need different onboarding approaches."
       },
-      "baseline": { "expected_row_count": 6 }
+      "baseline": {
+        "expected_row_count": 6
+      },
+      "container": "view:query"
     },
     {
       "event_type": "ai_ask",
@@ -100,7 +117,10 @@
         "pre": "Under-utilized accounts: 'Show me the top 20 accounts with less than 30% seat utilization, ordered by ARR highest first.' These are at high risk of downsizing or churning.",
         "post": "Top 20 under-utilized accounts by ARR. These are the highest-value accounts at risk of seat reduction. A customer success team would prioritize these for proactive outreach — understand why utilization is low and drive adoption before renewal."
       },
-      "baseline": { "expected_row_count": 20 }
+      "baseline": {
+        "expected_row_count": 20
+      },
+      "container": "view:query"
     },
     {
       "event_type": "ai_ask",
@@ -113,7 +133,10 @@
         "pre": "Expansion pipeline: 'What are the account count, total ARR, and average seat utilization for expansion-opportunity accounts, broken out by plan tier?'",
         "post": "4 tiers with expansion-flagged accounts. The biggest upsell opportunity is typically Professional-to-Enterprise upgrades on accounts with high utilization — they're already using the product heavily and could benefit from Enterprise features."
       },
-      "baseline": { "expected_row_count": 4 }
+      "baseline": {
+        "expected_row_count": 4
+      },
+      "container": "view:query"
     },
     {
       "event_type": "session_end",

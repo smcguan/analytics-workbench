@@ -909,7 +909,15 @@ def get_column_aliases(
     if not refresh:
         cached = _read_aliases_cache(dataset)
         if cached is not None:
-            return ColumnAliasResponse(dataset=dataset, aliases=cached, cached=True)
+            # Identity mapping (every alias equals its original column name) means
+            # a previous AI call failed and was cached incorrectly by an older code
+            # version. Treat as a cache miss so the AI gets another attempt.
+            is_cached_identity = len(cached) > 0 and all(v == k for k, v in cached.items())
+            if not is_cached_identity:
+                return ColumnAliasResponse(dataset=dataset, aliases=cached, cached=True)
+            logger.info(
+                "column_aliases: cached identity detected for %s — regenerating", dataset
+            )
 
     columns = _get_dataset_columns(dataset)
     if not columns:

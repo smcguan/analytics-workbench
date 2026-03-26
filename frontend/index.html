@@ -8278,8 +8278,11 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         // Schema inspector, Insights, and Suggestions.
         async function _prefetchColumnAliases(dataset) {
             try {
+                // Always use refresh=true on import — bypasses any stale cached
+                // identity that may have been written by older code. The result is
+                // cached after a successful generation so Schema opens are instant.
                 const data = await apiJson(
-                    "/api/ai/column_aliases?dataset=" + encodeURIComponent(dataset)
+                    "/api/ai/column_aliases?dataset=" + encodeURIComponent(dataset) + "&refresh=true"
                 );
                 if (data && data.aliases && Object.keys(data.aliases).length) {
                     datasetAliases[dataset] = data.aliases;

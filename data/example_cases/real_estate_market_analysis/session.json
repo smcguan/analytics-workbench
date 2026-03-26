@@ -33,7 +33,8 @@
       },
       "baseline": {
         "expected_row_count": 2000
-      }
+      },
+      "container": "data"
     },
     {
       "event_type": "inspect_schema",
@@ -44,7 +45,8 @@
       "narration": {
         "pre": "Click Schema to see every column name and data type in the dataset. This is the first thing an analyst should do after import — understand the structure before asking questions.",
         "post": "14 columns displayed. LIST_PRICE and SALE_PRICE are numeric. NEIGHBORHOOD and PROPERTY_TYPE are categorical — good candidates for GROUP BY. DAYS_ON_MARKET is our velocity metric. ZIP_CODE is the join key we will use later to JOIN against a reference table. Now let's see what the AI finds interesting about this data."
-      }
+      },
+      "container": "data"
     },
     {
       "event_type": "insights_generated",
@@ -56,7 +58,8 @@
       "narration": {
         "pre": "Switch to the Insights view. The AI reads the column names and statistics — never the actual row data — and generates 3-5 analytical observations automatically. This happens the moment you import a dataset. No prompting required.",
         "post": "The AI flagged price concentration — a small number of listings pull the average well above the median. It also identified days-on-market variation across neighborhoods and the sold/active split. Each insight card has an Explore in Query button that loads the supporting SQL. These are starting points, not final answers. Now let's load a reference table and start querying."
-      }
+      },
+      "container": "view:insights"
     },
     {
       "event_type": "reference_load",
@@ -70,7 +73,8 @@
       "narration": {
         "pre": "Now we load a reference table. Reference tables are small lookup files that enrich your dataset through SQL JOINs. This one classifies each ZIP code into a market tier — Tier 1 for premium, Tier 2 for mid-market, Tier 3 for entry-level. Click + Reference Table in the sidebar to import it.",
         "post": "Reference table loaded: 20 rows, 5 columns — zip_code, city, neighborhood, tier, notes. It appears in the sidebar with a REF badge. In SQL, use the table name 'neighborhood_tier_map' in your JOIN clause. The join key is ZIP_CODE in the listings matched against zip_code in the reference table. We will use this in the last Austin query."
-      }
+      },
+      "container": "data"
     },
     {
       "event_type": "ai_ask",
@@ -85,7 +89,8 @@
       },
       "baseline": {
         "expected_row_count": 10
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "ai_ask",
@@ -100,7 +105,8 @@
       },
       "baseline": {
         "expected_row_count": 4
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "query_run",
@@ -117,7 +123,8 @@
       },
       "baseline": {
         "expected_row_count": 36
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "query_run",
@@ -126,7 +133,7 @@
         "dataset": "austin_listings",
         "sql": "SELECT\n    t.tier,\n    d.STATUS,\n    COUNT(*) AS listing_count,\n    ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER (PARTITION BY t.tier), 1) AS pct\nFROM dataset d\nJOIN neighborhood_tier_map t ON d.ZIP_CODE = t.zip_code\nGROUP BY t.tier, d.STATUS\nORDER BY t.tier, d.STATUS",
         "row_count": 6,
-        "elapsed_seconds": 0.020
+        "elapsed_seconds": 0.02
       },
       "narration": {
         "pre": "This is the JOIN step — the key capability that reference tables unlock. Look at the SQL: FROM dataset d JOIN neighborhood_tier_map t ON d.ZIP_CODE = t.zip_code. The listings table has ZIP_CODE. The reference table has zip_code and tier. The JOIN connects them, so we can GROUP BY tier without ever adding a tier column to the original data. The window function OVER (PARTITION BY t.tier) calculates percentages within each tier.",
@@ -134,7 +141,8 @@
       },
       "baseline": {
         "expected_row_count": 6
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "session_end",
@@ -158,13 +166,16 @@
           }
         ],
         "references": [
-          { "name": "neighborhood_tier_map" }
+          {
+            "name": "neighborhood_tier_map"
+          }
         ]
       },
       "narration": {
         "pre": "A new client wants a Denver market analysis. Same investment thesis, same methodology. Instead of starting from scratch, we open the Edit panel on the Austin workflow.",
         "post": "This is the Edit panel. The original Austin file is on the left — that is what the workflow was recorded with. The current mapping is on the right — that is what it will use when we run it. We are going to swap the right side from Austin to Denver. The reference table stays — the neighborhood tier map applies to both cities."
-      }
+      },
+      "container": "workflows"
     },
     {
       "event_type": "edit_panel_choose",
@@ -179,7 +190,8 @@
       "narration": {
         "pre": "Click Choose File next to the Austin dataset. Select the Denver listings file.",
         "post": "File selected. The current mapping now shows denver_listings.csv with 1,800 rows. The system is checking whether Denver's columns match what the workflow expects."
-      }
+      },
+      "container": "workflows"
     },
     {
       "event_type": "edit_panel_check",
@@ -188,12 +200,28 @@
         "target_dataset": "austin_listings",
         "columns_checked": 14,
         "columns_matched": 14,
-        "column_list": ["LISTING_ID", "ZIP_CODE", "NEIGHBORHOOD", "PROPERTY_TYPE", "BEDROOMS", "BATHROOMS", "SQFT", "LIST_PRICE", "SALE_PRICE", "PRICE_PER_SQFT", "DAYS_ON_MARKET", "LIST_DATE", "STATUS", "AGENT_ID"]
+        "column_list": [
+          "LISTING_ID",
+          "ZIP_CODE",
+          "NEIGHBORHOOD",
+          "PROPERTY_TYPE",
+          "BEDROOMS",
+          "BATHROOMS",
+          "SQFT",
+          "LIST_PRICE",
+          "SALE_PRICE",
+          "PRICE_PER_SQFT",
+          "DAYS_ON_MARKET",
+          "LIST_DATE",
+          "STATUS",
+          "AGENT_ID"
+        ]
       },
       "narration": {
         "pre": "Watch the column check.",
         "post": "Green across the board. All 14 columns match. The workflow was built on Austin data — but Denver uses the exact same schema. Every query will run without a single modification. This is what a consistent data standard buys you. Run Now is active."
-      }
+      },
+      "container": "workflows"
     },
     {
       "event_type": "edit_panel_run",
@@ -204,7 +232,8 @@
       "narration": {
         "pre": "Click Run Now. Same queries. Denver data. Watch the results change.",
         "post": "The Edit panel closes. Every step from the Austin workflow now replays against the Denver dataset."
-      }
+      },
+      "container": "workflows"
     },
     {
       "event_type": "dataset_import",
@@ -221,7 +250,8 @@
       },
       "baseline": {
         "expected_row_count": 1800
-      }
+      },
+      "container": "data"
     },
     {
       "event_type": "query_run",
@@ -238,7 +268,8 @@
       },
       "baseline": {
         "expected_row_count": 10
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "query_run",
@@ -255,7 +286,8 @@
       },
       "baseline": {
         "expected_row_count": 42
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "session_end",

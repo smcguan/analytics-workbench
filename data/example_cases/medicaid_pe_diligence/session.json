@@ -33,7 +33,8 @@
       },
       "baseline": {
         "expected_row_count": 500
-      }
+      },
+      "container": "data"
     },
     {
       "event_type": "insights_generated",
@@ -45,7 +46,8 @@
       "narration": {
         "pre": "AI is generating automatic insights from the Texas dataset structure. This uses column names and aggregate statistics only — no raw patient or provider data leaves your machine.",
         "post": "Insights generated from the Texas schema. The concentration card should flag one MCO with a disproportionate share of claims — this is a key diligence risk indicator. We will quantify this precisely in the query steps."
-      }
+      },
+      "container": "view:insights"
     },
     {
       "event_type": "dataset_import",
@@ -62,7 +64,8 @@
       },
       "baseline": {
         "expected_row_count": 500
-      }
+      },
+      "container": "data"
     },
     {
       "event_type": "dataset_import",
@@ -79,7 +82,8 @@
       },
       "baseline": {
         "expected_row_count": 500
-      }
+      },
+      "container": "data"
     },
     {
       "event_type": "reference_load",
@@ -93,7 +97,8 @@
       "narration": {
         "pre": "Loading the Medicaid schema map reference table. This maps each state's source column names to a shared canonical schema. 30 rows — 10 mappings per state, covering all three states. After this JOIN, all three datasets can be compared using the same column names.",
         "post": "Schema map loaded: 30 rows covering TX, FL, and OH column mappings. The reference table is now available as 'medicaid_schema_map' in SQL queries. Note: string values are title-cased on import — JOIN conditions must use UPPER() on both sides."
-      }
+      },
+      "container": "data"
     },
     {
       "event_type": "query_run",
@@ -110,7 +115,8 @@
       },
       "baseline": {
         "expected_row_count": 20
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "ai_ask",
@@ -125,7 +131,8 @@
       },
       "baseline": {
         "expected_row_count": 3
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "chart_view",
@@ -136,7 +143,8 @@
       "narration": {
         "pre": "The results tell the story in numbers. The chart tells it visually. Click the Chart tab.",
         "post": "Lone Star Health's bar dwarfs the others. Concentration risk is more immediately obvious in a chart than in a table. This is the visual you put in the slide deck."
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "query_run",
@@ -153,7 +161,8 @@
       },
       "baseline": {
         "expected_row_count": 3
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "explain",
@@ -164,7 +173,8 @@
       "narration": {
         "pre": "Before moving on — notice the Explain button next to Run SQL. Click it.",
         "post": "Explain translates the SQL into plain English. For a PE sponsor who is not technical, this is how you show your work. The query logic is documented in language anyone can read."
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "reference_load",
@@ -178,7 +188,8 @@
       "narration": {
         "pre": "Loading the audit risk flags reference table. This captures CPT and HCPCS procedure codes that CMS or state Medicaid agencies have historically targeted in audits — upcoding, duplicate billing, documentation deficiencies. Joining this against the claims data tells us immediately which portion of the platform's revenue sits in elevated-risk territory.",
         "post": "Audit risk flags loaded: 8 procedure codes with risk levels (High, Medium, Low) and audit reasons. This is now the active reference table. We will run the compliance JOIN against the Florida dataset next."
-      }
+      },
+      "container": "data"
     },
     {
       "event_type": "query_run",
@@ -195,7 +206,8 @@
       },
       "baseline": {
         "expected_row_count": 8
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "reference_load",
@@ -209,7 +221,8 @@
       "narration": {
         "pre": "Loading the service category map. This normalizes service category labels across all three states — Texas uses 'Skilled Nursing', Florida uses 'SN', Ohio uses 'Skilled Nsg'. Without this map, cross-state comparisons would silently undercount or miss categories entirely.",
         "post": "Service category map loaded: 15 mappings covering all 5 service categories across 3 states. We can now run cross-state category aggregations that correctly group equivalent services regardless of how each state labels them."
-      }
+      },
+      "container": "data"
     },
     {
       "event_type": "query_run",
@@ -226,7 +239,8 @@
       },
       "baseline": {
         "expected_row_count": 3
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "query_save",
@@ -237,7 +251,8 @@
       "narration": {
         "pre": "This query — comparing reimbursement rates across three states — is one you will run on every multi-state engagement. Save it.",
         "post": "Saved. It now lives in Saved Queries in the sidebar. Any session, any dataset — load it and run it."
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "query_run",
@@ -254,7 +269,8 @@
       },
       "baseline": {
         "expected_row_count": 6
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "query_run",
@@ -271,7 +287,8 @@
       },
       "baseline": {
         "expected_row_count": 12
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "chart_view",
@@ -282,7 +299,8 @@
       "narration": {
         "pre": "Time series data becomes a line chart automatically. Click Chart.",
         "post": "Month by month claim volume for Florida — rendered automatically. No configuration required. AW detects the date column and draws the trend."
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "export",
@@ -295,7 +313,8 @@
       "narration": {
         "pre": "Exporting the Texas MCO concentration results to Excel. This is the table that goes directly into the diligence memo — MCO name, claim count, total paid, and percentage share.",
         "post": "Export complete. The Excel file contains the MCO concentration table formatted for inclusion in the PE sponsor deliverable. In a full engagement, you would export each state's results separately and combine them in the memo appendix."
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "result_passport",
@@ -320,7 +339,8 @@
       "narration": {
         "pre": "Saved Queries. Everything you have saved is here — across all sessions.",
         "post": "One click to load any saved query. Run it against the current dataset or modify it for a new question. This is your personal query library."
-      }
+      },
+      "container": "view:saved"
     },
     {
       "event_type": "session_end",

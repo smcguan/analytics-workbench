@@ -30,34 +30,45 @@
       "narration": {
         "pre": "Importing retail order data: 10,000 orders with customer IDs, regions, product categories, pricing, discounts, shipping, returns, and customer satisfaction scores.",
         "post": "Dataset loaded: 10,000 orders, 20 columns including gross_revenue, net_revenue, cost, margin, discount_pct, returned flag, and csat_score."
-      }
+      },
+      "container": "data"
     },
     {
       "event_type": "inspect_schema",
       "timestamp": "2026-03-20T21:30:07.000000+00:00",
-      "details": { "dataset": "retail_orders_sample" },
+      "details": {
+        "dataset": "retail_orders_sample"
+      },
       "narration": {
         "pre": "Inspect the schema to see the column structure before querying.",
         "post": "20 columns. The financial columns — list_price, gross_revenue, net_revenue, cost — are all numeric and will display as currency. discount_pct is a percentage (0-1 range). The returned column is boolean. region and category are good GROUP BY candidates."
-      }
+      },
+      "container": "data"
     },
     {
       "event_type": "inspect_preview",
       "timestamp": "2026-03-20T21:30:09.000000+00:00",
-      "details": { "dataset": "retail_orders_sample" },
+      "details": {
+        "dataset": "retail_orders_sample"
+      },
       "narration": {
         "pre": "Preview the first rows to see actual order data with dollar formatting.",
         "post": "Revenue and cost columns now show as formatted currency. Each row is one order with customer, product, pricing, and satisfaction data."
-      }
+      },
+      "container": "data"
     },
     {
       "event_type": "insights_generated",
       "timestamp": "2026-03-20T21:30:12.000000+00:00",
-      "details": { "dataset": "retail_orders_sample", "insight_count": 5 },
+      "details": {
+        "dataset": "retail_orders_sample",
+        "insight_count": 5
+      },
       "narration": {
         "pre": "AI generates automatic insights from the column structure.",
         "post": "Insights ready — revenue concentration, discount impact, and return rate patterns identified. Each card has Explore in Query to load the SQL."
-      }
+      },
+      "container": "view:insights"
     },
     {
       "event_type": "ai_ask",
@@ -70,7 +81,10 @@
         "pre": "Revenue by product category: 'What are the order count, total revenue, and average margin by product category?' This is the fundamental question in retail analytics.",
         "post": "7 product categories ranked by revenue. The gap between top and bottom categories, combined with margin differences, reveals where to focus growth vs. optimization efforts."
       },
-      "baseline": { "expected_row_count": 7 }
+      "baseline": {
+        "expected_row_count": 7
+      },
+      "container": "view:query"
     },
     {
       "event_type": "ai_ask",
@@ -83,7 +97,10 @@
         "pre": "Regional performance: 'What are the order count, total revenue, and average customer satisfaction by region?' Regional gaps often point to execution differences worth investigating.",
         "post": "4 regions compared. Revenue and satisfaction can diverge — a high-revenue region with low CSAT may be growing unsustainably. A low-revenue region with high CSAT may be underinvested."
       },
-      "baseline": { "expected_row_count": 4 }
+      "baseline": {
+        "expected_row_count": 4
+      },
+      "container": "view:query"
     },
     {
       "event_type": "ai_ask",
@@ -96,7 +113,10 @@
         "pre": "Top 10 sales reps: 'What are the top 10 sales reps by total revenue, with their order count and average discount?' The interesting metric isn't just revenue — it's revenue relative to discount rate.",
         "post": "Top 10 reps with their discount rates. Compare the rep who sells $X at 5% discount vs. the rep who sells similar volume at 15% discount — the first rep is more valuable to the business."
       },
-      "baseline": { "expected_row_count": 10 }
+      "baseline": {
+        "expected_row_count": 10
+      },
+      "container": "view:query"
     },
     {
       "event_type": "ai_ask",
@@ -109,7 +129,10 @@
         "pre": "Returns analysis: 'Compare returned vs non-returned orders on order count, revenue, average satisfaction, and average shipping days.' Returns are the most expensive failure in retail.",
         "post": "Returned vs. non-returned comparison. If returned orders have lower CSAT and longer shipping times, that points to a fulfillment quality issue. If CSAT is similar, the returns may be product-driven."
       },
-      "baseline": { "expected_row_count": 2 }
+      "baseline": {
+        "expected_row_count": 2
+      },
+      "container": "view:query"
     },
     {
       "event_type": "query_run",
@@ -124,7 +147,10 @@
         "pre": "Discount impact analysis: how do different discount levels affect margin and average order value? Discounts drive volume but erode margin — the question is where the breakeven point falls.",
         "post": "2 discount bands — no discount and 1-10%. Orders with no discount have the highest margin. This is the data a pricing team needs to evaluate whether the volume lift from discounting compensates for the margin erosion."
       },
-      "baseline": { "expected_row_count": 2 }
+      "baseline": {
+        "expected_row_count": 2
+      },
+      "container": "view:query"
     },
     {
       "event_type": "session_end",

@@ -471,6 +471,13 @@ class DeleteQueryRequest(BaseModel):
     name: str
 
 
+class SaveResultAsDatasetRequest(BaseModel):
+    name: str
+    dataset: str
+    sql: str
+    reference: str | None = None
+
+
 class SqlRequest(BaseModel):
     dataset: str
     sql: str
@@ -749,6 +756,7 @@ def _dataset_meta_summary(dataset: str) -> dict[str, Any]:
                     "row_count": row_count,
                     "column_count": col_count,
                     "file_size_bytes": meta.get("file_size_bytes"),
+                    "dataset_type": meta.get("dataset_type"),
                     "meta_source": "cached",
                 }
             except Exception:
@@ -791,6 +799,7 @@ def _dataset_meta_summary(dataset: str) -> dict[str, Any]:
         "row_count": row_count,
         "column_count": col_count,
         "file_size_bytes": file_size_bytes,
+        "dataset_type": None,
         "meta_source": "live",
     }
 
@@ -4105,6 +4114,135 @@ def register_dataset(req: RegisterRequest):
         context_built = False
 
     return {"dataset": ds_name, "storage": storage, "context_built": context_built}
+
+
+# ============================================================
+# SAVE QUERY RESULT AS DATASET
+# ------------------------------------------------------------
+# Materializes the current query result (re-executed against
+# the source parquet) into a new derived dataset on disk.
+# The derived dataset is then available like any imported
+# dataset — Schema, Preview, SQL queries, and export all work.
+# ============================================================
+
+@app.post("/api/datasets/save_result")
+def api_save_result_as_dataset(req: SaveResultAsDatasetRequest):
+    """Re-execute SQL and save the full result as a new named dataset."""
+    t0 = time.perf_counter()
+
+    # 1. Sanitize and validate the requested name
+    raw_name = (req.name or "").strip()
+    sanitized = re.sub(r"[^A-Za-z0-9_]+", "_", raw_name).strip("_")[:50]
+    if not sanitized:
+        raise HTTPException(status_code=400, detail="Dataset name must contain at least one alphanumeric character.")
+    sanitized = sanitized.lower()
+
+    # 2. Resolve a unique name — auto-suffix if collision
+    base = sanitized
+    candidate = base
+    suffix = 2
+    while (DATASETS_DIR / candidate).exists():
+        candidate = f"{base}_{suffix}"
+        suffix += 1
+        if suffix > 99:
+            raise HTTPException(status_code=400, detail=f"Too many datasets named '{base}'; choose a different name.")
+    ds_name = candidate
+
+    # 3. Validate source dataset
+    if req.dataset not in list_datasets():
+        raise HTTPException(status_code=404, detail=f"Dataset not found: {req.dataset}")
+
+    # 4. Validate SQL is read-only
+    try:
+        cleaned_sql = _strip_trailing_semicolon(_validate_readonly_sql(req.sql))
+    except HTTPException:
+        raise
+
+    # 5. Rewrite SQL references (same pipeline as /api/sql)
+    try:
+        src, _ = dataset_source_path(req.dataset)
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+
+    esc = _sql_escape_path(src)
+    parquet_sql = f"read_parquet('{esc}')"
+
+    reference_parquet_sql, reference_name = _resolve_reference_for_sql(req.reference)
+
+    additional_datasets: dict[str, str] = {}
+    for other_name in list_datasets():
+        if other_name == req.dataset:
+            continue
+        try:
+            other_src, _ = dataset_source_path(other_name)
+            additional_datasets[other_name] = f"read_parquet('{_sql_escape_path(other_src)}')"
+        except Exception:
+            pass
+
+    additional_references = _build_additional_references()
+
+    sql = _rewrite_sql_dataset_reference(
+        sql=cleaned_sql,
+        dataset_name=req.dataset,
+        parquet_sql=parquet_sql,
+        reference_parquet_sql=reference_parquet_sql,
+        reference_name=reference_name,
+        additional_datasets=additional_datasets,
+        additional_references=additional_references,
+    )
+
+    # 6. Create directory and write parquet using DuckDB COPY
+    ds_dir = DATASETS_DIR / ds_name
+    ds_dir.mkdir(parents=True, exist_ok=True)
+    dest = (ds_dir / "source.parquet").resolve()
+    dest_str = str(dest).replace("\\", "/")
+
+    con = _connect()
+    try:
+        con.execute(f"COPY ({sql}) TO '{dest_str}' (FORMAT PARQUET)")
+        row_count = int(con.execute(f"SELECT COUNT(*) FROM read_parquet('{dest_str}')").fetchone()[0])
+        col_count = len(con.execute(f"DESCRIBE SELECT * FROM read_parquet('{dest_str}')").fetchall())
+    except duckdb.Error as e:
+        # Clean up the empty dir if write failed
+        try:
+            _rmtree_robust(ds_dir)
+        except Exception:
+            pass
+        raise HTTPException(status_code=400, detail=f"Failed to save result: {e}") from e
+    finally:
+        con.close()
+
+    # 7. Write _meta.json so the dataset is recognized by list_datasets()
+    meta = {
+        "dataset_type": "derived",
+        "row_count": row_count,
+        "column_count": col_count,
+        "source_dataset": req.dataset,
+        "source_query": req.sql,
+    }
+    (ds_dir / "_meta.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
+
+    elapsed = round(time.perf_counter() - t0, 4)
+    logger.info("save_result success | dataset=%s row_count=%d elapsed=%s", ds_name, row_count, elapsed)
+
+    # 8. Log session event — include "dataset" key so _build_resume_state picks it up
+    try:
+        log_event(SessionEventType.DATASET_DERIVED, {
+            "dataset": ds_name,
+            "name": ds_name,
+            "row_count": row_count,
+            "source_query": req.sql,
+        })
+    except Exception:
+        logger.warning("Failed to log DATASET_DERIVED event", exc_info=True)
+
+    return {
+        "status": "ok",
+        "dataset": ds_name,
+        "row_count": row_count,
+        "column_count": col_count,
+        "elapsed_seconds": elapsed,
+    }
 
 
 @app.get("/api/session")

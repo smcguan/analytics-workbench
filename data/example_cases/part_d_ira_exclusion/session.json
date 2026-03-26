@@ -30,25 +30,32 @@
       "narration": {
         "pre": "Importing the CMS Medicare Part D Drug Spending dataset. This is a 500-row sample from the full CMS release, containing brand names, generic names, manufacturer info, and spending data across 5 years (2019-2023). Each row represents one drug-manufacturer combination.",
         "post": "Dataset loaded: 500 rows, 46 columns. The data includes spending columns (Tot_Spndng), dosage units, claim counts, beneficiary counts, and cost-per-unit metrics for each year. Insights will auto-generate from the column structure."
-      }
+      },
+      "container": "data"
     },
     {
       "event_type": "inspect_schema",
       "timestamp": "2026-03-20T17:15:07.000000+00:00",
-      "details": { "dataset": "part_d_spending_sample" },
+      "details": {
+        "dataset": "part_d_spending_sample"
+      },
       "narration": {
         "pre": "Before querying, inspect the schema. Click Schema to see every column name and type. Medicare datasets have dense naming conventions — Tot_Spndng, Avg_Spnd_Per_Dsg_Unt_Wghtd — so reviewing the schema first saves time.",
         "post": "46 columns. The spending columns (Tot_Spndng, Avg_Spnd_Per_Clm) are the monetary fields you will query. Brnd_Name and Gnrc_Name identify the drug. Tot_Mftr counts manufacturers — used later to approximate single-source status."
-      }
+      },
+      "container": "data"
     },
     {
       "event_type": "inspect_preview",
       "timestamp": "2026-03-20T17:15:09.000000+00:00",
-      "details": { "dataset": "part_d_spending_sample" },
+      "details": {
+        "dataset": "part_d_spending_sample"
+      },
       "narration": {
         "pre": "Click Preview to see the first rows of actual data. This confirms the data loaded correctly and gives you a feel for the values — drug names, spending amounts, manufacturer counts.",
         "post": "Data looks clean. Notice the dollar amounts in the spending columns — these are formatted as currency. The Brnd_Name column has trailing asterisks on some drugs (e.g. 'Stelara*') — AW handles this automatically with LIKE pattern matching."
-      }
+      },
+      "container": "data"
     },
     {
       "event_type": "insights_generated",
@@ -60,7 +67,8 @@
       "narration": {
         "pre": "AI is analyzing the dataset structure to generate automatic insights. This uses column names and aggregate statistics only — no raw data leaves your machine.",
         "post": "5 insight cards generated. These highlight spending concentration, outliers, and trends in the data. Each card has an Explore in Query button to load the supporting SQL. For now, we move to the IRA exclusion analysis."
-      }
+      },
+      "container": "view:insights"
     },
     {
       "event_type": "reference_load",
@@ -74,7 +82,8 @@
       "narration": {
         "pre": "Loading the IRA Negotiated Drugs reference table. This contains 35 drugs selected for Medicare price negotiation under the Inflation Reduction Act (Rounds 1-3). We will JOIN this against the spending dataset to identify which drugs are excluded from further analysis.",
         "post": "Reference table loaded: 35 drugs with columns drug_name, generic_name, ira_round, effective_date, manufacturer, and indication_category. The table is now available as 'reference' in SQL queries. String columns are title-cased to match CMS naming conventions."
-      }
+      },
+      "container": "data"
     },
     {
       "event_type": "ai_ask",
@@ -89,7 +98,8 @@
       },
       "baseline": {
         "expected_row_count": 272
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "ai_ask",
@@ -104,7 +114,8 @@
       },
       "baseline": {
         "expected_row_count": 10
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "query_run",
@@ -121,7 +132,8 @@
       },
       "baseline": {
         "expected_row_count": 22
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "query_run",
@@ -138,7 +150,8 @@
       },
       "baseline": {
         "expected_row_count": 202
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "query_run",
@@ -155,7 +168,8 @@
       },
       "baseline": {
         "expected_row_count": 50
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "export",
@@ -168,7 +182,8 @@
       "narration": {
         "pre": "Exporting the top 50 non-IRA candidates to Excel for further analysis and stakeholder review.",
         "post": "Export complete. The Excel file contains the ranked candidate list ready for policy review. In a full analysis, you would apply additional reference table JOINs (orphan drug status, USP therapeutic categories) to further classify these candidates."
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "session_end",

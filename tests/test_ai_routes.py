@@ -898,9 +898,12 @@ def test_column_aliases_response_has_aliases_field(client):
 
 
 def test_column_aliases_cache_hit(client, datasets_tmp):
-    """After first call caches, second call returns cached=True without calling AI."""
+    """Non-identity cached aliases are returned from cache without calling AI."""
     ds_dir = datasets_tmp / DATASET
-    mock_aliases = {c: c for c in EXPECTED_COLUMNS}
+    # Must be non-identity (at least one alias differs) — identity is treated as a
+    # cache miss and triggers regeneration so the AI gets another chance.
+    mock_aliases = {"drug_name": "Drug Name", "total_paid": "Total Paid",
+                    "hcpcs_code": "HCPCS Code", "total_claims": "Total Claims"}
     cache_path = ds_dir / "dataset_context.json"
     existing = json.loads(cache_path.read_text(encoding="utf-8"))
     existing["column_aliases"] = mock_aliases

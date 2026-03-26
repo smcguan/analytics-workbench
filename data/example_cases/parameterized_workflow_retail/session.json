@@ -33,7 +33,8 @@
       },
       "baseline": {
         "expected_row_count": 1500
-      }
+      },
+      "container": "data"
     },
     {
       "event_type": "inspect_schema",
@@ -44,7 +45,8 @@
       "narration": {
         "pre": "Click Schema to see every column name and type. Understanding the structure is always the first step.",
         "post": "12 columns. STORE_ID and STORE_NAME identify each location. REGION is the geographic grouping. CATEGORY splits products into Laptops, Phones, Tablets, Accessories, and Audio. REVENUE is UNITS_SOLD times UNIT_PRICE. STORE_ID is the join key we will use later to connect actual sales against target benchmarks."
-      }
+      },
+      "container": "data"
     },
     {
       "event_type": "insights_generated",
@@ -56,7 +58,8 @@
       "narration": {
         "pre": "Switch to the Insights view. The AI reads column names and statistics — never the actual row data — and generates observations automatically.",
         "post": "The AI flagged revenue concentration — a few stores are driving a disproportionate share of total revenue. It also noted regional variance and category price dispersion. These are starting points. Now let's load the targets reference table and start querying."
-      }
+      },
+      "container": "view:insights"
     },
     {
       "event_type": "reference_load",
@@ -70,7 +73,8 @@
       "narration": {
         "pre": "Every client engagement includes a targets file — what each store was supposed to hit. This is the benchmark we JOIN against actual sales to measure performance. Click + Reference Table to import it.",
         "post": "Targets loaded: 20 rows, 8 columns — STORE_ID, STORE_NAME, REGION, Q1 through Q4 targets, and ANNUAL_TARGET. It appears in the sidebar with a REF badge. In SQL, use the table name 'electronics_targets' in your JOIN clause. The join key is STORE_ID."
-      }
+      },
+      "container": "data"
     },
     {
       "event_type": "ai_ask",
@@ -85,7 +89,8 @@
       },
       "baseline": {
         "expected_row_count": 4
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "chart_view",
@@ -96,7 +101,8 @@
       "narration": {
         "pre": "Four regions, one chart. Click Chart.",
         "post": "West region underperformance is immediately visible. The chart makes the finding undeniable — this is the first slide in a retail performance presentation."
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "query_run",
@@ -113,7 +119,8 @@
       },
       "baseline": {
         "expected_row_count": 20
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "query_save",
@@ -124,7 +131,8 @@
       "narration": {
         "pre": "Save this query. On every retail engagement you will want to compare actuals against targets. This query becomes reusable the moment you save it.",
         "post": "Saved to your query library. It will be there when you need it — for this client or the next one."
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "ai_ask",
@@ -139,7 +147,8 @@
       },
       "baseline": {
         "expected_row_count": 5
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "chart_view",
@@ -150,7 +159,8 @@
       "narration": {
         "pre": "Category breakdown as a chart. One click.",
         "post": "Accessories stands out immediately. Visual confirmation of the margin story."
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "query_run",
@@ -167,7 +177,8 @@
       },
       "baseline": {
         "expected_row_count": 2
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "explain",
@@ -178,7 +189,8 @@
       "narration": {
         "pre": "Click Explain. This is the feature that turns a SQL query into a client-readable methodology note.",
         "post": "Every query in this analysis can be explained in plain English on demand. No technical translation required."
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "session_end",
@@ -212,7 +224,8 @@
       "narration": {
         "pre": "Open the Workflows dialog. Find the electronics workflow. Click Edit. This is where the parameterization happens.",
         "post": "The Edit panel shows every file the workflow depends on. Two files — the sales dataset and the targets reference table. Both point to electronics files. We are going to remap both to sporting goods."
-      }
+      },
+      "container": "workflows"
     },
     {
       "event_type": "edit_panel_choose",
@@ -227,7 +240,8 @@
       "narration": {
         "pre": "Click Choose File next to the sales dataset. Select sporting_goods_sales.csv — the new client's transaction data.",
         "post": "File selected. The current mapping now shows sporting_goods_sales.csv with 1,500 rows. Column check is running."
-      }
+      },
+      "container": "workflows"
     },
     {
       "event_type": "edit_panel_check",
@@ -254,7 +268,8 @@
       "narration": {
         "pre": "Watch the column check — each column from the original workflow is verified against the new file.",
         "post": "Green across the board. All 12 columns match. The sporting goods file uses the exact same column names as electronics. Every query will run without a single modification. This is what a consistent data standard buys you."
-      }
+      },
+      "container": "workflows"
     },
     {
       "event_type": "edit_panel_run",
@@ -265,7 +280,8 @@
       "narration": {
         "pre": "Both files remapped. Both column checks green. Run Now is active. Click it. Same workflow. New client.",
         "post": "The Edit panel closes. Every step from the electronics workflow now replays against the sporting goods dataset. The reference table swap happens automatically — sporting_goods_targets replaces electronics_targets."
-      }
+      },
+      "container": "workflows"
     },
     {
       "event_type": "query_load",
@@ -276,7 +292,8 @@
       "narration": {
         "pre": "The saved query from the Electronics analysis is still here. When we run the Sporting Goods workflow, this query runs against the new data automatically — but you can also load and run it manually at any point.",
         "post": "Saved queries travel with you across engagements. The query logic is yours — the data is just the input."
-      }
+      },
+      "container": "view:saved"
     },
     {
       "event_type": "dataset_import",
@@ -293,7 +310,8 @@
       },
       "baseline": {
         "expected_row_count": 1500
-      }
+      },
+      "container": "data"
     },
     {
       "event_type": "query_run",
@@ -310,7 +328,8 @@
       },
       "baseline": {
         "expected_row_count": 4
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "query_run",
@@ -327,7 +346,8 @@
       },
       "baseline": {
         "expected_row_count": 20
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "query_run",
@@ -344,7 +364,8 @@
       },
       "baseline": {
         "expected_row_count": 5
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "query_run",
@@ -361,7 +382,8 @@
       },
       "baseline": {
         "expected_row_count": 2
-      }
+      },
+      "container": "view:query"
     },
     {
       "event_type": "session_end",
