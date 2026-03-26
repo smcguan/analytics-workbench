@@ -588,11 +588,20 @@ Columns:
         if raw.startswith("```"):
             lines = raw.split("\n")
             raw = "\n".join(lines[1:]).rstrip("`").strip()
+        # Robust extraction: find the first { and last } in case the model
+        # prefixed the object with explanation text (e.g. "Here are the aliases:")
+        start = raw.find("{")
+        end = raw.rfind("}")
+        if start != -1 and end != -1 and end > start:
+            raw = raw[start : end + 1]
         result = json.loads(raw)
         if isinstance(result, dict):
             return {c: str(result.get(c, c)) for c in columns}
-    except Exception:
-        pass
+    except Exception as exc:
+        import logging as _logging
+        _logging.getLogger(__name__).warning(
+            "generate_column_aliases: JSON parse failed | error=%s | raw=%r", exc, locals().get("raw", "")[:200]
+        )
     # Identity fallback — aliases equal original names
     return {c: c for c in columns}
 

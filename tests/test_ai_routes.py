@@ -1014,3 +1014,43 @@ def test_analysis_sequence_cache_persists(client, datasets_tmp):
 
     updated = json.loads(cache_path.read_text(encoding="utf-8"))
     assert updated.get("analysis_sequence") == MOCK_STEPS
+
+
+# ---------------------------------------------------------------------------
+# Column alias — identity-not-cached regression tests
+# ---------------------------------------------------------------------------
+
+def test_column_aliases_identity_result_not_cached(client, datasets_tmp):
+    """If AI returns identity mapping, do not write to cache so next call retries."""
+    ds_dir = datasets_tmp / DATASET
+    cache_path = ds_dir / "dataset_context.json"
+    existing = json.loads(cache_path.read_text(encoding="utf-8"))
+    existing.pop("column_aliases", None)
+    cache_path.write_text(json.dumps(existing), encoding="utf-8")
+
+    # AI returns identity (all columns unchanged)
+    identity = {c: c for c in EXPECTED_COLUMNS}
+    with patch("app.ai.routes.generate_column_aliases", return_value=identity):
+        resp = client.get("/api/ai/column_aliases?dataset=" + DATASET + "&refresh=true")
+    assert resp.status_code == 200
+
+    # Cache must NOT have been written
+    updated = json.loads(cache_path.read_text(encoding="utf-8"))
+    assert "column_aliases" not in updated
+
+
+def test_column_aliases_non_identity_result_is_cached(client, datasets_tmp):
+    """If AI returns real aliases, they must be written to cache."""
+    ds_dir = datasets_tmp / DATASET
+    cache_path = ds_dir / "dataset_context.json"
+    existing = json.loads(cache_path.read_text(encoding="utf-8"))
+    existing.pop("column_aliases", None)
+    cache_path.write_text(json.dumps(existing), encoding="utf-8")
+
+    real_aliases = {"drug_name": "Drug Name", "total_paid": "Total Paid", "hcpcs_code": "HCPCS Code", "total_claims": "Total Claims"}
+    with patch("app.ai.routes.generate_column_aliases", return_value=real_aliases):
+        resp = client.get("/api/ai/column_aliases?dataset=" + DATASET + "&refresh=true")
+    assert resp.status_code == 200
+
+    updated = json.loads(cache_path.read_text(encoding="utf-8"))
+    assert updated.get("column_aliases") == real_aliases

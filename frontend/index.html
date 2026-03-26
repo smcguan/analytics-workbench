@@ -7588,14 +7588,23 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 inspectMode = "schema";
                 setInspectButtons();
 
-                // Load aliases (cache-first — no loading indicator needed for fast path)
+                // Use client-side alias cache if already populated by import prefetch.
+                // If not yet loaded (e.g. dataset selected without a fresh import),
+                // fetch now — this is the lazy fallback path.
                 const dataset = selectedDataset;
-                let aliases = datasetAliases[dataset] || {};
-                try {
-                    const aliasData = await apiJson("/api/ai/column_aliases?dataset=" + encodeURIComponent(dataset));
-                    aliases = aliasData.aliases || {};
-                    datasetAliases[dataset] = aliases;
-                } catch (_) {}
+                let aliases = datasetAliases[dataset] || null;
+                if (!aliases) {
+                    try {
+                        const aliasData = await apiJson(
+                            "/api/ai/column_aliases?dataset=" + encodeURIComponent(dataset)
+                        );
+                        aliases = aliasData.aliases || {};
+                        datasetAliases[dataset] = aliases;
+                    } catch (e) {
+                        console.warn("[AW] Could not load column aliases for", dataset, "—", e.message);
+                        aliases = {};
+                    }
+                }
 
                 // Render schema table with editable alias column
                 const head = $("inspectHead");
@@ -8259,6 +8268,25 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             _expandSidebarSection("sidebarDataTitle", "sidebarDataBody");
             _expandSidebarSection("sidebarWorkspaceTitle", "sidebarWorkspaceBody");
             _collapseSidebarSection("sidebarGetStartedTitle", "sidebarGetStartedBody");
+            // Pre-fetch column aliases in the background so Schema view is
+            // populated immediately when the analyst opens it.
+            if (selectedDataset) _prefetchColumnAliases(selectedDataset);
+        }
+
+        // Fire-and-forget: generate and cache column aliases for a dataset.
+        // Stores result in datasetAliases[dataset] for instant use in
+        // Schema inspector, Insights, and Suggestions.
+        async function _prefetchColumnAliases(dataset) {
+            try {
+                const data = await apiJson(
+                    "/api/ai/column_aliases?dataset=" + encodeURIComponent(dataset)
+                );
+                if (data && data.aliases && Object.keys(data.aliases).length) {
+                    datasetAliases[dataset] = data.aliases;
+                }
+            } catch (e) {
+                console.warn("[AW] Column alias generation failed for", dataset, "—", e.message);
+            }
         }
 
         // Smart auto-expand: called after query execution

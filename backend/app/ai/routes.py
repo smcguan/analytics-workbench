@@ -917,11 +917,20 @@ def get_column_aliases(
 
     try:
         aliases = generate_column_aliases(columns=columns, dataset_name=dataset)
-        _write_aliases_cache(dataset, aliases)
+        # Only cache if the AI actually renamed at least one column.
+        # If every alias equals its original (identity fallback), the AI call
+        # likely failed silently — do not write to cache so the next open retries.
+        is_identity = all(aliases.get(c, c) == c for c in columns)
+        if not is_identity:
+            _write_aliases_cache(dataset, aliases)
+        else:
+            logger.warning(
+                "column_aliases returned identity for %s — AI may have failed; not caching",
+                dataset,
+            )
         return ColumnAliasResponse(dataset=dataset, aliases=aliases, cached=False)
     except Exception as e:
         logger.exception("column_aliases failed | dataset=%s | error=%s", dataset, e)
-        # Fall back to identity mapping — aliases equal original names
         identity = {c: c for c in columns}
         return ColumnAliasResponse(dataset=dataset, aliases=identity, cached=False)
 
