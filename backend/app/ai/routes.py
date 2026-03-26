@@ -82,6 +82,7 @@ from .provider_openai import (
     suggest_questions_for_dataset,
     generate_insights_for_dataset,
     generate_explanation,
+    generate_result_narrative,
 )
 from .context_builder import build_reference_context
 
@@ -96,6 +97,8 @@ from .schemas import (
     InsightsResponse,
     ExplainRequest,
     ExplainResponse,
+    ResultNarrativeRequest,
+    ResultNarrativeResponse,
 )
 
 from .sql_validator import (
@@ -820,5 +823,27 @@ def explain_sql(payload: ExplainRequest) -> ExplainResponse:
         return ExplainResponse(explanation=explanation)
     except Exception as e:
         logger.exception("explain failed | dataset=%s | error=%s", payload.dataset, e)
+        from fastapi import HTTPException
+        raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}")
+
+
+@router.post("/result_narrative", response_model=ResultNarrativeResponse)
+def get_result_narrative(payload: ResultNarrativeRequest) -> ResultNarrativeResponse:
+    try:
+        narrative = generate_result_narrative(
+            question=payload.question,
+            sql=payload.sql,
+            columns=payload.columns,
+            rows=payload.rows,
+            rowcount=payload.rowcount,
+            dataset_name=payload.dataset,
+        )
+        log_event(SessionEventType.RESULT_NARRATIVE, {
+            "dataset": payload.dataset,
+            "narrative": narrative,
+        })
+        return ResultNarrativeResponse(narrative=narrative)
+    except Exception as e:
+        logger.exception("result_narrative failed | dataset=%s | error=%s", payload.dataset, e)
         from fastapi import HTTPException
         raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}")

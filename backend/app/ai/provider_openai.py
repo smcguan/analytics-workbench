@@ -512,6 +512,48 @@ Result rows (up to 10):
     return prompt
 
 
+def generate_result_narrative(
+    *,
+    question: str,
+    sql: str,
+    columns: list[str],
+    rows: list[dict],
+    rowcount: int,
+    dataset_name: str,
+) -> str:
+    """
+    Generate a two-sentence plain-English narrative of a query result.
+    Focuses on the finding and its significance, not on what the query does.
+    Returns a hardcoded message for zero-row results without an AI call.
+    """
+    if rowcount == 0:
+        return (
+            "No records matched this filter. "
+            "Verify your criteria or check whether the reference table JOIN "
+            "produced the expected matches."
+        )
+
+    sample = rows[:5]
+    rows_text = "(no rows)"
+    if sample and columns:
+        header = " | ".join(columns)
+        data_lines = [" | ".join(str(row.get(c, "")) for c in columns) for row in sample]
+        rows_text = header + "\n" + "\n".join(data_lines)
+
+    prompt = f"""You are a data analyst summarising a query result for a business audience.
+
+In exactly two sentences: describe what this result shows and why it matters. Be specific — use the actual numbers. Do not describe what the query does. Do not start with "The query" or "This query". Focus on the finding and its significance.
+
+Dataset: {dataset_name}
+Question asked: {question or "(none provided)"}
+Total rows returned: {rowcount:,}
+Columns: {", ".join(columns)}
+First rows:
+{rows_text}""".strip()
+
+    return generate_sql_response(prompt)
+
+
 def generate_explanation(
     *,
     sql: str,

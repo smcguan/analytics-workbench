@@ -326,6 +326,17 @@
             color:#f1c40f;
             white-space:nowrap;
         }
+        .derived-badge{
+            font-size:9px;
+            font-weight:700;
+            text-transform:uppercase;
+            letter-spacing:.5px;
+            padding:1px 5px;
+            border-radius:3px;
+            background:rgba(230,126,34,.15);
+            color:#e67e22;
+            white-space:nowrap;
+        }
         .ref-item-remove{
             background:none; border:none; color:var(--muted2); cursor:pointer;
             font-size:13px; padding:0 2px; line-height:1;
@@ -468,6 +479,70 @@
             font-size:13px;
             line-height:1.6;
         }
+
+        /* ── Result Narrative ────────────────────────────────── */
+        .narrative-area{
+            display:flex;
+            align-items:flex-start;
+            gap:8px;
+            margin:0 0 10px 0;
+            padding:10px 14px;
+            border-radius:10px;
+            border:1px solid var(--stroke);
+            background:rgba(255,255,255,.03);
+        }
+        .narrative-text{
+            flex:1;
+            font-size:13px;
+            color:var(--muted);
+            line-height:1.55;
+            font-style:italic;
+        }
+        .narrative-copy{
+            flex-shrink:0;
+            align-self:flex-start;
+            margin-top:1px;
+        }
+        .narrative-shimmer{
+            height:36px;
+            border-radius:8px;
+            background:linear-gradient(90deg,var(--bg1) 25%,rgba(79,140,255,.08) 50%,var(--bg1) 75%);
+            background-size:200% 100%;
+            animation:shimmer 1.4s infinite linear;
+            flex:1;
+        }
+
+        /* ── Sanity Check Warnings ───────────────────────────── */
+        .sanity-warnings{
+            display:flex;
+            flex-direction:column;
+            gap:6px;
+            margin:0 0 10px 0;
+        }
+        .sanity-warning-item{
+            display:flex;
+            align-items:flex-start;
+            gap:8px;
+            background:rgba(255,200,50,.10);
+            border:1px solid rgba(255,200,50,.30);
+            border-radius:8px;
+            padding:8px 10px;
+            font-size:12px;
+            color:var(--fg1, var(--text));
+            line-height:1.45;
+        }
+        .sanity-warning-item span{ flex:1; }
+        .sanity-dismiss{
+            background:none;
+            border:none;
+            cursor:pointer;
+            color:var(--muted);
+            font-size:16px;
+            line-height:1;
+            padding:0 2px;
+            flex-shrink:0;
+        }
+        .sanity-dismiss:hover{ color:var(--text); }
 
         .dataset-name{
             overflow:hidden;
@@ -2278,8 +2353,19 @@ LIMIT 100</textarea>
                             <div class="tab-group" style="margin-left:auto;">
                                 <button class="btn small" id="exportExcelBtn" title="Export query results as an Excel file">Export Excel</button>
                                 <button class="btn small" id="exportTsvBtn" title="Export query results as a tab-separated file">Export TSV</button>
+                                <button class="btn small" id="saveAsDatasetBtn" disabled title="Save this query result as a new named dataset">Save as Dataset</button>
                                 <button class="btn small" id="copyResultSummaryBtn" disabled title="Copy a structured summary of the result to your clipboard">Copy Result Summary</button>
                             </div>
+                        </div>
+
+                        <!-- Sanity check warnings — yellow advisory banners, client-side only -->
+                        <div id="sanityWarnings" class="sanity-warnings" style="display:none;"></div>
+
+                        <!-- Result Narrative — two-sentence AI summary of each query result -->
+                        <div id="resultNarrativeArea" class="narrative-area" style="display:none;">
+                            <div id="resultNarrativeShimmer" class="narrative-shimmer" style="display:none;"></div>
+                            <div id="resultNarrativeText" class="narrative-text"></div>
+                            <button id="copyNarrativeBtn" class="btn small narrative-copy" title="Copy narrative to clipboard" style="display:none;">Copy</button>
                         </div>
 
                         <div class="results-card">
@@ -2983,10 +3069,21 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 btn.className = "dataset-item" + ((d.name || "") === selectedDataset ? " active" : "");
                 btn.type = "button";
 
-                btn.innerHTML = `
-                    <span class="dataset-name">${d.name || "(unnamed dataset)"}</span>
-                    <span class="dataset-meta-mini">${datasetButtonLabel(d)}</span>
-                `;
+                const isDerived = d.dataset_type === "derived";
+                if (isDerived) {
+                    const rowStr = d.row_count != null ? num(d.row_count) + " rows" : "";
+                    btn.innerHTML =
+                        `<span class="dataset-name">${d.name || "(unnamed dataset)"}</span>` +
+                        `<span style="display:flex;align-items:center;gap:6px;">` +
+                            `<span class="dataset-meta-mini">${rowStr}</span>` +
+                            `<span class="derived-badge" title="Created from query result — not an imported file">DERIVED</span>` +
+                        `</span>`;
+                } else {
+                    btn.innerHTML = `
+                        <span class="dataset-name">${d.name || "(unnamed dataset)"}</span>
+                        <span class="dataset-meta-mini">${datasetButtonLabel(d)}</span>
+                    `;
+                }
 
                 btn.addEventListener("click", async () => {
                     selectedDataset = d.name || "";
@@ -3979,6 +4076,8 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                         $("resultsCount").textContent = `${num(lastRun.rowcount)} rows`;
                         $("resultsMeta").textContent = `executed in ${lastRun.elapsed}s`;
                         updateChartTab(lastRun.visualization);
+                        $("copyResultSummaryBtn").disabled = false;
+                        $("saveAsDatasetBtn").disabled = lastRun.rowcount === 0;
                     } catch (sqlErr) {
                         // SQL re-run failed (e.g. missing reference) — show editor with SQL
                         $("resultsMeta").textContent = "Previous query could not be re-run.";
@@ -4090,7 +4189,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         let _sldInterval = null;
 
         function _sldBadgeClass(eventType) {
-            if (eventType === "dataset_import" || eventType === "dataset_delete") return "sld-badge-import";
+            if (eventType === "dataset_import" || eventType === "dataset_delete" || eventType === "dataset_derived") return "sld-badge-import";
             if (eventType === "query_run" || eventType === "ai_sql_generated") return "sld-badge-query";
             if (eventType === "reference_load" || eventType === "reference_delete") return "sld-badge-ref";
             if (eventType === "export") return "sld-badge-export";
@@ -4101,6 +4200,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         function _sldBadgeLabel(eventType) {
             const labels = {
                 dataset_import: "DATASET IMPORTED",
+                dataset_derived: "DATASET DERIVED",
                 query_run: "QUERY RUN",
                 reference_load: "REFERENCE LOADED",
                 reference_delete: "REFERENCE REMOVED",
@@ -4121,6 +4221,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             const d = ev.details || {};
             const t = ev.event_type;
             if (t === "dataset_import") return d.dataset || d.source_file || "Dataset imported";
+            if (t === "dataset_derived") return (d.name || d.dataset || "Derived dataset") + (d.row_count ? " — " + num(d.row_count) + " rows" : "");
             if (t === "query_run") {
                 // Show the natural-language question if available, else first 80 chars of SQL
                 if (d.question) return d.question.length > 80 ? d.question.substring(0, 80) + "..." : d.question;
@@ -5066,11 +5167,16 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 
             // Button states
             $("tutorialPrevBtn").disabled = tutorialCurrentStep <= 0;
-            $("tutorialNextBtn").disabled = tutorialCurrentStep >= tutorialSteps.length - 1;
+            // Disable Next only when on the last step AND it has already been executed.
+            // If the last step hasn't run yet, Next must stay enabled so the user can execute it.
+            $("tutorialNextBtn").disabled = (tutorialCurrentStep >= tutorialSteps.length - 1)
+                && (tutorialResults[tutorialCurrentStep] !== undefined);
         }
 
         async function tutorialNext() {
-            if (tutorialCurrentStep >= tutorialSteps.length - 1) return;
+            // Allow executing the last step if it hasn't run yet; block only when done.
+            if (tutorialCurrentStep >= tutorialSteps.length - 1
+                    && tutorialResults[tutorialCurrentStep] !== undefined) return;
 
             const step = tutorialSteps[tutorialCurrentStep];
             const alreadyExecuted = tutorialResults[tutorialCurrentStep] !== undefined;
@@ -5165,6 +5271,11 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             if (step.event_type !== "explain") {
                 $("explainPanel").style.display = "none";
             }
+
+            // ── Ensure required container is open ───────────────────
+            // Each step declares which container it operates in via
+            // step.container. Open it silently before the primary action.
+            ensureContainerOpen(step.container);
 
             if (step.event_type === "dataset_import") {
                 const dsName = d.dataset || "";
@@ -5328,6 +5439,8 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 $("resultsCount").textContent = `${num(lastRun.rowcount)} rows`;
                 $("resultsMeta").textContent = `executed in ${lastRun.elapsed}s`;
                 updateChartTab(lastRun.visualization);
+                $("copyResultSummaryBtn").disabled = false;
+                $("saveAsDatasetBtn").disabled = lastRun.rowcount === 0;
                 _onQueryExecuted();
                 // Do NOT collapse during playback — analyst needs to see the SQL
                 // Auto-collapse only applies to manual query execution
@@ -5429,14 +5542,9 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                     const wfDesc = (d.description || d.workflow_description || "");
 
                     // Expand WORKFLOWS sidebar section visibly
-                    const wfTitle = $("sidebarWorkflowsTitle");
-                    const wfBody = $("sidebarWorkflowsBody");
-                    if (wfTitle && wfTitle.classList.contains("collapsed")) {
-                        wfTitle.classList.remove("collapsed");
-                        if (wfBody) wfBody.classList.remove("collapsed");
-                    }
+                    _expandSidebarSection("sidebarSessionsTitle", "sidebarSessionsBody");
                     // Scroll sidebar to WORKFLOWS
-                    if (wfTitle) wfTitle.scrollIntoView({ behavior: "smooth", block: "center" });
+                    $("sidebarSessionsTitle").scrollIntoView({ behavior: "smooth", block: "center" });
                     await _tutorialPause(600);
 
                     // Save session with the workflow name and description
@@ -5463,6 +5571,11 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                     const overlay = $("exampleCasesOverlay");
                     if (overlay) overlay.classList.add("hidden");
                 } else if (isSessionLogStep) {
+                    // Expand WORKFLOWS sidebar section so user can see the Session Log checkbox
+                    _expandSidebarSection("sidebarSessionsTitle", "sidebarSessionsBody");
+                    $("sidebarSessionsTitle").scrollIntoView({ behavior: "smooth", block: "center" });
+                    await _tutorialPause(700);
+
                     // Session Log step — open the Session Log drawer
                     showSessionLog();
                     toast("Session complete — review the audit trail.");
@@ -5494,10 +5607,14 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                     } catch (_) {}
                 }
 
-                // Switch to Insights view — this triggers fetchInsights automatically
+                // Switch to Insights view. Temporarily set a dummy cache entry so
+                // switchView's auto-fetch guard doesn't fire a competing fetchInsights(false)
+                // call that would block the awaited fetchInsights(true) below via the
+                // _insightsFetchInProgress guard.
+                if (selectedDataset) insightsCache[selectedDataset] = { insights: [] };
                 switchView("insights");
 
-                // Clear JS-level cache and force a fresh fetch so insights
+                // Clear the placeholder and force a fresh fetch so insights
                 // always regenerate — even on second run after Clear Workspace
                 if (selectedDataset) {
                     delete insightsCache[selectedDataset];
@@ -5582,6 +5699,8 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                     $("resultsCount").textContent = `${num(lastRun.rowcount)} rows`;
                     $("resultsMeta").textContent = `executed in ${lastRun.elapsed}s`;
                     updateChartTab(lastRun.visualization);
+                    $("copyResultSummaryBtn").disabled = false;
+                    $("saveAsDatasetBtn").disabled = lastRun.rowcount === 0;
                     _onQueryExecuted();
                 }
 
@@ -6881,6 +7000,12 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 $("resultsMeta").textContent = "Running SQL...";
                 $("chartTab").disabled = true;
                 setActiveTab("table");
+                // Clear stale sanity warnings and narrative from prior run
+                $("sanityWarnings").innerHTML = "";
+                $("sanityWarnings").style.display = "none";
+                $("resultNarrativeArea").style.display = "none";
+                $("resultNarrativeText").textContent = "";
+                $("copyNarrativeBtn").style.display = "none";
 
                 const sqlBody = { dataset, sql };
                 if (currentReference) sqlBody.reference = currentReference;
@@ -6906,6 +7031,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 renderResults(lastRun.columns, lastRun.rows);
                 $("resultsCount").textContent = `${num(lastRun.rowcount)} rows`;
                 $("copyResultSummaryBtn").disabled = false;
+                $("saveAsDatasetBtn").disabled = lastRun.rowcount === 0;
                 updateChartTab(lastRun.visualization);
                 let metaText = `executed in ${lastRun.elapsed}s • DuckDB local`;
                 // Reference table diagnostic
@@ -6915,6 +7041,8 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                     metaText += ` • Reference: ${ri.name} (${refRows} rows) → ${num(ri.result_rows)} results`;
                 }
                 $("resultsMeta").textContent = metaText;
+                _runSanityChecks();
+                _fetchResultNarrative();
                 toast("SQL executed.");
                 _onQueryExecuted();
             } catch (e) {
@@ -6924,6 +7052,133 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 console.error("SQL execution error:", errMsg);
             } finally {
                 clearButtonShimmering($("runSqlBtn"));
+            }
+        }
+
+        // ── Sanity Check ────────────────────────────────────────────────────────
+        // Client-side checks that run after every query. Advisory only — yellow
+        // banners, each dismissible with ×. No AI call required.
+        function _runSanityChecks() {
+            const container = $("sanityWarnings");
+            container.innerHTML = "";
+            container.style.display = "none";
+
+            const warnings = [];
+            const { columns, rows, rowcount, sql } = lastRun;
+
+            // Check 1: Empty result
+            if (rowcount === 0) {
+                warnings.push("No rows returned. Your JOIN may have failed or your filter may be too restrictive. Check your WHERE clause and confirm the reference table is loaded.");
+            }
+
+            // Check 2: Suspiciously small GROUP BY result
+            if (rowcount > 0 && rowcount < 3 && /GROUP\s+BY/i.test(sql)) {
+                warnings.push(`Only ${rowcount} group${rowcount === 1 ? "" : "s"} returned. Verify your GROUP BY column contains the expected distinct values.`);
+            }
+
+            // Check 3: Percentages don't sum to 100
+            if (rowcount > 0 && rows.length > 0) {
+                for (const col of columns) {
+                    if (/pct|percent|%|share|ratio/i.test(col)) {
+                        const total = rows.reduce((s, r) => s + (parseFloat(r[col]) || 0), 0);
+                        // Only warn if sum is plausible (>5) and materially off from 100
+                        if (total > 5 && Math.abs(total - 100) > 2) {
+                            warnings.push(`Percentages in "${col}" sum to ${total.toFixed(1)}%, not 100%. Check whether your denominator query is correct.`);
+                        }
+                    }
+                }
+            }
+
+            // Check 4: Result has more rows than the source dataset (likely a many-to-many JOIN)
+            if (rowcount > 0) {
+                const dsInfo = datasets.find(d => d.name === selectedDataset);
+                const srcRows = dsInfo?.row_count;
+                if (srcRows && rowcount > srcRows) {
+                    warnings.push(`Result has more rows (${num(rowcount)}) than the source dataset (${num(srcRows)}). You may have a many-to-many JOIN producing duplicate rows.`);
+                }
+            }
+
+            // Check 5: A result column is >90% null in the returned preview rows
+            if (rowcount > 0 && rows.length > 0) {
+                for (const col of columns) {
+                    const nullCount = rows.filter(r => r[col] === null || r[col] === undefined || r[col] === "").length;
+                    const nullPct = (nullCount / rows.length) * 100;
+                    if (nullPct > 90) {
+                        warnings.push(`"${col}" is ${nullPct.toFixed(0)}% null in the result preview. Verify this column exists in your dataset or check your JOIN key.`);
+                    }
+                }
+            }
+
+            // Check 6: Single row returned when multiple are expected
+            if (rowcount === 1 && !/LIMIT\s+1\b/i.test(sql) && !/^\s*SELECT\s+COUNT/i.test(sql)) {
+                warnings.push("Only one row returned for a query that typically returns multiple. Verify your filter is not too restrictive.");
+            }
+
+            if (!warnings.length) return;
+
+            container.style.display = "flex";
+            for (const msg of warnings) {
+                const div = document.createElement("div");
+                div.className = "sanity-warning-item";
+                const span = document.createElement("span");
+                span.textContent = msg;
+                const x = document.createElement("button");
+                x.className = "sanity-dismiss";
+                x.textContent = "\u00d7";
+                x.title = "Dismiss";
+                x.addEventListener("click", () => {
+                    div.remove();
+                    if (!container.querySelector(".sanity-warning-item")) container.style.display = "none";
+                });
+                div.appendChild(span);
+                div.appendChild(x);
+                container.appendChild(div);
+            }
+        }
+
+        // ── Result Narrative ────────────────────────────────────────────────────
+        // Fires an async AI call after every successful query. Shows a shimmer
+        // while in-flight, then displays a two-sentence finding below the row count.
+        async function _fetchResultNarrative() {
+            const area = $("resultNarrativeArea");
+            const shimmer = $("resultNarrativeShimmer");
+            const textEl = $("resultNarrativeText");
+            const copyBtn = $("copyNarrativeBtn");
+
+            area.style.display = "flex";
+            shimmer.style.display = "block";
+            textEl.textContent = "";
+            copyBtn.style.display = "none";
+
+            try {
+                const payload = {
+                    question: ($("askPrompt").value || "").trim(),
+                    sql: lastRun.sql,
+                    columns: lastRun.columns,
+                    rows: lastRun.rows.slice(0, 5),
+                    rowcount: lastRun.rowcount,
+                    dataset: selectedDataset,
+                };
+                const data = await apiJson("/api/ai/result_narrative", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                });
+                shimmer.style.display = "none";
+                textEl.textContent = data.narrative || "";
+                if (data.narrative) copyBtn.style.display = "inline-flex";
+                // Log to session — best-effort
+                try {
+                    await apiJson("/api/session/log_event", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ event_type: "result_narrative", details: { narrative: data.narrative } }),
+                    });
+                } catch (_) {}
+            } catch (_) {
+                // Non-critical — hide area if AI call fails
+                shimmer.style.display = "none";
+                area.style.display = "none";
             }
         }
 
@@ -6952,6 +7207,45 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 toast("Result summary failed: " + (e.message || "Unknown error"), 8000);
             } finally {
                 clearButtonShimmering($("copyResultSummaryBtn"));
+            }
+        }
+
+        async function saveAsDataset() {
+            if (!selectedDataset) { toast("Select a dataset first."); return; }
+            const sql = $("sqlEditor").value.trim();
+            if (!sql) { toast("Run a query first."); return; }
+            if (!lastRun.rowcount || lastRun.rowcount === 0) { toast("No rows to save as a dataset."); return; }
+
+            // Suggested name: sanitize current dataset name + "_result"
+            const suggestedName = (selectedDataset + "_result")
+                .toLowerCase().replace(/[^a-z0-9_]+/g, "_").replace(/_+/g, "_").substring(0, 50);
+
+            const warningMsg = lastRun.rowcount > 500000
+                ? `This result has ${num(lastRun.rowcount)} rows. Saving may take a moment.`
+                : null;
+
+            const name = await awPrompt("Save as Dataset", "dataset_name", suggestedName, warningMsg);
+            if (name === null) return; // cancelled
+
+            const trimmed = name.trim();
+            if (!trimmed) { toast("Please enter a dataset name."); return; }
+
+            setButtonShimmering($("saveAsDatasetBtn"), "Saving\u2026");
+            try {
+                const body = { name: trimmed, dataset: selectedDataset, sql };
+                if (currentReference) body.reference = currentReference;
+                const result = await apiJson("/api/datasets/save_result", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(body)
+                });
+                await loadDatasets();
+                _expandSidebarSection("sidebarDataTitle", "sidebarDataBody");
+                toast(`Saved as dataset: ${result.dataset} \u2014 ${num(result.row_count)} rows`);
+            } catch (e) {
+                toast("Save as Dataset failed: " + (e.message || ""), 8000);
+            } finally {
+                clearButtonShimmering($("saveAsDatasetBtn"));
             }
         }
 
@@ -7460,7 +7754,12 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 
         $("exportExcelBtn").addEventListener("click", () => exportSqlWorkspaceResult("xlsx"));
         $("exportTsvBtn").addEventListener("click", () => exportSqlWorkspaceResult("tsv"));
+        $("saveAsDatasetBtn").addEventListener("click", saveAsDataset);
         $("copyResultSummaryBtn").addEventListener("click", copyResultSummary);
+        $("copyNarrativeBtn").addEventListener("click", () => {
+            const text = $("resultNarrativeText").textContent;
+            if (text) navigator.clipboard.writeText(text).then(() => toast("Narrative copied."));
+        });
 
         $("inspectSchemaBtn").addEventListener("click", inspectSchema);
         $("inspectPreviewBtn").addEventListener("click", inspectPreview);
@@ -7542,6 +7841,15 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                     try { await apiJson("/api/references/" + encodeURIComponent(r.name) + "/delete", { method: "POST" }); } catch (_) {}
                 }
             } catch (_) {}
+            // Delete all derived datasets from disk
+            try {
+                const dsData = await apiJson("/api/datasets");
+                for (const d of (dsData.datasets || [])) {
+                    if (d.dataset_type === "derived") {
+                        try { await apiJson("/api/datasets/" + encodeURIComponent(d.name) + "/delete", { method: "POST" }); } catch (_) {}
+                    }
+                }
+            } catch (_) {}
             $("sqlEditor").value = "SELECT *\nFROM dataset\nLIMIT 100";
             $("editorPreview").textContent = "";
             $("editorShell").classList.add("collapsed");
@@ -7555,6 +7863,8 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             $("explainText").textContent = "";
             $("chartContainer").style.display = "none";
             lastRun = { columns: [], rows: [], rowcount: 0, elapsed: 0, sql: "", visualization: null };
+            $("saveAsDatasetBtn").disabled = true;
+            $("copyResultSummaryBtn").disabled = true;
             // Close Session Log drawer
             closeSessionLogDrawer();
             $("sessionLogToggle").checked = false;
@@ -7589,6 +7899,35 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         function _collapseSidebarSection(titleId, bodyId) {
             $(titleId).classList.add("collapsed");
             $(bodyId).classList.add("collapsed");
+        }
+
+        // ── ensureContainerOpen ─────────────────────────────────────────────
+        // Engine-level rule: before any tutorial step executes its primary
+        // action, the container it operates in must be open and visible.
+        // Silent and instant — no pause, no narration, no-op if already open.
+        // Called at the top of _executeTutorialStep for every replayable step.
+        function ensureContainerOpen(container) {
+            if (!container) return;
+            switch (container) {
+                case "data":
+                    _expandSidebarSection("sidebarDataTitle", "sidebarDataBody");
+                    break;
+                case "workspace":
+                    _expandSidebarSection("sidebarWorkspaceTitle", "sidebarWorkspaceBody");
+                    break;
+                case "workflows":
+                    _expandSidebarSection("sidebarSessionsTitle", "sidebarSessionsBody");
+                    break;
+                case "view:query":
+                    if (currentView !== "query") switchView("query");
+                    break;
+                case "view:insights":
+                    if (currentView !== "insights") switchView("insights");
+                    break;
+                case "view:saved":
+                    if (currentView !== "saved") switchView("saved");
+                    break;
+            }
         }
 
         $("sidebarGetStartedTitle").addEventListener("click", () => _toggleSidebarSection("sidebarGetStartedTitle", "sidebarGetStartedBody"));

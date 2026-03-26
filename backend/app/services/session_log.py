@@ -52,6 +52,7 @@ class SessionEventType(str, Enum):
     SESSION_START = "session_start"
     SESSION_END = "session_end"
     DATASET_IMPORT = "dataset_import"
+    DATASET_DERIVED = "dataset_derived"
     DATASET_DELETE = "dataset_delete"
     REFERENCE_LOAD = "reference_load"
     REFERENCE_DELETE = "reference_delete"
@@ -63,6 +64,7 @@ class SessionEventType(str, Enum):
     INSIGHTS_GENERATED = "insights_generated"
     SUGGESTIONS_GENERATED = "suggestions_generated"
     AI_SQL_GENERATED = "ai_sql_generated"
+    RESULT_NARRATIVE = "result_narrative"
 
 
 @dataclass
@@ -165,7 +167,7 @@ def _build_resume_state(session: SessionLog) -> dict:
     deleted_references: set[str] = set()
 
     for event in session.events:
-        if event.event_type == SessionEventType.DATASET_IMPORT:
+        if event.event_type in (SessionEventType.DATASET_IMPORT, SessionEventType.DATASET_DERIVED):
             name = event.details.get("dataset", "")
             if name and name not in all_datasets:
                 all_datasets.append(name)

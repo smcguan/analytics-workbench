@@ -206,3 +206,22 @@ class ExplainRequest(BaseModel):
 
 class ExplainResponse(BaseModel):
     explanation: str
+
+
+# ============================================================
+# RESULT NARRATIVE MODELS
+# ============================================================
+# Used by POST /api/ai/result_narrative
+# ============================================================
+
+class ResultNarrativeRequest(BaseModel):
+    question: str = ""
+    sql: str
+    columns: List[str]
+    rows: List[dict]
+    rowcount: int
+    dataset: str
+
+
+class ResultNarrativeResponse(BaseModel):
+    narrative: str
