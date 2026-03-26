@@ -878,3 +878,67 @@ def test_result_narrative_narrative_is_string(client):
 def test_result_narrative_session_event_type_exists():
     from app.services.session_log import SessionEventType
     assert SessionEventType.RESULT_NARRATIVE == "result_narrative"
+
+
+# ---------------------------------------------------------------------------
+# GET /api/ai/column_aliases  +  POST /api/ai/column_aliases
+# ---------------------------------------------------------------------------
+
+def test_column_aliases_returns_200(client):
+    with patch("app.ai.routes.generate_column_aliases", return_value={"drug_name": "Drug Name", "total_paid": "Total Paid", "hcpcs_code": "HCPCS Code", "total_claims": "Total Claims"}):
+        resp = client.get("/api/ai/column_aliases?dataset=" + DATASET)
+    assert resp.status_code == 200
+
+
+def test_column_aliases_response_has_aliases_field(client):
+    with patch("app.ai.routes.generate_column_aliases", return_value={"drug_name": "Drug Name", "total_paid": "Total Paid", "hcpcs_code": "HCPCS Code", "total_claims": "Total Claims"}):
+        resp = client.get("/api/ai/column_aliases?dataset=" + DATASET)
+    assert "aliases" in resp.json()
+    assert isinstance(resp.json()["aliases"], dict)
+
+
+def test_column_aliases_cache_hit(client, datasets_tmp):
+    """After first call caches, second call returns cached=True without calling AI."""
+    ds_dir = datasets_tmp / DATASET
+    mock_aliases = {c: c for c in EXPECTED_COLUMNS}
+    cache_path = ds_dir / "dataset_context.json"
+    existing = json.loads(cache_path.read_text(encoding="utf-8"))
+    existing["column_aliases"] = mock_aliases
+    cache_path.write_text(json.dumps(existing), encoding="utf-8")
+
+    resp = client.get("/api/ai/column_aliases?dataset=" + DATASET)
+    assert resp.status_code == 200
+    assert resp.json()["cached"] is True
+    assert resp.json()["aliases"] == mock_aliases
+
+
+def test_column_aliases_refresh_calls_provider(client, datasets_tmp):
+    mock_aliases = {"drug_name": "Drug", "total_paid": "Total", "hcpcs_code": "Code", "total_claims": "Claims"}
+    with patch("app.ai.routes.generate_column_aliases", return_value=mock_aliases) as mock_fn:
+        resp = client.get("/api/ai/column_aliases?dataset=" + DATASET + "&refresh=true")
+    assert resp.status_code == 200
+    mock_fn.assert_called_once()
+
+
+def test_column_aliases_nonexistent_dataset_returns_empty(client):
+    resp = client.get("/api/ai/column_aliases?dataset=nonexistent_xyz")
+    assert resp.status_code == 200
+    assert resp.json()["aliases"] == {}
+
+
+def test_save_column_aliases_returns_ok(client):
+    resp = client.post("/api/ai/column_aliases", json={
+        "dataset": DATASET,
+        "aliases": {"drug_name": "Drug Name", "total_paid": "Total Paid"},
+    })
+    assert resp.status_code == 200
+    assert resp.json()["status"] == "ok"
+
+
+def test_save_column_aliases_persists_to_cache(client, datasets_tmp):
+    aliases = {"drug_name": "My Drug", "total_paid": "My Spend", "hcpcs_code": "Code", "total_claims": "Claims"}
+    client.post("/api/ai/column_aliases", json={"dataset": DATASET, "aliases": aliases})
+    # Verify written to cache
+    cache_path = datasets_tmp / DATASET / "dataset_context.json"
+    cache = json.loads(cache_path.read_text(encoding="utf-8"))
+    assert cache.get("column_aliases") == aliases

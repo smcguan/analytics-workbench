@@ -225,3 +225,20 @@ class ResultNarrativeRequest(BaseModel):
 
 class ResultNarrativeResponse(BaseModel):
     narrative: str
+
+
+# ============================================================
+# COLUMN ALIAS MODELS
+# ============================================================
+# Used by GET /api/ai/column_aliases and POST /api/ai/column_aliases
+# ============================================================
+
+class ColumnAliasResponse(BaseModel):
+    dataset: str
+    aliases: dict  # {original_col: display_alias}
+    cached: bool = False
+
+
+class UpdateColumnAliasRequest(BaseModel):
+    dataset: str
+    aliases: dict  # {original_col: display_alias}

@@ -83,6 +83,7 @@ from .provider_openai import (
     generate_insights_for_dataset,
     generate_explanation,
     generate_result_narrative,
+    generate_column_aliases,
 )
 from .context_builder import build_reference_context
 
@@ -99,6 +100,8 @@ from .schemas import (
     ExplainResponse,
     ResultNarrativeRequest,
     ResultNarrativeResponse,
+    ColumnAliasResponse,
+    UpdateColumnAliasRequest,
 )
 
 from .sql_validator import (
@@ -229,6 +232,48 @@ def _write_suggestions_cache(dataset: str, questions: list[str]) -> None:
         cache_path.write_text(json.dumps(existing, indent=2), encoding="utf-8")
     except Exception as exc:
         logger.warning("Could not write suggestions cache for %s: %s", dataset, exc)
+
+
+def _read_aliases_cache(dataset: str) -> dict[str, str] | None:
+    """Return cached column alias dict, or None if no valid cache exists."""
+    try:
+        cache = json.loads(_suggestions_cache_path(dataset).read_text(encoding="utf-8"))
+        aliases = cache.get("column_aliases")
+        if isinstance(aliases, dict):
+            return aliases
+    except Exception:
+        pass
+    return None
+
+
+def _write_aliases_cache(dataset: str, aliases: dict[str, str]) -> None:
+    """Persist column aliases to dataset_context.json. Merges with existing keys."""
+    try:
+        cache_path = _suggestions_cache_path(dataset)
+        existing: dict = {}
+        try:
+            existing = json.loads(cache_path.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+        existing["column_aliases"] = aliases
+        cache_path.write_text(json.dumps(existing, indent=2), encoding="utf-8")
+    except Exception as exc:
+        logger.warning("Could not write aliases cache for %s: %s", dataset, exc)
+
+
+def _get_dataset_columns(dataset: str) -> list[str]:
+    """Read column names from _meta.json without an AI call."""
+    try:
+        try:
+            from app.main import DATASETS_DIR
+        except Exception:
+            from main import DATASETS_DIR  # type: ignore[no-redef]
+        meta_path = (DATASETS_DIR / dataset / "_meta.json").resolve()
+        meta = json.loads(meta_path.read_text(encoding="utf-8"))
+        columns = meta.get("columns", [])
+        return [str(c) for c in columns]
+    except Exception:
+        return []
 
 
 def _build_synopsis_from_meta(dataset: str) -> str:
@@ -845,5 +890,47 @@ def get_result_narrative(payload: ResultNarrativeRequest) -> ResultNarrativeResp
         return ResultNarrativeResponse(narrative=narrative)
     except Exception as e:
         logger.exception("result_narrative failed | dataset=%s | error=%s", payload.dataset, e)
+        from fastapi import HTTPException
+        raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}")
+
+
+@router.get("/column_aliases", response_model=ColumnAliasResponse)
+def get_column_aliases(
+    dataset: str,
+    refresh: bool = Query(False, description="Force regeneration, ignoring cache"),
+) -> ColumnAliasResponse:
+    """Return human-readable display aliases for a dataset's column names.
+
+    Cache hit: returns instantly from dataset_context.json.
+    Cache miss or refresh=true: calls the AI, caches, and returns.
+    """
+    if not refresh:
+        cached = _read_aliases_cache(dataset)
+        if cached is not None:
+            return ColumnAliasResponse(dataset=dataset, aliases=cached, cached=True)
+
+    columns = _get_dataset_columns(dataset)
+    if not columns:
+        return ColumnAliasResponse(dataset=dataset, aliases={}, cached=False)
+
+    try:
+        aliases = generate_column_aliases(columns=columns, dataset_name=dataset)
+        _write_aliases_cache(dataset, aliases)
+        return ColumnAliasResponse(dataset=dataset, aliases=aliases, cached=False)
+    except Exception as e:
+        logger.exception("column_aliases failed | dataset=%s | error=%s", dataset, e)
+        # Fall back to identity mapping — aliases equal original names
+        identity = {c: c for c in columns}
+        return ColumnAliasResponse(dataset=dataset, aliases=identity, cached=False)
+
+
+@router.post("/column_aliases")
+def save_column_aliases(payload: UpdateColumnAliasRequest) -> dict:
+    """Persist user-edited column aliases back to the cache."""
+    try:
+        _write_aliases_cache(payload.dataset, payload.aliases)
+        return {"status": "ok"}
+    except Exception as e:
+        logger.exception("save_column_aliases failed | dataset=%s | error=%s", payload.dataset, e)
         from fastapi import HTTPException
         raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}")

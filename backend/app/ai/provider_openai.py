@@ -512,6 +512,47 @@ Result rows (up to 10):
     return prompt
 
 
+def generate_column_aliases(
+    *,
+    columns: list[str],
+    dataset_name: str,
+) -> dict[str, str]:
+    """
+    Generate human-readable display aliases for cryptic or abbreviated column names.
+    Returns a dict mapping original column name → alias.
+    If a column name is already clear, the alias equals the original.
+    Falls back to identity mapping (no change) if the AI response cannot be parsed.
+    """
+    if not columns:
+        return {}
+
+    col_list = "\n".join(f"- {c}" for c in columns)
+    prompt = f"""For each column name below, suggest a human-readable display alias.
+If the column name is already clear English, return it unchanged.
+Return ONLY a JSON object mapping each original column name to its alias. No markdown, no explanation.
+
+Example input columns: Tot_Spndng, Brnd_Name, id
+Example output: {{"Tot_Spndng": "Total Spending", "Brnd_Name": "Brand Name", "id": "id"}}
+
+Dataset: {dataset_name}
+Columns:
+{col_list}""".strip()
+
+    try:
+        raw = generate_sql_response(prompt).strip()
+        # Strip code fences if the model wrapped in ```json ... ```
+        if raw.startswith("```"):
+            lines = raw.split("\n")
+            raw = "\n".join(lines[1:]).rstrip("`").strip()
+        result = json.loads(raw)
+        if isinstance(result, dict):
+            return {c: str(result.get(c, c)) for c in columns}
+    except Exception:
+        pass
+    # Identity fallback — aliases equal original names
+    return {c: c for c in columns}
+
+
 def generate_result_narrative(
     *,
     question: str,

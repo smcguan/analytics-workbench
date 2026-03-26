@@ -1061,6 +1061,25 @@
             overflow:hidden;
         }
 
+        /* ── Column alias editor (in Schema inspector) ───────── */
+        .alias-input{
+            background:rgba(255,255,255,.05);
+            border:1px solid var(--stroke);
+            border-radius:6px;
+            color:var(--text);
+            font-size:12px;
+            padding:3px 6px;
+            width:100%;
+            min-width:80px;
+        }
+        .alias-input:focus{ outline:none; border-color:rgba(79,140,255,.5); }
+        .alias-save-row{
+            display:flex;
+            justify-content:flex-end;
+            padding:8px 12px;
+            border-top:1px solid var(--stroke);
+        }
+
         .results-placeholder,
         .saved-empty,
         .inspect-empty{
@@ -2977,6 +2996,25 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         }
 
         let lastRun = { columns: [], rows: [], rowcount: 0, elapsed: 0, sql: "", visualization: null };
+        // Column aliases: keyed by dataset name, value is {originalCol: displayAlias}
+        let datasetAliases = {};
+
+        // Apply display aliases to a text string for the current dataset.
+        // Replaces each original column name with its alias (longest first to
+        // avoid partial matches). SQL is never passed through this function.
+        function applyAliases(text) {
+            const aliases = datasetAliases[selectedDataset];
+            if (!aliases) return text;
+            // Sort by length descending so longer names are replaced first
+            const pairs = Object.entries(aliases).filter(([k, v]) => k !== v).sort((a, b) => b[0].length - a[0].length);
+            for (const [orig, alias] of pairs) {
+                // Replace whole-word occurrences
+                try {
+                    text = text.replace(new RegExp(`\\b${orig.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "g"), alias);
+                } catch (_) {}
+            }
+            return text;
+        }
         let _chartInstance = null; // holds the active Chart.js instance
         let _insightChartInstances = []; // one Chart.js instance per insight card
         let datasets = [];
@@ -6252,7 +6290,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 const chip = document.createElement("button");
                 chip.className = "suggestion-chip";
                 chip.type = "button";
-                chip.textContent = q;
+                chip.textContent = applyAliases(q);
                 chip.addEventListener("click", () => {
                     $("askPrompt").value = q;
                     $("suggestionsPopover").style.display = "none";
@@ -6425,12 +6463,12 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 
             const headline = document.createElement("div");
             headline.className = "insight-headline";
-            headline.textContent = insight.headline;
+            headline.textContent = applyAliases(insight.headline);
             card.appendChild(headline);
 
             const explanation = document.createElement("div");
             explanation.className = "insight-explanation";
-            explanation.textContent = insight.explanation;
+            explanation.textContent = applyAliases(insight.explanation);
             card.appendChild(explanation);
 
             // Result area — filled async after card is in the DOM
@@ -7383,10 +7421,86 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             try {
                 const data = await apiJson("/api/schema?dataset=" + encodeURIComponent(selectedDataset));
                 const cols = data.columns || [];
-                const rows = cols.map(c => ({ "Column Name": c.name || "", "Type": c.type || "" }));
                 inspectMode = "schema";
                 setInspectButtons();
-                renderInspectTable(["Column Name", "Type"], rows);
+
+                // Load aliases (cache-first — no loading indicator needed for fast path)
+                const dataset = selectedDataset;
+                let aliases = datasetAliases[dataset] || {};
+                try {
+                    const aliasData = await apiJson("/api/ai/column_aliases?dataset=" + encodeURIComponent(dataset));
+                    aliases = aliasData.aliases || {};
+                    datasetAliases[dataset] = aliases;
+                } catch (_) {}
+
+                // Render schema table with editable alias column
+                const head = $("inspectHead");
+                const body = $("inspectBody");
+                head.innerHTML = "";
+                body.innerHTML = "";
+
+                const trh = document.createElement("tr");
+                for (const label of ["Column Name", "Type", "Display Alias"]) {
+                    const th = document.createElement("th");
+                    th.textContent = label;
+                    trh.appendChild(th);
+                }
+                head.appendChild(trh);
+
+                for (const col of cols) {
+                    const tr = document.createElement("tr");
+
+                    const tdName = document.createElement("td");
+                    tdName.textContent = col.name || "";
+                    tr.appendChild(tdName);
+
+                    const tdType = document.createElement("td");
+                    tdType.textContent = col.type || "";
+                    tr.appendChild(tdType);
+
+                    const tdAlias = document.createElement("td");
+                    const input = document.createElement("input");
+                    input.type = "text";
+                    input.className = "alias-input";
+                    input.value = aliases[col.name] || col.name || "";
+                    input.dataset.col = col.name || "";
+                    tdAlias.appendChild(input);
+                    tr.appendChild(tdAlias);
+
+                    body.appendChild(tr);
+                }
+
+                // Save Aliases button
+                const saveRow = document.createElement("div");
+                saveRow.className = "alias-save-row";
+                const saveBtn = document.createElement("button");
+                saveBtn.className = "btn small primary";
+                saveBtn.textContent = "Save Aliases";
+                saveBtn.addEventListener("click", async () => {
+                    const updated = {};
+                    body.querySelectorAll(".alias-input").forEach(inp => {
+                        updated[inp.dataset.col] = inp.value.trim() || inp.dataset.col;
+                    });
+                    try {
+                        await apiJson("/api/ai/column_aliases", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ dataset, aliases: updated }),
+                        });
+                        datasetAliases[dataset] = updated;
+                        toast("Aliases saved.");
+                    } catch (e) {
+                        toast("Save failed: " + e.message);
+                    }
+                });
+                saveRow.appendChild(saveBtn);
+
+                $("inspectCard").style.display = "";
+                $("inspectEmpty").style.display = "none";
+                $("inspectTableWrap").classList.remove("hidden");
+                // Append save row below the table
+                $("inspectCard").appendChild(saveRow);
+
             } catch (e) {
                 toast("Schema load failed: " + e.message);
             }
