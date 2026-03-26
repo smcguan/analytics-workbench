@@ -2381,7 +2381,7 @@ e.g. "Show revenue by region for 2024"'
                                     <div class="sequence-actions">
                                         <button class="btn primary small" id="runSequenceBtn">Run Sequence</button>
                                         <button class="btn small" id="customizeSequenceBtn">Customize</button>
-                                        <button class="sequence-toggle-link" id="showChipsBtn">Show individual suggestions</button>
+                                        <button class="sequence-toggle-link" id="showChipsBtn">Show all suggestions</button>
                                     </div>
                                 </div>
 
@@ -2399,7 +2399,7 @@ e.g. "Show revenue by region for 2024"'
                                     <span class="suggestions-empty">Select a dataset to load suggestions.</span>
                                 </div>
                                 <div id="chipsBackRow" style="display:none;margin-top:8px;">
-                                    <button class="sequence-toggle-link" id="showSequenceBtn">Show analysis sequence instead</button>
+                                    <button class="sequence-toggle-link" id="showSequenceBtn">← Back to sequence view</button>
                                 </div>
                             </div>
 
@@ -6372,6 +6372,23 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 
         // ── Sequence view helpers ──────────────────────────────────────────
 
+        // Pick 3 questions from a larger suggestion list using keyword matching:
+        //   Step 1 — distribution: totals, ranking, breakdown (broadest question)
+        //   Step 2 — concentration: top performers, highest share
+        //   Step 3 — outlier: anomalies, exceptions, trends, changes over time
+        function _pickSequenceFromQuestions(questions) {
+            const dist = questions.find(q =>
+                /total|overall|breakdown|distribution|rank|how many|count|by\s+\w/i.test(q)
+            ) || questions[0];
+            const conc = questions.find(q => q !== dist &&
+                /top|highest|most|largest|concentrat|account|share|leading|percent/i.test(q)
+            ) || questions.find(q => q !== dist) || questions[1];
+            const outl = questions.find(q => q !== dist && q !== conc &&
+                /outlier|anomal|unusual|exception|above|trend|change|over time|vs\.|compar/i.test(q)
+            ) || questions.find(q => q !== dist && q !== conc) || questions[2];
+            return [dist, conc, outl].filter(Boolean).slice(0, 3);
+        }
+
         function _showSequencePanel(steps) {
             const stepsEl = $("sequenceSteps");
             stepsEl.innerHTML = "";
@@ -6495,20 +6512,17 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             const refreshParam = force ? "&refresh=true" : "";
 
             try {
-                // Fetch sequence and chips in parallel
-                const [seqData, qData] = await Promise.allSettled([
-                    apiJson("/api/ai/analysis_sequence?dataset=" + encodeURIComponent(dataset) + refreshParam),
-                    apiJson("/api/ai/suggest_questions?dataset=" + encodeURIComponent(dataset) + refreshParam),
-                ]);
+                // Fetch suggestions — sequence is derived client-side from the results
+                const qData = await apiJson(
+                    "/api/ai/suggest_questions?dataset=" + encodeURIComponent(dataset) + refreshParam
+                );
+                const questions = (qData.questions || []).filter(q => String(q).trim());
 
-                const steps = (seqData.status === "fulfilled" && seqData.value.steps?.length >= 3)
-                    ? seqData.value.steps : [];
-                const questions = (qData.status === "fulfilled")
-                    ? (qData.value.questions || []).filter(q => String(q).trim())
-                    : [];
-
-                if (steps.length >= 3) sequenceCache[dataset] = steps;
                 if (questions.length) suggestionsCache[dataset] = questions;
+
+                // Derive 3-step sequence from the returned suggestions
+                const steps = questions.length >= 3 ? _pickSequenceFromQuestions(questions) : [];
+                if (steps.length >= 3) sequenceCache[dataset] = steps;
 
                 // Show sequence by default if available, else chips
                 if (steps.length >= 3) {
@@ -7527,6 +7541,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             $("suggestionsPopover").style.display = "none";
             suggestionsVisible = false;
             if (selectedDataset) delete suggestionsCache[selectedDataset];
+            if (selectedDataset) delete sequenceCache[selectedDataset];
             if (selectedDataset) delete insightsCache[selectedDataset];
             $("infoPopover").style.display = "none";
             clearInsights();
