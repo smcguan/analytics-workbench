@@ -2308,6 +2308,9 @@
                                 <button class="btn small" id="inspectPreviewBtn" title="Show the first rows of the dataset">Preview</button>
                                 <button class="btn small" id="exportPassportBtn" title="Download a full JSON profile with schema, distributions, and AI grain description">Export Passport</button>
                             </div>
+                            <div id="saveAliasesRow" style="display:none;margin-top:6px;">
+                                <button class="btn small primary" id="saveAliasesBtn">Save Aliases</button>
+                            </div>
                         </div>
 
                         <div class="inspect-card" id="inspectCard" style="display:none;">
@@ -2348,7 +2351,8 @@ e.g. "Show revenue by region for 2024"'
 
                             <div class="ask-actions">
                                 <button class="btn icon" id="infoBtn" aria-label="How to ask your data" title="Tips on how to ask questions about your data">ⓘ</button>
-                                <button class="btn" id="suggestionsBtn" title="Show AI-suggested questions for this dataset">Suggestions</button>
+                                <button class="btn" id="sequenceBtn" title="Show a 3-step analytical sequence for this dataset">Suggested Analysis Sequence</button>
+                                <button class="btn" id="questionsBtn" title="Show all AI-suggested questions for this dataset">Suggested Questions</button>
                                 <button class="btn primary" id="generateSqlBtn" title="Generate SQL from your natural-language question">Generate SQL</button>
                             </div>
 
@@ -6471,11 +6475,15 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             }
         }
 
-        // ── fetchSuggestions — opens the popover, loads both sequence + chips
-        async function fetchSuggestions(force = false) {
+        // ── fetchSuggestions — opens the popover in sequence or chips view
+        // targetMode: "sequence" | "chips" — which view to show (default: "sequence")
+        async function fetchSuggestions(force = false, targetMode = "sequence") {
             const dataset = selectedDataset;
+            // Button that was clicked — shimmer it while loading
+            const _triggerBtn = $( targetMode === "chips" ? "questionsBtn" : "sequenceBtn" );
 
-            if (!force && suggestionsVisible) {
+            // Toggle-close: if popover is open AND already showing the requested mode
+            if (!force && suggestionsVisible && _suggestionsMode === targetMode) {
                 $("suggestionsPopover").style.display = "none";
                 suggestionsVisible = false;
                 return;
@@ -6491,11 +6499,13 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 return;
             }
 
-            // JS cache hit — render instantly
+            // JS cache hit — render instantly in requested view
             if (!force && (sequenceCache[dataset] || suggestionsCache[dataset])) {
-                if (sequenceCache[dataset] && _suggestionsMode === "sequence") {
+                if (targetMode === "sequence" && sequenceCache[dataset]) {
+                    _suggestionsMode = "sequence";
                     _showSequencePanel(sequenceCache[dataset]);
                 } else if (suggestionsCache[dataset]) {
+                    _suggestionsMode = "chips";
                     _showChipsPanel(suggestionsCache[dataset]);
                 }
                 $("suggestionsPopover").style.display = "block";
@@ -6503,32 +6513,29 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 return;
             }
 
-            // Show loading state
+            // Show loading state while fetching
             $("suggestionsChips").style.display = "flex";
             $("sequenceView").style.display = "none";
             $("sequenceCustomizePanel").style.display = "none";
-            $("suggestionsChips").innerHTML = '<span class="suggestions-empty">Loading…</span>';
+            $("suggestionsChips").innerHTML = '<span class="suggestions-empty">Loading\u2026</span>';
             $("suggestionsPopover").style.display = "block";
             suggestionsVisible = true;
-            setButtonShimmering($("suggestionsBtn"), "Loading\u2026");
+            setButtonShimmering(_triggerBtn, "Loading\u2026");
 
             const refreshParam = force ? "&refresh=true" : "";
 
             try {
-                // Fetch suggestions — sequence is derived client-side from the results
                 const qData = await apiJson(
                     "/api/ai/suggest_questions?dataset=" + encodeURIComponent(dataset) + refreshParam
                 );
                 const questions = (qData.questions || []).filter(q => String(q).trim());
-
                 if (questions.length) suggestionsCache[dataset] = questions;
 
-                // Derive 3-step sequence from the returned suggestions
                 const steps = questions.length >= 3 ? _pickSequenceFromQuestions(questions) : [];
                 if (steps.length >= 3) sequenceCache[dataset] = steps;
 
-                // Show sequence by default if available, else chips
-                if (steps.length >= 3) {
+                // Show the requested view; fall back to chips if sequence unavailable
+                if (targetMode === "sequence" && steps.length >= 3) {
                     _suggestionsMode = "sequence";
                     _showSequencePanel(steps);
                 } else {
@@ -6538,7 +6545,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             } catch (e) {
                 $("suggestionsChips").innerHTML = '<span class="suggestions-empty">Could not load: ' + e.message + '</span>';
             } finally {
-                clearButtonShimmering($("suggestionsBtn"));
+                clearButtonShimmering(_triggerBtn);
             }
         }
 
@@ -7527,10 +7534,11 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 schema: "inspectSchemaBtn",
                 preview: "inspectPreviewBtn"
             };
-
             Object.entries(map).forEach(([mode, id]) => {
                 $(id).classList.toggle("toggle-active", inspectMode === mode);
             });
+            // Save Aliases row visible only when Schema is active
+            $("saveAliasesRow").style.display = (inspectMode === "schema") ? "" : "none";
         }
 
         function resetInspectState() {
@@ -7605,48 +7613,19 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 
             if (!selectedDataset) { toast("Select a dataset first."); return; }
 
-            // Shimmer the Schema button if alias loading will be needed.
-            // Skip shimmer if aliases are already in memory — render is instant.
+            const dataset = selectedDataset;
             const _schemaBtn = $("inspectSchemaBtn");
-            const _needsLoad = !datasetAliases[selectedDataset];
-            if (_needsLoad) setButtonShimmering(_schemaBtn, "Loading\u2026");
 
             try {
-                const data = await apiJson("/api/schema?dataset=" + encodeURIComponent(selectedDataset));
+                // ── Phase 1: fetch schema and render table instantly ──────────────
+                // The schema endpoint is fast (~100ms). Show the table immediately
+                // with original column names as alias placeholders so the analyst
+                // never sees a blank screen.
+                const data = await apiJson("/api/schema?dataset=" + encodeURIComponent(dataset));
                 const cols = data.columns || [];
                 inspectMode = "schema";
                 setInspectButtons();
 
-                // Resolve aliases via one of three paths (in priority order):
-                //   1. Already in memory — instant (prefetch completed before Schema click)
-                //   2. Prefetch in-flight — await the existing promise (no second AI call)
-                //   3. No prefetch — backend cache or fresh AI call (e.g. session restore)
-                const dataset = selectedDataset;
-                let aliases = datasetAliases[dataset] || null;
-                if (!aliases) {
-                    if (_aliasInFlight[dataset]) {
-                        // Prefetch fired at import but hasn't finished yet.
-                        // Await it so we reuse the same AI call instead of racing.
-                        await _aliasInFlight[dataset];
-                        aliases = datasetAliases[dataset] || {};
-                    } else {
-                        // No prefetch in flight (e.g. dataset loaded from saved session).
-                        // Backend cache in dataset_context.json serves instantly on
-                        // repeat opens; backend identity-detection handles stale caches.
-                        try {
-                            const aliasData = await apiJson(
-                                "/api/ai/column_aliases?dataset=" + encodeURIComponent(dataset)
-                            );
-                            aliases = aliasData.aliases || {};
-                            if (Object.keys(aliases).length) datasetAliases[dataset] = aliases;
-                        } catch (e) {
-                            console.warn("[AW] Could not load column aliases for", dataset, "—", e.message);
-                            aliases = {};
-                        }
-                    }
-                }
-
-                // Render schema table with editable alias column
                 const head = $("inspectHead");
                 const body = $("inspectBody");
                 head.innerHTML = "";
@@ -7662,78 +7641,64 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 
                 for (const col of cols) {
                     const tr = document.createElement("tr");
-
                     const tdName = document.createElement("td");
                     tdName.textContent = col.name || "";
                     tr.appendChild(tdName);
-
                     const tdType = document.createElement("td");
                     tdType.textContent = col.type || "";
                     tr.appendChild(tdType);
-
                     const tdAlias = document.createElement("td");
                     const input = document.createElement("input");
                     input.type = "text";
                     input.className = "alias-input";
-                    input.value = aliases[col.name] || col.name || "";
+                    // Placeholder: original name. Updated in-place by Phase 2.
+                    input.value = col.name || "";
                     input.dataset.col = col.name || "";
                     tdAlias.appendChild(input);
                     tr.appendChild(tdAlias);
-
                     body.appendChild(tr);
                 }
-
-                // Save Aliases button
-                const saveRow = document.createElement("div");
-                saveRow.className = "alias-save-row";
-                const saveBtn = document.createElement("button");
-                saveBtn.className = "btn small primary";
-                saveBtn.textContent = "Save Aliases";
-                saveBtn.addEventListener("click", async () => {
-                    const updated = {};
-                    body.querySelectorAll(".alias-input").forEach(inp => {
-                        updated[inp.dataset.col] = inp.value.trim() || inp.dataset.col;
-                    });
-                    try {
-                        await apiJson("/api/ai/column_aliases", {
-                            method: "POST",
-                            headers: { "Content-Type": "application/json" },
-                            body: JSON.stringify({ dataset, aliases: updated }),
-                        });
-                        // Update in-memory cache so all alias-dependent UI refreshes
-                        datasetAliases[dataset] = updated;
-
-                        // Re-render results table with new column headers (if a query ran)
-                        if (lastRun.columns && lastRun.columns.length) {
-                            renderResults(lastRun.columns, lastRun.rows);
-                        }
-
-                        // Re-render insight cards with updated alias text (if cached)
-                        if (insightsCache[dataset]) {
-                            const { synopsis, insights } = insightsCache[dataset];
-                            clearInsights();
-                            _renderInsightsFromData(synopsis || "", insights || []);
-                        }
-
-                        toast("Aliases saved.");
-                    } catch (e) {
-                        toast("Save failed: " + e.message);
-                    }
-                });
-                saveRow.appendChild(saveBtn);
 
                 $("inspectCard").style.display = "";
                 $("inspectEmpty").style.display = "none";
                 $("inspectTableWrap").classList.remove("hidden");
-                // Remove any Save Aliases buttons left over from previous renders
-                // (guard against DOM accumulation on repeated Schema opens).
-                $("inspectCard").querySelectorAll(".alias-save-row").forEach(el => el.remove());
-                $("inspectCard").appendChild(saveRow);
+
+                // ── Phase 2: resolve aliases and fill in-place ────────────────────
+                // If aliases are already in memory — instant, no shimmer.
+                // If prefetch is in-flight — await it (no second AI call, shimmer).
+                // If neither — call backend (uses cache or generates fresh, shimmer).
+                let aliases = datasetAliases[dataset] || null;
+                if (!aliases) {
+                    setButtonShimmering(_schemaBtn, "Loading\u2026");
+                    try {
+                        if (_aliasInFlight[dataset]) {
+                            await _aliasInFlight[dataset];
+                            aliases = datasetAliases[dataset] || {};
+                        } else {
+                            const aliasData = await apiJson(
+                                "/api/ai/column_aliases?dataset=" + encodeURIComponent(dataset)
+                            );
+                            aliases = aliasData.aliases || {};
+                            if (Object.keys(aliases).length) datasetAliases[dataset] = aliases;
+                        }
+                    } catch (e) {
+                        console.warn("[AW] Could not load column aliases for", dataset, "—", e.message);
+                        aliases = {};
+                    } finally {
+                        clearButtonShimmering(_schemaBtn);
+                    }
+                }
+
+                // Fill alias inputs in-place — only if schema is still open
+                if (inspectMode === "schema" && aliases && Object.keys(aliases).length) {
+                    body.querySelectorAll(".alias-input").forEach(inp => {
+                        const col = inp.dataset.col;
+                        if (col && aliases[col]) inp.value = aliases[col];
+                    });
+                }
 
             } catch (e) {
                 toast("Schema load failed: " + e.message);
-            } finally {
-                if (_needsLoad) clearButtonShimmering(_schemaBtn);
             }
         }
 
@@ -8065,10 +8030,13 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         $("ecCloseBtn").addEventListener("click", closeExampleCases);
 
         $("infoBtn").addEventListener("click", toggleInfoPopover);
-        $("suggestionsBtn").addEventListener("click", () => fetchSuggestions());
+        // Sequence button: open popover in sequence view; close if already showing sequence
+        $("sequenceBtn").addEventListener("click", () => fetchSuggestions(false, "sequence"));
+        // Questions button: open popover in chips view; close if already showing chips
+        $("questionsBtn").addEventListener("click", () => fetchSuggestions(false, "chips"));
         $("suggestionsRefreshBtn").addEventListener("click", (e) => {
             e.stopPropagation();
-            fetchSuggestions(true);
+            fetchSuggestions(true, _suggestionsMode || "sequence");
         });
 
         // Sequence view buttons
@@ -8150,6 +8118,35 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         $("inspectSchemaBtn").addEventListener("click", inspectSchema);
         $("inspectPreviewBtn").addEventListener("click", inspectPreview);
         $("exportPassportBtn").addEventListener("click", exportPassport);
+
+        // Save Aliases — static button in header row; only visible when Schema active
+        $("saveAliasesBtn").addEventListener("click", async () => {
+            const dataset = selectedDataset;
+            if (!dataset || inspectMode !== "schema") return;
+            const updated = {};
+            $("inspectBody").querySelectorAll(".alias-input").forEach(inp => {
+                updated[inp.dataset.col] = inp.value.trim() || inp.dataset.col;
+            });
+            try {
+                await apiJson("/api/ai/column_aliases", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ dataset, aliases: updated }),
+                });
+                datasetAliases[dataset] = updated;
+                if (lastRun.columns && lastRun.columns.length) {
+                    renderResults(lastRun.columns, lastRun.rows);
+                }
+                if (insightsCache[dataset]) {
+                    const { synopsis, insights } = insightsCache[dataset];
+                    clearInsights();
+                    _renderInsightsFromData(synopsis || "", insights || []);
+                }
+                toast("Aliases saved.");
+            } catch (e) {
+                toast("Save failed: " + e.message);
+            }
+        });
 
         $("saveQueryBtn").addEventListener("click", saveCurrentQuery);
         $("refreshQueriesBtn").addEventListener("click", loadSavedQueries);
