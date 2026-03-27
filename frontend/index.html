@@ -7181,10 +7181,13 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 if (_isCashColumn(c, rows || [])) cashCols.add(c);
             }
 
+            // Use saved display aliases for column headers — original names still
+            // used for data access in the rows below.
+            const _colAliases = datasetAliases[selectedDataset] || {};
             const trh = document.createElement("tr");
             for (const c of columns) {
                 const th = document.createElement("th");
-                th.textContent = c;
+                th.textContent = _colAliases[c] || c;
                 if (cashCols.has(c)) th.style.textAlign = "right";
                 trh.appendChild(th);
             }
@@ -7697,7 +7700,21 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                             headers: { "Content-Type": "application/json" },
                             body: JSON.stringify({ dataset, aliases: updated }),
                         });
+                        // Update in-memory cache so all alias-dependent UI refreshes
                         datasetAliases[dataset] = updated;
+
+                        // Re-render results table with new column headers (if a query ran)
+                        if (lastRun.columns && lastRun.columns.length) {
+                            renderResults(lastRun.columns, lastRun.rows);
+                        }
+
+                        // Re-render insight cards with updated alias text (if cached)
+                        if (insightsCache[dataset]) {
+                            const { synopsis, insights } = insightsCache[dataset];
+                            clearInsights();
+                            _renderInsightsFromData(synopsis || "", insights || []);
+                        }
+
                         toast("Aliases saved.");
                     } catch (e) {
                         toast("Save failed: " + e.message);
@@ -7708,7 +7725,9 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 $("inspectCard").style.display = "";
                 $("inspectEmpty").style.display = "none";
                 $("inspectTableWrap").classList.remove("hidden");
-                // Append save row below the table
+                // Remove any Save Aliases buttons left over from previous renders
+                // (guard against DOM accumulation on repeated Schema opens).
+                $("inspectCard").querySelectorAll(".alias-save-row").forEach(el => el.remove());
                 $("inspectCard").appendChild(saveRow);
 
             } catch (e) {
