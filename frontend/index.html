@@ -7602,6 +7602,12 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 
             if (!selectedDataset) { toast("Select a dataset first."); return; }
 
+            // Shimmer the Schema button if alias loading will be needed.
+            // Skip shimmer if aliases are already in memory — render is instant.
+            const _schemaBtn = $("inspectSchemaBtn");
+            const _needsLoad = !datasetAliases[selectedDataset];
+            if (_needsLoad) setButtonShimmering(_schemaBtn, "Loading\u2026");
+
             try {
                 const data = await apiJson("/api/schema?dataset=" + encodeURIComponent(selectedDataset));
                 const cols = data.columns || [];
@@ -7611,7 +7617,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 // Resolve aliases via one of three paths (in priority order):
                 //   1. Already in memory — instant (prefetch completed before Schema click)
                 //   2. Prefetch in-flight — await the existing promise (no second AI call)
-                //   3. No prefetch — fetch now (e.g. dataset loaded from session, not imported)
+                //   3. No prefetch — backend cache or fresh AI call (e.g. session restore)
                 const dataset = selectedDataset;
                 let aliases = datasetAliases[dataset] || null;
                 if (!aliases) {
@@ -7621,12 +7627,12 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                         await _aliasInFlight[dataset];
                         aliases = datasetAliases[dataset] || {};
                     } else {
-                        // No prefetch in flight — call the endpoint directly.
-                        // Use refresh=true so the backend always runs the AI;
-                        // a cached identity result would be stale and unhelpful.
+                        // No prefetch in flight (e.g. dataset loaded from saved session).
+                        // Backend cache in dataset_context.json serves instantly on
+                        // repeat opens; backend identity-detection handles stale caches.
                         try {
                             const aliasData = await apiJson(
-                                "/api/ai/column_aliases?dataset=" + encodeURIComponent(dataset) + "&refresh=true"
+                                "/api/ai/column_aliases?dataset=" + encodeURIComponent(dataset)
                             );
                             aliases = aliasData.aliases || {};
                             if (Object.keys(aliases).length) datasetAliases[dataset] = aliases;
@@ -7707,6 +7713,8 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 
             } catch (e) {
                 toast("Schema load failed: " + e.message);
+            } finally {
+                if (_needsLoad) clearButtonShimmering(_schemaBtn);
             }
         }
 
@@ -8310,9 +8318,11 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         function _prefetchColumnAliases(dataset) {
             const promise = (async () => {
                 try {
-                    // Always refresh=true on import — bypasses any stale cache.
+                    // No refresh=true — backend cache in dataset_context.json is used
+                    // when available (instant). Backend identity-detection handles
+                    // stale caches. refresh=true would bypass good cached aliases.
                     const data = await apiJson(
-                        "/api/ai/column_aliases?dataset=" + encodeURIComponent(dataset) + "&refresh=true"
+                        "/api/ai/column_aliases?dataset=" + encodeURIComponent(dataset)
                     );
                     if (data && data.aliases && Object.keys(data.aliases).length) {
                         datasetAliases[dataset] = data.aliases;

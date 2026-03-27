@@ -571,12 +571,18 @@ def generate_column_aliases(
         return {}
 
     col_list = "\n".join(f"- {c}" for c in columns)
-    prompt = f"""For each column name below, suggest a human-readable display alias.
-If the column name is already clear English, return it unchanged.
-Return ONLY a JSON object mapping each original column name to its alias. No markdown, no explanation.
+    prompt = f"""For each column name below, return a clear human-readable display label.
 
-Example input columns: Tot_Spndng, Brnd_Name, id
-Example output: {{"Tot_Spndng": "Total Spending", "Brnd_Name": "Brand Name", "id": "id"}}
+Rules:
+- Convert EVERY column name to proper Title Case English with spaces
+  (snake_case and CamelCase must be split: origin_city → "Origin City", shipment_id → "Shipment ID")
+- Expand abbreviations and codes: Tot_Spndng → "Total Spending", weight_kg → "Weight (kg)", cube_m3 → "Volume (m3)"
+- Short generic words may stay lowercase inside a phrase: on_time → "On Time", damage_flag → "Damage Flag"
+- Return ONLY a JSON object. No markdown fences, no explanation, no extra keys.
+
+Examples:
+{{"origin_city": "Origin City", "shipment_id": "Shipment ID", "weight_kg": "Weight (kg)",
+ "Brnd_Name": "Brand Name", "Tot_Spndng_2023": "Total Spending 2023", "on_time": "On Time"}}
 
 Dataset: {dataset_name}
 Columns:
