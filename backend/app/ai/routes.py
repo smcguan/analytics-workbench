@@ -264,18 +264,42 @@ def _write_aliases_cache(dataset: str, aliases: dict[str, str]) -> None:
 
 
 def _get_dataset_columns(dataset: str) -> list[str]:
-    """Read column names from _meta.json without an AI call."""
+    """Read column names for a dataset without an AI call.
+
+    Priority:
+    1. _meta.json "columns" key (present on datasets imported via the save-result path)
+    2. metadata.json "columns" list (written by the standard import pipeline —
+       each entry is a dict with a "name" key)
+    3. Empty list if neither file has column data.
+    """
     try:
         try:
             from app.main import DATASETS_DIR
         except Exception:
             from main import DATASETS_DIR  # type: ignore[no-redef]
-        meta_path = (DATASETS_DIR / dataset / "_meta.json").resolve()
-        meta = json.loads(meta_path.read_text(encoding="utf-8"))
-        columns = meta.get("columns", [])
-        return [str(c) for c in columns]
+
+        ds_dir = (DATASETS_DIR / dataset).resolve()
+
+        # Try _meta.json first (lightweight, always present after import)
+        meta_path = ds_dir / "_meta.json"
+        if meta_path.exists():
+            meta = json.loads(meta_path.read_text(encoding="utf-8"))
+            cols = meta.get("columns", [])
+            if cols:
+                return [str(c) for c in cols]
+
+        # Fall back to metadata.json (written by the import pipeline).
+        # Its "columns" value is a list of dicts: [{"name": "col", "type": "..."}, ...]
+        full_path = ds_dir / "metadata.json"
+        if full_path.exists():
+            full = json.loads(full_path.read_text(encoding="utf-8"))
+            col_entries = full.get("columns", [])
+            if col_entries:
+                return [str(c["name"]) for c in col_entries if isinstance(c, dict) and c.get("name")]
+
     except Exception:
-        return []
+        pass
+    return []
 
 
 def _build_synopsis_from_meta(dataset: str) -> str:
