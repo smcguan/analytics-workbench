@@ -3089,6 +3089,9 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         let lastRun = { columns: [], rows: [], rowcount: 0, elapsed: 0, sql: "", visualization: null };
         // Column aliases: keyed by dataset name, value is {originalCol: displayAlias}
         let datasetAliases = {};
+        // In-flight alias fetch Promises — stored so inspectSchema can await the
+        // prefetch that fired at import instead of starting a second AI call.
+        const _aliasInFlight = {}; // dataset → Promise<void>
 
         // Apply display aliases to a text string for the current dataset.
         // Replaces each original column name with its alias (longest first to
@@ -7543,6 +7546,8 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             if (selectedDataset) delete suggestionsCache[selectedDataset];
             if (selectedDataset) delete sequenceCache[selectedDataset];
             if (selectedDataset) delete insightsCache[selectedDataset];
+            if (selectedDataset) delete datasetAliases[selectedDataset];
+            if (selectedDataset) delete _aliasInFlight[selectedDataset];
             $("infoPopover").style.display = "none";
             clearInsights();
         }
@@ -7603,21 +7608,32 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 inspectMode = "schema";
                 setInspectButtons();
 
-                // Use client-side alias cache if already populated by import prefetch.
-                // If not yet loaded (e.g. dataset selected without a fresh import),
-                // fetch now — this is the lazy fallback path.
+                // Resolve aliases via one of three paths (in priority order):
+                //   1. Already in memory — instant (prefetch completed before Schema click)
+                //   2. Prefetch in-flight — await the existing promise (no second AI call)
+                //   3. No prefetch — fetch now (e.g. dataset loaded from session, not imported)
                 const dataset = selectedDataset;
                 let aliases = datasetAliases[dataset] || null;
                 if (!aliases) {
-                    try {
-                        const aliasData = await apiJson(
-                            "/api/ai/column_aliases?dataset=" + encodeURIComponent(dataset)
-                        );
-                        aliases = aliasData.aliases || {};
-                        datasetAliases[dataset] = aliases;
-                    } catch (e) {
-                        console.warn("[AW] Could not load column aliases for", dataset, "—", e.message);
-                        aliases = {};
+                    if (_aliasInFlight[dataset]) {
+                        // Prefetch fired at import but hasn't finished yet.
+                        // Await it so we reuse the same AI call instead of racing.
+                        await _aliasInFlight[dataset];
+                        aliases = datasetAliases[dataset] || {};
+                    } else {
+                        // No prefetch in flight — call the endpoint directly.
+                        // Use refresh=true so the backend always runs the AI;
+                        // a cached identity result would be stale and unhelpful.
+                        try {
+                            const aliasData = await apiJson(
+                                "/api/ai/column_aliases?dataset=" + encodeURIComponent(dataset) + "&refresh=true"
+                            );
+                            aliases = aliasData.aliases || {};
+                            if (Object.keys(aliases).length) datasetAliases[dataset] = aliases;
+                        } catch (e) {
+                            console.warn("[AW] Could not load column aliases for", dataset, "—", e.message);
+                            aliases = {};
+                        }
                     }
                 }
 
@@ -8288,23 +8304,26 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             if (selectedDataset) _prefetchColumnAliases(selectedDataset);
         }
 
-        // Fire-and-forget: generate and cache column aliases for a dataset.
-        // Stores result in datasetAliases[dataset] for instant use in
-        // Schema inspector, Insights, and Suggestions.
-        async function _prefetchColumnAliases(dataset) {
-            try {
-                // Always use refresh=true on import — bypasses any stale cached
-                // identity that may have been written by older code. The result is
-                // cached after a successful generation so Schema opens are instant.
-                const data = await apiJson(
-                    "/api/ai/column_aliases?dataset=" + encodeURIComponent(dataset) + "&refresh=true"
-                );
-                if (data && data.aliases && Object.keys(data.aliases).length) {
-                    datasetAliases[dataset] = data.aliases;
+        // Kick off alias generation after import and store the Promise in
+        // _aliasInFlight[dataset] so inspectSchema can await it directly
+        // instead of starting a competing second AI call.
+        function _prefetchColumnAliases(dataset) {
+            const promise = (async () => {
+                try {
+                    // Always refresh=true on import — bypasses any stale cache.
+                    const data = await apiJson(
+                        "/api/ai/column_aliases?dataset=" + encodeURIComponent(dataset) + "&refresh=true"
+                    );
+                    if (data && data.aliases && Object.keys(data.aliases).length) {
+                        datasetAliases[dataset] = data.aliases;
+                    }
+                } catch (e) {
+                    console.warn("[AW] Column alias generation failed for", dataset, "—", e.message);
+                } finally {
+                    delete _aliasInFlight[dataset]; // clear once settled
                 }
-            } catch (e) {
-                console.warn("[AW] Column alias generation failed for", dataset, "—", e.message);
-            }
+            })();
+            _aliasInFlight[dataset] = promise;
         }
 
         // Smart auto-expand: called after query execution
