@@ -626,10 +626,16 @@ def get_insights(
             refresh,
         )
 
+        # Pass column aliases if available so the insights prompt can annotate
+        # abbreviated or non-standard column names with their human-readable meaning.
+        # This makes the AI column-name-agnostic — it can identify spending columns,
+        # categorical dimensions, etc. from semantic context rather than column names.
+        aliases = _read_aliases_cache(dataset)
         result = generate_insights_for_dataset(
             dataset_name=dataset,
             dataset_source_path_fn=_get_dataset_source_path,
             max_insights=max_insights,
+            column_aliases=aliases,
         )
         synopsis = result.get("synopsis", "")
         raw_insights = result.get("insights", [])

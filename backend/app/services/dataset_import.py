@@ -556,6 +556,11 @@ def convert_xlsx_to_parquet(
 def dataframe_to_parquet(dataframe: pd.DataFrame, parquet_path: Path, source_label: str) -> None:
     """
     Validate a DataFrame and persist it as Parquet.
+
+    Before writing, we apply _force_identifier_columns_to_string() to ensure
+    columns like ZIP_CODE, NPI, FIPS, and *_ID are stored as VARCHAR rather than
+    as integers. This prevents type-mismatch errors in cross-dataset UNION queries
+    (e.g. OH ZIP_CODE INTEGER cannot be UNIONed with TX/FL ZIP VARCHAR).
     """
 
     if dataframe is None or dataframe.empty:
@@ -563,6 +568,11 @@ def dataframe_to_parquet(dataframe: pd.DataFrame, parquet_path: Path, source_lab
 
     if len(dataframe.columns) == 0:
         raise DatasetValidationError(f"{source_label} dataset contains no columns.")
+
+    # Apply identifier column type overrides before writing to Parquet.
+    # This must happen AFTER stripping (if any) but BEFORE pa.Table.from_pandas
+    # so that the Parquet schema reflects the forced string types.
+    dataframe = _force_identifier_columns_to_string(dataframe)
 
     try:
         table = pa.Table.from_pandas(dataframe, preserve_index=False)
@@ -615,25 +625,79 @@ def inspect_parquet(parquet_path: Path) -> tuple[int, list[DatasetColumn]]:
 # -----------------------------------------------------------------------------
 
 
-def _title_case_string_columns(parquet_path: Path) -> None:
+def _force_identifier_columns_to_string(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Read a Parquet file, apply str.title() to every string column, rewrite.
+    Force columns that look like identifiers to string dtype before Parquet write.
 
-    Reference tables are small (tens to hundreds of rows), so reading the
-    entire file into memory is fine.  This ensures JOIN conditions match
-    the primary dataset without requiring LOWER() on both sides.
+    Some columns contain ZIP codes, FIPS codes, NPI numbers, phone numbers, or
+    other identifiers that pandas infers as integers. Storing them as integers
+    causes type-mismatch errors in cross-dataset UNION queries (e.g. OH ZIP_CODE
+    as INTEGER cannot be UNIONed with TX/FL ZIP columns stored as VARCHAR).
+
+    Pattern rules (all column name checks are case-insensitive):
+    - ZIP / postal code: ZIP, ZIP_CODE, ZIPCODE, POSTAL_CODE, POSTAL, *_ZIP, *_ZIPCODE
+    - NPI columns: any column whose name contains "NPI"
+    - FIPS codes: FIPS, FIPS_CD, *FIPS*, STATE_FIPS, COUNTY_FIPS
+    - Phone / fax / tel: any column whose name contains PHONE, TEL, or FAX
+    - Columns ending exactly with _ID: treated as identifiers only when pandas
+      inferred them as an integer type (float or int). Numeric measures that
+      happen to be named *_ID (rare) are left alone.
+    - Columns ending exactly with _CODE or _CD: forced to string.
+
+    Only columns that are currently numeric (int or float dtype) are touched.
+    Columns already stored as object/string are left unchanged to avoid no-ops.
     """
-    df = pd.read_parquet(parquet_path)
-    changed = False
+    _EXACT_MATCHES = {
+        "zip", "zip_code", "zipcode", "postal_code", "postal",
+        "npi", "prvdr_npi", "physcn_npi",
+        "fips", "fips_cd", "state_fips", "county_fips",
+    }
+    _SUFFIX_MATCHES = ("_zip", "_zipcode", "_fips")
+    _CONTAINS_MATCHES = ("npi", "fips", "phone", "tel", "fax")
+
     for col in df.columns:
-        if pd.api.types.is_string_dtype(df[col]):
+        col_lower = col.lower()
+
+        # Only override integer/float columns — string columns are already fine
+        if not (
+            pd.api.types.is_integer_dtype(df[col])
+            or pd.api.types.is_float_dtype(df[col])
+        ):
+            continue
+
+        should_force = False
+
+        # Exact match against known identifier column names
+        if col_lower in _EXACT_MATCHES:
+            should_force = True
+
+        # Suffix match
+        elif any(col_lower.endswith(s) for s in _SUFFIX_MATCHES):
+            should_force = True
+
+        # Contains match (NPI, FIPS, PHONE, TEL, FAX anywhere in the name)
+        elif any(kw in col_lower for kw in _CONTAINS_MATCHES):
+            should_force = True
+
+        # Columns ending exactly with _id — treat as identifier when inferred numeric
+        elif col_lower.endswith("_id"):
+            should_force = True
+
+        # Columns ending exactly with _code or _cd — treat as code/identifier
+        elif col_lower.endswith("_code") or col_lower.endswith("_cd"):
+            should_force = True
+
+        if should_force:
+            # Convert integer/float to string, preserving NaN as None
             df[col] = df[col].apply(
-                lambda v: v.title() if isinstance(v, str) else v
+                lambda v: None if pd.isna(v) else (
+                    # For floats that represent whole numbers (e.g. 45678.0), strip
+                    # the decimal suffix so "45678.0" doesn't appear in SQL results
+                    str(int(v)) if isinstance(v, float) and v == int(v) else str(v)
+                )
             )
-            changed = True
-    if changed:
-        table = pa.Table.from_pandas(df, preserve_index=False)
-        pq.write_table(table, parquet_path)
+
+    return df
 
 
 @dataclass
@@ -698,10 +762,11 @@ def import_reference_table(
     else:
         raise UnsupportedDatasetTypeError(f"Unsupported file type: {original_type}")
 
-    # Normalize string columns to title case so JOINs between the reference
-    # table and the primary dataset match without LOWER() wrappers.
-    # Example: IRA CSV stores "apixaban" but CMS data stores "Apixaban".
-    _title_case_string_columns(parquet_path)
+    # String values are stored exactly as they appear in the source file — no
+    # title-casing or other normalization.  The AI SQL generation prompt instructs
+    # the model to wrap both sides of string JOIN conditions in LOWER() so that
+    # case differences between the primary dataset and the reference table are
+    # resolved at query time rather than by transforming the data at import time.
 
     row_count, columns = inspect_parquet(parquet_path)
 

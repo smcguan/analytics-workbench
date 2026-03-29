@@ -238,6 +238,15 @@ Columns:
 
 You may use JOIN reference ON ... to combine this lookup table with the primary dataset.
 Use LIKE patterns (not =) for string matching to handle trailing special characters.
+
+STRING JOIN RULE — CRITICAL:
+For ALL string JOIN conditions between the primary dataset and the reference table,
+always wrap BOTH sides in LOWER() to ensure case-insensitive matching:
+  CORRECT: JOIN reference r ON LOWER(dataset.drug_name) = LOWER(r.drug_name)
+  WRONG:   JOIN reference r ON dataset.drug_name = r.drug_name
+Reference table string values are stored exactly as they appear in the source CSV —
+they may be uppercase, lowercase, or mixed case. LOWER() on both sides guarantees
+the JOIN works regardless of case differences between the two tables.
 """
 
     return prompt
@@ -693,9 +702,15 @@ def build_insights_prompt(
     dataset_name: str,
     dataset_source_path_fn,
     max_insights: int = 5,
+    column_aliases: dict[str, str] | None = None,
 ) -> str:
     """
     Build the prompt used to generate AI insights for a dataset.
+
+    column_aliases: optional dict mapping raw column name -> human-readable alias.
+    When provided, both the raw name and alias are shown so the model can correctly
+    identify the semantic role of columns with abbreviated or non-standard names
+    (e.g. BILLED_AMOUNT, REIMB_AMT, MANAGED_CARE_ORG).
     """
     context = build_context(
         dataset_name=dataset_name,
@@ -705,8 +720,20 @@ def build_insights_prompt(
     # PRIVACY: Insights prompt uses schema + aggregate stats ONLY.
     # No sample rows, no top values (categorical). The AI generates SQL
     # that runs locally — it does not need to see raw data values.
-    columns_text = _format_columns(context.get("columns", []))
+    raw_columns = context.get("columns", [])
     numeric_stats_text = _format_numeric_stats(context.get("numeric_stats", []))
+
+    # Build annotated column list: if aliases are available, show both the raw
+    # name (for SQL) and the human-readable alias (for semantic interpretation).
+    columns_lines = []
+    for col in raw_columns:
+        name = col["name"]
+        col_type = col["type"]
+        if column_aliases and name in column_aliases and column_aliases[name] != name:
+            columns_lines.append(f'- {name} ({col_type})  [= "{column_aliases[name]}"]')
+        else:
+            columns_lines.append(f'- {name} ({col_type})')
+    columns_text = "\n".join(columns_lines) if columns_lines else "(none)"
 
     prompt = f"""
 You are a data analyst identifying non-obvious insights in a dataset.
@@ -725,6 +752,19 @@ CRITICAL RULES — FOLLOW EXACTLY:
 - Do NOT restate the obvious (e.g. "This dataset has 734 rows").
 - Do NOT generate more than {max_insights} insights.
 - Write for business users — no technical jargon in headlines or explanations.
+
+COLUMN NAME INTERPRETATION — IMPORTANT:
+Column names in this dataset may be abbreviated, non-standard, or domain-specific
+(e.g. BILLED_AMOUNT, ALLOWED_AMOUNT, REIMB_AMT, MANAGED_CARE_ORG, BENE_ID, PRVDR_NPI).
+Where a human-readable alias is shown in square brackets next to the column name, use
+that alias to understand the column's semantic role when writing headlines and explanations.
+When no alias is available, infer the column's role from its statistical profile:
+- Numeric columns with large variance and large max values are likely spending/amount/cost columns
+- Numeric columns with values 0 or 1 (or small integers) are likely flags, counts, or codes
+- String columns with low cardinality (few distinct values) are likely categorical dimensions
+  such as region, state, plan type, or category
+- String columns with high cardinality are likely identifiers (IDs, names, codes)
+Generate insights based on statistical patterns in the data, not on column name recognition.
 
 INSIGHT TYPES (use in this priority order — pick whichever apply):
 1. concentration — a small number of items drives a disproportionate share of the total (Pareto)
@@ -766,10 +806,10 @@ Return JSON with exactly this structure:
 
 Dataset name: {dataset_name}
 
-Available columns (USE ONLY THESE):
+Available columns (USE ONLY THESE — aliases in brackets show human-readable meaning):
 {columns_text}
 
-Numeric column stats (min/max/avg — use these to identify patterns):
+Numeric column stats (min/max/avg — use these to identify patterns and semantic roles):
 {numeric_stats_text}
 
 Note: You are seeing column names and aggregate statistics only — no raw data values.
@@ -863,9 +903,15 @@ def generate_insights_for_dataset(
     dataset_name: str,
     dataset_source_path_fn,
     max_insights: int = 5,
+    column_aliases: dict[str, str] | None = None,
 ) -> dict:
     """
     Generate AI-powered insights for a dataset.
+
+    column_aliases: optional dict of raw column name -> human-readable alias.
+    When provided, the insights prompt annotates each column with its alias so
+    the model can correctly identify the semantic role of non-standard column
+    names (e.g. BILLED_AMOUNT, REIMB_AMT, MANAGED_CARE_ORG).
 
     Returns:
         {"synopsis": str, "insights": list[dict]}
@@ -874,6 +920,7 @@ def generate_insights_for_dataset(
         dataset_name=dataset_name,
         dataset_source_path_fn=dataset_source_path_fn,
         max_insights=max_insights,
+        column_aliases=column_aliases,
     )
 
     raw_text = generate_sql_response(prompt)
