@@ -1252,7 +1252,9 @@
         }
 
         .inspect-actions{
-            display:contents;
+            display:flex;
+            flex-direction:column;
+            gap:6px;
         }
 
         .inspect-actions .btn{
@@ -2305,12 +2307,10 @@
 
                             <div class="inspect-actions">
                                 <button class="btn small" id="inspectSchemaBtn" title="Show column names and data types">Schema</button>
-                                <button class="btn small" id="inspectPreviewBtn" title="Show the first rows of the dataset">Preview</button>
-                                <button class="btn small" id="exportPassportBtn" title="Download a full JSON profile with schema, distributions, and AI grain description">Export Passport</button>
+                                <button class="btn small" id="saveAliasesBtn" style="display:none;">Save Aliases</button>
                             </div>
-                            <div id="saveAliasesRow" style="display:none;margin-top:6px;">
-                                <button class="btn small primary" id="saveAliasesBtn">Save Aliases</button>
-                            </div>
+                            <button class="btn small" id="inspectPreviewBtn" title="Show the first rows of the dataset">Preview</button>
+                            <button class="btn small" id="exportPassportBtn" title="Download a full JSON profile with schema, distributions, and AI grain description">Export Passport</button>
                         </div>
 
                         <div class="inspect-card" id="inspectCard" style="display:none;">
@@ -3097,6 +3097,13 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         // prefetch that fired at import instead of starting a second AI call.
         const _aliasInFlight = {}; // dataset → Promise<void>
 
+        // Return the display name for a single column — alias if saved, otherwise
+        // the original column name. Use this for table headers and column labels.
+        function getDisplayName(datasetName, columnName) {
+            const aliases = datasetAliases[datasetName] || {};
+            return aliases[columnName] || columnName;
+        }
+
         // Apply display aliases to a text string for the current dataset.
         // Replaces each original column name with its alias (longest first to
         // avoid partial matches). SQL is never passed through this function.
@@ -3574,6 +3581,9 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 renderDatasets();
                 updateSelectedDatasetSummary();
                 resetInspectState();
+                // Clear aliases for this dataset — fresh import gets fresh AI-generated aliases.
+                delete datasetAliases[selectedDataset];
+                delete _aliasInFlight[selectedDataset];
                 // Clear prompt and SQL for the freshly imported dataset
                 $("askPrompt").value = "";
                 $("sqlEditor").value = "SELECT *\nFROM dataset\nLIMIT 100";
@@ -5193,7 +5203,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             return ["dataset_import", "query_run", "reference_load", "reference_delete", "export", "session_end",
                     "edit_panel_open", "edit_panel_choose", "edit_panel_check", "edit_panel_run",
                     "inspect_schema", "inspect_preview", "ai_ask", "insights_generated",
-                    "explain", "chart_view", "query_save", "query_load"].includes(eventType);
+                    "explain", "chart_view", "query_save", "query_load", "dataset_derived"].includes(eventType);
         }
 
         async function openTutorial(filename) {
@@ -6183,6 +6193,35 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                     } catch (e) {
                         toast("Could not load saved queries: " + e.message);
                     }
+                }
+                return;
+            }
+
+            // ── dataset_derived ──────────────────────────────────────────────────────
+            // Re-executes the source query and saves the result as a derived dataset.
+            // Requires source_dataset and source_query in step details (logged by backend).
+            if (step.event_type === "dataset_derived") {
+                const derivedName = d.name || d.dataset;
+                const sourceDataset = d.source_dataset;
+                const sourceQuery = d.source_query;
+                if (!derivedName || !sourceDataset || !sourceQuery) {
+                    toast(`Skipping dataset_derived: missing name, source_dataset, or source_query.`);
+                    return;
+                }
+                const body = { name: derivedName, dataset: sourceDataset, sql: sourceQuery };
+                if (d.reference) body.reference = d.reference;
+                try {
+                    const result = await apiJson("/api/datasets/save_result", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(body),
+                    });
+                    await loadDatasets();
+                    _expandSidebarSection("sidebarDataTitle", "sidebarDataBody");
+                    toast(`Derived dataset recreated: ${result.dataset} — ${num(result.row_count)} rows`);
+                    await _tutorialPause(1200);
+                } catch (e) {
+                    toast(`Save as Dataset failed during replay: ${e.message || ""}`, 6000);
                 }
                 return;
             }
@@ -7190,11 +7229,10 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 
             // Use saved display aliases for column headers — original names still
             // used for data access in the rows below.
-            const _colAliases = datasetAliases[selectedDataset] || {};
             const trh = document.createElement("tr");
             for (const c of columns) {
                 const th = document.createElement("th");
-                th.textContent = _colAliases[c] || c;
+                th.textContent = getDisplayName(selectedDataset, c);
                 if (cashCols.has(c)) th.style.textAlign = "right";
                 trh.appendChild(th);
             }
@@ -7380,11 +7418,20 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             copyBtn.style.display = "none";
 
             try {
+                // Remap both column names and row keys to display aliases so the AI
+                // sees readable names. Without remapping row keys, row.get(aliasedCol)
+                // returns empty strings and the narrative has no actual data values.
+                const aliasedCols = lastRun.columns.map(c => getDisplayName(selectedDataset, c));
+                const aliasedRows = lastRun.rows.slice(0, 10).map(row => {
+                    const out = {};
+                    lastRun.columns.forEach((orig, i) => { out[aliasedCols[i]] = row[orig]; });
+                    return out;
+                });
                 const payload = {
                     question: ($("askPrompt").value || "").trim(),
                     sql: lastRun.sql,
-                    columns: lastRun.columns,
-                    rows: lastRun.rows.slice(0, 5),
+                    columns: aliasedCols,
+                    rows: aliasedRows,
                     rowcount: lastRun.rowcount,
                     dataset: selectedDataset,
                 };
@@ -7537,8 +7584,8 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             Object.entries(map).forEach(([mode, id]) => {
                 $(id).classList.toggle("toggle-active", inspectMode === mode);
             });
-            // Save Aliases row visible only when Schema is active
-            $("saveAliasesRow").style.display = (inspectMode === "schema") ? "" : "none";
+            // Save Aliases visible only when Schema is active
+            $("saveAliasesBtn").style.display = (inspectMode === "schema") ? "" : "none";
         }
 
         function resetInspectState() {
@@ -7552,13 +7599,14 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             // Close suggestions and info popovers when dataset changes.
             // Also clear the JS-level caches for this dataset so switching
             // back later re-fetches (server-side cache in JSON still applies).
+            // NOTE: datasetAliases is intentionally NOT cleared here — user-saved
+            // aliases must survive Schema close/reopen and query runs within the
+            // same session. Aliases are only cleared on fresh import or Clear Workspace.
             $("suggestionsPopover").style.display = "none";
             suggestionsVisible = false;
             if (selectedDataset) delete suggestionsCache[selectedDataset];
             if (selectedDataset) delete sequenceCache[selectedDataset];
             if (selectedDataset) delete insightsCache[selectedDataset];
-            if (selectedDataset) delete datasetAliases[selectedDataset];
-            if (selectedDataset) delete _aliasInFlight[selectedDataset];
             $("infoPopover").style.display = "none";
             clearInsights();
         }
@@ -7578,7 +7626,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             const trh = document.createElement("tr");
             for (const c of columns) {
                 const th = document.createElement("th");
-                th.textContent = c;
+                th.textContent = getDisplayName(selectedDataset, c);
                 if (cashCols.has(c)) th.style.textAlign = "right";
                 trh.appendChild(th);
             }
@@ -8213,6 +8261,9 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             resetInspectState();
             // Clear insights cache so next run generates fresh
             for (const k in insightsCache) delete insightsCache[k];
+            // Clear alias cache — Clear Workspace resets everything
+            for (const k in datasetAliases) delete datasetAliases[k];
+            for (const k in _aliasInFlight) delete _aliasInFlight[k];
             // If Insights view is active, switch back to Welcome
             if (currentView === "insights") switchView("welcome");
             $("referenceIndicator").style.display = "none";

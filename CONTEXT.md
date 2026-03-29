@@ -371,6 +371,17 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-25] [BD+CODE] — Feature testing session. Column Name Interpreter (Feature 4)
+  confirmed working after fix — aliases now generate on import. Six additional bugs
+  found and in progress: Save Aliases button accumulates on each Schema click (DOM
+  accumulation bug), aliases not applying to results table, logistics dataset failing,
+  schema table slow to render, Save Aliases wrong position. Layout changes: Save Aliases
+  moved to header row below Schema button, same size, show/hide tied to Schema table
+  visibility. Suggestions buttons renamed — Suggested Analysis Sequence + Suggested
+  Questions added as separate buttons. AW stopped launching briefly — recovered.
+  Features 1 and 2 not yet tested across all datasets. Features 5-7 not yet built.
+  SOW stress test deferred until Feature 4 fully stable. CONTEXT_BUSINESS.md created
+  as trimmed BD-only context file for BD project sessions.
 [2026-03-24] [CODE] — v1.18.1. PyInstaller Python DLL portability fix. AnalyticsWorkbench.spec
   replaced hardcoded python313.dll with dynamic lookup (searches python_dir → sys.base_prefix →
   SYSTEMROOT → System32; raises RuntimeError with clear message if not found). upx_exclude and

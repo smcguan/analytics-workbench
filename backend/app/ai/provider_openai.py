@@ -640,16 +640,22 @@ def generate_result_narrative(
         data_lines = [" | ".join(str(row.get(c, "")) for c in columns) for row in sample]
         rows_text = header + "\n" + "\n".join(data_lines)
 
-    prompt = f"""You are a data analyst summarising a query result for a business audience.
+    prompt = f"""You are a data analyst writing a finding summary.
+You will be given a query result with actual data values.
+Write exactly two sentences describing what the data shows.
+Rules:
+- You MUST use specific values, names, and numbers from the actual result rows provided
+- Name the top item specifically — do not say "the highest" without naming it
+- Include at least two specific numbers or values from the results
+- Do not write generic statements that could apply to any dataset
+- Do not explain what the query does — describe what the FINDING means
+- Keep it under 50 words total
 
-In exactly two sentences: describe what this result shows and why it matters. Be specific — use the actual numbers. Do not describe what the query does. Do not start with "The query" or "This query". Focus on the finding and its significance.
-
-Dataset: {dataset_name}
-Question asked: {question or "(none provided)"}
-Total rows returned: {rowcount:,}
-Columns: {", ".join(columns)}
-First rows:
-{rows_text}""".strip()
+Query: {question or "(none provided)"}
+Top 5 rows of results:
+{rows_text}
+Total row count: {rowcount:,}
+Column names: {", ".join(columns)}""".strip()
 
     return generate_sql_response(prompt)
 

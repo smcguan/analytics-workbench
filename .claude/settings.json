@@ -14,5 +14,19 @@
       "Bash(.venv/Scripts/python -c:*)",
       "Bash access"
     ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -c \"import json, sys; c=open('C:/dev/analytics-workbench/CONTEXT.md').read(); print(json.dumps({'hookSpecificOutput': {'hookEventName': 'SessionStart', 'additionalContext': 'SESSION JUST STARTED. As your very first action this session, respond immediately with a brief status greeting covering: (1) current version from CONTEXT.md, (2) the top 3 items from NEXT ACTIONS > Product / code section, (3) any ACTIVE BUGS. Keep it under 15 lines total.\\n\\nFull CONTEXT.md contents:\\n' + c}})); sys.exit(2)\"",
+            "asyncRewake": true,
+            "statusMessage": "Loading project context..."
+          }
+        ]
+      }
+    ]
   }
 }

@@ -4230,8 +4230,10 @@ def api_save_result_as_dataset(req: SaveResultAsDatasetRequest):
         log_event(SessionEventType.DATASET_DERIVED, {
             "dataset": ds_name,
             "name": ds_name,
+            "source_dataset": req.dataset,
             "row_count": row_count,
             "source_query": req.sql,
+            **({"reference": req.reference} if req.reference else {}),
         })
     except Exception:
         logger.warning("Failed to log DATASET_DERIVED event", exc_info=True)
