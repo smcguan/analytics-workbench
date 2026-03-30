@@ -190,6 +190,23 @@ QUERY CONSTRUCTION GUIDELINES:
 - Always add ORDER BY to make results meaningful when possible
 - Default LIMIT to 100 unless the question specifies a number or asks for ALL rows
 
+RATIO AND RATE QUERIES — CRITICAL:
+When asked about a ratio, rate, or threshold per entity (provider, store, customer, plan, etc.):
+  CORRECT: GROUP BY entity first, compute AVG(ratio) per entity, then HAVING AVG(ratio) > threshold
+  WRONG:   WHERE individual_row_ratio > threshold  (misses entities whose average exceeds the threshold
+           but individual rows vary above and below it)
+Example — "providers with billed-to-paid ratio above 3":
+  CORRECT: SELECT PRVDR_NPI, AVG(BILL_AMT / PAID_AMT) as avg_ratio FROM dataset
+           WHERE PAID_AMT > 0 GROUP BY PRVDR_NPI HAVING AVG(BILL_AMT / PAID_AMT) > 3.0
+  WRONG:   SELECT * FROM dataset WHERE PAID_AMT > 0 AND BILL_AMT / PAID_AMT > 3.0
+
+REIMBURSEMENT RATE vs REIMBURSEMENT AMOUNT — CRITICAL:
+"Reimbursement rate", "payment rate", or "reimbursement ratio" means the PROPORTION of paid to billed —
+a number between 0 and 1 (or 0% to 100%). Always compute as AVG(paid_col / billed_col).
+  CORRECT: AVG(REIMB_AMT / CHARGE_AMT) or AVG(PAID_AMT / BILL_AMT)
+  WRONG:   AVG(REIMB_AMT)  — this is a dollar amount, not a rate
+"Average reimbursement amount" or "average paid amount" means the dollar value: AVG(REIMB_AMT).
+
 Return JSON with exactly this structure:
 {{
   "status": "ok",
