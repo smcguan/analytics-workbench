@@ -285,6 +285,9 @@ Both rewrites happen before execution. AI always uses "dataset" as table name, n
 - No semicolon at end of query
 - Returns JSON: {status, sql, message, warnings}
 - LIKE patterns preferred over = or IN for string matching (CMS asterisk contamination)
+- Reference table JOINs: always use LOWER() on both sides — values stored as-is from CSV
+- Ratio/rate queries: GROUP BY entity first, then HAVING AVG(ratio) > threshold — never WHERE on individual rows
+- "Reimbursement rate" = AVG(paid/billed) proportion; "reimbursement amount" = AVG(paid_col) dollars
 
 ### Insights Generation
 - Input: column names, types, numeric stats ONLY — no sample rows, no top values (privacy)
@@ -329,6 +332,7 @@ AW_MAX_EXPORT_ROWS=200000
 - Use DESCRIBE SELECT * not parquet_schema() for column counts
 - Never call loadDatasets() inside import polling loop
 - Never leave bare except: pass blocks — always log the error
+- ZIP/postal, NPI, FIPS, phone, *_ID, *_CODE, *_CD columns are forced to VARCHAR in dataframe_to_parquet() — do not treat them as numeric even if DuckDB infers integer type
 
 ---
 

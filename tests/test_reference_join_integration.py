@@ -194,10 +194,11 @@ def test_left_join_preserves_all_dataset_rows(client):
 # 3. Case-insensitive matching via title-case normalization on import
 # ===========================================================================
 
-def test_join_case_insensitive_via_title_case_import(client):
+def test_join_case_insensitive_via_lower(client):
     """
-    Dataset has title-cased 'Keytruda'. Reference CSV has 'KEYTRUDA'.
-    After import (which title-cases strings), JOIN should match without LOWER().
+    Bug #10 fix: reference table values are stored as-is (no title-casing).
+    JOINs must use LOWER() on both sides for case-insensitive matching.
+    Dataset has title-cased values; reference CSV has mixed-case values.
     """
     ref_data = _import_ref(client, [
         {"drug_name": "KEYTRUDA", "flag": "yes"},
@@ -206,17 +207,20 @@ def test_join_case_insensitive_via_title_case_import(client):
     ])
     ref_name = ref_data["reference"]
 
+    # Verify values are stored exactly as in CSV (no title-casing)
+    ref_resp = client.get("/api/schema", params={"dataset": ref_name})
+    # LOWER() JOIN must match all three despite case differences
     resp = _run_sql(
         client,
         "SELECT d.drug_name, r.flag "
-        "FROM dataset d INNER JOIN reference r ON d.drug_name = r.drug_name",
+        "FROM dataset d INNER JOIN reference r ON LOWER(d.drug_name) = LOWER(r.drug_name)",
         reference=ref_name,
     )
     assert resp.status_code == 200
     rows = resp.json()["rows"]
     matched_names = sorted(r["drug_name"] for r in rows)
-    assert "Keytruda" in matched_names, "KEYTRUDA should title-case to Keytruda and match"
-    assert "Opdivo" in matched_names, "opdivo should title-case to Opdivo and match"
+    assert "Keytruda" in matched_names, "LOWER() JOIN should match KEYTRUDA -> Keytruda"
+    assert "Opdivo" in matched_names, "LOWER() JOIN should match opdivo -> Opdivo"
     assert "Eliquis" in matched_names, "Eliquis should match directly"
     assert len(rows) == 3
 

@@ -2787,7 +2787,7 @@ FROM dataset d
 LEFT JOIN reference r ON d.Brnd_Name = r.drug_name
 WHERE r.drug_name IS NULL
 ORDER BY d.Tot_Spndng_2023 DESC</pre>
-<p>String columns in reference tables are automatically title-cased on import so JOINs match without <code>LOWER()</code> wrappers.</p>
+<p>Reference table string values are stored exactly as they appear in the CSV. Use <code>LOWER()</code> on both sides of string JOIN conditions for reliable case-insensitive matching: <code>JOIN reference r ON LOWER(d.col) = LOWER(r.col)</code>.</p>
 
 <hr>
 <h3>Reference Library</h3>

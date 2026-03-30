@@ -34,7 +34,6 @@ from app.services.dataset_import import (
     import_dataset,
     make_registered_name,
     _strip_trailing_special_chars_from_df,
-    _title_case_string_columns,
 )
 
 
@@ -344,27 +343,11 @@ def test_strip_trailing_special_chars_disabled(tmp_path):
 
 
 # ===========================================================================
-# 12. _title_case_string_columns()
+# 12. _title_case_string_columns() — REMOVED (Bug #10 fix)
+# Reference table string values are now stored exactly as they appear in
+# the CSV. Title-casing was removed to prevent JOIN mismatches. LOWER() is
+# used at query time for case-insensitive matching instead.
 # ===========================================================================
-
-def test_title_case_string_columns(tmp_path):
-    df = pd.DataFrame({
-        "drug_name": ["keytruda", "OPDIVO", "avastin"],
-        "amount": [100.0, 200.0, 300.0],
-        "count": [1, 2, 3],
-    })
-    pq_path = tmp_path / "test.parquet"
-    table = pa.Table.from_pandas(df, preserve_index=False)
-    pq.write_table(table, pq_path)
-
-    _title_case_string_columns(pq_path)
-
-    result_df = pd.read_parquet(pq_path)
-    # String column should be title-cased
-    assert list(result_df["drug_name"]) == ["Keytruda", "Opdivo", "Avastin"]
-    # Numeric columns should be unchanged
-    assert list(result_df["amount"]) == [100.0, 200.0, 300.0]
-    assert list(result_df["count"]) == [1, 2, 3]
 
 
 # ===========================================================================

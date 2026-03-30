@@ -243,10 +243,11 @@ def test_loaded_library_ref_queryable_via_sql(lib_tmp, tmp_path):
 # Bug #8 — Reference Library case normalization on import
 # ===========================================================================
 
-def test_library_ref_title_cases_string_columns(lib_tmp, tmp_path):
+def test_library_ref_stores_values_as_is(lib_tmp, tmp_path):
     """
-    Bug #8: String columns in library reference tables should be
-    title-cased on import so JOINs match without LOWER() wrappers.
+    Bug #10 fix: String columns in library reference tables are stored
+    exactly as they appear in the CSV — no title-casing applied.
+    JOINs use LOWER() at query time instead.
     """
     import pyarrow.parquet as pq_test
     import app.main as main_module
@@ -266,7 +267,7 @@ def test_library_ref_title_cases_string_columns(lib_tmp, tmp_path):
     manifest.append({
         "filename": "mixed_case.csv",
         "name": "Mixed Case Test",
-        "description": "Test case normalization",
+        "description": "Test case preservation",
         "columns": ["generic_name", "category"],
         "row_count": 3,
         "version": "2026-03",
@@ -278,27 +279,27 @@ def test_library_ref_title_cases_string_columns(lib_tmp, tmp_path):
         resp = c.post("/api/reference_library/mixed_case.csv/load")
         assert resp.status_code == 200
 
-        # Read the imported parquet and verify title case
+        # Read the imported parquet and verify values are stored as-is
         ref_dir = main_module.REFERENCES_DIR
         ref_parquet = list(ref_dir.rglob("source.parquet"))
         assert len(ref_parquet) >= 1
-        # Find the one from mixed_case
         result_df = pd.read_parquet(ref_parquet[-1])
         names = result_df["generic_name"].tolist()
-        assert "Apixaban" in names, f"Expected title-cased 'Apixaban', got {names}"
-        assert "Semaglutide" in names, f"Expected title-cased 'Semaglutide', got {names}"
-        assert "Pembrolizumab" in names, f"Expected title-cased 'Pembrolizumab', got {names}"
+        # Values must be stored exactly as in CSV — no title-casing
+        assert "apixaban" in names, f"Expected original 'apixaban', got {names}"
+        assert "SEMAGLUTIDE" in names, f"Expected original 'SEMAGLUTIDE', got {names}"
+        assert "Pembrolizumab" in names, f"Expected original 'Pembrolizumab', got {names}"
         categories = result_df["category"].tolist()
-        assert "Cardiovascular" in categories
-        assert "Diabetes" in categories
+        assert "CARDIOVASCULAR" in categories
+        assert "diabetes" in categories
         assert "Oncology" in categories
 
 
 def test_case_insensitive_join_after_library_load(lib_tmp, tmp_path):
     """
-    Bug #8 end-to-end: A JOIN between a primary dataset and a library
-    reference should return rows even when the source data has different
-    casing, because reference import normalizes to title case.
+    Bug #10 fix end-to-end: A JOIN between a primary dataset and a library
+    reference returns rows when LOWER() is used on both sides. Reference
+    values are stored as-is (no title-casing), so LOWER() is required.
     """
     import app.main as main_module
     from fastapi.testclient import TestClient
@@ -344,13 +345,13 @@ def test_case_insensitive_join_after_library_load(lib_tmp, tmp_path):
             assert resp.status_code == 200
             ref_name = resp.json()["reference"]
 
-            # JOIN without LOWER() — should match because import title-cased
+            # JOIN with LOWER() on both sides — required since values are stored as-is
             sql_resp = c.post("/api/sql", json={
                 "dataset": "cms_drugs",
                 "sql": (
                     f"SELECT p.Gnrc_Name, i.drug_name, i.ira_round "
                     f"FROM dataset p "
-                    f"INNER JOIN {ref_name} i ON p.Gnrc_Name = i.generic_name"
+                    f"INNER JOIN {ref_name} i ON LOWER(p.Gnrc_Name) = LOWER(i.generic_name)"
                 ),
                 "reference": ref_name,
             })

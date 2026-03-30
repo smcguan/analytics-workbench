@@ -38,10 +38,14 @@
 - Tutorial #6 Parameterized Workflow — COMPLETE (v1.17.0) — Retail Sales Performance, Edit panel dataset+reference swap demo
 - Natural language queries in tutorials — COMPLETE (v1.17.0) — 22 query_run steps converted to ai_ask across 7 demos
 
-**Current version:** v1.17.0 — demo-ready for Farragut/McDermott meeting
+**Current version:** v1.19.0
 
-**Test suite:** 611 automated tests, all passing (zero xfail), runs under 12 seconds.
-Pre-commit and pre-push git hooks enforce green suite on every commit and push.
+**Test suite:** 1,100 automated tests across three suites, all passing.
+- Unit tests (pytest tests/): 872 passed, 21 skipped
+- Feature + workflow suite (run_all.py): 185 passed, 1 skipped (SaaS no baselines)
+- Query accuracy suite (test_accuracy.py): 43 passed (23 deterministic + 20 AI, AI skipped by default)
+- AI accuracy when enabled: 100% (20/20) — threshold is 85%
+- Pre-push hook runs all three suites before any push is allowed
 
 **Validated at scale:** 220M rows, DuckDB local execution, sub-second import.
 
@@ -371,6 +375,26 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-29] [CODE] — v1.19.0. Three-suite test infrastructure complete + Bugs #9/#10/#11
+  permanently fixed. Bug #9: Insights prompt column-name agnostic — passes aliases and uses
+  semantic inference (variance/cardinality) not name patterns. Bug #10: reference table
+  title-casing removed entirely; SQL prompt updated with LOWER() JOIN rule; 3 existing
+  reference join tests updated to use LOWER() pattern; _title_case_string_columns removed.
+  Bug #11: _force_identifier_columns_to_string() in dataframe_to_parquet() forces
+  ZIP/NPI/FIPS/phone/*_ID/*_CODE/*_CD columns to VARCHAR. Test suites: test_features.py
+  (106 tests), test_workflows.py (79), run_all.py (formatted runner), test_accuracy.py
+  (23 deterministic + 20 AI accuracy, golden values from real synthetic CSVs). AI accuracy
+  100% (20/20) after ratio/rate prompt guidance fix. Pre-push hook wired. 1,100 tests total.
+[2026-03-29] [BD+CODE] — Query accuracy test suite built and passing. 46 accuracy tests:
+  23/23 non-AI tests passing, 20/20 AI SQL accuracy tests passing (100%). Golden dataset
+  methodology: 31 pre-computed values from synthetic CSVs. Categories: aggregation (8),
+  filter (5), JOIN (4), cross-state (4), derived dataset (2), AI SQL (20). Two AI prompt
+  improvements from testing: (1) ratio queries must GROUP BY entity then HAVING AVG >
+  threshold, not WHERE individual row ratio; (2) reimbursement rate = AVG(paid/billed)
+  proportion not AVG(paid) dollar amount. Total test suite: 895 tests all passing.
+  Testing procedure Word doc built for enterprise customer QA conversations. Features
+  1-5 confirmed working across multiple datasets. SOW stress test ready to run next
+  session. Features 6-7 (Compare Mode, Shareable HTML Export) not yet built.
 [2026-03-29] [CODE] — Bugs #9/#10/#11 permanently fixed. Comprehensive test suite added
   (168 tests: 106 feature + 79 workflow, all passing). Bug #9: Insights prompt now passes
   column aliases alongside raw names and uses semantic inference (variance/cardinality) for
@@ -621,23 +645,28 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 ## NEXT ACTIONS
 
 **Business development (Claude.ai):**
-- Send Casey immersion guide and motivational email
+- Send Casey immersion guide and motivational email — PENDING CONFIRMATION
 - Casey completes immersion program — debrief after Module 5
 - Casey dry run of Tutorial #4 with you playing Stan
+- Casey sends follow-up email to Jackie and Stan — template in conversation guide
 - Confirm meeting date and attendees with Farragut
-- Await Farragut follow-up to Casey's requirements email
-- File Wyoming LLC — name decision needed first
+- File Wyoming LLC — JetWare AI confirmed as company name
 - Draft proposal for Farragut/McDermott (team license + onboarding + library)
 - Draft proposal and contract template skeleton
-- Apply orphan drug + MFN flags to GUARD Part D candidate list
-- Draft one-pager for Tier 1 consultant outreach (COMPLETE — aw_consultant_onepager.docx)
+- Run SOW stress test — READY — execute GLOBE/GUARD analysis in AW step by step
 
 **Product / code (Claude Code):**
-- Fix Library button width — still mismatched vs Import Dataset after two attempts
-- Fix shimmer loading states — upload bar still appearing, needs full removal
-- Fix workflow step parity — occasional Step Through failures remaining
-- Spec and build Analysis Summary Artifact (M5 Priority 2)
-- Spec and build AI Mode Switch (M5 Priority 3)
+- ~~Build comprehensive feature test suite~~ COMPLETE — 168 tests passing
+- ~~Build query accuracy test suite~~ COMPLETE — 46 tests, 100% AI accuracy
+- ~~Fix Bugs #9, #10, #11~~ COMPLETE — permanently fixed, workarounds retired
+- Run SOW stress test — ready now, all quality gates passed
+- Build Feature 6 — Compare Mode
+- Build Feature 7 — Shareable HTML Export
+- Fix Feature 3 — Smarter Suggestions three-step sequence UI
+- Build Analysis Summary Artifact (M5 Priority 2)
+- Build AI Mode Switch (M5 Priority 3)
+- Fix Library button width — still mismatched
+- Fix shimmer upload bar — still appearing
 - ~~Spec M5 Priority 1: Multi-State Medicaid Normalization~~ COMPLETE — multi-dataset UNION built (v1.13.0)
 - ~~Phase 1: Validate multi-dataset simultaneous load~~ COMPLETE — TX/FL/OH all load correctly (v1.13.0)
 - ~~Phase 2: Validate schema normalization JOIN~~ COMPLETE — medicaid_schema_map validated, title-case UPPER() fix documented (v1.13.0)
