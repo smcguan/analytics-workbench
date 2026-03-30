@@ -38,12 +38,12 @@
 - Tutorial #6 Parameterized Workflow — COMPLETE (v1.17.0) — Retail Sales Performance, Edit panel dataset+reference swap demo
 - Natural language queries in tutorials — COMPLETE (v1.17.0) — 22 query_run steps converted to ai_ask across 7 demos
 
-**Current version:** v1.19.0
+**Current version:** v1.19.0 — demo-ready for Farragut/McDermott meeting
 
 **Test suite:** 1,100 automated tests across three suites, all passing.
 - Unit tests (pytest tests/): 872 passed, 21 skipped
-- Feature + workflow suite (run_all.py): 185 passed, 1 skipped (SaaS no baselines)
-- Query accuracy suite (test_accuracy.py): 43 passed (23 deterministic + 20 AI, AI skipped by default)
+- Feature + workflow suite (run_all.py): 185 passed, 1 skipped
+- Query accuracy suite (test_accuracy.py): 43 passed (23 deterministic + 20 AI)
 - AI accuracy when enabled: 100% (20/20) — threshold is 85%
 - Pre-push hook runs all three suites before any push is allowed
 
@@ -375,6 +375,11 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-29] [BD] — Wrap workflow established. SKILL.md updated to run all three test
+  suites (pytest + run_all.py + test_accuracy.py) and update both CONTEXT.md and
+  CONTEXT_BUSINESS.md on every wrap. Testing procedure Word doc produced for enterprise
+  QA conversations. Wrap → upload → BD update → final CONTEXT.md loop confirmed working.
+  Next session priorities: SOW stress test, Features 6-7, Casey follow-up, Wyoming LLC.
 [2026-03-29] [CODE] — v1.19.0. Three-suite test infrastructure complete + Bugs #9/#10/#11
   permanently fixed. Bug #9: Insights prompt column-name agnostic — passes aliases and uses
   semantic inference (variance/cardinality) not name patterns. Bug #10: reference table
