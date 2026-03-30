@@ -371,6 +371,14 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-03-29] [CODE] — Bugs #9/#10/#11 permanently fixed. Comprehensive test suite added
+  (168 tests: 106 feature + 79 workflow, all passing). Bug #9: Insights prompt now passes
+  column aliases alongside raw names and uses semantic inference (variance/cardinality) for
+  non-standard column names — column-name agnostic. Bug #10: title-casing removed from
+  reference table import entirely; SQL generation prompt updated to use LOWER() on both
+  sides of string JOIN conditions. Bug #11: _force_identifier_columns_to_string() added to
+  dataframe_to_parquet() — ZIP/NPI/FIPS/phone/*_ID/*_CODE/*_CD columns forced to VARCHAR
+  before Parquet write. All three workarounds retired.
 [2026-03-25] [BD+CODE] — Feature testing session. Column Name Interpreter (Feature 4)
   confirmed working after fix — aliases now generate on import. Six additional bugs
   found and in progress: Save Aliases button accumulates on each Schema click (DOM
