@@ -10,7 +10,7 @@
 
 **Company name:** JetWare AI (Jetware AI LLC — California LLC, rename from LifeModeler Services LLC COMPLETE 2026-03-31)
 **Product:** Analytics Workbench (AW) — local-first AI analytics desktop application
-**Stage:** Pre-revenue. Brand launched. First customer engagement in progress.
+**Stage:** Pre-revenue. Brand launched. First customer engagement active.
 **Developer:** Shawn (product owner, sole developer, 100% owner)
 **BD lead:** Casey (Shawn's son, CS degree, embedded at Farragut/McDermott)
 
@@ -51,6 +51,35 @@ SQL — without sending data to any cloud server.
 
 ---
 
+## PRODUCT FAMILY — JETWARE AI WORKBENCH SUITE
+
+JetWare AI is a suite of local-first AI workbench tools. All products share the same
+privacy architecture. Product naming convention: "[X] Workbench" under JetWare AI brand.
+
+| Product | Status | Description |
+|---------|--------|-------------|
+| Analytics Workbench | Available | Structured data analytics — CSV, SQL, charts, insights |
+| Document Workbench | In development | Local RAG — index prior deliverables, query in plain English |
+| Research Workbench | Roadmap | External data sourcing — fee schedules, CMS, regulatory filings |
+
+**Document Workbench — spec drafted 2026-04-01:**
+- Indexes PDFs, Word, Excel locally using ChromaDB or LanceDB (embedded, no server)
+- Analyst queries firm's prior work product in plain English
+- AI returns answer grounded in source passages with citations and confidence scores
+- Privacy architecture identical to AW — documents never leave the machine
+- Embeddings via OpenAI text-embedding-3-small (customer's own API key) or Ollama (local)
+- Build trigger: confirmed paying customer relationship with Farragut/McDermott
+- Estimated build: 6–8 weeks from start given AW infrastructure already exists
+- Pricing target: $2,000–3,500/seat; bundle with AW at $4,500–7,000/seat
+
+**Why Document Workbench is the right second product:**
+- Same buyer (Stan, Jackie), same privacy justification, same procurement argument
+- Directly addresses Stan's stated use case: "crawl prior projects and deliverables"
+- Local-first RAG for regulated consulting firms does not exist as a polished product
+- Every engagement adds to the index — compounding value for repeat diligence work
+
+---
+
 ## PRIVACY ARCHITECTURE — THREE TIERS
 
 | Tier | Customer | Privacy Level | What it means |
@@ -61,6 +90,20 @@ SQL — without sending data to any cloud server.
 
 Farragut sits between Tier 1 and Tier 3 — law firm context requires Tier 3 assurance
 but may function day-to-day at Tier 1. AI Mode Switch (coming in M5) gives them both.
+
+**Key privacy language (use precisely):**
+- Correct: "AI generates analysis instructions from column names and statistics only"
+- Correct: "AI generates instructions that run on your computer"
+- Never say: "AI analyzes your data"
+- Procurement unlock: "No BAA required" — eliminates a major procurement barrier for law firms
+
+**On certifications:**
+SOC 2, ISO 27001, and similar certifications are designed for cloud vendors handling
+customer data on their systems. AW has no vendor systems — data never leaves the
+customer's machine. These certifications are largely irrelevant to AW's architecture.
+The higher-value move is a plain-English technical architecture document for legal review
+— already built (see BD Materials below). CMMC may become relevant for future
+government/federal contractor buyers.
 
 ---
 
@@ -76,6 +119,7 @@ but may function day-to-day at Tier 1. AI Mode Switch (coming in M5) gives them 
 - $500–800/seat annual maintenance
 - $5,000–10,000 onboarding engagement
 - Ongoing reference table library maintenance (recurring revenue)
+- Do NOT use $499 Tier 1 price in any Farragut materials
 
 Customer supplies their own OpenAI API key — no data intermediary.
 
@@ -114,9 +158,26 @@ sends a single row to the cloud."
 - Key contacts: Jackie (primary relationship, business-side), Stan (technical gatekeeper)
 - Casey's role: Delivered Compass work (GLOBE/GUARD memos), introduced AW, sent
   requirements email. Both memos delivered March 2026.
-- Status: Positive reception. Requirements email sent, no response yet. Follow-up needed.
+- Status: Stan responded to Casey's requirements email (2026-04-01). McDermott AI
+  policy call scheduled for Monday. Stan to send update next week.
 - Potential: 5–10 seat team license + onboarding + reference library. Anchor customer.
-- Next step: Casey sends follow-up to schedule demo call. Demo = Tutorial #4 live.
+  Expanded potential with Document Workbench — same buyer, broader scope.
+- Next step: Wait for Stan's update after Monday policy call. Do not send materials
+  before Stan's update arrives — Stan set the pace explicitly.
+
+**Stan's email — key points (received 2026-04-01):**
+Three use cases identified beyond Medicaid data analysis:
+  1. Internal query/database — crawl prior projects and deliverables (→ Document Workbench)
+  2. External data finder — source fee schedules, primary materials (→ Research Workbench)
+  3. Copy editing — AI first draft on notes (→ not an AW use case, separate tool)
+Stan confirmed privacy and accuracy are paramount. Interested in RAG and LLM-as-a-judge.
+McDermott AI policy call Monday — Stan to send update next week.
+
+**What this means strategically:**
+Stan described a broader AI platform vision. AW fits the structured data analytics layer.
+Document Workbench fits the institutional knowledge layer. Present as complementary tools,
+not competing. Do not stretch AW to cover use cases it doesn't handle — Stan is technical
+and will see through it.
 
 **Healthcare operations team (SECONDARY)**
 - Tier 3 prospect. Meeting prep materials complete. Date not confirmed.
@@ -138,11 +199,22 @@ to Shawn, becomes indispensable to their workflow.
 
 **Casey still needs to:**
 - Complete 5-module AW Immersion Program
-- Send follow-up email to Jackie and Stan
+- Wait for Stan's update before next outreach — do not push before Monday's call
 - Run Tutorial #4 cold dry run with Shawn playing Stan
 - Update his LinkedIn to show JetWare AI connection (coordinate with launch)
 
 **Casey's company relationship:** Subcontractor of JetWare AI LLC (agreement not yet drafted)
+
+**Introducing the software license through Casey:**
+Casey already mentioned AW was built with his dad — foundation is laid. Correct framing:
+Casey is a co-creator, not a reseller. Two commercial tracks must stay separate: Casey's
+consulting engagement and the AW software license. Do not bundle them.
+Timing: introduce the license after Stan clears AI policy, after second engagement is
+scoped, after Casey has demonstrated independent value. Casey's line: "As we get deeper
+into this workflow, it's probably worth talking about a proper software license for the
+team. The product is commercialized through my dad's company — JetWare AI. I can make
+that introduction when you're ready." Casey introduces — Shawn owns the proposal and
+contract. Casey never negotiates the software deal.
 
 ---
 
@@ -168,6 +240,30 @@ SOW stress test ready to run at v1.19.0 — all quality gates passed.
 **Not yet built:** Biosimilar tracker, MFN deal status, State Medicaid schema map
 
 Maintained reference library = recurring maintenance contract revenue.
+
+---
+
+## BD MATERIALS PRODUCED
+
+**Customer-facing:**
+- Tier 1 consultant one-pager
+- 8-slide deck, one-pager, talking points + demo script (healthcare operations)
+- Data Privacy and Security Architecture document — written for general counsel;
+  covers installation, data flow, AI mechanics, OpenAI API key ownership,
+  HIPAA/BAA inapplicability. Ready to send to Stan after Monday's policy call
+  if data security questions arise. Do not send proactively before Stan's update.
+
+**Internal/BD:**
+- Casey Immersion Guide, motivation email, conversation guide, onboarding guide
+- Farragut demo script
+- SOW capability mapping memo
+- Company formation checklist
+
+**Brand/web:**
+- JetWare AI family landing page (Analytics, Document, Research Workbench)
+- Document Workbench UI mockup — same design system, amber accent color
+- LinkedIn company page copy, Shawn personal LinkedIn rewrite
+- LinkedIn banner, email signature
 
 ---
 
@@ -199,14 +295,8 @@ Maintained reference library = recurring maintenance contract revenue.
 - Logo: Blue gradient JET, thin WARE AI, horizontal swoosh with jet detail
 - Tagline: "AI analytics for data that stays put."
 - Color palette: Dark navy (#11192c) + blue accent (#3b9fe8)
-
-**Assets complete:**
-- Square dark logo (LinkedIn company page, dark backgrounds)
-- White background logo (documents, email signature)
-- LinkedIn banner (1584x396)
-- Landing page (jetwareai.com)
-- Email signature
-- Infrastructure summary document
+- Product family accent colors: AW = green (#00E87A), Document Workbench = amber (#F59E0B),
+  Research Workbench = blue (#3B82F6)
 
 **Web presence:**
 - jetwareai.com — live on GitHub Pages (migrated from Cloudflare Pages 2026-04-01)
@@ -224,6 +314,18 @@ Maintained reference library = recurring maintenance contract revenue.
 
 ## LAST SESSION LOG (BD-RELEVANT)
 
+[2026-04-01] [BD] — Stan email received and analyzed. Three additional use cases identified
+  beyond Medicaid data (document RAG, external sourcing, copy editing). Product family
+  defined: Analytics Workbench, Document Workbench, Research Workbench. Document Workbench
+  product spec drafted. Family landing page and Document Workbench UI mockup produced (HTML).
+  Privacy architecture document produced for McDermott GC review (DOCX). Decision: hold all
+  outbound materials until Stan's Monday policy call update lands — Stan set the pace.
+  Casey/Shawn software license introduction timing discussed — post policy clearance.
+  Local model threat (Ollama/YouTube demo) assessed — M5 P4 Ollama integration is correct
+  response, not a threat. Certifications discussed — SOC 2 not relevant for local-first
+  architecture; plain-English legal document is the right move (built). Agentic BD second
+  project created with prompt file for ongoing AI/BD research.
+
 [2026-04-01] [BD] — jetwareai.com migrated from Cloudflare Pages to GitHub Pages
   (github.com/smcguan/jetwareai-site). Formspree contact form added (endpoint xlgolljk)
   — resolves email obfuscation issue that persisted through prior migration. Infrastructure
@@ -231,9 +333,7 @@ Maintained reference library = recurring maintenance contract revenue.
 
 [2026-03-31] [BD] — Company launch day. CA LLC rename confirmed complete. CPA engaged.
   Brand identity locked: blue palette, all logo formats. jetwareai.com live on Cloudflare
-  Pages (migrated from Worker — email obfuscation issue resolved). LinkedIn company page
-  built: banner, logo, tagline, about, specialties. LinkedIn personal profile fully updated:
-  headline, about, JetWare AI as current position, featured section, skills, contact info.
+  Pages. LinkedIn company page built. LinkedIn personal profile fully updated.
   Email signature complete. Notifications OFF — public launch post pending Casey coordination.
 
 [2026-03-29] [BD] — Wrap workflow established. SKILL.md updated. Testing procedure
@@ -243,17 +343,19 @@ Maintained reference library = recurring maintenance contract revenue.
   Column Name Interpreter confirmed working.
 
 [2026-03-24] [BD] — Casey Immersion Guide, motivation email, conversation guide,
-  onboarding guide, company formation checklist all built. Wyoming LLC checklist
-  complete — filing not started. SOW capability mapping memo built.
+  onboarding guide, company formation checklist all built. SOW capability mapping memo built.
 
 ---
 
 ## OPEN DECISIONS
 
-- [ ] Farragut meeting date — not yet confirmed
+- [ ] Farragut meeting date — pending Stan's Monday policy call update
 - [ ] Farragut pricing — $3k–4.5k/seat, confirm before proposal
-- [ ] Casey follow-up email — needs to go out this week
-- [ ] Casey immersion program — must complete before meeting
+- [ ] Farragut proposal — hold until after Stan's update; highest BD priority once cleared
+- [ ] Document Workbench build start — trigger: confirmed paying Farragut relationship
+- [ ] Casey follow-up — hold until Stan's update lands next week
+- [ ] Casey immersion program — must complete before demo meeting
+- [ ] Casey/Shawn software license introduction — after Stan clears AI policy
 - [ ] LinkedIn public launch post — pending Casey coordination. Notifications currently OFF.
 - [ ] Casey subcontractor agreement — needed before contract
 - [ ] IP assignment — AW to Jetware AI LLC
@@ -275,22 +377,22 @@ Maintained reference library = recurring maintenance contract revenue.
 
 ## NEXT ACTIONS
 
-**Immediate (tomorrow):**
-- Confirm jetwareai.com Contact Us form is delivering email via Formspree
-- Run linkedin.com/post-inspector → paste jetwareai.com → Inspect (fixes Featured section OG image)
-- Coordinate with Casey on launch timing before turning notifications on
-
 **This week:**
-- Casey sends follow-up email to Jackie and Stan
-- Casey begins AW Immersion Program
+- Wait for Stan's update (expected after Monday McDermott AI policy call)
+- Casey: do not send anything to Stan or Jackie before update arrives
 - IRS name change notification — confirm with CPA
 - Bank account rename to Jetware AI LLC
+- Shawn: finish M5 P1 multi-dataset UNION/normalization — prerequisite for demo
+- Shawn: run Tutorial #4 end-to-end, time it, find rough spots
 
-**Before Farragut meeting:**
+**When Stan's update arrives:**
+- If policy cleared → send privacy architecture document, schedule demo
+- If policy questions raised → respond with targeted materials matched to questions
+- Draft Farragut proposal immediately (do not wait further)
+
+**Before Farragut demo meeting:**
 - Casey completes immersion program
 - Casey dry run Tutorial #4 — Shawn plays Stan
-- Confirm meeting date
-- Draft Farragut proposal (hold until post-Stan policy call)
 - Draft Casey subcontractor agreement
 - USPTO trademark filings
 
@@ -304,5 +406,5 @@ Maintained reference library = recurring maintenance contract revenue.
 ## HOW TO USE THIS FILE
 
 Start BD session: paste this file, say "JetWare AI BD context loaded."
-End BD session: note key decisions. Claude Code wrap script updates automatically.
-Full technical detail: see CONTEXT.md.
+End BD session: note key decisions. Claude Code wrap script updates CONTEXT.md automatically.
+This file updated manually at end of BD sessions. Full technical detail: see CONTEXT.md.

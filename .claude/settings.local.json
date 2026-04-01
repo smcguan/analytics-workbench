@@ -18,7 +18,9 @@
       "Bash(PYTHONPATH=backend .venv/Scripts/python -m pytest tests/ -q)",
       "Bash(PYTHONPATH=backend .venv/Scripts/python tests/run_all.py)",
       "Bash(PYTHONPATH=backend .venv/Scripts/python tests/test_accuracy.py)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ]
   },
   "hooks": {

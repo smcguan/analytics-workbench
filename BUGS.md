@@ -19,8 +19,7 @@ MISSING_TEST | CONCURRENCY | SCHEMA_ASSUMPTION | EXTERNAL_BEHAVIOR | SPEC_GAP
 
 ## SYNTHESIS SUMMARY — Last run: 2026-03-31
 
-**Top risk:** Demo runner is a divergent code path — every new feature added to the
-main query flow will silently fail in demos unless manually wired in each time.
+**Top risk:** CONCURRENCY pattern is more prevalent than initial analysis showed — BUG-001 was a race condition (not divergent path), and BUG-008 (file lock) is also concurrency. Async fire-and-forget calls in demo runner paths are a recurring risk as new AI features are added.
 
 **Scaling concern:** QUERY_ENGINE (3 bugs) and RESULTS_RENDER (2 bugs) are the most
 customer-facing components and currently have no end-to-end test coverage. Edge cases
@@ -45,12 +44,12 @@ multiply at 200+ customers.
 **Status:** FIXED — v1.19.1
 **Found:** 2026-03-31 — Self-test (Claude.ai session)
 **Component:** DEMO_RUNNER / RESULTS_RENDER
-**Root Cause:** CONCURRENCY
-**Summary:** Result Narrative field does not render when SQL runs through the Example Cases demo runner (Run All mode). Works correctly in normal query execution and Step Through mode.
-**Detail:** Demo runner called _fetchResultNarrative() as fire-and-forget (not awaited). In Run All mode the next step's query_run clears the narrative area before the AI response returns (~2-4s OpenAI latency vs 800ms step pause). The code path was correct — the call was present at both query_run and ai_ask handlers — but the race condition prevented the narrative from ever being visible.
-**Fix:** Await _fetchResultNarrative() in both demo runner SQL execution paths (query_run handler line 5590, ai_ask handler line 5851). Run All now waits for narrative to render before advancing.
-**Fix Commit:** v1.19.1
-**Test Added:** PENDING
+**Root Cause:** CONCURRENCY (corrected from DIVERGENT_PATH)
+**Summary:** Result Narrative missing in Run All demo mode — race condition between _fetchResultNarrative() and the next step clearing the narrative area.
+**Detail:** _fetchResultNarrative() was fire-and-forget in demo runner paths. tutorialRunAll() paused only 800ms before advancing to next step, which cleared the narrative area (line 7275). OpenAI call takes 2-4 seconds — narrative response arrived after the area was already cleared. Step Through mode worked fine because user controls pace manually.
+**Fix:** Await _fetchResultNarrative() in both demo runner paths (query_run at line 5590, ai_ask at line 5851). Normal runSqlQuery() path left fire-and-forget — no automated next step overwrites it.
+**Fix Commit:** 7c034d8 — v1.19.1
+**Test Added:** Yes
 
 ---
 
@@ -176,4 +175,5 @@ multiply at 200+ customers.
 ---
 
 ## CHANGELOG
+- 2026-03-31 — BUG-001 fixed v1.19.1. Root cause corrected to CONCURRENCY. 1,079 tests passing.
 - 2026-03-31 — File created. 9 bugs back-populated. Synthesis run added.
