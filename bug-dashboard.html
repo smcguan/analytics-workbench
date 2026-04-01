@@ -521,6 +521,27 @@
 </div>
 
 <script>
+// Auto-fetch BUGS.md when served via localhost
+window.addEventListener('DOMContentLoaded', () => {
+  if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+    fetch('BUGS.md')
+      .then(r => {
+        if (!r.ok) throw new Error('BUGS.md not found');
+        return r.text();
+      })
+      .then(text => {
+        document.getElementById('load-path').textContent = 'BUGS.md loaded automatically';
+        parseBugsMd(text);
+        document.getElementById('load-screen').style.display = 'none';
+        document.getElementById('main-app').style.display = 'block';
+        renderAll();
+      })
+      .catch(() => {
+        // Not found — fall back to manual file picker (silent fail)
+      });
+  }
+});
+
 const CAUSE_LABELS = {
   DIVERGENT_PATH:"Divergent path", MISSING_WIRE:"Missing wiring",
   TYPE_MISMATCH:"Type mismatch", PATH_RESOLUTION:"Path resolution",
