@@ -1,70 +1,38 @@
 {
   "permissions": {
     "allow": [
-      "Write",
-      "Bash(git *)",
-      "Bash(cd *&&*git *)",
-      "Bash(cd * && git *)",
-      "Bash(.venv/Scripts/python:*)",
-      "Bash(PYTHONPATH=backend .venv/Scripts/python:*)",
-      "Bash(cp:*)",
-      "Bash(mv:*)",
-      "Bash(mkdir:*)",
-      "Bash(touch:*)",
-      "Bash(chmod:*)",
-      "Bash(bash:*)",
-      "Bash(ls *)",
-      "Bash(cd *&&*ls *)",
-      "Bash(cd * && ls *)",
-      "Bash(cat:*)",
-      "Bash(head:*)",
-      "Bash(tail:*)",
-      "Bash(sleep:*)",
-      "Bash(cmd:*)",
-      "Bash(grep -n \"def test_\" /c/dev/analytics-workbench/tests/test_*.py)",
-      "Bash(grep -n \"/api/session\" /c/dev/analytics-workbench/tests/test_*.py)",
-      "Bash(grep:*)",
-      "Bash(python3:*)",
-      "Bash(python -m pytest tests/ -k \"sessions_saved or session_saved\" -v)",
-      "Bash(.venv/Scripts/pytest tests/ -k \"sessions_saved or session_saved\" -v)",
-      "Bash(.venv/Scripts/pytest tests/ -q)",
-      "Bash(cp -r frontend dist/AnalyticsWorkbench/)",
-      "Bash(cp -r data dist/AnalyticsWorkbench/)",
-      "Bash(cp .env dist/AnalyticsWorkbench/)",
-      "Bash(taskkill //F //IM AnalyticsWorkbench.exe)",
-      "Bash(python -c \":*)",
-      "Bash(PYTHONPATH=backend .venv/Scripts/python -c \":*)",
-      "Bash(python -m pytest tests/ -x -q --tb=short)",
-      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d[''''checks''''][''''frontend''''][''''path'''']\\)\")",
-      "Bash(.venv/Scripts/python -c \":*)",
-      "Bash(done)"
-    ],
-    "deny": [
-      "Read(C:/dev/analytics-workbench/.env)",
-      "Edit(C:/dev/analytics-workbench/.env)",
-      "Write(C:/dev/analytics-workbench/.env)",
-      "Grep(C:/dev/analytics-workbench/.env)"
-    ],
-    "ask": [
-      "Bash(curl:*)",
-      "Bash(wget:*)",
-      "Bash(ssh:*)",
-      "Bash(scp:*)",
-      "Bash(git clone:*)",
-      "Bash(rm:*)",
-      "Bash(rmdir:*)",
-      "Bash(del:*)",
-      "Bash(rd:*)",
-      "Bash(.venv/Scripts/python -m pip install:*)",
-      "Bash(.venv/Scripts/python -m pip uninstall:*)",
-      "Bash(.venv/Scripts/pip:*)",
-      "Bash(pip install:*)",
-      "Bash(pip uninstall:*)",
-      "Bash(npm:*)",
-      "Bash(npx:*)",
-      "WebFetch",
-      "WebSearch"
-    ],
-    "defaultMode": "auto"
+      "Read",
+      "Edit",
+      "Glob",
+      "Grep",
+      "Bash(ls:*)",
+      "Bash(dir:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(.venv/Scripts/python -m pytest:*)",
+      "Bash(.venv/Scripts/python -c:*)",
+      "Bash access",
+      "Bash(git pull:*)",
+      "Bash(git stash:*)",
+      "Bash(PYTHONPATH=backend .venv/Scripts/python -m pytest tests/ -q)",
+      "Bash(PYTHONPATH=backend .venv/Scripts/python tests/run_all.py)",
+      "Bash(PYTHONPATH=backend .venv/Scripts/python tests/test_accuracy.py)",
+      "Bash(git add:*)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python -c \"import json, sys; c=open('C:/dev/analytics-workbench/CONTEXT.md').read(); print(json.dumps({'hookSpecificOutput': {'hookEventName': 'SessionStart', 'additionalContext': 'SESSION JUST STARTED. As your very first action this session, respond immediately with a brief status greeting covering: (1) current version from CONTEXT.md, (2) the top 3 items from NEXT ACTIONS > Product / code section, (3) any ACTIVE BUGS. Keep it under 15 lines total.\\n\\nFull CONTEXT.md contents:\\n' + c}})); sys.exit(2)\"",
+            "statusMessage": "Loading project context...",
+            "asyncRewake": true
+          }
+        ]
+      }
+    ]
   }
 }

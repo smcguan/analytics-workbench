@@ -10,7 +10,7 @@ stays on the analyst's machine — AI generates analysis instructions, not data 
 **Tech stack:** FastAPI backend, DuckDB query engine, OpenAI GPT-4.1-mini for AI,
 vanilla HTML/JS/CSS frontend, PyInstaller packaging for Windows desktop.
 
-**Current version:** v1.19.0 | **Total commits:** 130+ | **Test suite:** 1,100 tests (three suites, AI accuracy 100%)
+**Current version:** v1.19.1 | **Total commits:** 130+ | **Test suite:** 1,079 tests (three suites, AI accuracy 100%)
 
 ---
 
@@ -132,6 +132,7 @@ Building toward reproducible, auditable, shareable analytical sessions:
 | v1.10.2 | 2026-03-21 | Bug #18: Refresh was deleting disk files (root cause of restore loop); Clear SQL button; Sessions Save exits; SQL auto-clears on restore |
 | v1.10.3 | 2026-03-21 | Chart tab disabled until query returns chartable result; Sessions Save no longer exits; restore filters dataset list to session dataset only |
 | v1.11.0 | 2026-03-21 | SESSIONS sidebar removed; snapshots retired; Welcome card is session hub (Resume + Save); Reference Guide as slide-in drawer; 603 tests |
+| v1.19.1 | 2026-04-01 | BUG-001 fix: Result Narrative race condition in demo runner — await _fetchResultNarrative() in query_run and ai_ask handlers; 1,079 tests |
 | v1.19.0 | 2026-03-29 | Three-suite test infrastructure (1,100 tests); Bugs #9/#10/#11 permanently fixed; query accuracy golden dataset suite; AI accuracy 100% (20/20); pre-push hook |
 | v1.18.1 | 2026-03-24 | PyInstaller DLL portability fix — dynamic pythonXYZ.dll lookup, works on Python 3.13 and 3.14; pyarrow.tests excluded; BUILD_RELEASE.bat verification dynamic; 642 tests |
 | v1.18.0 | 2026-03-24 | JetWare AI logo, tutorial integration test suite, 4 new event types (explain/chart/save/load), Tutorial #4 +6 steps, Tutorial #6 +5 steps, 3 engine guards, DATE CAST AI prompt fix; 642 tests |
@@ -147,6 +148,10 @@ Building toward reproducible, auditable, shareable analytical sessions:
 
 ## Wrap Records
 <!-- Each /wrap appends a 3-line summary below. Most recent at top. -->
+
+**v1.19.1** | 2026-04-01
+BUG-001 fixed: Result Narrative race condition in demo runner. _fetchResultNarrative() was
+fire-and-forget; now awaited in both query_run and ai_ask handlers. Root cause: CONCURRENCY.
 
 **v1.19.0** | 2026-03-29
 Three-suite test infrastructure: unit (872), feature+workflow (185), query accuracy (43). Bugs #9/#10/#11

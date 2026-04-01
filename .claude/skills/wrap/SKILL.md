@@ -19,7 +19,14 @@ Run `git log --oneline` to see all commits this session. Use this to build
 an accurate summary of what was built, changed, and fixed — do not rely on
 memory alone.
 
-**4. Update CONTEXT.md — full file review**
+**4. Update BUGS.md — inline confirmation**
+- Confirm that every bug fixed this session was already updated inline at fix time.
+- If any fixed bug was not updated inline, update it now:
+  Set Status to FIXED, add version number, add fix commit reference, mark Test Added.
+- Do NOT add bugs that were found but not yet fixed — those stay OPEN.
+- Do NOT add new bugs discovered this session unless they were also fixed this session.
+
+**5. Update CONTEXT.md — full file review**
 - Append a session log entry under Last Session Log:
   Format: [DATE] [CODE] — what was built, what changed, what's next.
 - Update test count to match step 1 results.
@@ -28,7 +35,7 @@ memory alone.
 - Update component/feature statuses if they changed.
 - Update bug tracker entries if bugs were fixed or found.
 
-**5. Update CLAUDE.md — full file review**
+**6. Update CLAUDE.md — full file review**
 - Add new API endpoints to the endpoints list.
 - Add new bugs to the resolved or active bugs section.
 - Update repository structure if new directories were added.
@@ -36,30 +43,30 @@ memory alone.
 - Update coding conventions if new patterns were established.
 - Do NOT just append — read the relevant sections and update them.
 
-**6. Update Reference Guide (in frontend/index.html)**
+**7. Update Reference Guide (in frontend/index.html)**
 - If any user-facing features changed this session, update the Reference
   Guide content in the `referenceGuideView` section of index.html.
 - Check: sidebar layout, import flow, sessions/snapshots, privacy model,
   example cases, troubleshooting — update any section that was affected.
 - The Reference Guide is the in-app documentation. It must stay accurate.
 
-**7. Review and update Welcome screen (in frontend/index.html)**
+**8. Review and update Welcome screen (in frontend/index.html)**
 - Read the `welcomeDefaultCard` and `welcomeResumeCard` sections of index.html.
 - Update the feature highlights list if new features were added this session.
 - Update any version references or capability descriptions that changed.
 - The Welcome screen is the first thing a new user sees — keep it current.
 
-**8. Update RECORD.md**
+**9. Update RECORD.md**
 - Add a row to the Version History table.
 - Append a 3-line wrap record under "Wrap Records" (most recent at top):
   Format: version number, date, and what was built/changed/fixed.
 
-**9. Check for uncommitted changes**
+**10. Check for uncommitted changes**
 Run `git status` and warn if there are unstaged changes that would be
 left behind. Stage all relevant changed files.
 
-**10. Commit with descriptive message**
+**11. Commit with descriptive message**
 Stage all updated files and commit. Message should summarize the session.
 
-**11. Push to remote**
+**12. Push to remote**
 Run `git push` after successful commit.

@@ -38,9 +38,9 @@
 - Tutorial #6 Parameterized Workflow — COMPLETE (v1.17.0) — Retail Sales Performance, Edit panel dataset+reference swap demo
 - Natural language queries in tutorials — COMPLETE (v1.17.0) — 22 query_run steps converted to ai_ask across 7 demos
 
-**Current version:** v1.19.0 — demo-ready for Farragut/McDermott meeting
+**Current version:** v1.19.1 — demo-ready for Farragut/McDermott meeting
 
-**Test suite:** 1,100 automated tests across three suites, all passing.
+**Test suite:** 1,079 automated tests across three suites, all passing.
 - Unit tests (pytest tests/): 872 passed, 21 skipped
 - Feature + workflow suite (run_all.py): 185 passed, 1 skipped
 - Query accuracy suite (test_accuracy.py): 43 passed (23 deterministic + 20 AI)
@@ -375,6 +375,11 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-04-01] [CODE] — v1.19.1. BUG-001 fixed: Result Narrative race condition in demo
+  runner. _fetchResultNarrative() was fire-and-forget in query_run and ai_ask handlers;
+  next step's 800ms pause was shorter than OpenAI's 2-4s response time, so narrative
+  got cleared before rendering. Fix: await the call in both demo runner paths. Root cause
+  corrected from DIVERGENT_PATH to CONCURRENCY in BUGS.md. 1,079 tests passing.
 [2026-03-29] [BD] — Wrap workflow established. SKILL.md updated to run all three test
   suites (pytest + run_all.py + test_accuracy.py) and update both CONTEXT.md and
   CONTEXT_BUSINESS.md on every wrap. Testing procedure Word doc produced for enterprise
@@ -578,6 +583,8 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
   dataset, reference, SQL editor, and Ask Your Data field. Session resume now restores last
   natural-language question to Ask Your Data field (last_question stored in resume_state via
   AI_SQL_GENERATED events; field blanked on resume if no question was saved). 603 tests. v1.12.0.
+[2026-03-31] [BD] — Company launch day. CA LLC rename to Jetware AI LLC confirmed complete. CPA engaged (existing relationship). Brand identity locked: blue palette, JetWare AI logo in all formats (square dark, white background, banner). jetwareai.com live on Cloudflare Pages (migrated from Worker — email obfuscation issue resolved). LinkedIn company page built: banner, logo, tagline, about, specialties. LinkedIn personal profile fully updated: headline, about, JetWare AI as current position, featured section, skills, contact info. Email signature complete. Notifications off — public launch post pending Casey coordination.
+
 [2026-03-21] [CODE] — Major UX simplification: SESSIONS sidebar section removed entirely; snapshots
   retired; Welcome card is now the session hub (Resume Session dropdown + Save Session name field).
   Reference Guide converted to right-side slide-in drawer — sidebar stays visible while reading.
@@ -632,7 +639,12 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 - [ ] Stan conversation prep — Casey needs to be briefed. Casey immersion guide built — needs to complete it.
 - [x] Casey immersion program — COMPLETE. 5-module guide built March 2026.
 - [x] Casey email re: AW opportunity — COMPLETE. Sent March 2026.
-- [ ] Wyoming LLC formation — checklist built, filing not yet started.
+- [x] Wyoming LLC formation — DROPPED. CA LLC rename to Jetware AI LLC is the correct path and is complete.
+- [x] CA LLC rename — COMPLETE 2026-03-31.
+- [ ] IRS name change notification — CPA to handle (same EIN).
+- [ ] Bank account name update to Jetware AI LLC.
+- [ ] USPTO trademark filings — Class 9 and Class 42 (~$500 total) — pending.
+- [ ] LinkedIn public launch post — pending Casey coordination. Notifications currently OFF.
 - [ ] Multi-state Medicaid sample file — ask Farragut for sanitized sample to validate schema mapping approach.
 - [ ] M5 P1 scope — schema mapping only, or include MCO lookup in same build?
 - [ ] Analysis Summary Artifact format — configurable template (Farragut memo style) vs. fixed output?
@@ -650,15 +662,18 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 ## NEXT ACTIONS
 
 **Business development (Claude.ai):**
-- Send Casey immersion guide and motivational email — PENDING CONFIRMATION
+- Check jetwareai.com Contact Us button — confirm email working after Pages migration
+- Run linkedin.com/post-inspector on jetwareai.com — force OG image refresh for Featured section
+- Coordinate with Casey on launch timing before turning notifications on
+- Publish LinkedIn launch post when ready
+- IRS name change notification — confirm with CPA
+- Bank account rename to Jetware AI LLC
+- USPTO trademark filings — Class 9 and Class 42
 - Casey completes immersion program — debrief after Module 5
 - Casey dry run of Tutorial #4 with you playing Stan
 - Casey sends follow-up email to Jackie and Stan — template in conversation guide
 - Confirm meeting date and attendees with Farragut
-- File Wyoming LLC — JetWare AI confirmed as company name
-- Draft proposal for Farragut/McDermott (team license + onboarding + library)
-- Draft proposal and contract template skeleton
-- Run SOW stress test — READY — execute GLOBE/GUARD analysis in AW step by step
+- Draft proposal for Farragut/McDermott (team license + onboarding + library) — hold until post-Stan policy call
 
 **Product / code (Claude Code):**
 - ~~Build comprehensive feature test suite~~ COMPLETE — 168 tests passing

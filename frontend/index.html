@@ -5587,6 +5587,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 updateChartTab(lastRun.visualization);
                 $("copyResultSummaryBtn").disabled = false;
                 $("saveAsDatasetBtn").disabled = lastRun.rowcount === 0;
+                await _fetchResultNarrative();
                 _onQueryExecuted();
                 // Do NOT collapse during playback — analyst needs to see the SQL
                 // Auto-collapse only applies to manual query execution
@@ -5847,6 +5848,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                     updateChartTab(lastRun.visualization);
                     $("copyResultSummaryBtn").disabled = false;
                     $("saveAsDatasetBtn").disabled = lastRun.rowcount === 0;
+                    await _fetchResultNarrative();
                     _onQueryExecuted();
                 }
 
@@ -8296,6 +8298,9 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             $("explainPanel").style.display = "none";
             $("explainText").textContent = "";
             $("chartContainer").style.display = "none";
+            // Clear result narrative
+            $("resultNarrativeArea").style.display = "none";
+            $("resultNarrativeText").textContent = "";
             lastRun = { columns: [], rows: [], rowcount: 0, elapsed: 0, sql: "", visualization: null };
             $("saveAsDatasetBtn").disabled = true;
             $("copyResultSummaryBtn").disabled = true;

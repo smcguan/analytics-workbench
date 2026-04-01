@@ -4,6 +4,11 @@
 > CONTEXT.md is the single source of truth for milestone status, open decisions,
 > session log, and next actions. Always read CONTEXT.md alongside this file.
 > Historical milestone detail and resolved bugs are in HISTORY.md.
+>
+> **Also read BUGS.md at session start.**
+> BUGS.md is the structured bug log. When you fix a bug this session, update its
+> record in BUGS.md immediately — set Status to FIXED, add the version and commit
+> reference, and mark whether a test was added. Do not wait until session end.
 
 ---
 
@@ -362,13 +367,14 @@ AW_MAX_EXPORT_ROWS=200000
 
 ## WHEN CONTRIBUTING
 1. Always read CONTEXT.md at session start — current status, backlog, next actions
-2. Always read the actual file before editing — never assume current state
-3. Preserve frozen UI decisions unless explicitly told to change them
-4. Distinguish frontend vs backend problems clearly
-5. Prefer targeted fixes over rewrites
-6. Use /plan in Claude Code for any change touching multiple files
-7. Always .resolve() file paths to absolute
-8. Test that imports still work after any main.py change
-9. Never leave bare except: pass blocks — always log the error
-10. For any new AI endpoint, follow the suggest_questions caching pattern exactly
-11. When in doubt about DuckDB syntax, test with EXPLAIN before executing
+2. Always read BUGS.md at session start — active bugs, root causes, hardening priorities
+3. Always read the actual file before editing — never assume current state
+4. Preserve frozen UI decisions unless explicitly told to change them
+5. Distinguish frontend vs backend problems clearly
+6. Prefer targeted fixes over rewrites
+7. Use /plan in Claude Code for any change touching multiple files
+8. Always .resolve() file paths to absolute
+9. Test that imports still work after any main.py change
+10. Never leave bare except: pass blocks — always log the error
+11. For any new AI endpoint, follow the suggest_questions caching pattern exactly
+12. When in doubt about DuckDB syntax, test with EXPLAIN before executing
