@@ -38,7 +38,7 @@
 - Tutorial #6 Parameterized Workflow — COMPLETE (v1.17.0) — Retail Sales Performance, Edit panel dataset+reference swap demo
 - Natural language queries in tutorials — COMPLETE (v1.17.0) — 22 query_run steps converted to ai_ask across 7 demos
 
-**Current version:** v1.19.1 — demo-ready for Farragut/McDermott meeting
+**Current version:** v1.19.2 — demo-ready for Farragut/McDermott meeting
 
 **Test suite:** 1,079 automated tests across three suites, all passing.
 - Unit tests (pytest tests/): 872 passed, 21 skipped
@@ -375,6 +375,11 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-04-02] [CODE] — v1.19.2. Logo refresh: replaced jetware_logo.png in frontend/assets/
+  and src/assets/ with new JetWare AI branded logo. Added cache-busting ?v=2 query params
+  on both logo <img> references in index.html. CSS sizing changes attempted and fully
+  reverted — logo displays at original dimensions. Identified build asset chain:
+  frontend/assets/ (dev server + xcopy), src/assets/ (PyInstaller bundle). 872 tests passing.
 [2026-04-01] [CODE] — v1.19.1. BUG-001 fixed: Result Narrative race condition in demo
   runner. _fetchResultNarrative() was fire-and-forget in query_run and ai_ask handlers;
   next step's 800ms pause was shorter than OpenAI's 2-4s response time, so narrative
