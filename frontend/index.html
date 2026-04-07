@@ -2880,7 +2880,7 @@ LIMIT 100</textarea>
 
 <h3>Getting Started</h3>
 <p><strong>Analytics Workbench</strong> is a local-first AI analytics tool. Import any structured dataset, get automatic insights, query with natural language or SQL, and export results with a full audit trail.</p>
-<p><strong>Privacy model:</strong> AI sees only column names and aggregate statistics. Your row data never leaves your machine. AI generates analysis <em>instructions</em> (SQL) that execute locally via DuckDB.</p>
+<p><strong>Privacy model:</strong> Your row data never leaves your machine. In default mode, AI features receive column names, statistics, and limited sample context to improve accuracy. Enable Privacy Mode in Settings to restrict all AI transmissions to column names and statistics only. AI generates analysis <em>instructions</em> (SQL) that execute locally via DuckDB.</p>
 <p><strong>Four-step workflow:</strong></p>
 <ol>
 <li><strong>Import</strong> — load a CSV, Excel, TSV, or Parquet file</li>
@@ -3045,7 +3045,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 
 <hr>
 <h3>Settings</h3>
-<p><strong>API Key:</strong> AW requires your own OpenAI API key. On first launch, a setup screen prompts you to enter it. The key is encrypted and stored locally at <code>%APPDATA%\JetWareAI\config.enc</code> — it is never transmitted to JetWare AI.</p>
+<p><strong>API Key:</strong> AW requires your own OpenAI API key. On first launch, a setup screen prompts you to enter it. The key is encrypted and stored locally at <code>%APPDATA%\JetWareAI\config.enc</code> — it is never transmitted to JetWare AI. An OpenAI account with API access is required. Visit <a href="https://platform.openai.com" target="_blank" rel="noopener">platform.openai.com</a> to create one and generate a key before first launch.</p>
 <p>To manage your key later, click <strong>Settings</strong> in the sidebar. You can view the masked key, update it, or remove it.</p>
 <p><strong>Privacy Mode:</strong> A toggle in the Settings panel that controls exactly what context is sent to OpenAI. The current state (On/Off) is always visible in the Settings panel.</p>
 <p><strong>When Privacy Mode is OFF (default):</strong></p>
@@ -3075,7 +3075,8 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 <tr style="border-bottom:1px solid var(--bg2);"><td style="padding:6px; font-weight:600; white-space:nowrap;">"Parser error"</td><td style="padding:6px;">Check DuckDB syntax. Remove trailing semicolons.</td></tr>
 <tr style="border-bottom:1px solid var(--bg2);"><td style="padding:6px; font-weight:600; white-space:nowrap;">Import fails</td><td style="padding:6px;">Check file format. Try saving as CSV if Excel fails.</td></tr>
 <tr style="border-bottom:1px solid var(--bg2);"><td style="padding:6px; font-weight:600; white-space:nowrap;">Insights not generating</td><td style="padding:6px;">Check that your API key is configured in Settings.</td></tr>
-<tr><td style="padding:6px; font-weight:600; white-space:nowrap;">Wrong dataset after restore</td><td style="padding:6px;">The saved dataset may have been deleted. Re-import it and try again.</td></tr>
+<tr style="border-bottom:1px solid var(--bg2);"><td style="padding:6px; font-weight:600; white-space:nowrap;">Wrong dataset after restore</td><td style="padding:6px;">The saved dataset may have been deleted. Re-import it and try again.</td></tr>
+<tr><td style="padding:6px; font-weight:600; white-space:nowrap;">AI narratives or explanations are vague or generic</td><td style="padding:6px;">Privacy Mode may be enabled. When on, result rows are withheld from AI prompts — narratives summarize based on column context only. Check Settings to review the current Privacy Mode state.</td></tr>
 </table>
 
         </div>

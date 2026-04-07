@@ -40,7 +40,7 @@
 - Customer API key management — COMPLETE (v1.20.0) — Fernet-encrypted key storage at %APPDATA%\JetWareAI\config.enc, first-launch setup overlay, Settings panel, 402 guard on all AI endpoints, developer key removed from codebase
 - Privacy Mode toggle — COMPLETE (v1.21.0) — Settings panel toggle restricts all AI transmissions to schema+stats only when enabled. Strips sample rows, categorical values, and query result rows from 5 affected endpoints. JSON config format in config.enc. Reference Guide rewritten with per-endpoint disclosure.
 
-**Current version:** v1.21.0 — Privacy Mode toggle, demo-ready for Farragut/McDermott meeting
+**Current version:** v1.21.1 — Reference Guide accuracy pass, demo-ready for Farragut/McDermott meeting
 
 **Test suite:** 1,098 automated tests across three suites, all passing.
 - Unit tests (pytest tests/): 872 passed, 21 skipped
@@ -377,6 +377,22 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-04-07] [BD+CODE] — Major documentation and privacy hardening session. Privacy Mode toggle
+  complete (v1.21.0) and verified via prompt-level audit — debug_prompts.log confirmed sample
+  rows and result rows correctly stripped in all five affected endpoints when Privacy Mode ON.
+  Debug logging removed. Privacy Architecture document fully rewritten — accurate feature-by-feature
+  inventory, both modes documented, Ollama corrected to on roadmap. Evaluation Setup Guide
+  updated — privacy table reflects both modes. In-app Reference Guide updated — Getting Started
+  blurb corrected, Settings section has full Privacy Mode documentation with exact per-feature
+  behavior in both states, dynamic toggle label showing current transmission state, OpenAI account
+  requirement added, troubleshooting row added. SOW stress test COMPLETE — Tutorial #4 Multi-State
+  Medicaid Diligence ran end-to-end, all 10 queries passed baselines, workflow replay produced
+  identical results to original tutorial run. Evaluation package validated. Document Workbench spec
+  written — Ollama provider interface designed in from day one, ChromaDB vector store, PyMuPDF
+  ingestion, OpenAI and Ollama answer providers, Option A separate app recommended, CMS library v1
+  content plan included. Five Farragut use cases briefed and mapped to product: CIM extraction and
+  CMS rule repository require Document Workbench (6-8 weeks); PE ownership database is AW query
+  partial with org chart gap; cash pay analysis and IDRE are AW today.
 [2026-04-07] [CODE] — v1.21.0. Privacy Mode toggle. key_manager.py migrated to JSON config
   format (backward-compatible with plain-key v1.20.x files). get_privacy_mode()/set_privacy_mode()
   added. 2 new API endpoints: GET/POST /api/settings/privacy_mode. context_builder.py accepts
@@ -710,7 +726,7 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 - ~~Build comprehensive feature test suite~~ COMPLETE — 168 tests passing
 - ~~Build query accuracy test suite~~ COMPLETE — 46 tests, 100% AI accuracy
 - ~~Fix Bugs #9, #10, #11~~ COMPLETE — permanently fixed, workarounds retired
-- Run SOW stress test — ready now, all quality gates passed
+- ~~Run SOW stress test~~ COMPLETE — Tutorial #4 end-to-end, all 10 queries passed baselines
 - Build Feature 6 — Compare Mode
 - Build Feature 7 — Shareable HTML Export
 - Fix Feature 3 — Smarter Suggestions three-step sequence UI

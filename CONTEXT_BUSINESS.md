@@ -1,16 +1,16 @@
 # JetWare AI — Business Development Context File
 # Paste this at the start of any Claude.ai BD session.
 # Say "JetWare AI BD context loaded" to proceed.
-# Updated at the end of every BD session and by Claude Code wrap script.
+# Updated: 2026-04-07
 # For full technical product detail see CONTEXT.md.
 
 ---
 
 ## COMPANY
 
-**Company name:** JetWare AI (Jetware AI LLC — California LLC, rename from LifeModeler Services LLC COMPLETE 2026-03-31)
+**Company name:** JetWare AI (Jetware AI LLC — California LLC, rename COMPLETE 2026-03-31)
 **Product:** Analytics Workbench (AW) — local-first AI analytics desktop application
-**Stage:** Pre-revenue. Brand launched. LinkedIn launched 2026-04-07. First customer engagement in progress.
+**Stage:** Pre-revenue. Brand launched. Evaluation package complete. First customer engagement in progress.
 **Developer:** Shawn (product owner, sole developer, 100% owner)
 **BD lead:** Casey (Shawn's son, CS degree, embedded at Farragut/McDermott)
 
@@ -18,589 +18,154 @@
 
 ## PRODUCT SUMMARY
 
-Analytics Workbench is a Windows desktop application for analysts who work with
-sensitive data. It imports CSV, Excel, TSV, and Parquet files locally, surfaces
-insights automatically, and answers natural language questions via AI-generated
-SQL — without sending data to any cloud server.
+**Current version:** v1.21.0 — Privacy Mode complete and verified, SOW stress test passed, evaluation package ready for Farragut sandbox install.
+**Test suite:** 1,098 automated tests passing. AI SQL accuracy: 100% (20/20).
 
-**Current version:** v1.20.0
-**Test suite:** 1,079 automated tests, all passing. AI SQL accuracy: 100% (20/20).
+Core capabilities: import up to 220M rows, automatic insight cards, natural language to SQL, Reference Table JOIN, Session Log, Workflows, Parameterized Workflows, Customer API Key Management, Privacy Mode toggle, 8 Example Workflows including Multi-State Medicaid Diligence.
 
-**Core capabilities (all shipped):**
-- Import up to 220M rows — loads in seconds
-- Automatic insight cards on import — concentration, outliers, trends
-- Natural language to SQL — AI generates, analyst reviews and runs
-- Reference Table JOIN — enrich data against lookup CSVs without exporting
-- Session Log — full audit trail of every query and result
-- Workflows — record, save, and replay analytical sessions
-- Parameterized Workflows — swap files and rerun same methodology on new data
-- Save as Dataset — materialize JOIN results without Excel export
-- Column Name Interpreter — human-readable aliases for cryptic column names
-- Result Narrative — two-sentence plain English summary after every query
-- Sanity Check — automatic warnings on suspicious results
-- Smarter Suggestions — three-step analytical sequence on any dataset
-- Example Workflows — 8 built-in tutorials across 5 domains
-- JetWare AI logo — branding in header and Welcome card
+**SOW stress test COMPLETE 2026-04-07:** Tutorial #4 ran end-to-end. All 10 queries passed baselines. Workflow replay identical to original run. Ready for Farragut sandbox.
 
-**Key selling points by audience:**
-- Consultants: "No NDA violations — data never leaves your machine"
-- Law firms: "No BAA required — no client data touches our systems"
-- Healthcare/government: "Full air-gap option available — zero external API calls"
-- PE diligence firms: "Replayable workflows — same methodology, new target, one click"
-- Enterprise IT: "1,079 automated tests — 100% AI SQL accuracy verified"
+**Known demo limitation:** Schema normalization JOIN requires pre-written SQL. Frame as "save once, rerun" — sets up Parameterized Sessions story.
 
-**Known demo limitation:** Schema normalization JOIN queries cannot be reliably
-generated from natural language. Pre-written SQL is required for that step.
-Frame this as "your analyst saves this once and reruns it" — honest and
-sets up the Parameterized Sessions story naturally.
-
-**API KEY STATUS — COMPLETE:**
-Customer API key management is built and shipped. On first launch AW prompts
-for the customer's OpenAI API key. Key is encrypted and stored locally at
-%APPDATA%\JetWareAI\config.enc. Persists across sessions. Updateable via
-Settings panel. Developer key fully removed from codebase. JetWare AI is
-no longer in the data path at all.
-
-**AI touchpoint audit — COMPLETE:**
-Full prompt-level audit conducted. Confirmed transmission inventory by feature:
-- SQL generation / query suggestions: schema, stats, up to 5 sample rows,
-  up to 10 categorical values per column, natural language question
-- Result Narrative / Explain: question, column names, row count, up to 5-10
-  result rows (query output, not raw source data)
-- Insight cards: schema and aggregate stats only — no sample rows (cleanest feature)
-- Column aliases, analysis sequences, workflow suggestions: column names only
-
-**Privacy Mode toggle — IN DEVELOPMENT:**
-Settings toggle that restricts all AI transmissions to schema and aggregate
-statistics only when enabled. Strips sample rows, categorical values, and
-result rows from all AI prompts. Persists in encrypted local settings alongside
-API key. Claude Code implementation prompt drafted and passed to dev project.
-This feature must be built and verified before evaluation package ships.
+**Customer onboarding requirement:** Customer must supply own OpenAI API key on first launch. Casey must brief Farragut before install.
 
 ---
 
-## PRIVACY ARCHITECTURE — THREE TIERS
+## PRIVACY ARCHITECTURE
 
-| Tier | Customer | Privacy Level | What it means |
-|------|----------|---------------|---------------|
-| 1 | Consultants/freelancers | Schema-only AI | AI sees column names + stats only. Data stays local. |
-| 2 | Mid-market finance/ops | Result Passport | Analyst collaboration without raw data leaving. |
-| 3 | Healthcare/government/law firms | Local AI mode | Zero external API calls. Full air-gap. Auditable. |
+| Tier | Customer | Privacy Level |
+|------|----------|---------------|
+| 1 | Consultants/freelancers | Schema-only AI — data stays local |
+| 2 | Mid-market finance/ops | Result Passport collaboration |
+| 3 | Healthcare/government/law firms | Local AI mode — full air-gap |
 
-Farragut sits between Tier 1 and Tier 3 — law firm context requires Tier 3 assurance
-but may function day-to-day at Tier 1. AI Mode Switch (coming in M5) gives them both.
+**Privacy Mode (v1.21.0 COMPLETE):** Toggle in Settings. When ON, all AI restricted to schema and aggregate statistics only. Verified via prompt-level audit. When OFF (default), SQL generation sends up to 5 sample rows + 10 categorical values; Result Narrative/Explain send up to 5-10 result rows.
 
-**Privacy statement for customer conversations:**
-"Your data files never leave your machine. When AI features are used, the system
-sends limited structural information — column names, statistics, and in some features
-a small number of sample values — to generate SQL. No complete records or bulk data
-are ever transmitted. For highly sensitive environments, Privacy Mode restricts all
-AI transmissions to column names and statistics only — no sample values of any kind."
-
-**Privacy Mode framing (for Tier 3 / law firm conversations):**
-Standard mode: schema, stats, up to 5 sample rows for improved SQL accuracy.
-Privacy Mode: schema and stats only. Zero sample values or result rows transmitted.
-Recommended for attorney-client privilege and air-gap environments.
-
-**No BAA required** — this is a procurement unlock that must be front and center
-with healthcare/law firm buyers.
+**Ollama local AI mode:** ON ROADMAP. Not built. Documented accurately in all customer-facing materials as "available upon request."
 
 ---
 
-## PRICING STRUCTURE
+## FIVE FARRAGUT USE CASES
 
-- Tier 1 (consultants/freelancers): $300–800 one-time + 15–20% annual maintenance
-- Tier 2 (mid-market finance/ops): $1,000–2,500 per seat + maintenance
-- Tier 3 (healthcare/government): $2,000–5,000 per seat + consulting engagement
-- Consulting/onboarding: $150–300/hr or fixed project fee
+| Use Case | Product | Status | Build Needed |
+|---|---|---|---|
+| CIM extraction (Andrew) | Document Workbench | Not built | 6-8 weeks |
+| CMS rule repository | Document Workbench + library | Not built | 6-8 weeks + curation |
+| PE ownership database | AW query + new viz | Partial | Org chart: 3-4 weeks |
+| Cash pay entity analysis | Analytics Workbench | Available now | None |
+| IDRE data analysis | Analytics Workbench | Available now | Confirm format |
 
-**Farragut/McDermott proposal (not yet drafted — hold until NDA signed):**
-- 5–10 seat team license at $3,000–4,500/seat
-- $500–800/seat annual maintenance
-- $5,000–10,000 onboarding engagement
-- Ongoing reference table library maintenance (recurring revenue)
-
-Customer supplies their own OpenAI API key — no data intermediary.
+Cash pay and IDRE are the strongest cards — available today, no caveats.
+CIM and CMS rules require Document Workbench — spec complete, 6-8 week build.
+PE ownership — query works, org chart output is the gap.
 
 ---
 
-## GO-TO-MARKET POSITION
+## DOCUMENT WORKBENCH SPEC — COMPLETE
 
-**Primary positioning:**
-"Analytics Workbench is the only AI analytics tool that imports your files, surfaces
-insights automatically, lets you enrich your data without exporting it — and never
-sends a single row to the cloud."
+Spec uploaded to both projects (DOCUMENT_WORKBENCH_SPEC.md). Key decisions: separate .exe (Option A), PyMuPDF ingestion, ChromaDB vector store, abstract provider interface supporting both OpenAI and Ollama from day one, CMS regulatory library v1 content plan, recurring maintenance revenue model.
 
-**Tagline:** "AI analytics for data that stays put."
+Open before build: Ollama model benchmark, ChromaDB vs LanceDB eval, CMS library scope confirmation with Farragut post-NDA.
 
-**Core differentiator:** Privacy architecture — three tiers, each honest and verifiable.
-**Quality differentiator:** 1,079 automated tests including AI SQL accuracy verification.
+---
 
-**Key buyer vocabulary:**
-- "Shadow AI" — the problem AW eliminates
-- "Local-first" / "private AI" — architecture descriptors buyers now use
-- "Air-gapped analysis" — Tier 3 / law firm language
-- "No BAA required" — procurement unlock for healthcare law firm context
-- "Schema-only AI mode" — precise technical claim, not marketing
-- "Your own API key" — customer controls their OpenAI relationship directly
+## EVALUATION PACKAGE — COMPLETE
 
-**Target sequence:** Consultants/freelancers → Mid-market finance/ops → Healthcare/government
-**Anchor customer:** Farragut/McDermott+Consulting — law firm analytics arm doing PE diligence.
-**University beachhead:** Planned.
+All documents accurate and consistent as of 2026-04-07:
+- AW_Evaluation_Setup_Guide.docx — COMPLETE
+- AW_Privacy_Architecture_Final.docx — COMPLETE
+- In-app Reference Guide — COMPLETE
+- Tutorial #4 Multi-State Medicaid Diligence — SOW STRESS TEST PASSED
+
+---
+
+## PRICING
+
+- Tier 1: $300-800 one-time + 15-20% maintenance
+- Tier 2: $1,000-2,500/seat + maintenance
+- Tier 3: $2,000-5,000/seat + consulting
+
+**Farragut proposal (not yet drafted — hold until post-NDA):**
+5-10 seat AW license at $3,000-4,500/seat + $500-800/seat maintenance + $5,000-10,000 onboarding + Document Workbench license (TBD) + CMS library subscription.
 
 ---
 
 ## ACTIVE PIPELINE
 
 **Farragut/McDermott+Consulting (PRIMARY)**
-- What they are: McDermott+Consulting, analytics arm of McDermott Will & Emery law firm
-- What they do: Healthcare policy consulting, PE diligence on healthcare acquisitions
-- Key contacts: Jackie Williams (primary relationship, business-side), Stan (technical gatekeeper)
-- Casey's role: Subcontractor delivering SOW work. Full-time hire budgeted for May 2026.
-  Jackie has discussed AI department career trajectory for Casey at McDermott.
+McDermott+Consulting is the analytics arm of McDermott Will & Emery law firm. They do PE diligence on healthcare acquisitions. Contacts: Jackie (primary), Andrew (CIM use case), Stan (technical gatekeeper).
+Casey scoping meeting imminent. Goal: NDA, Casey inside feeding requirements to Shawn, build toward full-time employment for Casey.
 
-**Current Farragut status (as of 2026-04-07):**
-- Casey had lunch with Shawn. Full-time hire at Farragut confirmed for May onboarding.
-- Wednesday call = Casey only, five use cases discussion. Shawn not invited.
-- Casey does NOT want to mention JetWare or flag Shawn's follow-up on the call.
-  His read of the room takes priority — respect it completely.
-- Shawn will debrief with Casey after Wednesday call before deciding Thursday approach.
-- Thursday outreach to Jackie will be calibrated based on Wednesday debrief signal:
-  which use cases had most urgency, how Casey's standing looks, how fast Farragut
-  is moving. Email draft ready but framing may adjust based on debrief.
-- Jackie has accepted Shawn's LinkedIn connection request.
-- Do NOT reference Wednesday's call in Thursday email if Casey gave no heads-up.
-  Email must stand alone as founder reaching out to establish formal relationship.
-
-**Five Farragut use cases identified (from Stan email):**
-- CIM extraction — Document Workbench territory
-- CMS rule/note repository + searchable query — Document Workbench territory
-- Searchable PE ownership database with org chart output — AW + new output capability
-- Cash pay entities analysis (MedSpas etc.) — AW today
-- IDRE data analysis (CMS inpatient dataset) — AW today
-
-**Farragut commercial separation (CRITICAL):**
-Casey's consulting/employment track and the AW software license track are two
-completely separate commercial relationships. Never conflate. Casey is the
-embedded analyst. Shawn owns the proposal and contract. Do not let the
-full-time employment conversation block or bundle the software sale.
-
-**Casey's Farragut agreement (reviewed 2026-04-07):**
-Key risks identified: Section 8b non-compete (during agreement — JetWare is a
-tool vendor not a consulting competitor, distinction matters); Section 8d
-client non-solicitation 24 months post-termination (Casey cannot be involved
-in selling to Farragut's PE firm clients). Section 3 work product — AW is clean,
-not created under SOW, not paid for by Farragut. Get CA employment attorney
-review before Casey starts full-time.
-
-**NDA Thursday email — READY BUT FRAMING TBD:**
-Two versions depending on Wednesday debrief outcome:
-
-Version A (if Casey gave Jackie heads-up — unlikely given his current position):
-Subject: Analytics Workbench — Next Steps
-"Jackie, Casey mentioned you'd had a good conversation Wednesday, and I wanted
-to follow up directly. I understand the right next step before any further
-product discussions is to establish a formal NDA relationship between JetWare AI
-and Farragut. That makes complete sense, and I'd like to move it forward on
-your timeline. Who is the right person on your end to engage — legal, or
-someone on the business side? Best, Shawn McGuan, Founder, JetWare AI"
-
-Version B (standalone — no Casey reference):
-Subject: Analytics Workbench — Establishing a Formal Relationship
-"Jackie, I wanted to reach out directly as we think about next steps between
-JetWare AI and Farragut. I understand the right foundation before any product
-discussions is a formal NDA relationship. That makes complete sense given your
-environment, and I'd like to move it forward on your timeline. Who is the right
-person on your end to engage — legal, or someone on the business side?
-Best, Shawn McGuan, Founder, JetWare AI"
-
-NOTE: Do NOT attach JetWare's NDA. Let Farragut send their form.
-SEND CONDITION: After Wednesday debrief with Casey confirms timing is right.
-
-**Healthcare operations team (SECONDARY)**
-- Tier 3 prospect. Meeting prep materials complete. Date not confirmed.
+**Healthcare operations team (SECONDARY):** Tier 3 prospect. Materials ready.
 
 ---
 
-## CASEY — ROLE AND STATUS
+## CASEY
 
-Casey is Shawn's son. CS degree. Has connections at Farragut from prior work.
-Full-time hire at Farragut budgeted for May 2026 with AI department trajectory.
+Goal: full-time Farragut employee. Shawn supports this fully.
+JetWare AI angle: Casey inside as employee = best reference position for AW.
 
-**Dark period protocol (now through NDA signing):**
-- Do not initiate contact with Casey about Farragut work during this window
-- One debrief call after Wednesday is appropriate and expected
-- Casey needs to show up to Farragut as their analyst, not Shawn's reporter
-- If Casey calls with a technical AW question, answer it — don't initiate
-
-**Casey still needs to:**
-- Complete 5-module AW Immersion Program
-- Give Jackie one-sentence heads-up on Wednesday that Shawn will reach out
-- Be briefed on API key build — customers must supply their own OpenAI API key
-- Casey subcontractor agreement — needed before he starts full-time at Farragut
-
-**Materials sent to Casey:**
-- Casey Immersion Guide (5 modules)
-- Casey Motivation Email
-- Casey Conversation Guide
-- AW Onboarding Guide
-- Farragut Demo Script
+**CRITICAL before Casey signs employment agreement:**
+- Shawn/Casey conversation on JetWare AI referral/finder arrangement — must happen before signing
+- Review employment agreement for IP assignment and tools/software clauses
+- Brief Casey on OpenAI API key onboarding requirement
 
 ---
 
-## COMPETITIVE MOAT AND IP STRATEGY
+## COMPANY FORMATION
 
-**The LifeMOD comparison — what carries over and what doesn't:**
+Entity: Jetware AI LLC (CA) — rename COMPLETE. CPA: Paul (engaged 2026-04-02).
+Tax strategy: stay LLC, convert to C Corp if revenue scales.
 
-LifeMOD had a technical moat — simulation algorithms that were hard to replicate.
-AW's moat is different. Local-first architecture is a design choice, not a patent.
-Vibe coding and commoditized AI APIs mean the technical barrier is lower. The real
-moat is customer proximity, regulated-industry credibility, and execution speed.
-
-**The core tension with anchor customers:**
-
-Farragut will drive the roadmap — CIM extraction, CMS repository, org chart output.
-Those become features. JetWare then sells those features to Marwood Group, BRG,
-Avalere, and other Farragut competitors. Farragut's investment in shaping the product
-benefits their direct competitors. This is a known enterprise software tension and
-must be addressed in the agreement structure.
-
-**The clean contractual distinction:**
-
-Software ships broadly — cannot agree to withhold features from the general market.
-Workflow templates and reference libraries built to a specific customer's methodology
-are a consulting deliverable — can be kept proprietary to that customer for a defined
-period (12 months recommended).
-
-The pitch to Farragut: "The software ships to everyone. The workflows and reference
-libraries we build together for your specific use cases are yours. We can formalize
-that in the agreement."
-
-**The adapted LifeMOD pitch for Farragut:**
-
-Not about technology moat — about workflow moat. Farragut's analysts are shaping the
-tool. Their workflows are being encoded into replayable templates. They will be running
-analytical sequences in May that competitors won't figure out until Q4. They're not
-buying a feature — they're buying a six-month head start on how to use it at
-Farragut's level of sophistication. The tool eventually commoditizes. The institutional
-knowledge of how to use it doesn't.
-
-**The real moat going forward:**
-
-Casey inside the most demanding customer in the space, feeding requirements back in
-real time. By the time a competitor reverse-engineers what's been built, JetWare is
-two versions ahead. Run faster than the competition rather than hiding behind a patent
-wall. This requires execution speed and customer proximity — both present.
-
-**Status:** In development — build trigger is confirmed paying Farragut relationship.
-**One-pager:** Complete (produced 2026-04-07). Navy/amber design, four sections.
-
-**What it is:** Local-first AI document intelligence. Index PDFs, Word docs, regulatory
-texts, deal materials. Ask questions in plain English. Every answer cites source
-document, page, and passage. Nothing leaves the machine.
-
-**Three of five Farragut use cases point here:**
-- CIM extraction
-- CMS rule/note repository
-- Deal document review
-
-**Architecture decisions to make during dark period (before Farragut requirements arrive):**
-- Vector store selection
-- Local RAG vs hybrid approach
-- Chunking and retrieval strategy
-- Citation model
-Build the platform foundation now. Build features only after Casey surfaces
-confirmed Farragut requirements.
-
-**Suite framing:**
-- Analytics Workbench — structured data, available now
-- Document Workbench — unstructured documents, in development
-- Research Workbench — external sourcing, roadmap
+Pending: QuickBooks, business bank account, company credit card, IRS name change (Paul), USPTO Class 9 + 42, Casey referral agreement, IP assignment, proposal template, Operating Agreement update.
 
 ---
 
-## COMPASS/FARRAGUT DELIVERABLE STATUS
+## BRAND AND WEB
 
-**Delivered:**
-- Part B / GLOBE memo — 57 confirmed candidates, 14 sole orphan drugs. March 18, 2026.
-- Part D / GUARD memo — 304 preliminary candidates, $125.9B spending. March 18, 2026.
-
-**Pending:**
-- Farragut confirmation on 5 flagged items
-- Orphan drug + MFN flags not yet applied to Part D list
+Logo: correct in-app and on web. Email signature updated 2026-04-07.
+jetwareai.com live on GitHub Pages. Repo: github.com/smcguan/jetwareai-site.
+Local clone on both desktop and laptop at C:\dev\JetWareAI-site.
+LinkedIn live. Notifications OFF — launch post pending Casey coordination.
 
 ---
 
-## REFERENCE TABLE LIBRARY
+## LAST SESSION LOG
 
-**Shipped:** IRA negotiated drugs (35 drugs, Rounds 1-3)
-**In draft (need verification):** USP GLOBE/GUARD categories, orphan drug status
-**Not yet built:** Biosimilar tracker, MFN deal status, State Medicaid schema map
+[2026-04-07] [BD+CODE] — SOW stress test COMPLETE. Privacy Mode verified. All evaluation documents updated and consistent. Five Farragut use cases mapped to product. Document Workbench spec written with Ollama designed in. Casey employment/referral arrangement discussion identified as critical pre-meeting item. Email signature fixed. Website repo cloned to laptop.
 
-Maintained reference library = recurring maintenance contract revenue.
+[2026-04-06] [BD] — v1.20.0. API key management complete. Tutorial #4 step-through. Schema normalization natural language confirmed unreliable.
 
----
+[2026-04-02] [BD] — Met CPA Paul. Tax strategy confirmed. Contact form working. Git repo set up.
 
-## LEGAL DOCUMENTS STATUS
-
-**JetWare AI SLA (Analytics Workbench):** Drafted. Clean on data/privacy, no BAA,
-liability cap, IP retention. One gap: Data and Privacy section language must precisely
-match the AI touchpoint audit results once complete.
-
-**Casey/Farragut Master Agreement:** Reviewed. Key risks documented above. Get CA
-employment attorney review before Casey starts full-time.
-
-**Casey/JetWare subcontractor agreement:** Not yet drafted. Needed before contract.
-
----
-
-## COMPANY FORMATION AND ADMIN
-
-**Entity:** Jetware AI LLC (California)
-**Ownership:** 100% Shawn (co-member Sheila Penke — Operating Agreement update needed)
-**Status:** CA LLC rename from LifeModeler Services LLC — COMPLETE 2026-03-31
-
-**Completed:**
-- CA LLC rename — DONE
-- CPA engaged: Paul (met 2026-04-02) — DONE
-- EIN — same, no change needed
-
-**Tax strategy (confirmed with Paul 2026-04-02):**
-Stay LLC while small. Convert to C Corp if revenue scales — unlocks R&D tax credit
-when hiring. "Big beautiful bill" may allow 3-year retroactive C Corp tax advantage
-— Paul to clarify. Paul checking CA $800 annual LLC fee compliance.
-
-**Still pending:**
-- Start QuickBooks
-- Get company credit card
-- Get business bank account
-- IRS name change notification — CPA (Paul) to handle
-- USPTO trademark filings — Class 9 and Class 42 (~$500 total)
-- Casey subcontractor agreement — needed before contract
-- IP assignment — AW to Jetware AI LLC
-- Proposal template — needed before first contract
-- Operating Agreement update — signatures from Shawn and Sheila Penke
-
----
-
-## BRAND AND WEB PRESENCE
-
-**Identity:**
-- Logo: Navy/amber — new swoosh version approved. Third build source location
-  still overwriting asset in app — unresolved.
-- Tagline: "AI analytics for data that stays put."
-- Color palette: Navy (#0C1527) + electric green (#00C878) [memory note: 
-  context file shows dark navy #11192c + blue #3b9fe8 — confirm which is current]
-
-**Assets complete:**
-- Square dark logo (LinkedIn company page, dark backgrounds)
-- White background logo (documents, email signature)
-- LinkedIn banner (1584x396)
-- Landing page (jetwareai.com)
-- Email signature (all 4 icons standardized to 24x24, April 2026)
-- Document Workbench one-pager (produced 2026-04-07)
-- AW Evaluation Setup Guide v1.20 — FINAL (ready for evaluation package)
-- AW Privacy Architecture document — FINAL (ready for McDermott general counsel)
-  NOTE: Both documents gate on Privacy Mode toggle being built and verified
-  before evaluation package ships to Farragut.
-
-**Web presence:**
-- jetwareai.com — live on GitHub Pages
-  - Repo: github.com/smcguan/jetwareai-site — local clone at C:\dev\JetWareAI-site
-  - Contact Us form: Formspree endpoint xlgolljk — confirmed working
-  - OG image: 1200x627, logo + tagline
-  - Page load time: 4ms (confirmed via Cloudflare)
-  - Cloudflare Web Analytics: beacon already installed and running
-- LinkedIn company page — live (linkedin.com/company/jetware-ai)
-- LinkedIn personal profile (linkedin.com/in/shawnmcguan) — fully updated
-
-**LinkedIn status (as of 2026-04-07):**
-- Personal profile: notifications ON
-- Launch post: PUBLISHED 2026-04-07
-- ~50 personal outreach emails sent to 600-person contact list pre-launch
-- Jackie Williams (Farragut) has accepted Shawn's LinkedIn connection
-- Content strategy: see LinkedIn Content Strategy section below
-
----
-
-## LINKEDIN CONTENT STRATEGY
-
-**Core principle:** Every post reinforces credibility, problem awareness, or product proof.
-Shawn is a technical founder with 40-year track record — not a content creator.
-Post accordingly.
-
-**Three content categories:**
-
-1. PROBLEM POSTS (most frequent — post these most)
-   No product mention. Articulate the pain buyers feel. These get shared.
-   Jackie reads one and forwards it to colleagues.
-   Examples:
-   - Why analysts in healthcare and law are the last to get AI tools
-   - The NDA problem: when client data can't go near the cloud
-   - What firms are actually losing by leaving their analysts out of AI
-
-2. CREDIBILITY AND PERSPECTIVE POSTS (unfair advantage — use it)
-   Nobody else has FDA-regulated software background + successful exit + AI second act.
-   Examples:
-   - Lessons from the LifeMOD exit applied to AI products
-   - What building software for surgeons taught me about building for analysts
-   - Why local-first architecture is having a moment
-
-3. PRODUCT PROOF POSTS (use sparingly — earn the right first)
-   One real customer story or metric is worth ten feature announcements.
-   Hold until there is something real to show.
-
-**Cadence:** One post per week. Tuesday or Wednesday morning Pacific.
-Never Monday or Friday.
-
-**Format:** Short paragraphs. No walls of text. No bullet-point listicles.
-First two lines must earn the read. Write the way Shawn talks — direct and credible.
-
-**Next five posts (in order):**
-1. Launch post — PUBLISHED 2026-04-07
-2. The NDA problem post — write this week
-3. LifeMOD to JetWare AI lessons — second act story
-4. What PE diligence analysts actually do with sensitive data — buyer problem awareness
-5. Why "no BAA required" matters more than people realize — healthcare/law firm audience
-
-**LinkedIn rules during Farragut dark period:**
-- Do NOT message Jackie on LinkedIn — email is the right channel for NDA conversation
-- DO post knowing Jackie is reading — content reinforces credibility ambient
-- Posts about local-first architecture and law firm data privacy are working
-  for you in the background while the formal relationship catches up
-
----
-
-## LAST SESSION LOG (BD-RELEVANT)
-
-[2026-04-07] [BD] — Session 3. Lunch with Casey. Full-time Farragut hire confirmed
-  for May. Casey does not want to mention JetWare on Wednesday call — his read of
-  the room takes priority. Thursday Jackie outreach approach to be calibrated after
-  Wednesday debrief. Two NDA email versions drafted (with/without Casey reference).
-  Strategic discussion on competitive moat: LifeMOD technical moat does not carry
-  over directly — AW moat is customer proximity and execution speed. Clean IP
-  distinction identified: software ships broadly, workflow templates and reference
-  libraries built to customer methodology stay proprietary for defined period.
-  Adapted LifeMOD pitch documented: workflow moat, not technology moat.
-  CONTEXT_BUSINESS.md updated with moat/IP strategy section.
-
-[2026-04-07] [BD] — Session 2. Customer API key build confirmed complete —
-  encrypted local storage, first-launch prompt, Settings panel, developer key
-  removed. AI touchpoint audit completed — full transmission inventory documented
-  by feature. Privacy Mode toggle scoped and Claude Code prompt drafted. Two
-  evaluation package documents finalized: AW Evaluation Setup Guide v1.20 and
-  AW Privacy Architecture Final — both ready pending Privacy Mode toggle build
-  and verification. Privacy statement updated to reflect accurate audit findings.
-  Evaluation package ready to ship same day NDA lands, pending Privacy Mode toggle.
-
-[2026-04-07] [BD] — LinkedIn launched. ~50 personal outreach emails sent.
-  Launch post published. Notifications ON. Jackie Williams accepted LinkedIn
-  connection. Casey pre-Wednesday call with Jackie: full-time hire confirmed
-  for May, AI department trajectory discussed. Bad news: NDA required before
-  AW exposure, Shawn disinvited from Wednesday call. Wednesday = Casey SOW
-  cases only. NDA Thursday email drafted and ready to send post-Wednesday debrief.
-  Casey Farragut agreement reviewed — risks documented. JetWare SLA reviewed —
-  clean with one gap (AI touchpoint audit must complete). Document Workbench
-  one-pager produced. API key issue confirmed — still on Shawn's personal key,
-  Track 1 priority, Claude Code prompt drafted. Shawn's current OpenAI key to
-  be revoked today. Cloudflare Web Analytics confirmed running (beacon already
-  installed). LinkedIn content strategy defined — three categories, weekly cadence,
-  five posts queued. AI touchpoint audit started but incomplete — four features
-  still unconfirmed (insight cards, result narrative, sanity check, explain).
-
-[2026-04-06] [BD] — AW context loaded. v1.20.0 confirmed. Tutorial #4 step-through
-  attempted — schema normalization natural language confirmed unreliable. Logo swap
-  in progress. Email signature fixed. Website repo cloned to C:\dev\JetWareAI-site.
-
-[2026-04-02] [BD] — Met with CPA Paul. Tax strategy confirmed. QuickBooks, bank
-  account, credit card action items. Contact form confirmed working. OG image rebuilt.
-  Local git repo set up.
-
-[2026-04-01] [BD] — jetwareai.com migrated to GitHub Pages. Formspree contact form added.
-
-[2026-03-31] [BD] — Company launch day. CA LLC rename confirmed. Brand identity locked.
-  jetwareai.com live. LinkedIn pages complete.
-
-[2026-03-29] [BD] — Wrap workflow established. SOW stress test ready. v1.19.0.
-
-[2026-03-25] [BD+CODE] — Feature testing. CONTEXT_BUSINESS.md created.
-
-[2026-03-24] [BD] — Casey materials built.
+[2026-03-31] [BD] — Company launch. CA LLC rename complete. Brand locked. jetwareai.com live. LinkedIn up.
 
 ---
 
 ## OPEN DECISIONS
 
-**Commercial:**
-- [ ] NDA with Farragut — Thursday email to Jackie initiates this
-- [ ] Farragut proposal — hold until NDA signed
-- [ ] Farragut pricing — $3k–4.5k/seat, confirm before proposal
-- [ ] Casey subcontractor agreement — needed before he starts full-time at Farragut
-- [ ] Casey/Farragut agreement — CA employment attorney review needed
-- [ ] IP assignment — AW to Jetware AI LLC
+Immediate — before Casey signs:
+- [ ] Shawn/Casey referral/finder arrangement conversation
+- [ ] Casey reviews employment agreement with Shawn
+- [ ] Casey briefed on OpenAI API key requirement
 
-**Product:**
-- [x] Customer API key build — COMPLETE
-- [x] Revoke personal OpenAI key — COMPLETE
-- [x] AI touchpoint audit — COMPLETE
-- [ ] Privacy Mode toggle — IN DEVELOPMENT (Claude Code prompt drafted)
-  Gate: must be built and prompt-level verified before evaluation package ships
-- [ ] IT intake document — finalize once Privacy Mode toggle is verified
-- [ ] Document Workbench foundation — architecture decisions, build during dark period
-- [ ] Logo swap — resolve third build source overwriting asset
-- [ ] Demo dataset — clean representative healthcare PE dataset for Farragut demo
+Business formation:
+- [ ] QuickBooks, bank account, credit card
+- [ ] IRS name change (Paul)
+- [ ] USPTO Class 9 + 42
+- [ ] IP assignment, proposal template, Operating Agreement
 
-**Admin:**
-- [ ] Start QuickBooks
-- [ ] Get company credit card
-- [ ] Get business bank account
-- [ ] IRS name change notification — Paul (CPA) to handle
-- [ ] Paul to clarify "big beautiful bill" 3-year C Corp retroactive provision
-- [ ] USPTO trademark filings — Class 9 and Class 42 (~$500 total)
-- [ ] Operating Agreement update — Shawn + Sheila Penke signatures needed
-- [ ] Proposal template — needed before first contract
-
-**Analytical:**
-- [ ] Farragut 5 flagged items — awaiting confirmation
-- [ ] Part D orphan drug + MFN flags — not yet applied
-- [ ] USP GLOBE/GUARD CSVs — need verification
-- [ ] MFN deal status CSV — not yet built
-- [ ] Biosimilar tracker CSV — not yet built
-- [ ] SOW stress test — ready to run, not yet completed
-
-**LinkedIn:**
-- [ ] NDA problem post — write this week
-- [ ] LifeMOD to JetWare AI lessons post
-- [ ] PE diligence analyst problem awareness post
-- [ ] No BAA required post
-
----
-
-## NEXT ACTIONS
-
-**Wednesday:**
-- Casey call with Jackie — five use cases only, no JetWare mention
-- Casey debrief call with Shawn after — listen for use case urgency, timing signals,
-  and Casey's read on the room before deciding Thursday approach
-
-**Thursday (after Wednesday debrief):**
-- Send NDA email to Jackie — Version A or B depending on debrief outcome
-- Hold if debrief signals timing is wrong
-
-**Dark period build priorities:**
-1. Privacy Mode toggle (gating item for evaluation package)
-2. Document Workbench foundation (architecture, not features)
-3. Admin: QuickBooks, bank account, credit card
-
-**Weekly:**
-- One LinkedIn post — Tuesday or Wednesday morning Pacific
-- Next post: NDA problem post
+Product:
+- [ ] Document Workbench build start (post-Farragut NDA)
+- [ ] Farragut 5 flagged items confirmation
+- [ ] Part D orphan drug + MFN flags
+- [ ] LinkedIn launch post (Casey coordination)
+- [ ] Farragut proposal (post-NDA)
 
 ---
 
 ## HOW TO USE THIS FILE
 
 Start BD session: paste this file, say "JetWare AI BD context loaded."
-Start LinkedIn/content session: paste this file, say "JetWare AI content session loaded."
-End BD session: note key decisions. Claude Code wrap script updates automatically.
-Full technical detail: see CONTEXT.md.
+End BD session: produce updated version. Upload to BD project only.
+Full technical detail: see CONTEXT.md (upload to both projects).
