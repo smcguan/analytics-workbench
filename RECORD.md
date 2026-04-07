@@ -10,7 +10,7 @@ stays on the analyst's machine — AI generates analysis instructions, not data 
 **Tech stack:** FastAPI backend, DuckDB query engine, OpenAI GPT-4.1-mini for AI,
 vanilla HTML/JS/CSS frontend, PyInstaller packaging for Windows desktop.
 
-**Current version:** v1.20.0 | **Total commits:** 130+ | **Test suite:** 1,079 tests (three suites, AI accuracy 100%)
+**Current version:** v1.20.1 | **Total commits:** 130+ | **Test suite:** 1,090 tests (three suites, AI accuracy 100%)
 
 ---
 
@@ -132,6 +132,7 @@ Building toward reproducible, auditable, shareable analytical sessions:
 | v1.10.2 | 2026-03-21 | Bug #18: Refresh was deleting disk files (root cause of restore loop); Clear SQL button; Sessions Save exits; SQL auto-clears on restore |
 | v1.10.3 | 2026-03-21 | Chart tab disabled until query returns chartable result; Sessions Save no longer exits; restore filters dataset list to session dataset only |
 | v1.11.0 | 2026-03-21 | SESSIONS sidebar removed; snapshots retired; Welcome card is session hub (Resume + Save); Reference Guide as slide-in drawer; 603 tests |
+| v1.20.1 | 2026-04-06 | BUG-010/011 fixed: config.enc in .gitignore, corrupted/wrong-machine key auto-deleted; 11 new key_manager tests; 883 tests |
 | v1.20.0 | 2026-04-06 | Customer API key management: Fernet-encrypted storage, first-launch overlay, Settings panel, 402 guard on all AI endpoints, developer key removed; 872 tests |
 | v1.19.2 | 2026-04-02 | Logo refresh: new JetWare AI branded logo in both asset dirs, cache-busting ?v=2 on img refs; 872 tests |
 | v1.19.1 | 2026-04-01 | BUG-001 fix: Result Narrative race condition in demo runner — await _fetchResultNarrative() in query_run and ai_ask handlers; 1,079 tests |
@@ -150,6 +151,10 @@ Building toward reproducible, auditable, shareable analytical sessions:
 
 ## Wrap Records
 <!-- Each /wrap appends a 3-line summary below. Most recent at top. -->
+
+**v1.20.1** | 2026-04-06
+BUG-010: config.enc added to .gitignore. BUG-011: corrupted/wrong-machine config.enc
+auto-deleted by has_key() and get_key(), triggers first-launch overlay. 11 new tests.
 
 **v1.20.0** | 2026-04-06
 Customer API key management. Fernet-encrypted key storage at %APPDATA%\JetWareAI\config.enc with

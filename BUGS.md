@@ -147,6 +147,32 @@ multiply at 200+ customers.
 
 ---
 
+### BUG-010
+**Status:** FIXED — v1.20.1
+**Found:** 2026-04-06 — Self-test (multi-machine workflow)
+**Component:** PACKAGING
+**Root Cause:** MISSING_TEST
+**Summary:** config.enc (encrypted API key file) not in .gitignore — committed to repo and pulled to other machines, bypassing first-launch setup overlay.
+**Detail:** When developer pushed repo from desktop to GitHub, %APPDATA%\JetWareAI\config.enc was not excluded by .gitignore. File was pulled to laptop. AW found the file on first launch and skipped the setup overlay entirely, even though the key was encrypted for a different machine. Customer-facing risk: any customer who clones the repo or receives a build with config.enc bundled will silently inherit a broken key state.
+**Fix:** Added `config.enc` to .gitignore. Verified file was not already tracked in git (no git rm --cached needed).
+**Fix Commit:** v1.20.1
+**Test Added:** Yes — test_key_manager.py validates wrong-machine config is detected and deleted
+
+---
+
+### BUG-011
+**Status:** FIXED — v1.20.1
+**Found:** 2026-04-06 — Self-test (multi-machine workflow)
+**Component:** AI_FEATURES
+**Root Cause:** MISSING_WIRE
+**Summary:** API key decryption failure on wrong machine is silent — AI features fail without error or setup prompt.
+**Detail:** Encryption key is derived from machine-specific values (COMPUTERNAME + USERNAME). When config.enc from machine A is present on machine B, decryption fails. Instead of surfacing an error or triggering the first-launch setup overlay, the failure is swallowed silently. AI features (insights, natural language queries) simply do not work — no error message, no prompt to add a key. User has no way to diagnose the problem.
+**Fix:** Both has_key() and get_key() now catch all decryption exceptions, delete the bad config.enc file, log a warning, and return False / raise RuntimeError respectively. This allows the first-launch setup overlay to appear naturally on the next check.
+**Fix Commit:** v1.20.1
+**Test Added:** Yes — 5 tests in test_key_manager.py::TestCorruptedConfig (corrupted file, wrong machine, get_key cleanup, fresh key after cleanup)
+
+---
+
 ## HOW TO USE THIS FILE
 
 **In any JetWare AI Development project chat:**
@@ -175,5 +201,7 @@ multiply at 200+ customers.
 ---
 
 ## CHANGELOG
+- 2026-04-06 — BUG-010 and BUG-011 fixed v1.20.1. config.enc added to .gitignore; corrupted/wrong-machine key auto-deleted with 11 tests.
+- 2026-04-06 — BUG-010 and BUG-011 logged. API key management multi-machine bugs found in self-test.
 - 2026-03-31 — BUG-001 fixed v1.19.1. Root cause corrected to CONCURRENCY. 1,079 tests passing.
 - 2026-03-31 — File created. 9 bugs back-populated. Synthesis run added.

@@ -57,3 +57,6 @@ data/queries.json
 # Environmental Variables
 
 .env
+
+# Encrypted API key (machine-specific, never share)
+config.enc

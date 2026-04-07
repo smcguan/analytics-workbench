@@ -39,9 +39,9 @@
 - Natural language queries in tutorials — COMPLETE (v1.17.0) — 22 query_run steps converted to ai_ask across 7 demos
 - Customer API key management — COMPLETE (v1.20.0) — Fernet-encrypted key storage at %APPDATA%\JetWareAI\config.enc, first-launch setup overlay, Settings panel, 402 guard on all AI endpoints, developer key removed from codebase
 
-**Current version:** v1.20.0 — customer API key management, demo-ready for Farragut/McDermott meeting
+**Current version:** v1.20.1 — BUG-010/011 fixed, demo-ready for Farragut/McDermott meeting
 
-**Test suite:** 1,079 automated tests across three suites, all passing.
+**Test suite:** 1,090 automated tests across three suites, all passing.
 - Unit tests (pytest tests/): 872 passed, 21 skipped
 - Feature + workflow suite (run_all.py): 185 passed, 1 skipped
 - Query accuracy suite (test_accuracy.py): 43 passed (23 deterministic + 20 AI)
@@ -376,6 +376,10 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-04-06] [CODE] — v1.20.1. BUG-010 fixed: config.enc added to .gitignore. BUG-011 fixed:
+  has_key() and get_key() now auto-delete corrupted/wrong-machine config.enc and return
+  False/raise RuntimeError so first-launch overlay triggers naturally. 11 new tests in
+  test_key_manager.py (basics + corruption + wrong-machine + cleanup + recovery). 883 tests.
 [2026-04-06] [CODE] — v1.20.0. Customer API key management. Developer key removed from all code
   paths. New: backend/app/key_manager.py (Fernet encryption, machine-specific derivation,
   %APPDATA%\JetWareAI\config.enc storage). 4 new API endpoints: GET/POST/DELETE /api/settings/key,

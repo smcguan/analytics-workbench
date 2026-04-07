@@ -72,29 +72,50 @@ def _ensure_config_dir() -> None:
 # ============================================================
 
 def has_key() -> bool:
-    """Return True if a valid encrypted key exists on disk."""
+    """Return True if a valid encrypted key exists on disk.
+
+    If the file exists but cannot be decrypted (wrong machine, corrupted),
+    the bad file is deleted so the first-launch setup overlay triggers.
+    """
     path = _config_path()
     if not path.exists():
         return False
     try:
         _get_fernet().decrypt(path.read_bytes())
         return True
-    except (InvalidToken, Exception):
+    except Exception:
+        logger.warning(
+            "config.enc exists but decryption failed (wrong machine or corrupted) — deleting %s",
+            path,
+        )
+        try:
+            path.unlink()
+        except OSError as exc:
+            logger.warning("Could not delete bad config.enc: %s", exc)
         return False
 
 
 def get_key() -> str:
-    """Decrypt and return the API key. Raises RuntimeError if not found."""
+    """Decrypt and return the API key. Raises RuntimeError if not found.
+
+    If decryption fails (wrong machine, corrupted), the bad file is deleted
+    so subsequent has_key() calls return False and the setup overlay triggers.
+    """
     path = _config_path()
     if not path.exists():
         raise RuntimeError("No API key configured. Add your key in Settings.")
     try:
         decrypted = _get_fernet().decrypt(path.read_bytes())
         return decrypted.decode("utf-8")
-    except InvalidToken:
-        raise RuntimeError("API key file is corrupted. Please re-enter your key in Settings.")
-    except Exception as exc:
-        raise RuntimeError(f"Failed to read API key: {exc}")
+    except Exception:
+        logger.warning(
+            "config.enc decryption failed in get_key() — deleting %s", path,
+        )
+        try:
+            path.unlink()
+        except OSError:
+            pass
+        raise RuntimeError("API key file is corrupted or from another machine. Please re-enter your key in Settings.")
 
 
 def save_key(key: str) -> None:
