@@ -112,6 +112,7 @@ from .sql_validator import (
 )
 
 from app.services.session_log import log_event, SessionEventType
+from app.key_manager import has_key as _has_api_key
 
 # ============================================================
 # ROUTER INITIALIZATION
@@ -124,6 +125,13 @@ from app.services.session_log import log_event, SessionEventType
 # ============================================================
 
 router = APIRouter(prefix="/api/ai", tags=["AI"])
+
+
+def _require_api_key():
+    """Raise HTTP 402 if no API key is configured."""
+    if not _has_api_key():
+        from fastapi import HTTPException
+        raise HTTPException(status_code=402, detail="no_api_key")
 
 
 # ============================================================
@@ -449,6 +457,11 @@ def suggest_questions(
     try:
 
         # ----------------------------------------------------
+        # STEP 0a — Require API key
+        # ----------------------------------------------------
+        _require_api_key()
+
+        # ----------------------------------------------------
         # STEP 0 — Check AI consent before doing anything
         # ----------------------------------------------------
         try:
@@ -572,6 +585,11 @@ def get_insights(
     """
 
     try:
+
+        # ----------------------------------------------------
+        # STEP 0a — Require API key
+        # ----------------------------------------------------
+        _require_api_key()
 
         # ----------------------------------------------------
         # STEP 0 — Check AI consent before doing anything
@@ -724,6 +742,11 @@ def get_insights(
 def generate_sql(payload: GenerateSQLRequest) -> GenerateSQLResponse:
 
     try:
+
+        # ----------------------------------------------------
+        # STEP 0 — Require API key
+        # ----------------------------------------------------
+        _require_api_key()
 
         # ----------------------------------------------------
         # STEP 1 — Resolve the question from either the
@@ -891,6 +914,7 @@ def generate_sql(payload: GenerateSQLRequest) -> GenerateSQLResponse:
 @router.post("/explain", response_model=ExplainResponse)
 def explain_sql(payload: ExplainRequest) -> ExplainResponse:
     try:
+        _require_api_key()
         explanation = generate_explanation(
             sql=payload.sql,
             columns=payload.columns,
@@ -907,6 +931,7 @@ def explain_sql(payload: ExplainRequest) -> ExplainResponse:
 @router.post("/result_narrative", response_model=ResultNarrativeResponse)
 def get_result_narrative(payload: ResultNarrativeRequest) -> ResultNarrativeResponse:
     try:
+        _require_api_key()
         narrative = generate_result_narrative(
             question=payload.question,
             sql=payload.sql,
@@ -936,6 +961,8 @@ def get_column_aliases(
     Cache hit: returns instantly from dataset_context.json.
     Cache miss or refresh=true: calls the AI, caches, and returns.
     """
+    _require_api_key()
+
     if not refresh:
         cached = _read_aliases_cache(dataset)
         if cached is not None:
@@ -1025,6 +1052,8 @@ def get_analysis_sequence(
     Cache hit: returns instantly from dataset_context.json.
     Cache miss or refresh=true: calls the AI, caches, and returns.
     """
+    _require_api_key()
+
     if not refresh:
         cached = _read_sequence_cache(dataset)
         if cached is not None:

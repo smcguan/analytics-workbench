@@ -140,7 +140,6 @@ from dataclasses import asdict
 early_env_candidates = [
     Path.cwd() / ".env",
     Path(sys.executable).parent / ".env",
-    Path("C:/dev/AnalyticsWorkbench-Claude/.env"),
 ]
 
 for env_path in early_env_candidates:
@@ -272,10 +271,6 @@ def _load_local_env() -> None:
             if env_path.exists():
                 load_dotenv(env_path, override=False)
                 logger.info("loaded .env | path=%s", env_path)
-                logger.info(
-                    "OPENAI_API_KEY present after load: %s",
-                    bool(os.getenv("OPENAI_API_KEY")),
-                )
                 return
         except Exception as e:
             logger.warning("failed loading .env | path=%s | reason=%s", env_path, e)
@@ -2181,6 +2176,48 @@ def api_health():
             "frozen": bool(getattr(sys, "frozen", False)),
         },
     }
+
+
+# ============================================================
+# API KEY MANAGEMENT
+# ============================================================
+
+from app.key_manager import has_key as _has_key, get_key as _get_key, save_key as _save_key, clear_key as _clear_key, mask_key as _mask_key
+
+
+@app.get("/api/settings/key")
+def api_settings_key():
+    """Return whether an API key is configured and its masked value."""
+    if _has_key():
+        try:
+            raw = _get_key()
+            return {"configured": True, "masked": _mask_key(raw)}
+        except Exception:
+            return {"configured": False, "masked": None}
+    return {"configured": False, "masked": None}
+
+
+@app.post("/api/settings/key")
+def api_settings_key_save(payload: dict):
+    """Save a new API key."""
+    key = (payload.get("key") or "").strip()
+    if not key.startswith("sk-"):
+        raise HTTPException(status_code=400, detail="Invalid API key format. Key must start with 'sk-'.")
+    _save_key(key)
+    return {"success": True}
+
+
+@app.delete("/api/settings/key")
+def api_settings_key_delete():
+    """Clear the stored API key."""
+    _clear_key()
+    return {"success": True}
+
+
+@app.get("/api/settings/key/status")
+def api_settings_key_status():
+    """Quick check if an API key is configured. Called on every AI feature invocation."""
+    return {"configured": _has_key()}
 
 
 @app.get("/api/datasets")
@@ -5162,18 +5199,15 @@ def api_shutdown(bg: BackgroundTasks):
 
 @app.get("/api/debug/env")
 def api_debug_env():
-    """Debug endpoint for confirming .env loading behavior."""
+    """Debug endpoint for confirming environment and key status."""
     exe_dir = Path(sys.executable).resolve().parent if getattr(sys, "frozen", False) else None
-    raw_key = os.environ.get("OPENAI_API_KEY")
 
     return {
         "frozen": bool(getattr(sys, "frozen", False)),
         "cwd": str(Path.cwd()),
         "exe_dir": str(exe_dir) if exe_dir else None,
         "base_dir": str(BASE_DIR),
-        "openai_key_present": bool(raw_key),
-        "openai_key_is_none": raw_key is None,
-        "openai_key_length": len(raw_key) if raw_key is not None else None,
+        "api_key_configured": _has_key(),
         "cwd_env_exists": (Path.cwd() / ".env").exists(),
         "exe_env_exists": (exe_dir / ".env").exists() if exe_dir else False,
         "base_env_exists": (BASE_DIR / ".env").exists(),

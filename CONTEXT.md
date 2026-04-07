@@ -37,8 +37,9 @@
 - PyInstaller packaging fix — COMPLETE (v1.17.0) — python313.dll force-bundled from base Python, full upx_exclude (14 entries), build script wipes dist/build before every build, post-build DLL verification
 - Tutorial #6 Parameterized Workflow — COMPLETE (v1.17.0) — Retail Sales Performance, Edit panel dataset+reference swap demo
 - Natural language queries in tutorials — COMPLETE (v1.17.0) — 22 query_run steps converted to ai_ask across 7 demos
+- Customer API key management — COMPLETE (v1.20.0) — Fernet-encrypted key storage at %APPDATA%\JetWareAI\config.enc, first-launch setup overlay, Settings panel, 402 guard on all AI endpoints, developer key removed from codebase
 
-**Current version:** v1.19.2 — demo-ready for Farragut/McDermott meeting
+**Current version:** v1.20.0 — customer API key management, demo-ready for Farragut/McDermott meeting
 
 **Test suite:** 1,079 automated tests across three suites, all passing.
 - Unit tests (pytest tests/): 872 passed, 21 skipped
@@ -375,6 +376,15 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-04-06] [CODE] — v1.20.0. Customer API key management. Developer key removed from all code
+  paths. New: backend/app/key_manager.py (Fernet encryption, machine-specific derivation,
+  %APPDATA%\JetWareAI\config.enc storage). 4 new API endpoints: GET/POST/DELETE /api/settings/key,
+  GET /api/settings/key/status. HTTP 402 guard on all 7 AI endpoints in routes.py. Frontend:
+  first-launch setup overlay (full-screen, z-index 9999), Settings panel in GET STARTED sidebar,
+  402 interception in apiJson() with redirect to Settings. .env cleaned (key replaced with comment),
+  .env.example updated, provider_openai.py _read_key_from_env_file() removed, cryptography added
+  to requirements.txt and AnalyticsWorkbench.spec hiddenimports. tests/conftest.py auto-patches
+  _has_api_key for test suite compatibility. 872 tests passing. Old key in git history — rotate required.
 [2026-04-02] [CODE] — v1.19.2. Logo refresh: replaced jetware_logo.png in frontend/assets/
   and src/assets/ with new JetWare AI branded logo. Added cache-busting ?v=2 query params
   on both logo <img> references in index.html. CSS sizing changes attempted and fully

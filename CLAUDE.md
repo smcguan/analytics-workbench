@@ -59,6 +59,7 @@ Milestones 1–4 complete. Milestone 5 in active planning. See CONTEXT.md.
 │       │   ├── response_parser.py  # Parses AI JSON responses
 │       │   ├── schemas.py      # Pydantic models for AI routes
 │       │   └── sql_validator.py    # Validates AI SQL with DuckDB EXPLAIN
+│       ├── key_manager.py          # API key encryption/storage (%APPDATA%\JetWareAI\config.enc)
 │       └── services/
 │           ├── dataset_import.py   # Import pipeline
 │           └── chart_recommender.py # Chart type recommendation
@@ -78,7 +79,7 @@ Milestones 1–4 complete. Milestone 5 in active planning. See CONTEXT.md.
 │   ├── test_tutorial_queries.py    # Integration: runs all tutorial SQL against sample data
 │   └── ...                         # 27 other test files (642 tests total)
 ├── exports/
-├── .env                        # OPENAI_API_KEY (not committed)
+├── .env                        # OPENAI_MODEL + BUILD_SHA (not committed; API key managed via Settings)
 ├── CLAUDE.md                   # This file
 ├── HISTORY.md                  # Archived milestone detail + resolved bugs
 └── start-dev.bat               # Double-click launcher for dev session
@@ -240,6 +241,10 @@ POST /api/workspace
 POST /api/workspace/restore
 DELETE /api/workspace
 GET  /api/datasets/{name}/passport  (?refresh=true to bypass cache)
+GET  /api/settings/key
+POST /api/settings/key
+DELETE /api/settings/key
+GET  /api/settings/key/status
 POST /api/shutdown
 ```
 
@@ -314,7 +319,7 @@ Both rewrites happen before execution. AI always uses "dataset" as table name, n
 
 ## ENVIRONMENT VARIABLES
 ```
-OPENAI_API_KEY=sk-...
+# OPENAI_API_KEY — managed via in-app Settings panel, encrypted at %APPDATA%\JetWareAI\config.enc
 OPENAI_MODEL=gpt-4.1-mini
 AW_DATASETS_DIR=...        (absolute path override)
 AW_EXPORTS_DIR=...

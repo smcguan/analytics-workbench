@@ -80,6 +80,13 @@ hiddenimports = [
     'multipart',
     'python_multipart',
     'openpyxl',
+
+    # API key encryption
+    'cryptography',
+    'cryptography.fernet',
+    'cryptography.hazmat.primitives',
+    'cryptography.hazmat.primitives.kdf',
+    'cryptography.hazmat.backends',
 ]
 
 # Collect package data and native binaries needed at runtime.

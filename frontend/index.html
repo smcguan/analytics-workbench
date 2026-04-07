@@ -2147,6 +2147,121 @@
             opacity:1;
             transform:translateY(0);
         }
+
+        /* ---- API Key Setup Overlay ---- */
+        .key-setup-overlay{
+            display:none;
+            position:fixed;
+            inset:0;
+            z-index:9999;
+            background:rgba(0,0,0,.75);
+            backdrop-filter:blur(10px);
+            justify-content:center;
+            align-items:center;
+        }
+        .key-setup-overlay.visible{ display:flex; }
+        .key-setup-card{
+            background:linear-gradient(180deg, rgba(24,36,54,.98), rgba(20,31,48,.98));
+            border:1px solid var(--stroke-strong);
+            border-radius:var(--radius);
+            box-shadow:var(--shadow);
+            width:min(480px, 90vw);
+            padding:32px;
+            text-align:center;
+        }
+        .key-setup-card h2{
+            margin:0 0 8px;
+            font-size:1.3rem;
+            color:var(--fg0);
+        }
+        .key-setup-card p{
+            color:var(--fg1);
+            font-size:.9rem;
+            margin:0 0 20px;
+            line-height:1.5;
+        }
+        .key-setup-card input[type="password"],
+        .key-setup-card input[type="text"]{
+            width:100%;
+            padding:10px 14px;
+            font:14px var(--font);
+            background:var(--bg0);
+            color:var(--fg0);
+            border:1px solid var(--stroke);
+            border-radius:8px;
+            box-sizing:border-box;
+            margin-bottom:12px;
+        }
+        .key-setup-card input:focus{
+            outline:none;
+            border-color:var(--accent);
+        }
+        .key-setup-card .key-link{
+            display:inline-block;
+            margin-top:12px;
+            color:var(--accent);
+            font-size:.85rem;
+            text-decoration:none;
+        }
+        .key-setup-card .key-link:hover{ text-decoration:underline; }
+        .key-setup-card .key-error{
+            color:#ff6b6b;
+            font-size:.85rem;
+            margin-bottom:8px;
+            min-height:1.2em;
+        }
+
+        /* ---- Settings Panel ---- */
+        .settings-view{
+            padding:24px;
+            max-width:560px;
+        }
+        .settings-view h2{
+            margin:0 0 20px;
+            font-size:1.2rem;
+            color:var(--fg0);
+        }
+        .settings-section{
+            background:var(--card);
+            border:1px solid var(--stroke);
+            border-radius:12px;
+            padding:16px 20px;
+            margin-bottom:16px;
+        }
+        .settings-section h3{
+            margin:0 0 12px;
+            font-size:.95rem;
+            color:var(--fg0);
+        }
+        .settings-key-display{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            margin-bottom:12px;
+        }
+        .settings-key-display code{
+            font-family:var(--font);
+            font-size:.9rem;
+            color:var(--accent);
+            background:var(--accent-soft);
+            padding:4px 10px;
+            border-radius:6px;
+        }
+        .settings-key-actions{
+            display:flex;
+            gap:8px;
+        }
+        .no-key-prompt{
+            color:var(--fg1);
+            font-size:.9rem;
+            padding:8px 0;
+        }
+        .no-key-prompt a{
+            color:var(--accent);
+            cursor:pointer;
+            text-decoration:none;
+        }
+        .no-key-prompt a:hover{ text-decoration:underline; }
     </style>
 </head>
 
@@ -2156,7 +2271,7 @@
             <div class="brand">
                 <img src="/ui/assets/jetware_logo.png?v=2" alt="JetWare AI" style="height: 36px; width: auto; object-fit: contain;">
                 <div>
-                    <div class="sub">Your data never leaves your machine.</div>
+                    <div class="sub">Your data never leaves the room.</div>
                 </div>
             </div>
 
@@ -2177,6 +2292,7 @@
                         <button class="nav-item" id="navWelcome" title="Return to the Welcome screen">Welcome</button>
                         <button class="nav-item" id="navReferenceGuide" title="Open the Reference Guide for how-to help">Reference Guide</button>
                         <button class="nav-item" id="sidebarExampleWorkflowsBtn" title="Browse example workflows with sample data">Example Workflows</button>
+                        <button class="nav-item" id="navSettings" title="Configure API key and application settings">Settings</button>
                     </div>
                     </div>
                 </section>
@@ -2548,6 +2664,38 @@ LIMIT 100</textarea>
                     </section>
                 </section>
 
+                <section id="settingsView" class="hidden">
+                    <div class="settings-view">
+                        <h2>Settings</h2>
+                        <div class="settings-section">
+                            <h3>OpenAI API Key</h3>
+                            <div id="settingsKeyConfigured" style="display:none;">
+                                <div class="settings-key-display">
+                                    <span>Current key:</span>
+                                    <code id="settingsKeyMasked"></code>
+                                </div>
+                                <div class="settings-key-actions">
+                                    <button class="btn small" id="settingsKeyUpdateBtn">Update</button>
+                                    <button class="btn small danger" id="settingsKeyRemoveBtn">Remove</button>
+                                </div>
+                                <div id="settingsKeyUpdateRow" style="display:none; margin-top:12px;">
+                                    <input type="password" id="settingsKeyUpdateInput" placeholder="sk-proj-..." style="width:100%; padding:8px 12px; font:13px var(--font); background:var(--bg0); color:var(--fg0); border:1px solid var(--stroke); border-radius:6px; box-sizing:border-box; margin-bottom:8px;">
+                                    <div style="display:flex; gap:8px;">
+                                        <button class="btn small primary" id="settingsKeyUpdateSaveBtn">Save</button>
+                                        <button class="btn small" id="settingsKeyUpdateCancelBtn">Cancel</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="settingsKeyNotConfigured" style="display:none;">
+                                <p style="color:var(--fg1); margin:0 0 12px;">No API key configured. AI features require an OpenAI API key.</p>
+                                <input type="password" id="settingsKeyAddInput" placeholder="sk-proj-..." style="width:100%; padding:8px 12px; font:13px var(--font); background:var(--bg0); color:var(--fg0); border:1px solid var(--stroke); border-radius:6px; box-sizing:border-box; margin-bottom:8px;">
+                                <button class="btn small primary" id="settingsKeyAddBtn">Save Key</button>
+                                <a class="key-link" href="https://platform.openai.com/api-keys" target="_blank" rel="noopener" style="margin-left:12px;">Get an API key</a>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
                 <section id="insightsView" class="hidden">
                     <section class="panel insights-shell">
                         <div class="insights-toolbar">
@@ -2581,7 +2729,7 @@ LIMIT 100</textarea>
                             </ol>
 
                             <div class="privacy-badge">
-                                Your data never leaves your machine.<br>
+                                Your data never leaves the room.<br>
                                 AI generates analysis instructions that run on your computer.
                             </div>
 
@@ -2725,7 +2873,7 @@ LIMIT 100</textarea>
 </ol>
 <p><strong>Sidebar layout:</strong> The left sidebar has three collapsible sections. Click any section header to expand or collapse it.</p>
 <ul>
-<li><strong>GET STARTED</strong> — Welcome, Reference Guide, Example Cases</li>
+<li><strong>GET STARTED</strong> — Welcome, Reference Guide, Example Workflows, Settings</li>
 <li><strong>DATA</strong> — Imported datasets, reference tables, library (auto-expands on first import)</li>
 <li><strong>WORKSPACE</strong> — Insights, Query, Saved Queries (auto-expands on first query)</li>
 </ul>
@@ -2879,6 +3027,11 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 <p><strong>Export Passport:</strong> Click <strong>Export Passport</strong> in the Inspect row to download a complete dataset profile JSON. Includes schema, sample values, grain description, quality flags, and starter SQL. Designed for cold-start AI collaboration.</p>
 
 <hr>
+<h3>Settings</h3>
+<p><strong>API Key:</strong> AW requires your own OpenAI API key. On first launch, a setup screen prompts you to enter it. The key is encrypted and stored locally at <code>%APPDATA%\JetWareAI\config.enc</code> — it is never transmitted to JetWare AI.</p>
+<p>To manage your key later, click <strong>Settings</strong> in the sidebar. You can view the masked key, update it, or remove it.</p>
+
+<hr>
 <h3>Privacy</h3>
 <p><strong>Schema-only AI:</strong> When AW calls OpenAI, it sends only column names, data types, and aggregate statistics (min, max, mean). Sample rows and raw values are never sent.</p>
 <p><strong>What gets sent:</strong> Column names, data types, numeric ranges, null rates.</p>
@@ -2892,7 +3045,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 <tr style="border-bottom:1px solid var(--bg2);"><td style="padding:6px; font-weight:600; white-space:nowrap;">"SQL must reference the selected dataset"</td><td style="padding:6px;">Use <code>FROM dataset</code> in your query, not the raw filename.</td></tr>
 <tr style="border-bottom:1px solid var(--bg2);"><td style="padding:6px; font-weight:600; white-space:nowrap;">"Parser error"</td><td style="padding:6px;">Check DuckDB syntax. Remove trailing semicolons.</td></tr>
 <tr style="border-bottom:1px solid var(--bg2);"><td style="padding:6px; font-weight:600; white-space:nowrap;">Import fails</td><td style="padding:6px;">Check file format. Try saving as CSV if Excel fails.</td></tr>
-<tr style="border-bottom:1px solid var(--bg2);"><td style="padding:6px; font-weight:600; white-space:nowrap;">Insights not generating</td><td style="padding:6px;">Check that OPENAI_API_KEY is set in your .env file.</td></tr>
+<tr style="border-bottom:1px solid var(--bg2);"><td style="padding:6px; font-weight:600; white-space:nowrap;">Insights not generating</td><td style="padding:6px;">Check that your API key is configured in Settings.</td></tr>
 <tr><td style="padding:6px; font-weight:600; white-space:nowrap;">Wrong dataset after restore</td><td style="padding:6px;">The saved dataset may have been deleted. Re-import it and try again.</td></tr>
 </table>
 
@@ -2937,6 +3090,18 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             <button class="btn sidebar-btn-secondary" id="wfEditCancelBtn">Cancel</button>
             <button class="btn" id="wfEditRunNowBtn">Run Now</button>
             <button class="btn primary" id="wfEditSaveBtn">Save Edits</button>
+        </div>
+    </div>
+
+    <!-- API Key Setup Overlay -->
+    <div class="key-setup-overlay" id="keySetupOverlay">
+        <div class="key-setup-card">
+            <h2>Enter your OpenAI API key to get started</h2>
+            <p>AW uses your own API key to generate SQL and insights. Your key is stored encrypted on this machine and is never transmitted to JetWare AI.</p>
+            <div class="key-error" id="keySetupError"></div>
+            <input type="password" id="keySetupInput" placeholder="sk-proj-..." autocomplete="off">
+            <button class="btn primary" id="keySetupSaveBtn" style="width:100%;">Save Key</button>
+            <a class="key-link" href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">Get an API key at platform.openai.com</a>
         </div>
     </div>
 
@@ -3003,6 +3168,14 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 } else {
                     text = await res.text();
                 }
+
+                // Handle 402 — no API key configured
+                if (res.status === 402 && text.includes("no_api_key")) {
+                    const err = new Error("no_api_key");
+                    err.noApiKey = true;
+                    throw err;
+                }
+
                 throw new Error(text || ("HTTP " + res.status));
             }
 
@@ -3136,7 +3309,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         }
 
         function setActiveNav(buttonId) {
-            ["navWelcome","navReferenceGuide","navInsights","navQuery","navSavedQueries"].forEach((id) => {
+            ["navWelcome","navReferenceGuide","navInsights","navQuery","navSavedQueries","navSettings"].forEach((id) => {
                 $(id).classList.toggle("active", id === buttonId);
             });
         }
@@ -3149,6 +3322,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             $("insightsView").classList.toggle("hidden", viewName !== "insights");
             $("welcomeView").classList.toggle("hidden", viewName !== "welcome");
             $("sessionLogView").classList.toggle("hidden", viewName !== "sessionLog");
+            $("settingsView").classList.toggle("hidden", viewName !== "settings");
 
             if (viewName === "query") setActiveNav("navQuery");
             if (viewName === "saved") setActiveNav("navSavedQueries");
@@ -3162,6 +3336,10 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 if (selectedDataset && !insightsCache[selectedDataset] && _hasAiConsent()) {
                     fetchInsights(false);
                 }
+            }
+            if (viewName === "settings") {
+                setActiveNav("navSettings");
+                refreshSettingsPanel();
             }
 
             // Stop session log auto-refresh when leaving the view
@@ -6584,6 +6762,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                     _showChipsPanel(questions);
                 }
             } catch (e) {
+                if (e.noApiKey) { toast("No API key configured."); switchView("settings"); return; }
                 $("suggestionsChips").innerHTML = '<span class="suggestions-empty">Could not load: ' + e.message + '</span>';
             } finally {
                 clearButtonShimmering(_triggerBtn);
@@ -6863,6 +7042,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 }
 
             } catch (e) {
+                if (e.noApiKey) { toast("No API key configured."); switchView("settings"); return; }
                 clearInsights();
                 $("insightsGrid").innerHTML =
                     '<div class="insights-empty">Could not load insights: ' + e.message + '</div>';
@@ -6902,6 +7082,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 });
                 $("explainText").textContent = data.explanation || "(No explanation returned.)";
             } catch (e) {
+                if (e.noApiKey) { toast("No API key configured."); switchView("settings"); return; }
                 $("explainText").textContent = "Could not generate explanation: " + e.message;
             } finally {
                 clearButtonShimmering($("explainBtn"));
@@ -6997,6 +7178,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                             lastError = new Error(`No SQL was returned from ${attempt.url}.`);
                         }
                     } catch (e) {
+                        if (e.noApiKey) { toast("No API key configured."); switchView("settings"); return; }
                         lastError = e;
                     }
                 }
@@ -7006,6 +7188,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 const errMsg = lastError ? lastError.message : "All routes returned no SQL.";
                 toast("Generate SQL failed — " + errMsg + ". Loaded starter SQL.", 8000);
             } catch (e) {
+                if (e.noApiKey) { toast("No API key configured."); switchView("settings"); return; }
                 $("sqlEditor").value = "SELECT *\nFROM dataset\nLIMIT 100";
                 toast("Generate SQL failed. Loaded starter SQL instead.", 8000);
                 console.error("Generate SQL failed:", e);
@@ -7453,7 +7636,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                         body: JSON.stringify({ event_type: "result_narrative", details: { narrative: data.narrative } }),
                     });
                 } catch (_) {}
-            } catch (_) {
+            } catch (e) {
                 // Non-critical — hide area if AI call fails
                 shimmer.style.display = "none";
                 area.style.display = "none";
@@ -8483,6 +8666,149 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             document.addEventListener("scroll", hide, true);
         })();
 
+        // ---------------------------------------------------------------
+        // API Key Management
+        // ---------------------------------------------------------------
+        async function checkApiKeyStatus() {
+            try {
+                const data = await apiJson("/api/settings/key/status");
+                return data.configured;
+            } catch (_) {
+                return false;
+            }
+        }
+
+        function showKeySetupOverlay() {
+            $("keySetupOverlay").classList.add("visible");
+            $("keySetupInput").value = "";
+            $("keySetupError").textContent = "";
+            $("keySetupInput").focus();
+        }
+
+        function hideKeySetupOverlay() {
+            $("keySetupOverlay").classList.remove("visible");
+        }
+
+        async function saveKeyFromOverlay() {
+            const key = $("keySetupInput").value.trim();
+            if (!key.startsWith("sk-")) {
+                $("keySetupError").textContent = "Key must start with 'sk-'.";
+                return;
+            }
+            try {
+                await apiJson("/api/settings/key", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ key }),
+                });
+                hideKeySetupOverlay();
+                toast("API key saved successfully");
+            } catch (err) {
+                $("keySetupError").textContent = err.message || "Failed to save key.";
+            }
+        }
+
+        $("keySetupSaveBtn").addEventListener("click", saveKeyFromOverlay);
+        $("keySetupInput").addEventListener("keydown", (e) => {
+            if (e.key === "Enter") saveKeyFromOverlay();
+        });
+
+        async function refreshSettingsPanel() {
+            try {
+                const data = await apiJson("/api/settings/key");
+                if (data.configured) {
+                    $("settingsKeyConfigured").style.display = "";
+                    $("settingsKeyNotConfigured").style.display = "none";
+                    $("settingsKeyMasked").textContent = data.masked || "sk-...****";
+                    $("settingsKeyUpdateRow").style.display = "none";
+                } else {
+                    $("settingsKeyConfigured").style.display = "none";
+                    $("settingsKeyNotConfigured").style.display = "";
+                }
+            } catch (_) {
+                $("settingsKeyConfigured").style.display = "none";
+                $("settingsKeyNotConfigured").style.display = "";
+            }
+        }
+
+        $("navSettings").addEventListener("click", () => switchView("settings"));
+
+        $("settingsKeyUpdateBtn").addEventListener("click", () => {
+            $("settingsKeyUpdateRow").style.display = "";
+            $("settingsKeyUpdateInput").value = "";
+            $("settingsKeyUpdateInput").focus();
+        });
+
+        $("settingsKeyUpdateCancelBtn").addEventListener("click", () => {
+            $("settingsKeyUpdateRow").style.display = "none";
+        });
+
+        $("settingsKeyUpdateSaveBtn").addEventListener("click", async () => {
+            const key = $("settingsKeyUpdateInput").value.trim();
+            if (!key.startsWith("sk-")) {
+                toast("Key must start with 'sk-'.");
+                return;
+            }
+            try {
+                await apiJson("/api/settings/key", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ key }),
+                });
+                toast("API key updated");
+                refreshSettingsPanel();
+            } catch (err) {
+                toast("Failed to update key: " + err.message);
+            }
+        });
+
+        $("settingsKeyRemoveBtn").addEventListener("click", async () => {
+            try {
+                await apiJson("/api/settings/key", { method: "DELETE" });
+                toast("API key removed");
+                refreshSettingsPanel();
+            } catch (err) {
+                toast("Failed to remove key: " + err.message);
+            }
+        });
+
+        $("settingsKeyAddBtn").addEventListener("click", async () => {
+            const key = $("settingsKeyAddInput").value.trim();
+            if (!key.startsWith("sk-")) {
+                toast("Key must start with 'sk-'.");
+                return;
+            }
+            try {
+                await apiJson("/api/settings/key", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ key }),
+                });
+                toast("API key saved");
+                refreshSettingsPanel();
+            } catch (err) {
+                toast("Failed to save key: " + err.message);
+            }
+        });
+
+        // Intercept 402 "no_api_key" errors from AI features
+        function handleNoApiKeyError(err) {
+            if (err && err.message && err.message.includes("no_api_key")) {
+                return true;
+            }
+            return false;
+        }
+
+        function showNoKeyInlinePrompt(container) {
+            if (!container) return;
+            const existing = container.querySelector(".no-key-prompt");
+            if (existing) return;
+            const div = document.createElement("div");
+            div.className = "no-key-prompt";
+            div.innerHTML = 'No API key configured. <a onclick="switchView(\'settings\')">Add your key \u2192</a>';
+            container.appendChild(div);
+        }
+
         // Init
         // ---------------------------------------------------------------
         (async function init() {
@@ -8501,6 +8827,12 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             switchView("welcome");
 
             resetInspectState();
+
+            // Check API key status — show setup overlay if no key configured
+            const keyConfigured = await checkApiKeyStatus();
+            if (!keyConfigured) {
+                showKeySetupOverlay();
+            }
         })();
     </script>
 </body>
