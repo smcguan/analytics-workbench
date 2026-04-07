@@ -2022,7 +2022,7 @@ def _generate_grain_description(name: str, schema: list[dict[str, Any]]) -> str:
             return ""
 
     try:
-        return generate_grain_description_for_dataset(dataset_name=name, schema=schema)
+        return generate_grain_description_for_dataset(dataset_name=name, schema=schema, privacy_mode=_get_privacy_mode())
     except Exception as exc:
         logger.warning("grain description AI call failed | dataset=%s | reason=%s", name, exc)
         return ""
@@ -2182,7 +2182,7 @@ def api_health():
 # API KEY MANAGEMENT
 # ============================================================
 
-from app.key_manager import has_key as _has_key, get_key as _get_key, save_key as _save_key, clear_key as _clear_key, mask_key as _mask_key
+from app.key_manager import has_key as _has_key, get_key as _get_key, save_key as _save_key, clear_key as _clear_key, mask_key as _mask_key, get_privacy_mode as _get_privacy_mode, set_privacy_mode as _set_privacy_mode
 
 
 @app.get("/api/settings/key")
@@ -2218,6 +2218,20 @@ def api_settings_key_delete():
 def api_settings_key_status():
     """Quick check if an API key is configured. Called on every AI feature invocation."""
     return {"configured": _has_key()}
+
+
+@app.get("/api/settings/privacy_mode")
+def api_settings_privacy_mode():
+    """Return the current privacy mode setting."""
+    return {"privacy_mode": _get_privacy_mode()}
+
+
+@app.post("/api/settings/privacy_mode")
+def api_settings_privacy_mode_save(payload: dict):
+    """Save the privacy mode setting."""
+    enabled = bool(payload.get("enabled", False))
+    _set_privacy_mode(enabled)
+    return {"success": True}
 
 
 @app.get("/api/datasets")

@@ -1,7 +1,6 @@
-"""Tests for backend/app/key_manager.py — encryption, corruption, wrong-machine handling."""
+"""Tests for backend/app/key_manager.py — encryption, corruption, wrong-machine handling, privacy mode."""
 
 import os
-from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -12,6 +11,8 @@ from app.key_manager import (
     save_key,
     clear_key,
     mask_key,
+    get_privacy_mode,
+    set_privacy_mode,
     _config_path,
     _ensure_config_dir,
 )
@@ -55,45 +56,82 @@ class TestCorruptedConfig:
     """BUG-011: corrupted or wrong-machine config.enc must be auto-deleted."""
 
     def test_has_key_returns_false_on_corrupted_file(self):
-        """A corrupted config.enc should be deleted and has_key() returns False."""
         _ensure_config_dir()
         _config_path().write_bytes(b"this is not valid fernet data")
         assert has_key() is False
         assert not _config_path().exists(), "corrupted file should be deleted"
 
     def test_has_key_returns_false_on_wrong_machine_key(self):
-        """config.enc encrypted on a different machine (different seed) should be
-        detected as invalid, deleted, and has_key() returns False."""
-        # Save a valid key with current machine identity
         save_key("sk-test-valid")
         assert has_key() is True
-
-        # Simulate a different machine by changing COMPUTERNAME
         with patch.dict(os.environ, {"COMPUTERNAME": "OTHER_MACHINE_XYZ"}):
             assert has_key() is False
             assert not _config_path().exists(), "wrong-machine file should be deleted"
 
     def test_get_key_deletes_corrupted_and_raises(self):
-        """get_key() on a corrupted file should delete it and raise RuntimeError."""
         _ensure_config_dir()
         _config_path().write_bytes(b"corrupted-garbage-data")
-        with pytest.raises(RuntimeError, match="corrupted or from another machine"):
+        with pytest.raises(RuntimeError, match="No API key configured"):
             get_key()
         assert not _config_path().exists(), "corrupted file should be deleted"
 
     def test_get_key_deletes_wrong_machine_and_raises(self):
-        """get_key() with a wrong-machine file should delete it and raise."""
         save_key("sk-test-for-machine-a")
         with patch.dict(os.environ, {"COMPUTERNAME": "DIFFERENT_BOX"}):
-            with pytest.raises(RuntimeError, match="corrupted or from another machine"):
+            with pytest.raises(RuntimeError, match="No API key configured"):
                 get_key()
             assert not _config_path().exists()
 
     def test_fresh_key_works_after_corrupted_cleanup(self):
-        """After auto-deleting a corrupted file, a fresh save/get cycle works."""
         _ensure_config_dir()
         _config_path().write_bytes(b"bad-data")
         assert has_key() is False
         save_key("sk-fresh-key-999")
         assert has_key() is True
         assert get_key() == "sk-fresh-key-999"
+
+
+class TestPrivacyMode:
+    """Privacy mode toggle — persisted alongside API key in config.enc."""
+
+    def test_default_is_false(self):
+        assert get_privacy_mode() is False
+
+    def test_default_false_even_with_key(self):
+        save_key("sk-test-key")
+        assert get_privacy_mode() is False
+
+    def test_set_true_persists(self):
+        save_key("sk-test-key")
+        set_privacy_mode(True)
+        assert get_privacy_mode() is True
+
+    def test_set_false_persists(self):
+        save_key("sk-test-key")
+        set_privacy_mode(True)
+        set_privacy_mode(False)
+        assert get_privacy_mode() is False
+
+    def test_toggle_does_not_affect_key(self):
+        save_key("sk-test-key")
+        set_privacy_mode(True)
+        assert get_key() == "sk-test-key"
+
+    def test_key_save_does_not_affect_privacy(self):
+        save_key("sk-test-key")
+        set_privacy_mode(True)
+        save_key("sk-new-key")
+        assert get_privacy_mode() is True
+        assert get_key() == "sk-new-key"
+
+    def test_clear_key_resets_privacy(self):
+        save_key("sk-test-key")
+        set_privacy_mode(True)
+        clear_key()
+        assert get_privacy_mode() is False
+
+    def test_privacy_mode_without_key(self):
+        """Privacy mode can be set even without a key configured."""
+        set_privacy_mode(True)
+        assert get_privacy_mode() is True
+        assert has_key() is False

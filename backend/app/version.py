@@ -1,5 +1,5 @@
 import os
 
 APP_NAME = os.getenv("APP_NAME", "Analytics Workbench")
-APP_VERSION = os.getenv("APP_VERSION", "1.20.1")
+APP_VERSION = os.getenv("APP_VERSION", "1.21.0")
 BUILD_SHA = os.getenv("BUILD_SHA", "demo")

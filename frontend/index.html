@@ -2262,6 +2262,10 @@
             text-decoration:none;
         }
         .no-key-prompt a:hover{ text-decoration:underline; }
+
+        /* Toggle switch checked state */
+        #privacyModeToggle:checked + span{ background:var(--accent); }
+        #privacyModeToggle:checked ~ #privacyModeKnob{ transform:translateX(20px); }
     </style>
 </head>
 
@@ -2693,6 +2697,19 @@ LIMIT 100</textarea>
                                 <a class="key-link" href="https://platform.openai.com/api-keys" target="_blank" rel="noopener" style="margin-left:12px;">Get an API key</a>
                             </div>
                         </div>
+                        <div class="settings-section">
+                            <h3 id="privacyModeHeading">Privacy Mode — Off</h3>
+                            <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+                                <label style="position:relative; display:inline-block; width:44px; height:24px; cursor:pointer;">
+                                    <input type="checkbox" id="privacyModeToggle" style="opacity:0; width:0; height:0;">
+                                    <span style="position:absolute; inset:0; background:var(--stroke); border-radius:12px; transition:background .2s;"></span>
+                                    <span id="privacyModeKnob" style="position:absolute; top:2px; left:2px; width:20px; height:20px; background:#fff; border-radius:50%; transition:transform .2s;"></span>
+                                </label>
+                                <span id="privacyModeLabel" style="font-size:.9rem; color:var(--fg1);">Off</span>
+                            </div>
+                            <p id="privacyModeDesc" style="color:var(--fg1); font-size:.85rem; margin:0 0 8px; line-height:1.5;">AI features currently send: column names, statistics, up to 5 sample rows, up to 10 categorical values per column, and up to 10 query result rows (for Result Narrative and Explain).</p>
+                            <div id="privacyModeConfirm" style="color:var(--accent); font-size:.85rem; min-height:1.2em;"></div>
+                        </div>
                     </div>
                 </section>
 
@@ -3030,12 +3047,24 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 <h3>Settings</h3>
 <p><strong>API Key:</strong> AW requires your own OpenAI API key. On first launch, a setup screen prompts you to enter it. The key is encrypted and stored locally at <code>%APPDATA%\JetWareAI\config.enc</code> — it is never transmitted to JetWare AI.</p>
 <p>To manage your key later, click <strong>Settings</strong> in the sidebar. You can view the masked key, update it, or remove it.</p>
+<p><strong>Privacy Mode:</strong> A toggle in the Settings panel that controls exactly what context is sent to OpenAI. The current state (On/Off) is always visible in the Settings panel.</p>
+<p><strong>When Privacy Mode is OFF (default):</strong></p>
+<ul>
+<li>SQL generation and query suggestions send: column names, data types, aggregate statistics (min/max/avg), up to 5 sample rows from your dataset, up to 10 distinct categorical values per text column, and your natural language question.</li>
+<li>Result Narrative sends: your natural language question, column names, total row count, and up to 5 rows from the query result set.</li>
+<li>Explain sends: the SQL query text, column names, and up to 10 rows from the query result set.</li>
+<li>Insight cards, column aliases, and analysis suggestions send: column names, data types, and aggregate statistics only. No sample rows or data values in any of these three features regardless of mode.</li>
+</ul>
+<p><strong>When Privacy Mode is ON:</strong></p>
+<p>All of the above features are restricted to column names, data types, and aggregate statistics only. Sample rows, categorical values, and query result rows are withheld from every prompt before transmission. This restriction applies immediately — no restart required. The setting persists across sessions.</p>
+<p>For organizations with regulatory, privilege, or data handling requirements, enable Privacy Mode before beginning any session involving sensitive data.</p>
 
 <hr>
 <h3>Privacy</h3>
-<p><strong>Schema-only AI:</strong> When AW calls OpenAI, it sends only column names, data types, and aggregate statistics (min, max, mean). Sample rows and raw values are never sent.</p>
-<p><strong>What gets sent:</strong> Column names, data types, numeric ranges, null rates.</p>
-<p><strong>What never leaves your machine:</strong> Row data, query results, exported files, Reference Table contents.</p>
+<p><strong>What never leaves your machine — in any mode:</strong> Row-level data from your source files, bulk query results, exported files, Reference Table contents, and your API key.</p>
+<p><strong>What is sent to OpenAI — Privacy Mode OFF (default):</strong> Column names, data types, aggregate statistics (min, max, mean, null rates), up to 5 sample rows, up to 10 categorical values per text column, the analyst's natural language question, and up to 10 rows from query result sets (for Result Narrative and Explain features only).</p>
+<p><strong>What is sent to OpenAI — Privacy Mode ON:</strong> Column names, data types, and aggregate statistics only. No sample rows, no categorical values, no result rows. Enable Privacy Mode in Settings before your session to apply this restriction to all AI features.</p>
+<p><strong>JetWare AI is never in the data path.</strong> All OpenAI calls go directly from your machine to OpenAI under your own API key. JetWare AI has no access to your data or your API usage.</p>
 <p><strong>Data cleaning:</strong> Trailing special characters (asterisks, footnote symbols) are automatically stripped from string values on import, so SQL filters work correctly without manual cleanup.</p>
 
 <hr>
@@ -8729,7 +8758,39 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 $("settingsKeyConfigured").style.display = "none";
                 $("settingsKeyNotConfigured").style.display = "";
             }
+            // Load privacy mode state
+            try {
+                const pm = await apiJson("/api/settings/privacy_mode");
+                $("privacyModeToggle").checked = pm.privacy_mode;
+                _updatePrivacyModeUI(pm.privacy_mode);
+                $("privacyModeConfirm").textContent = "";
+            } catch (_) {}
         }
+
+        function _updatePrivacyModeUI(enabled) {
+            $("privacyModeHeading").textContent = enabled ? "Privacy Mode \u2014 On" : "Privacy Mode \u2014 Off";
+            $("privacyModeLabel").textContent = enabled ? "On" : "Off";
+            $("privacyModeDesc").textContent = enabled
+                ? "AI features send column names and statistics only. No sample rows, categorical values, or query result rows are transmitted."
+                : "AI features currently send: column names, statistics, up to 5 sample rows, up to 10 categorical values per column, and up to 10 query result rows (for Result Narrative and Explain).";
+        }
+
+        $("privacyModeToggle").addEventListener("change", async (e) => {
+            const enabled = e.target.checked;
+            try {
+                await apiJson("/api/settings/privacy_mode", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ enabled }),
+                });
+                _updatePrivacyModeUI(enabled);
+                $("privacyModeConfirm").textContent = enabled ? "Privacy Mode enabled" : "Privacy Mode disabled";
+                setTimeout(() => { $("privacyModeConfirm").textContent = ""; }, 3000);
+            } catch (err) {
+                e.target.checked = !enabled;
+                toast("Failed to update Privacy Mode: " + err.message);
+            }
+        });
 
         $("navSettings").addEventListener("click", () => switchView("settings"));
 

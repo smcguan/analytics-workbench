@@ -82,6 +82,7 @@ def build_sql_prompt(
     question: str,
     dataset_source_path_fn,
     reference_context: dict | None = None,
+    privacy_mode: bool = False,
 ) -> str:
     """
     Build the schema-aware prompt used for SQL generation.
@@ -89,6 +90,7 @@ def build_sql_prompt(
     context = build_context(
         dataset_name=dataset_name,
         dataset_source_path_fn=dataset_source_path_fn,
+        privacy_mode=privacy_mode,
     )
 
     columns_text = _format_columns(context.get("columns", []))
@@ -254,6 +256,7 @@ def build_suggest_questions_prompt(
     dataset_name: str,
     dataset_source_path_fn,
     max_questions: int = 8,
+    privacy_mode: bool = False,
 ) -> str:
     """
     Build the prompt used to generate suggested questions for
@@ -262,6 +265,7 @@ def build_suggest_questions_prompt(
     context = build_context(
         dataset_name=dataset_name,
         dataset_source_path_fn=dataset_source_path_fn,
+        privacy_mode=privacy_mode,
     )
 
     columns_text = _format_columns(context.get("columns", []))
@@ -351,6 +355,7 @@ def generate_sql_for_dataset(
     question: str,
     dataset_source_path_fn,
     reference_context: dict | None = None,
+    privacy_mode: bool = False,
 ) -> str:
     """
     High-level helper for question -> raw SQL response text.
@@ -360,6 +365,7 @@ def generate_sql_for_dataset(
         question=question,
         dataset_source_path_fn=dataset_source_path_fn,
         reference_context=reference_context,
+        privacy_mode=privacy_mode,
     )
     return generate_sql_response(prompt)
 
@@ -432,6 +438,7 @@ def suggest_questions_for_dataset(
     dataset_name: str,
     dataset_source_path_fn,
     max_questions: int = 8,
+    privacy_mode: bool = False,
 ) -> list[str]:
     """
     Generate a list of dataset-aware suggested questions.
@@ -440,6 +447,7 @@ def suggest_questions_for_dataset(
         dataset_name=dataset_name,
         dataset_source_path_fn=dataset_source_path_fn,
         max_questions=max_questions,
+        privacy_mode=privacy_mode,
     )
 
     raw_text = generate_sql_response(prompt)
@@ -461,22 +469,26 @@ def build_explain_prompt(
     columns: list[str],
     rows: list[dict],
     dataset_name: str,
+    privacy_mode: bool = False,
 ) -> str:
     """
     Build the prompt used to explain a SQL query and its results
     in plain-English business terms.
     """
-    sample = rows[:10]
+    if privacy_mode:
+        rows_text = "[Result rows withheld — Privacy Mode enabled. Summarize based on the analyst's question and column context only.]"
+    else:
+        sample = rows[:10]
 
-    # Format rows as a simple readable table
-    rows_text = "(no results)"
-    if sample and columns:
-        header = " | ".join(columns)
-        separator = "-" * len(header)
-        data_lines = []
-        for row in sample:
-            data_lines.append(" | ".join(str(row.get(c, "")) for c in columns))
-        rows_text = header + "\n" + separator + "\n" + "\n".join(data_lines)
+        # Format rows as a simple readable table
+        rows_text = "(no results)"
+        if sample and columns:
+            header = " | ".join(columns)
+            separator = "-" * len(header)
+            data_lines = []
+            for row in sample:
+                data_lines.append(" | ".join(str(row.get(c, "")) for c in columns))
+            rows_text = header + "\n" + separator + "\n" + "\n".join(data_lines)
 
     prompt = f"""
 You are a data analyst explaining a query result to a business user who is not technical.
@@ -614,6 +626,7 @@ def generate_result_narrative(
     rows: list[dict],
     rowcount: int,
     dataset_name: str,
+    privacy_mode: bool = False,
 ) -> str:
     """
     Generate a two-sentence plain-English narrative of a query result.
@@ -627,12 +640,15 @@ def generate_result_narrative(
             "produced the expected matches."
         )
 
-    sample = rows[:5]
-    rows_text = "(no rows)"
-    if sample and columns:
-        header = " | ".join(columns)
-        data_lines = [" | ".join(str(row.get(c, "")) for c in columns) for row in sample]
-        rows_text = header + "\n" + "\n".join(data_lines)
+    if privacy_mode:
+        rows_text = "[Result rows withheld — Privacy Mode enabled. Summarize based on the analyst's question and column context only.]"
+    else:
+        sample = rows[:5]
+        rows_text = "(no rows)"
+        if sample and columns:
+            header = " | ".join(columns)
+            data_lines = [" | ".join(str(row.get(c, "")) for c in columns) for row in sample]
+            rows_text = header + "\n" + "\n".join(data_lines)
 
     prompt = f"""You are a data analyst writing a finding summary.
 You will be given a query result with actual data values.
@@ -660,6 +676,7 @@ def generate_explanation(
     columns: list[str],
     rows: list[dict],
     dataset_name: str,
+    privacy_mode: bool = False,
 ) -> str:
     """
     Generate a plain-English explanation of a SQL query and its results.
@@ -669,6 +686,7 @@ def generate_explanation(
         columns=columns,
         rows=rows,
         dataset_name=dataset_name,
+        privacy_mode=privacy_mode,
     )
     return generate_sql_response(prompt)
 
@@ -924,6 +942,7 @@ def _build_grain_description_prompt(
     *,
     dataset_name: str,
     schema: list[dict],
+    privacy_mode: bool = False,
 ) -> str:
     """
     Build the prompt used to generate a dataset grain description.
@@ -933,9 +952,12 @@ def _build_grain_description_prompt(
     # Cap at 30 columns to keep the prompt concise
     lines = []
     for col in schema[:30]:
-        samples = col.get("sample_values", [])
-        sample_str = ", ".join(str(s) for s in samples[:3]) if samples else "N/A"
-        lines.append(f"- {col['column_name']} ({col['data_type']}): e.g. {sample_str}")
+        if privacy_mode:
+            lines.append(f"- {col['column_name']} ({col['data_type']})")
+        else:
+            samples = col.get("sample_values", [])
+            sample_str = ", ".join(str(s) for s in samples[:3]) if samples else "N/A"
+            lines.append(f"- {col['column_name']} ({col['data_type']}): e.g. {sample_str}")
     schema_text = "\n".join(lines)
 
     return f"""You are a data analyst writing concise documentation for a dataset.
@@ -966,6 +988,7 @@ def generate_grain_description_for_dataset(
     *,
     dataset_name: str,
     schema: list[dict],
+    privacy_mode: bool = False,
 ) -> str:
     """
     Generate a 1-2 sentence grain description for a dataset.
@@ -979,6 +1002,7 @@ def generate_grain_description_for_dataset(
     prompt = _build_grain_description_prompt(
         dataset_name=dataset_name,
         schema=schema,
+        privacy_mode=privacy_mode,
     )
     raw = generate_sql_response(prompt)
     # Strip stray quotes or markdown the model might have emitted

@@ -1,20 +1,29 @@
 """
 ============================================================
 FILE: key_manager.py
-LOCATION: src/key_manager.py
+LOCATION: backend/app/key_manager.py
 ============================================================
 
 PURPOSE
 -------
-Manages the customer-supplied OpenAI API key. The key is
-encrypted at rest using Fernet symmetric encryption with a
+Manages the customer-supplied OpenAI API key and application
+settings (e.g. privacy_mode). All values are stored as a JSON
+object encrypted with Fernet symmetric encryption using a
 machine-specific derivation key (COMPUTERNAME + USERNAME
 hashed with SHA-256).
 
 Storage location: %APPDATA%/JetWareAI/config.enc
 
-This module is the ONLY place the API key is read or written.
-No other module should access the key file directly.
+Config structure (encrypted JSON):
+    {"key": "sk-...", "privacy_mode": false}
+
+This module is the ONLY place the config file is read or
+written. No other module should access it directly.
+
+BACKWARD COMPATIBILITY
+----------------------
+Older installs stored only the raw API key string (not JSON).
+_read_config() detects this and migrates transparently.
 ============================================================
 """
 
@@ -22,6 +31,7 @@ from __future__ import annotations
 
 import base64
 import hashlib
+import json
 import logging
 import os
 from pathlib import Path
@@ -58,7 +68,6 @@ def _get_fernet() -> Fernet:
 def _config_path() -> Path:
     appdata = os.getenv("APPDATA")
     if not appdata:
-        # Fallback for non-Windows or missing APPDATA
         appdata = str(Path.home() / ".config")
     return Path(appdata) / "JetWareAI" / "config.enc"
 
@@ -68,66 +77,85 @@ def _ensure_config_dir() -> None:
 
 
 # ============================================================
-# PUBLIC API
+# INTERNAL CONFIG READ / WRITE
 # ============================================================
 
-def has_key() -> bool:
-    """Return True if a valid encrypted key exists on disk.
+def _read_config() -> dict:
+    """Decrypt and return the config dict. Returns {} if missing or corrupt.
 
-    If the file exists but cannot be decrypted (wrong machine, corrupted),
-    the bad file is deleted so the first-launch setup overlay triggers.
+    Handles backward compatibility: if the decrypted content is a plain
+    string (old format), it migrates to {"key": "<value>"} and re-saves.
     """
     path = _config_path()
     if not path.exists():
-        return False
+        return {}
     try:
-        _get_fernet().decrypt(path.read_bytes())
-        return True
+        decrypted = _get_fernet().decrypt(path.read_bytes()).decode("utf-8")
     except Exception:
         logger.warning(
-            "config.enc exists but decryption failed (wrong machine or corrupted) — deleting %s",
+            "config.enc decryption failed (wrong machine or corrupted) — deleting %s",
             path,
         )
         try:
             path.unlink()
         except OSError as exc:
             logger.warning("Could not delete bad config.enc: %s", exc)
-        return False
+        return {}
+
+    # Try JSON first (new format)
+    try:
+        cfg = json.loads(decrypted)
+        if isinstance(cfg, dict):
+            return cfg
+    except (json.JSONDecodeError, ValueError):
+        pass
+
+    # Backward compat: plain string = raw API key from v1.20.0
+    if decrypted.startswith("sk-"):
+        cfg = {"key": decrypted}
+        _write_config(cfg)  # migrate to JSON format
+        return cfg
+
+    return {}
+
+
+def _write_config(cfg: dict) -> None:
+    """Encrypt and write the config dict to disk."""
+    _ensure_config_dir()
+    payload = json.dumps(cfg).encode("utf-8")
+    encrypted = _get_fernet().encrypt(payload)
+    _config_path().write_bytes(encrypted)
+
+
+# ============================================================
+# PUBLIC API — API KEY
+# ============================================================
+
+def has_key() -> bool:
+    """Return True if a valid API key exists in the config."""
+    cfg = _read_config()
+    return bool(cfg.get("key"))
 
 
 def get_key() -> str:
-    """Decrypt and return the API key. Raises RuntimeError if not found.
-
-    If decryption fails (wrong machine, corrupted), the bad file is deleted
-    so subsequent has_key() calls return False and the setup overlay triggers.
-    """
-    path = _config_path()
-    if not path.exists():
+    """Return the API key. Raises RuntimeError if not found."""
+    cfg = _read_config()
+    key = cfg.get("key")
+    if not key:
         raise RuntimeError("No API key configured. Add your key in Settings.")
-    try:
-        decrypted = _get_fernet().decrypt(path.read_bytes())
-        return decrypted.decode("utf-8")
-    except Exception:
-        logger.warning(
-            "config.enc decryption failed in get_key() — deleting %s", path,
-        )
-        try:
-            path.unlink()
-        except OSError:
-            pass
-        raise RuntimeError("API key file is corrupted or from another machine. Please re-enter your key in Settings.")
+    return key
 
 
 def save_key(key: str) -> None:
-    """Encrypt and write the API key to disk."""
-    _ensure_config_dir()
-    encrypted = _get_fernet().encrypt(key.encode("utf-8"))
-    _config_path().write_bytes(encrypted)
+    """Save the API key, preserving other config fields."""
+    cfg = _read_config()
+    cfg["key"] = key
+    _write_config(cfg)
     logger.info("API key saved to %s", _config_path())
 
 
 def clear_key() -> None:
-    """Delete the config file."""
+    """Delete the entire config file."""
     path = _config_path()
     if path.exists():
         path.unlink()
@@ -139,3 +167,21 @@ def mask_key(key: str) -> str:
     if len(key) <= 7:
         return "sk-...****"
     return f"sk-...{key[-4:]}"
+
+
+# ============================================================
+# PUBLIC API — PRIVACY MODE
+# ============================================================
+
+def get_privacy_mode() -> bool:
+    """Return the current privacy_mode setting. Defaults to False."""
+    cfg = _read_config()
+    return bool(cfg.get("privacy_mode", False))
+
+
+def set_privacy_mode(enabled: bool) -> None:
+    """Save the privacy_mode setting, preserving other config fields."""
+    cfg = _read_config()
+    cfg["privacy_mode"] = enabled
+    _write_config(cfg)
+    logger.info("Privacy mode set to %s", enabled)

@@ -38,10 +38,11 @@
 - Tutorial #6 Parameterized Workflow — COMPLETE (v1.17.0) — Retail Sales Performance, Edit panel dataset+reference swap demo
 - Natural language queries in tutorials — COMPLETE (v1.17.0) — 22 query_run steps converted to ai_ask across 7 demos
 - Customer API key management — COMPLETE (v1.20.0) — Fernet-encrypted key storage at %APPDATA%\JetWareAI\config.enc, first-launch setup overlay, Settings panel, 402 guard on all AI endpoints, developer key removed from codebase
+- Privacy Mode toggle — COMPLETE (v1.21.0) — Settings panel toggle restricts all AI transmissions to schema+stats only when enabled. Strips sample rows, categorical values, and query result rows from 5 affected endpoints. JSON config format in config.enc. Reference Guide rewritten with per-endpoint disclosure.
 
-**Current version:** v1.20.1 — BUG-010/011 fixed, demo-ready for Farragut/McDermott meeting
+**Current version:** v1.21.0 — Privacy Mode toggle, demo-ready for Farragut/McDermott meeting
 
-**Test suite:** 1,090 automated tests across three suites, all passing.
+**Test suite:** 1,098 automated tests across three suites, all passing.
 - Unit tests (pytest tests/): 872 passed, 21 skipped
 - Feature + workflow suite (run_all.py): 185 passed, 1 skipped
 - Query accuracy suite (test_accuracy.py): 43 passed (23 deterministic + 20 AI)
@@ -376,6 +377,17 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-04-07] [CODE] — v1.21.0. Privacy Mode toggle. key_manager.py migrated to JSON config
+  format (backward-compatible with plain-key v1.20.x files). get_privacy_mode()/set_privacy_mode()
+  added. 2 new API endpoints: GET/POST /api/settings/privacy_mode. context_builder.py accepts
+  privacy_mode param — suppresses sample rows and categorical values when enabled. 5 prompt
+  builders updated: build_sql_prompt, build_suggest_questions_prompt, build_explain_prompt,
+  generate_result_narrative, _build_grain_description_prompt. Routes.py reads get_privacy_mode()
+  at request time for all affected endpoints. Settings panel: dynamic toggle with state-aware
+  heading ("Privacy Mode — On/Off"), dynamic description text showing what's sent in each mode.
+  Reference Guide: Settings section rewritten with per-endpoint disclosure, Privacy section
+  rewritten with three-tier OFF/ON/never-sent model. AI prompt audit completed — confirmed 5/8
+  endpoints send data values, 3 are schema-only. 19 key_manager tests (8 privacy mode). 891 tests.
 [2026-04-06] [CODE] — v1.20.1. BUG-010 fixed: config.enc added to .gitignore. BUG-011 fixed:
   has_key() and get_key() now auto-delete corrupted/wrong-machine config.enc and return
   False/raise RuntimeError so first-launch overlay triggers naturally. 11 new tests in

@@ -192,6 +192,7 @@ def build_context(
     dataset_source_path_fn,
     max_sample_rows: int = 5,
     max_categorical_values: int = 10,
+    privacy_mode: bool = False,
 ) -> dict[str, Any]:
     """
     Build a compact schema-aware context for the AI SQL generator.
@@ -261,17 +262,22 @@ def build_context(
         # Sample rows are very helpful for the model because
         # they show realistic value patterns, not just names.
         #
-        sample_cur = con.execute(
-            f"SELECT * FROM read_parquet('{esc}') LIMIT {int(max_sample_rows)}"
-        )
+        # PRIVACY MODE: skip sample rows entirely — no actual
+        # data values leave the machine.
+        #
+        sample_rows: list[dict[str, Any]] = []
+        if not privacy_mode:
+            sample_cur = con.execute(
+                f"SELECT * FROM read_parquet('{esc}') LIMIT {int(max_sample_rows)}"
+            )
 
-        sample_cols = [d[0] for d in sample_cur.description]
-        sample_rows_raw = sample_cur.fetchall()
+            sample_cols = [d[0] for d in sample_cur.description]
+            sample_rows_raw = sample_cur.fetchall()
 
-        sample_rows = [
-            {k: _json_safe_value(v) for k, v in zip(sample_cols, row)}
-            for row in sample_rows_raw
-        ]
+            sample_rows = [
+                {k: _json_safe_value(v) for k, v in zip(sample_cols, row)}
+                for row in sample_rows_raw
+            ]
 
         # ----------------------------------------------------
         # STEP 4 — Compute numeric stats
@@ -334,9 +340,11 @@ def build_context(
         # Example:
         #   region -> ["East", "West", "South"]
         #
+        # PRIVACY MODE: skip categorical values entirely — no actual
+        # data values leave the machine.
         categorical_values: list[dict[str, Any]] = []
 
-        for col in columns:
+        for col in (columns if not privacy_mode else []):
             col_name = col["name"]
             col_type = col["type"]
 

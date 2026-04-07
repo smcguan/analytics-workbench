@@ -245,6 +245,8 @@ GET  /api/settings/key
 POST /api/settings/key
 DELETE /api/settings/key
 GET  /api/settings/key/status
+GET  /api/settings/privacy_mode
+POST /api/settings/privacy_mode
 POST /api/shutdown
 ```
 

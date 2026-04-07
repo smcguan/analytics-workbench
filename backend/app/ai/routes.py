@@ -112,7 +112,7 @@ from .sql_validator import (
 )
 
 from app.services.session_log import log_event, SessionEventType
-from app.key_manager import has_key as _has_api_key
+from app.key_manager import has_key as _has_api_key, get_privacy_mode as _get_privacy_mode
 
 # ============================================================
 # ROUTER INITIALIZATION
@@ -511,6 +511,7 @@ def suggest_questions(
             dataset_name=dataset,
             dataset_source_path_fn=_get_dataset_source_path,
             max_questions=max_questions,
+            privacy_mode=_get_privacy_mode(),
         )
 
         # ----------------------------------------------------
@@ -788,6 +789,7 @@ def generate_sql(payload: GenerateSQLRequest) -> GenerateSQLResponse:
             question=question,
             dataset_source_path_fn=_get_dataset_source_path,
             reference_context=ref_ctx,
+            privacy_mode=_get_privacy_mode(),
         )
 
         # ----------------------------------------------------
@@ -920,6 +922,7 @@ def explain_sql(payload: ExplainRequest) -> ExplainResponse:
             columns=payload.columns,
             rows=payload.rows,
             dataset_name=payload.dataset,
+            privacy_mode=_get_privacy_mode(),
         )
         return ExplainResponse(explanation=explanation)
     except Exception as e:
@@ -939,6 +942,7 @@ def get_result_narrative(payload: ResultNarrativeRequest) -> ResultNarrativeResp
             rows=payload.rows,
             rowcount=payload.rowcount,
             dataset_name=payload.dataset,
+            privacy_mode=_get_privacy_mode(),
         )
         log_event(SessionEventType.RESULT_NARRATIVE, {
             "dataset": payload.dataset,
