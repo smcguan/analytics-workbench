@@ -248,6 +248,8 @@ DELETE /api/settings/key
 GET  /api/settings/key/status
 GET  /api/settings/privacy_mode
 POST /api/settings/privacy_mode
+GET  /api/settings/ai_mode
+POST /api/settings/ai_mode
 POST /api/shutdown
 ```
 

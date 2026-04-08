@@ -65,6 +65,7 @@ class SessionEventType(str, Enum):
     SUGGESTIONS_GENERATED = "suggestions_generated"
     AI_SQL_GENERATED = "ai_sql_generated"
     RESULT_NARRATIVE = "result_narrative"
+    AI_MODE_CHANGE = "ai_mode_change"
 
 
 @dataclass

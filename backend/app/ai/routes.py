@@ -73,7 +73,7 @@ import logging
 from datetime import datetime, timezone
 from pathlib import Path
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, HTTPException, Query
 
 logger = logging.getLogger("app")
 
@@ -112,7 +112,7 @@ from .sql_validator import (
 )
 
 from app.services.session_log import log_event, SessionEventType
-from app.key_manager import has_key as _has_api_key, get_privacy_mode as _get_privacy_mode
+from app.key_manager import has_key as _has_api_key, get_privacy_mode as _get_privacy_mode, get_ai_mode as _get_ai_mode
 
 # ============================================================
 # ROUTER INITIALIZATION
@@ -128,7 +128,20 @@ router = APIRouter(prefix="/api/ai", tags=["AI"])
 
 
 def _require_api_key():
-    """Raise HTTP 402 if no API key is configured."""
+    """Ensure the active AI provider is available.
+
+    Cloud mode: raises HTTP 402 if no API key is configured.
+    Local mode: raises HTTP 503 if Ollama is not running.
+    """
+    if _get_ai_mode() == "local":
+        from .provider_ollama import check_ollama_available
+        if not check_ollama_available():
+            from fastapi import HTTPException
+            raise HTTPException(
+                status_code=503,
+                detail="Ollama is not running. Start Ollama and try again.",
+            )
+        return  # Local mode doesn't need an API key
     if not _has_api_key():
         from fastapi import HTTPException
         raise HTTPException(status_code=402, detail="no_api_key")
@@ -868,6 +881,20 @@ def generate_sql(payload: GenerateSQLRequest) -> GenerateSQLResponse:
             sql=parsed["sql"],
             message=parsed["message"],
             warnings=parsed["warnings"],
+        )
+
+    except HTTPException as he:
+        if he.status_code in (402, 503):
+            raise  # Let API key / Ollama errors propagate directly
+        # Other HTTPExceptions (e.g. 400 from dataset resolution) fall through
+        # to the safety net below for structured error response
+        return GenerateSQLResponse(
+            status="error",
+            dataset=getattr(payload, "dataset", "unknown"),
+            question=getattr(payload, "question", "") or "",
+            sql="",
+            message=he.detail or f"HTTP {he.status_code}",
+            warnings=[],
         )
 
     except Exception as e:

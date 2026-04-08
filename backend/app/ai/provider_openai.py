@@ -325,12 +325,10 @@ Categorical values:
 
 
 # ============================================================
-# OPENAI RAW CALL
+# RAW AI CALL — dispatches to OpenAI or Ollama based on ai_mode
 # ============================================================
-def generate_sql_response(prompt: str) -> str:
-    """
-    Send a prompt to OpenAI and return the raw output text.
-    """
+def _call_openai(prompt: str) -> str:
+    """Send a prompt to OpenAI and return the raw output text."""
     from openai import OpenAI
     from app.key_manager import get_key
 
@@ -344,6 +342,23 @@ def generate_sql_response(prompt: str) -> str:
     )
 
     return response.output_text.strip()
+
+
+def generate_sql_response(prompt: str) -> str:
+    """
+    Send a prompt to the active AI provider and return raw output text.
+
+    Routes to OpenAI (cloud) or Ollama (local) based on the current
+    ai_mode setting. All higher-level functions call this single
+    chokepoint — changing provider here changes it everywhere.
+    """
+    from app.key_manager import get_ai_mode
+
+    if get_ai_mode() == "local":
+        from .provider_ollama import generate_response as _ollama_generate
+        return _ollama_generate(prompt)
+
+    return _call_openai(prompt)
 
 
 # ============================================================

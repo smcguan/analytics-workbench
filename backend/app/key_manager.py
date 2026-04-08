@@ -15,7 +15,7 @@ hashed with SHA-256).
 Storage location: %APPDATA%/JetWareAI/config.enc
 
 Config structure (encrypted JSON):
-    {"key": "sk-...", "privacy_mode": false}
+    {"key": "sk-...", "privacy_mode": false, "ai_mode": "cloud"}
 
 This module is the ONLY place the config file is read or
 written. No other module should access it directly.
@@ -185,3 +185,27 @@ def set_privacy_mode(enabled: bool) -> None:
     cfg["privacy_mode"] = enabled
     _write_config(cfg)
     logger.info("Privacy mode set to %s", enabled)
+
+
+# ============================================================
+# PUBLIC API — AI MODE
+# ============================================================
+
+_VALID_AI_MODES = ("cloud", "local")
+
+
+def get_ai_mode() -> str:
+    """Return the current ai_mode setting. Defaults to 'cloud'."""
+    cfg = _read_config()
+    mode = cfg.get("ai_mode", "cloud")
+    return mode if mode in _VALID_AI_MODES else "cloud"
+
+
+def set_ai_mode(mode: str) -> None:
+    """Save the ai_mode setting. Validates value is 'cloud' or 'local'."""
+    if mode not in _VALID_AI_MODES:
+        raise ValueError(f"Invalid ai_mode: {mode!r}. Must be 'cloud' or 'local'.")
+    cfg = _read_config()
+    cfg["ai_mode"] = mode
+    _write_config(cfg)
+    logger.info("AI mode set to %s", mode)

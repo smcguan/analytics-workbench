@@ -40,11 +40,12 @@
 - Customer API key management — COMPLETE (v1.20.0) — Fernet-encrypted key storage at %APPDATA%\JetWareAI\config.enc, first-launch setup overlay, Settings panel, 402 guard on all AI endpoints, developer key removed from codebase
 - Privacy Mode toggle — COMPLETE (v1.21.0) — Settings panel toggle restricts all AI transmissions to schema+stats only when enabled. Strips sample rows, categorical values, and query result rows from 5 affected endpoints. JSON config format in config.enc. Reference Guide rewritten with per-endpoint disclosure.
 - Analysis Summary Artifact — COMPLETE (v1.23.0) — AI-powered session summary generates structured memo (Findings/Methodology/Limitations/Open Items) from session log. Privacy mode strips SQL and data values. Slide-in drawer with markdown export. Configurable template for per-customer formats.
+- AI Mode Switch — COMPLETE (v1.24.0) — Session-level Cloud/Local toggle. OllamaProvider at localhost:11434 with llama3.2. Settings panel toggle with dynamic Ollama status. Topbar pill shows current mode. ai_mode_change event in Session Log. 503 on Ollama unavailable. Privacy Mode applies identically to both providers.
 
-**Current version:** v1.23.1 — Analysis Summary polish: Reference Guide, tutorials, tests, export UX
+**Current version:** v1.24.0 — AI Mode Switch: session-level Cloud/Local toggle via Ollama (M5 Priority 3)
 
-**Test suite:** 1,152 automated tests across three suites, all passing.
-- Unit tests (pytest tests/): 933 passed, 21 skipped
+**Test suite:** 1,168 automated tests across three suites, all passing.
+- Unit tests (pytest tests/): 949 passed, 21 skipped
 - Feature + workflow suite (run_all.py): 196 passed, 1 skipped
 - Query accuracy suite (test_accuracy.py): 43 passed (23 deterministic + 20 AI)
 - AI accuracy when enabled: 100% (20/20) — threshold is 85%
@@ -385,6 +386,16 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
   privacy prompt inspection both modes, empty session graceful handling, no cross-session caching,
   markdown export validation). generate_summary added to replayable step types and session log badge/label.
   933 pytest + 196 run_all + 23 accuracy = 1,152 tests.
+[2026-04-08] [CODE] — v1.24.0. AI Mode Switch (M5 Priority 3). New provider_ollama.py connects to
+  Ollama at localhost:11434 with llama3.2. generate_sql_response() dispatches to OpenAI or Ollama
+  based on ai_mode in config.enc. key_manager.py: get_ai_mode()/set_ai_mode() with validation.
+  2 new API endpoints: GET/POST /api/settings/ai_mode (includes ollama_available check).
+  _require_api_key() now handles both modes: 402 for missing API key (cloud), 503 for Ollama down
+  (local). Frontend: Settings panel AI Mode toggle with dynamic Ollama status indicator and Install
+  Ollama link. Topbar pill shows Cloud AI / Local AI / Privacy combinations. ai_mode_change event
+  type in SessionEventType enum with Session Log badge. 503 handler in apiJson(). 16 new tests
+  (key_manager, endpoints, provider routing, 503 handling, session log, privacy parity).
+  949 pytest + 196 run_all + 23 accuracy = 1,168 tests.
 [2026-04-08] [CODE] — v1.23.0. Analysis Summary Artifact (M5 Priority 2). New POST /api/session/analysis_summary endpoint reads session log events, sends metadata to OpenAI, returns structured 4-section memo (Findings, Methodology, Limitations, Open Items). Privacy mode supported — strips SQL and data values from prompt when enabled. Frontend: Generate Summary button in WORKFLOWS sidebar, slide-in drawer with rendered sections, Export Markdown button, Regenerate button. Configurable template variable for future per-customer customization. 19 new tests (prompt builder, parser, endpoint, privacy). 1,146 tests passing.
 [2026-04-08] [BD] — Document Workbench companion product built from zero to v0.6.3 in one day: PDF ingestion, LanceDB vector store, OpenAI providers, FastAPI routes, frontend UI matching AW design. Tested against Farragut NDA draft — Q&A with page citations working. Two new AW example cases generated and integrated: Tutorial #8 Cash Pay MedSpa (4,245 rows, PE diligence workflow) and Tutorial #9 Hospital Readmissions HRRP (975 rows, penalty exposure analysis). Both validated against Farragut use cases. Cloud/Local mode indicator added to AW header. DW repo fully set up with same continuity infrastructure as AW.
 [2026-04-07] [CODE] — v1.22.0. Tutorials #8 and #9 added: Cash Pay Entity Analysis (MedSpa,
@@ -746,8 +757,8 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 - Build Feature 6 — Compare Mode
 - Build Feature 7 — Shareable HTML Export
 - Fix Feature 3 — Smarter Suggestions three-step sequence UI
-- Build Analysis Summary Artifact (M5 Priority 2)
-- Build AI Mode Switch (M5 Priority 3)
+- ~~Build Analysis Summary Artifact (M5 Priority 2)~~ COMPLETE v1.23.0
+- ~~Build AI Mode Switch (M5 Priority 3)~~ COMPLETE v1.24.0
 - Fix Library button width — still mismatched
 - Fix shimmer upload bar — still appearing
 - ~~Spec M5 Priority 1: Multi-State Medicaid Normalization~~ COMPLETE — multi-dataset UNION built (v1.13.0)
@@ -759,7 +770,7 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 - ~~Build Tutorial #4 example case~~ COMPLETE v1.14.0 — Farragut demo ready
 - Add medicaid_schema_map, mco_lookup, audit_risk_flags, service_category_map to Reference Table Library
 - ~~Spec M5 Priority 2: Analysis Summary Artifact~~ COMPLETE v1.23.0 — AI-powered session summary with 4-section memo (Findings/Methodology/Limitations/Open Items), privacy mode support, markdown export
-- Spec M5 Priority 3: AI Mode Switch (session-level Local/Cloud toggle)
+- ~~Spec M5 Priority 3: AI Mode Switch~~ COMPLETE v1.24.0 — Cloud/Local toggle, OllamaProvider, Settings UI, topbar pill
 - Build additional Reference Table Library files: Medicaid schema map, MCO lookup
 - Spot-check usp_globe_categories, usp_guard_categories, orphan_drug_status CSVs
   against FDA OOPD and USP MMG before production

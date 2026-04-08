@@ -2348,6 +2348,8 @@
         /* Toggle switch checked state */
         #privacyModeToggle:checked + span{ background:var(--accent); }
         #privacyModeToggle:checked ~ #privacyModeKnob{ transform:translateX(20px); }
+        #aiModeToggle:checked + span{ background:var(--accent); }
+        #aiModeToggle:checked ~ #aiModeKnob{ transform:translateX(20px); }
     </style>
 </head>
 
@@ -2797,6 +2799,20 @@ LIMIT 100</textarea>
                             </div>
                             <p id="privacyModeDesc" style="color:var(--fg1); font-size:.85rem; margin:0 0 8px; line-height:1.5;">AI features currently send: column names, statistics, up to 5 sample rows, up to 10 categorical values per column, and up to 10 query result rows (for Result Narrative and Explain).</p>
                             <div id="privacyModeConfirm" style="color:var(--accent); font-size:.85rem; min-height:1.2em;"></div>
+
+                            <hr style="border:none; border-top:1px solid var(--stroke); margin:16px 0;">
+                            <h3 id="aiModeHeading">AI Mode — Cloud</h3>
+                            <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
+                                <label style="position:relative; display:inline-block; width:44px; height:24px; cursor:pointer;">
+                                    <input type="checkbox" id="aiModeToggle" style="opacity:0; width:0; height:0;">
+                                    <span style="position:absolute; inset:0; background:var(--stroke); border-radius:12px; transition:background .2s;"></span>
+                                    <span id="aiModeKnob" style="position:absolute; top:2px; left:2px; width:20px; height:20px; background:#fff; border-radius:50%; transition:transform .2s;"></span>
+                                </label>
+                                <span id="aiModeLabel" style="font-size:.9rem; color:var(--fg1);">Cloud</span>
+                            </div>
+                            <p id="aiModeDesc" style="color:var(--fg1); font-size:.85rem; margin:0 0 8px; line-height:1.5;">AI features use OpenAI via your API key. Requires internet connection.</p>
+                            <div id="ollamaStatus" style="font-size:.85rem; min-height:1.2em; display:none;"></div>
+                            <div id="aiModeConfirm" style="color:var(--accent); font-size:.85rem; min-height:1.2em;"></div>
                         </div>
                     </div>
                 </section>
@@ -3325,6 +3341,11 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                     const err = new Error("no_api_key");
                     err.noApiKey = true;
                     throw err;
+                }
+
+                // Handle 503 — Ollama not running (local AI mode)
+                if (res.status === 503 && text.includes("Ollama")) {
+                    throw new Error("Ollama is not running. Start Ollama and try again, or switch to Cloud AI in Settings.");
                 }
 
                 throw new Error(text || ("HTTP " + res.status));
@@ -4668,6 +4689,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             if (eventType === "query_run" || eventType === "ai_sql_generated") return "sld-badge-query";
             if (eventType === "reference_load" || eventType === "reference_delete") return "sld-badge-ref";
             if (eventType === "export" || eventType === "generate_summary") return "sld-badge-export";
+            if (eventType === "ai_mode_change") return "sld-badge-ref";
             if (eventType === "result_passport" || eventType === "passport_export") return "sld-badge-passport";
             return "sld-badge-system";
         }
@@ -4689,6 +4711,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 session_end: "SESSION END",
                 query_save: "QUERY SAVED",
                 generate_summary: "SUMMARY GENERATED",
+                ai_mode_change: "AI MODE",
             };
             return labels[eventType] || eventType.replace(/_/g, " ").toUpperCase();
         }
@@ -4713,6 +4736,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             if (t === "ai_sql_generated") return "SQL generated from question";
             if (t === "session_start") return "Session started";
             if (t === "session_end") return "Session ended";
+            if (t === "ai_mode_change") return (d.old_mode || "?") + " → " + (d.new_mode || "?");
             return t.replace(/_/g, " ");
         }
 
@@ -9044,7 +9068,15 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 _updatePrivacyModeUI(pm.privacy_mode);
                 $("privacyModeConfirm").textContent = "";
             } catch (_) {}
+            // Load AI mode state
+            try {
+                const am = await apiJson("/api/settings/ai_mode");
+                _updateAiModeUI(am.mode, am.ollama_available);
+                $("aiModeConfirm").textContent = "";
+            } catch (_) {}
         }
+
+        let _currentAiMode = "cloud";
 
         function _updatePrivacyModeUI(enabled) {
             $("privacyModeHeading").textContent = enabled ? "Privacy Mode \u2014 On" : "Privacy Mode \u2014 Off";
@@ -9052,9 +9084,43 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             $("privacyModeDesc").textContent = enabled
                 ? "AI features send column names and statistics only. No sample rows, categorical values, or query result rows are transmitted."
                 : "AI features currently send: column names, statistics, up to 5 sample rows, up to 10 categorical values per column, and up to 10 query result rows (for Result Narrative and Explain).";
-            // Update topbar mode indicator
-            $("modeText").textContent = enabled ? "Privacy Mode" : "Cloud Mode";
-            $("modeDot").className = "status-dot ok";
+            _updateTopbarModePill();
+        }
+
+        function _updateAiModeUI(mode, ollamaAvailable) {
+            _currentAiMode = mode;
+            const isLocal = mode === "local";
+            $("aiModeToggle").checked = isLocal;
+            $("aiModeHeading").textContent = isLocal ? "AI Mode \u2014 Local (Ollama)" : "AI Mode \u2014 Cloud";
+            $("aiModeLabel").textContent = isLocal ? "Local" : "Cloud";
+            $("aiModeDesc").textContent = isLocal
+                ? "AI features run entirely on this machine. No data leaves your device. Requires Ollama running on localhost:11434."
+                : "AI features use OpenAI via your API key. Requires internet connection.";
+            const status = $("ollamaStatus");
+            if (isLocal) {
+                status.style.display = "";
+                if (ollamaAvailable) {
+                    status.innerHTML = '<span style="color:var(--success);">\u25cf Ollama connected \u2014 llama3.2</span>';
+                } else {
+                    status.innerHTML = '<span style="color:var(--warning);">\u25cf Ollama not running \u2014 <a href="https://ollama.ai" target="_blank" rel="noopener" style="color:var(--accent);">Install Ollama \u2197</a></span>';
+                }
+            } else {
+                status.style.display = "none";
+            }
+            _updateTopbarModePill();
+        }
+
+        function _updateTopbarModePill() {
+            const privacyOn = $("privacyModeToggle").checked;
+            if (_currentAiMode === "local") {
+                $("modeText").textContent = privacyOn ? "Local AI + Privacy" : "Local AI";
+                $("modeDot").className = "status-dot ok";
+                $("modePill").style.background = "rgba(79,140,255,.15)";
+            } else {
+                $("modeText").textContent = privacyOn ? "Privacy Mode" : "Cloud AI";
+                $("modeDot").className = "status-dot ok";
+                $("modePill").style.background = "";
+            }
         }
 
         $("privacyModeToggle").addEventListener("change", async (e) => {
@@ -9071,6 +9137,25 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             } catch (err) {
                 e.target.checked = !enabled;
                 toast("Failed to update Privacy Mode: " + err.message);
+            }
+        });
+
+        $("aiModeToggle").addEventListener("change", async (e) => {
+            const isLocal = e.target.checked;
+            const mode = isLocal ? "local" : "cloud";
+            try {
+                await apiJson("/api/settings/ai_mode", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ mode }),
+                });
+                const status = await apiJson("/api/settings/ai_mode");
+                _updateAiModeUI(status.mode, status.ollama_available);
+                $("aiModeConfirm").textContent = isLocal ? "Switched to Local AI (Ollama)" : "Switched to Cloud AI (OpenAI)";
+                setTimeout(() => { $("aiModeConfirm").textContent = ""; }, 3000);
+            } catch (err) {
+                e.target.checked = !isLocal;
+                toast("Failed to update AI Mode: " + err.message);
             }
         });
 
@@ -9181,6 +9266,10 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             try {
                 const pm = await apiJson("/api/settings/privacy_mode");
                 _updatePrivacyModeUI(pm.privacy_mode);
+            } catch (_) {}
+            try {
+                const am = await apiJson("/api/settings/ai_mode");
+                _updateAiModeUI(am.mode, am.ollama_available);
             } catch (_) {}
         })();
     </script>

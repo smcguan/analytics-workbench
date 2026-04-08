@@ -2182,7 +2182,7 @@ def api_health():
 # API KEY MANAGEMENT
 # ============================================================
 
-from app.key_manager import has_key as _has_key, get_key as _get_key, save_key as _save_key, clear_key as _clear_key, mask_key as _mask_key, get_privacy_mode as _get_privacy_mode, set_privacy_mode as _set_privacy_mode
+from app.key_manager import has_key as _has_key, get_key as _get_key, save_key as _save_key, clear_key as _clear_key, mask_key as _mask_key, get_privacy_mode as _get_privacy_mode, set_privacy_mode as _set_privacy_mode, get_ai_mode as _get_ai_mode, set_ai_mode as _set_ai_mode
 
 
 @app.get("/api/settings/key")
@@ -2231,6 +2231,34 @@ def api_settings_privacy_mode_save(payload: dict):
     """Save the privacy mode setting."""
     enabled = bool(payload.get("enabled", False))
     _set_privacy_mode(enabled)
+    return {"success": True}
+
+
+@app.get("/api/settings/ai_mode")
+def api_settings_ai_mode():
+    """Return the current AI mode and Ollama availability."""
+    from app.ai.provider_ollama import check_ollama_available, get_ollama_model
+    mode = _get_ai_mode()
+    result = {"mode": mode, "ollama_available": check_ollama_available()}
+    if mode == "local":
+        result["ollama_model"] = get_ollama_model()
+    return result
+
+
+@app.post("/api/settings/ai_mode")
+def api_settings_ai_mode_save(payload: dict):
+    """Save the AI mode setting. Logs a session event on change."""
+    mode = payload.get("mode", "cloud")
+    old_mode = _get_ai_mode()
+    try:
+        _set_ai_mode(mode)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    if mode != old_mode:
+        log_event(SessionEventType.AI_MODE_CHANGE, {
+            "old_mode": old_mode,
+            "new_mode": mode,
+        })
     return {"success": True}
 
 
@@ -4340,8 +4368,12 @@ def api_analysis_summary():
     from app.ai.provider_openai import generate_analysis_summary
     from dataclasses import asdict
 
-    # Require API key
-    if not _has_key():
+    # Require AI provider available
+    if _get_ai_mode() == "local":
+        from app.ai.provider_ollama import check_ollama_available
+        if not check_ollama_available():
+            raise HTTPException(status_code=503, detail="Ollama is not running. Start Ollama and try again.")
+    elif not _has_key():
         raise HTTPException(status_code=402, detail="no_api_key")
 
     session = get_current_session()

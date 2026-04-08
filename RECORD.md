@@ -10,7 +10,7 @@ stays on the analyst's machine — AI generates analysis instructions, not data 
 **Tech stack:** FastAPI backend, DuckDB query engine, OpenAI GPT-4.1-mini for AI,
 vanilla HTML/JS/CSS frontend, PyInstaller packaging for Windows desktop.
 
-**Current version:** v1.23.1 | **Total commits:** 130+ | **Test suite:** 1,152 tests (three suites, AI accuracy 100%)
+**Current version:** v1.24.0 | **Total commits:** 130+ | **Test suite:** 1,168 tests (three suites, AI accuracy 100%)
 
 ---
 
@@ -132,6 +132,7 @@ Building toward reproducible, auditable, shareable analytical sessions:
 | v1.10.2 | 2026-03-21 | Bug #18: Refresh was deleting disk files (root cause of restore loop); Clear SQL button; Sessions Save exits; SQL auto-clears on restore |
 | v1.10.3 | 2026-03-21 | Chart tab disabled until query returns chartable result; Sessions Save no longer exits; restore filters dataset list to session dataset only |
 | v1.11.0 | 2026-03-21 | SESSIONS sidebar removed; snapshots retired; Welcome card is session hub (Resume + Save); Reference Guide as slide-in drawer; 603 tests |
+| v1.24.0 | 2026-04-08 | AI Mode Switch (M5 P3): Cloud/Local toggle via Ollama, Settings panel, topbar pill, 503 handling, 16 new tests; 1,168 tests |
 | v1.23.1 | 2026-04-08 | Analysis Summary polish: Reference Guide docs, tutorials #1/#3/#4 generate_summary step, Copy to Clipboard, 6 new tests; 1,152 tests |
 | v1.23.0 | 2026-04-08 | Analysis Summary Artifact (M5 P2): AI-powered session memo with 4-section structure, privacy mode, markdown export; 19 new tests; 1,146 tests |
 | v1.22.0 | 2026-04-07 | Tutorials #8 Cash Pay MedSpa + #9 Hospital Readmissions HRRP; 12 cases, 8 domains; two-column reference JOIN validated; 908 tests |
@@ -156,6 +157,11 @@ Building toward reproducible, auditable, shareable analytical sessions:
 
 ## Wrap Records
 <!-- Each /wrap appends a 3-line summary below. Most recent at top. -->
+
+**v1.24.0** | 2026-04-08
+AI Mode Switch (M5 Priority 3). provider_ollama.py with llama3.2 at localhost:11434.
+generate_sql_response() dispatches to OpenAI or Ollama via ai_mode config. Settings panel
+toggle with Ollama status indicator. Topbar pill shows current mode. 16 new tests.
 
 **v1.23.1** | 2026-04-08
 Analysis Summary polish pass. Reference Guide section rewritten with full documentation.
