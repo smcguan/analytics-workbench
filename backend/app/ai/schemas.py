@@ -254,3 +254,18 @@ class AnalysisSequenceResponse(BaseModel):
     dataset: str
     steps: List[str]   # exactly 3 plain-English questions
     cached: bool = False
+
+
+# ============================================================
+# ANALYSIS SUMMARY MODELS
+# ============================================================
+# Used by POST /api/session/analysis_summary
+# ============================================================
+
+class AnalysisSummaryResponse(BaseModel):
+    findings: str = ""
+    methodology: str = ""
+    limitations: str = ""
+    open_items: str = ""
+    raw_text: str = ""       # full markdown for export
+    error: str = ""

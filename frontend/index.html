@@ -188,6 +188,14 @@
             letter-spacing:.2px;
         }
 
+        .brand-title{
+            margin:0;
+            font-size:19px;
+            font-weight:700;
+            line-height:1.1;
+            letter-spacing:.2px;
+        }
+
         .brand .sub{
             margin-top:4px;
             color:var(--muted);
@@ -2052,6 +2060,70 @@
         .ref-guide-drawer-body table{ width:100%; border-collapse:collapse; font-size:12px; }
         .ref-guide-drawer-body td{ padding:6px 8px; border-bottom:1px solid var(--stroke); vertical-align:top; }
 
+        /* ── Analysis Summary slide-in drawer ─────────────────── */
+        .summary-drawer{
+            position:fixed;
+            top:0; right:0; bottom:0;
+            width:520px;
+            max-width:95vw;
+            background:linear-gradient(180deg, rgba(18,28,44,.99) 0%, rgba(14,22,36,.99) 100%);
+            border-left:1px solid var(--stroke-strong);
+            box-shadow:-12px 0 40px rgba(0,0,0,.45);
+            z-index:300;
+            display:flex;
+            flex-direction:column;
+            transform:translateX(100%);
+            transition:transform .22s cubic-bezier(.4,0,.2,1);
+        }
+        .summary-drawer.open{ transform:translateX(0); }
+        .summary-drawer-header{
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            padding:16px 20px;
+            border-bottom:1px solid var(--stroke);
+            flex-shrink:0;
+        }
+        .summary-drawer-header h2{
+            margin:0; font-size:16px; font-weight:700; color:var(--text);
+        }
+        .summary-drawer-body{
+            flex:1;
+            overflow-y:auto;
+            padding:20px 24px 32px;
+            font-size:13px;
+            line-height:1.75;
+            color:var(--text);
+        }
+        .summary-drawer-body h2{ font-size:15px; margin-top:20px; margin-bottom:8px; color:var(--accent); }
+        .summary-drawer-body h2:first-child{ margin-top:0; }
+        .summary-drawer-body ul{ padding-left:20px; margin:6px 0 12px; }
+        .summary-drawer-body li{ margin-bottom:4px; }
+        .summary-drawer-body p{ margin:6px 0 10px; }
+        .summary-drawer-body strong{ color:var(--text); }
+        .summary-drawer-footer{
+            display:flex;
+            gap:8px;
+            padding:12px 20px;
+            border-top:1px solid var(--stroke);
+            flex-shrink:0;
+        }
+        .summary-loading{
+            display:flex;
+            align-items:center;
+            gap:10px;
+            padding:40px 20px;
+            color:var(--muted);
+            font-size:13px;
+        }
+        .summary-loading .spinner{
+            width:18px; height:18px;
+            border:2px solid var(--stroke);
+            border-top-color:var(--accent);
+            border-radius:50%;
+            animation:spin .8s linear infinite;
+        }
+
         /* Step-through view */
         .ec-session-meta{
             display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px;
@@ -2275,6 +2347,7 @@
             <div class="brand">
                 <img src="/ui/assets/jetware_logo.png?v=2" alt="JetWare AI" style="height: 36px; width: auto; object-fit: contain;">
                 <div>
+                    <div class="brand-title">Analytics Workbench</div>
                     <div class="sub">Your data never leaves the room.</div>
                 </div>
             </div>
@@ -2372,6 +2445,7 @@
                         <button class="nav-item" id="workflowsBtn" style="flex:1; font-size:12px; min-width:0;" title="Browse stored and example workflows">Stored Workflows</button>
                         <button class="nav-item" id="sidebarSaveAsBtn" style="flex:0 0 60px; min-width:0;" title="Save the current session with a name">Save</button>
                     </div>
+                    <button class="nav-item" id="generateSummaryBtn" style="width:100%; margin-bottom:4px; font-size:12px;" title="Generate an AI-powered analysis summary of this session">Generate Summary</button>
                     <div style="display:flex; gap:5px;">
                         <label class="nav-item" style="cursor:pointer; display:flex; align-items:center; gap:6px; flex:1; min-width:0;" title="Toggle the Session Log drawer">
                             <span>Session Log</span>
@@ -3032,6 +3106,17 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 <li>Regression testing — Run All validates that updated data still produces expected results</li>
 </ul>
 
+<h4>Analysis Summary</h4>
+<p>Click <strong>Generate Summary</strong> in the Workflows sidebar section to create an AI-powered memo of your session. The summary reads your Session Log and produces a structured document with four sections:</p>
+<ul>
+<li><strong>Findings</strong> — key analytical results with specific numbers and entity names</li>
+<li><strong>Methodology</strong> — datasets loaded, reference tables joined, analytical approach taken</li>
+<li><strong>Limitations</strong> — data quality caveats, proxy measures, filter assumptions</li>
+<li><strong>Open Items</strong> — unanswered questions and follow-up analyses needed</li>
+</ul>
+<p><strong>Privacy Mode:</strong> When Privacy Mode is enabled, the summary prompt receives query descriptions and row counts but no SQL or data values. Findings describe analytical patterns rather than citing specific numbers.</p>
+<p><strong>Export:</strong> Click <strong>Export Markdown</strong> in the drawer footer to download the summary as a <code>.md</code> file. Click <strong>Regenerate</strong> to produce a fresh summary from the current session state.</p>
+
 <hr>
 <h3>Sessions</h3>
 <p>Session management is accessible from both the <strong>Welcome</strong> card and the <strong>sidebar footer</strong>.</p>
@@ -3104,6 +3189,21 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         </div>
         <div class="sld-footer">
             <button class="btn small" id="sldExportBtn" title="Export the session log as JSON">Export Log</button>
+        </div>
+    </div>
+
+    <!-- Analysis Summary slide-in drawer -->
+    <div id="summaryDrawer" class="summary-drawer">
+        <div class="summary-drawer-header">
+            <h2>Analysis Summary</h2>
+            <button id="summaryCloseBtn" class="ec-close" title="Close">&times;</button>
+        </div>
+        <div class="summary-drawer-body" id="summaryBody">
+            <div class="help-text">Click "Generate Summary" to create an AI-powered analysis memo from your session.</div>
+        </div>
+        <div class="summary-drawer-footer">
+            <button class="btn small" id="summaryExportBtn" title="Export summary as Markdown" disabled>Export Markdown</button>
+            <button class="btn small" id="summaryRegenerateBtn" title="Regenerate summary from current session">Regenerate</button>
         </div>
     </div>
 
@@ -4652,9 +4752,10 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         }
 
         function openSessionLogDrawer() {
-            // Close ref guide drawer if open
+            // Close other right-side drawers if open
             $("refGuideDrawer").classList.remove("open");
             $("navReferenceGuide").classList.remove("active");
+            closeSummaryDrawer();
 
             $("sessionLogDrawer").classList.add("open");
             fetchSessionLogDrawer();
@@ -4668,6 +4769,122 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 clearInterval(_sldInterval);
                 _sldInterval = null;
             }
+        }
+
+        // ---------------------------------------------------------------
+        // Analysis Summary drawer
+        // ---------------------------------------------------------------
+        let _summaryRawMarkdown = "";
+
+        function openSummaryDrawer() {
+            // Close other right-side drawers
+            $("refGuideDrawer").classList.remove("open");
+            $("navReferenceGuide").classList.remove("active");
+            closeSessionLogDrawer();
+            $("sessionLogToggle").checked = false;
+
+            $("summaryDrawer").classList.add("open");
+        }
+
+        function closeSummaryDrawer() {
+            $("summaryDrawer").classList.remove("open");
+        }
+
+        async function generateAnalysisSummary() {
+            openSummaryDrawer();
+            const body = $("summaryBody");
+            body.innerHTML = '<div class="summary-loading"><div class="spinner"></div>Generating analysis summary...</div>';
+            $("summaryExportBtn").disabled = true;
+            _summaryRawMarkdown = "";
+
+            try {
+                const resp = await fetch("/api/session/analysis_summary", { method: "POST" });
+                if (resp.status === 402) {
+                    body.innerHTML = '<div class="help-text">API key required. Configure your OpenAI API key in Settings.</div>';
+                    return;
+                }
+                if (resp.status === 400) {
+                    body.innerHTML = '<div class="help-text">No events to summarize. Import a dataset and run some queries first.</div>';
+                    return;
+                }
+                if (!resp.ok) {
+                    const err = await resp.json().catch(() => ({}));
+                    body.innerHTML = '<div class="help-text">Error: ' + (err.detail || resp.statusText) + '</div>';
+                    return;
+                }
+                const data = await resp.json();
+                if (data.error) {
+                    body.innerHTML = '<div class="help-text">Error: ' + data.error + '</div>';
+                    return;
+                }
+                _summaryRawMarkdown = data.raw_text || "";
+                _renderSummary(data);
+                $("summaryExportBtn").disabled = false;
+            } catch (e) {
+                body.innerHTML = '<div class="help-text">Failed to generate summary: ' + e.message + '</div>';
+            }
+        }
+
+        function _renderSummary(data) {
+            const body = $("summaryBody");
+            let html = "";
+            if (data.findings) {
+                html += "<h2>Findings</h2>" + _markdownToHtml(data.findings);
+            }
+            if (data.methodology) {
+                html += "<h2>Methodology</h2>" + _markdownToHtml(data.methodology);
+            }
+            if (data.limitations) {
+                html += "<h2>Limitations</h2>" + _markdownToHtml(data.limitations);
+            }
+            if (data.open_items) {
+                html += "<h2>Open Items</h2>" + _markdownToHtml(data.open_items);
+            }
+            if (!html) {
+                html = '<div class="help-text">The AI returned an empty summary. Try running more queries first.</div>';
+            }
+            body.innerHTML = html;
+        }
+
+        function _markdownToHtml(md) {
+            // Lightweight markdown: bullets, bold, line breaks
+            let html = md
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+            // Bold
+            html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+            // Convert bullet lines to list
+            const lines = html.split("\n");
+            let inList = false;
+            const out = [];
+            for (const line of lines) {
+                const trimmed = line.trim();
+                if (/^[-*]\s+/.test(trimmed)) {
+                    if (!inList) { out.push("<ul>"); inList = true; }
+                    out.push("<li>" + trimmed.replace(/^[-*]\s+/, "") + "</li>");
+                } else {
+                    if (inList) { out.push("</ul>"); inList = false; }
+                    if (trimmed) out.push("<p>" + trimmed + "</p>");
+                }
+            }
+            if (inList) out.push("</ul>");
+            return out.join("\n");
+        }
+
+        function _exportSummaryMarkdown() {
+            if (!_summaryRawMarkdown) return;
+            const blob = new Blob(["# Analysis Summary\n\n" + _summaryRawMarkdown], { type: "text/markdown" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            const date = new Date().toISOString().slice(0, 10);
+            a.download = "analysis_summary_" + date + ".md";
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast("Summary exported as Markdown");
         }
 
         // ---------------------------------------------------------------
@@ -8274,6 +8491,12 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 toast("Export failed: " + (e.message || ""), 6000);
             }
         });
+        // Analysis Summary drawer
+        $("generateSummaryBtn").addEventListener("click", generateAnalysisSummary);
+        $("summaryCloseBtn").addEventListener("click", closeSummaryDrawer);
+        $("summaryExportBtn").addEventListener("click", _exportSummaryMarkdown);
+        $("summaryRegenerateBtn").addEventListener("click", generateAnalysisSummary);
+
         // SQL expand/collapse in session log drawer
         document.addEventListener("click", (e) => {
             const toggle = e.target.closest(".sld-sql-toggle");
@@ -8472,6 +8695,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             // Stop any running Step Through / Run All workflow
             _tutorialAborted = true;
             tutorialClose();
+            closeSummaryDrawer();
             datasets = [];
             selectedDataset = "";
             currentReference = "";

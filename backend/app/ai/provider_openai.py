@@ -1010,3 +1010,226 @@ def generate_grain_description_for_dataset(
     # Collapse multiple newlines to a single space
     result = _re.sub(r"\n+", " ", result).strip()
     return result
+
+
+# ============================================================
+# ANALYSIS SUMMARY PROMPT BUILDER
+# ------------------------------------------------------------
+# Synthesizes session log events into a structured analytical
+# memo with four sections: Findings, Methodology, Limitations,
+# Open Items. This matches Farragut's deliverable format but
+# is kept generic for any customer.
+#
+# The template variable can be customized per customer in a
+# future milestone.
+# ============================================================
+
+ANALYSIS_SUMMARY_TEMPLATE = """You are a senior data analyst writing a structured summary of an analytical session.
+
+You will receive a session log containing events from a data analysis session: datasets loaded, reference tables joined, SQL queries run, their results, and AI-generated insights.
+
+Synthesize these events into a structured analytical memo with exactly four sections:
+
+## Findings
+Summarize the key analytical findings from the session. Each finding should be a concise statement supported by the data. Reference specific numbers, percentages, and entity names from query results. Order findings by significance.
+
+## Methodology
+Describe what was done: which datasets were loaded, what reference tables were joined and why, what filters or exclusions were applied, what analytical approach was taken. Write as a reproducible description of the analysis workflow.
+
+## Limitations
+Note any caveats, data quality issues, assumptions, or constraints that affect the findings. Include: columns with high null rates, proxy measures used, filters that may exclude relevant records, and any analytical shortcuts.
+
+## Open Items
+List questions that remain unanswered, follow-up analyses needed, or data gaps identified during the session. Each item should be actionable.
+
+RULES:
+- Write for a business audience — no SQL syntax, no technical jargon
+- Be specific — reference actual values, dataset names, column names in plain English
+- Keep each section concise: 3-8 bullet points or 2-4 paragraphs
+- If the session has very few events, keep the summary proportionally brief
+- Return ONLY the four sections with ## headers. No other text.
+- Use markdown formatting (bullets, bold for emphasis)
+"""
+
+ANALYSIS_SUMMARY_TEMPLATE_PRIVACY = """
+PRIVACY RESTRICTION: This summary must be generated from session metadata only.
+You will see query descriptions and column names, but NO raw data values or result rows.
+Where findings would normally cite specific values, instead describe the analytical pattern
+(e.g., "concentration analysis was performed" rather than "Top 5 items account for 42%").
+"""
+
+
+def build_analysis_summary_prompt(
+    *,
+    session_events: list[dict],
+    session_meta: dict,
+    privacy_mode: bool = False,
+) -> str:
+    """
+    Build the prompt for generating an analysis summary from session log events.
+
+    session_events: list of event dicts from the session log
+    session_meta: dict with session-level metadata (name, datasets, duration, etc.)
+    privacy_mode: when True, strips data values from events before sending
+    """
+    template = ANALYSIS_SUMMARY_TEMPLATE
+    if privacy_mode:
+        template += ANALYSIS_SUMMARY_TEMPLATE_PRIVACY
+
+    # Build a condensed representation of session events for the prompt
+    event_lines = []
+    for ev in session_events:
+        etype = ev.get("event_type", "unknown")
+        details = ev.get("details", {})
+
+        if etype == "dataset_import":
+            ds = details.get("dataset", "unknown")
+            rows = details.get("row_count", "?")
+            cols = details.get("column_count", "?")
+            event_lines.append(f"- Imported dataset: {ds} ({rows} rows, {cols} columns)")
+
+        elif etype == "reference_load":
+            ref = details.get("reference_name", "unknown")
+            source = details.get("source", "")
+            event_lines.append(f"- Loaded reference table: {ref} (source: {source})")
+
+        elif etype == "query_run":
+            sql = details.get("sql", "")
+            ds = details.get("dataset", "")
+            rowcount = details.get("rowcount", "?")
+            elapsed = details.get("elapsed_seconds", "?")
+            if privacy_mode:
+                # Strip actual SQL — just describe the query type
+                event_lines.append(
+                    f"- Ran query on {ds}: returned {rowcount} rows ({elapsed}s)"
+                )
+            else:
+                # Include SQL for context
+                event_lines.append(
+                    f"- Ran query on {ds} ({rowcount} rows, {elapsed}s): {sql}"
+                )
+
+        elif etype == "ai_sql_generated":
+            question = details.get("question", "")
+            event_lines.append(f"- Asked: \"{question}\"")
+
+        elif etype == "insights_generated":
+            ds = details.get("dataset", "")
+            count = details.get("insight_count", "?")
+            event_lines.append(f"- Generated {count} insights for {ds}")
+
+        elif etype == "result_narrative":
+            narrative = details.get("narrative", "")
+            if narrative and not privacy_mode:
+                event_lines.append(f"- Finding: {narrative}")
+
+        elif etype == "export":
+            fmt = details.get("format", "unknown")
+            event_lines.append(f"- Exported results as {fmt}")
+
+        elif etype == "reference_delete":
+            ref = details.get("reference_name", "unknown")
+            event_lines.append(f"- Removed reference table: {ref}")
+
+        elif etype == "passport_export":
+            ds = details.get("dataset", "")
+            event_lines.append(f"- Exported data passport for {ds}")
+
+        elif etype in ("session_start", "session_end"):
+            pass  # Skip bookkeeping events
+
+        else:
+            # Include other events generically
+            event_lines.append(f"- {etype}: {json.dumps(details)[:200]}")
+
+    events_text = "\n".join(event_lines) if event_lines else "(no analytical events recorded)"
+
+    # Session metadata
+    meta_parts = []
+    if session_meta.get("name"):
+        meta_parts.append(f"Session: {session_meta['name']}")
+    if session_meta.get("datasets_used"):
+        meta_parts.append(f"Datasets: {', '.join(session_meta['datasets_used'])}")
+    if session_meta.get("queries_run"):
+        meta_parts.append(f"Queries run: {session_meta['queries_run']}")
+    if session_meta.get("duration_seconds"):
+        mins = session_meta["duration_seconds"] / 60
+        meta_parts.append(f"Duration: {mins:.0f} minutes")
+    meta_text = "\n".join(meta_parts) if meta_parts else "(no session metadata)"
+
+    return f"""{template}
+
+Session metadata:
+{meta_text}
+
+Session events (chronological):
+{events_text}
+""".strip()
+
+
+def parse_analysis_summary(raw_text: str) -> dict:
+    """
+    Parse the AI response into four sections.
+
+    Returns dict with keys: findings, methodology, limitations, open_items, raw_text.
+    """
+    import re
+
+    # Clean up markdown fences if present
+    cleaned = raw_text.strip()
+    if cleaned.startswith("```"):
+        lines = cleaned.splitlines()
+        if lines and lines[0].startswith("```"):
+            lines = lines[1:]
+        if lines and lines[-1].strip() == "```":
+            lines = lines[:-1]
+        cleaned = "\n".join(lines).strip()
+
+    result = {
+        "findings": "",
+        "methodology": "",
+        "limitations": "",
+        "open_items": "",
+        "raw_text": cleaned,
+    }
+
+    # Split on ## headers
+    sections = re.split(r"^##\s+", cleaned, flags=re.MULTILINE)
+    for section in sections:
+        if not section.strip():
+            continue
+        # First line is the header name
+        lines = section.strip().split("\n", 1)
+        header = lines[0].strip().lower()
+        body = lines[1].strip() if len(lines) > 1 else ""
+
+        if "finding" in header:
+            result["findings"] = body
+        elif "methodolog" in header:
+            result["methodology"] = body
+        elif "limitation" in header:
+            result["limitations"] = body
+        elif "open" in header:
+            result["open_items"] = body
+
+    return result
+
+
+def generate_analysis_summary(
+    *,
+    session_events: list[dict],
+    session_meta: dict,
+    privacy_mode: bool = False,
+) -> dict:
+    """
+    Generate an AI-powered analysis summary from session log events.
+
+    Returns dict with keys: findings, methodology, limitations, open_items, raw_text.
+    """
+    prompt = build_analysis_summary_prompt(
+        session_events=session_events,
+        session_meta=session_meta,
+        privacy_mode=privacy_mode,
+    )
+    raw_text = generate_sql_response(prompt)
+    return parse_analysis_summary(raw_text)

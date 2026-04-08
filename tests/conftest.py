@@ -13,5 +13,6 @@ def _bypass_api_key_check():
     real OpenAI calls. The _require_api_key guard would block those
     tests with a 402 before the mock even runs, so we disable it here.
     """
-    with patch("app.ai.routes._has_api_key", return_value=True):
+    with patch("app.ai.routes._has_api_key", return_value=True), \
+         patch("app.main._has_key", return_value=True):
         yield

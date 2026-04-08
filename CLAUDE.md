@@ -219,6 +219,7 @@ POST /api/reference_library/{name}/load
 GET  /api/session
 GET  /api/session/export
 GET  /api/session/summary
+POST /api/session/analysis_summary
 GET  /api/session/files
 POST /api/session/replay
 POST /api/session/annotate

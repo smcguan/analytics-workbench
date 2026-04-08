@@ -10,7 +10,7 @@ stays on the analyst's machine — AI generates analysis instructions, not data 
 **Tech stack:** FastAPI backend, DuckDB query engine, OpenAI GPT-4.1-mini for AI,
 vanilla HTML/JS/CSS frontend, PyInstaller packaging for Windows desktop.
 
-**Current version:** v1.22.0 | **Total commits:** 130+ | **Test suite:** 1,127 tests (three suites, AI accuracy 100%)
+**Current version:** v1.23.0 | **Total commits:** 130+ | **Test suite:** 1,146 tests (three suites, AI accuracy 100%)
 
 ---
 
@@ -132,6 +132,7 @@ Building toward reproducible, auditable, shareable analytical sessions:
 | v1.10.2 | 2026-03-21 | Bug #18: Refresh was deleting disk files (root cause of restore loop); Clear SQL button; Sessions Save exits; SQL auto-clears on restore |
 | v1.10.3 | 2026-03-21 | Chart tab disabled until query returns chartable result; Sessions Save no longer exits; restore filters dataset list to session dataset only |
 | v1.11.0 | 2026-03-21 | SESSIONS sidebar removed; snapshots retired; Welcome card is session hub (Resume + Save); Reference Guide as slide-in drawer; 603 tests |
+| v1.23.0 | 2026-04-08 | Analysis Summary Artifact (M5 P2): AI-powered session memo with 4-section structure, privacy mode, markdown export; 19 new tests; 1,146 tests |
 | v1.22.0 | 2026-04-07 | Tutorials #8 Cash Pay MedSpa + #9 Hospital Readmissions HRRP; 12 cases, 8 domains; two-column reference JOIN validated; 908 tests |
 | v1.21.1 | 2026-04-07 | Reference Guide accuracy: privacy model blurb, OpenAI account requirement, Privacy Mode troubleshooting row; SOW stress test complete; 891 tests |
 | v1.21.0 | 2026-04-07 | Privacy Mode toggle: schema-only AI restriction, JSON config format, dynamic Settings panel, Reference Guide per-endpoint disclosure; 891 tests |
@@ -154,6 +155,12 @@ Building toward reproducible, auditable, shareable analytical sessions:
 
 ## Wrap Records
 <!-- Each /wrap appends a 3-line summary below. Most recent at top. -->
+
+**v1.23.0** | 2026-04-08
+Analysis Summary Artifact (M5 Priority 2). POST /api/session/analysis_summary reads session log,
+sends metadata to OpenAI, returns structured memo (Findings/Methodology/Limitations/Open Items).
+Privacy mode strips SQL and data values. Frontend: Generate Summary in WORKFLOWS, slide-in drawer,
+markdown export. Configurable template variable for per-customer formats. 19 new tests.
 
 **v1.22.0** | 2026-04-07
 Tutorials #8 (Cash Pay MedSpa — 4,245 rows, 16 steps, bar+line charts, reference JOIN, query

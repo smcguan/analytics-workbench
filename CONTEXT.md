@@ -39,12 +39,13 @@
 - Natural language queries in tutorials — COMPLETE (v1.17.0) — 22 query_run steps converted to ai_ask across 7 demos
 - Customer API key management — COMPLETE (v1.20.0) — Fernet-encrypted key storage at %APPDATA%\JetWareAI\config.enc, first-launch setup overlay, Settings panel, 402 guard on all AI endpoints, developer key removed from codebase
 - Privacy Mode toggle — COMPLETE (v1.21.0) — Settings panel toggle restricts all AI transmissions to schema+stats only when enabled. Strips sample rows, categorical values, and query result rows from 5 affected endpoints. JSON config format in config.enc. Reference Guide rewritten with per-endpoint disclosure.
+- Analysis Summary Artifact — COMPLETE (v1.23.0) — AI-powered session summary generates structured memo (Findings/Methodology/Limitations/Open Items) from session log. Privacy mode strips SQL and data values. Slide-in drawer with markdown export. Configurable template for per-customer formats.
 
-**Current version:** v1.22.0 — Tutorials #8/#9, demo-ready for Farragut/McDermott meeting
+**Current version:** v1.23.0 — Analysis Summary Artifact (M5 Priority 2)
 
-**Test suite:** 1,127 automated tests across three suites, all passing.
-- Unit tests (pytest tests/): 872 passed, 21 skipped
-- Feature + workflow suite (run_all.py): 185 passed, 1 skipped
+**Test suite:** 1,146 automated tests across three suites, all passing.
+- Unit tests (pytest tests/): 927 passed, 21 skipped
+- Feature + workflow suite (run_all.py): 196 passed, 1 skipped
 - Query accuracy suite (test_accuracy.py): 43 passed (23 deterministic + 20 AI)
 - AI accuracy when enabled: 100% (20/20) — threshold is 85%
 - Pre-push hook runs all three suites before any push is allowed
@@ -377,6 +378,8 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-04-08] [CODE] — v1.23.0. Analysis Summary Artifact (M5 Priority 2). New POST /api/session/analysis_summary endpoint reads session log events, sends metadata to OpenAI, returns structured 4-section memo (Findings, Methodology, Limitations, Open Items). Privacy mode supported — strips SQL and data values from prompt when enabled. Frontend: Generate Summary button in WORKFLOWS sidebar, slide-in drawer with rendered sections, Export Markdown button, Regenerate button. Configurable template variable for future per-customer customization. 19 new tests (prompt builder, parser, endpoint, privacy). 1,146 tests passing.
+[2026-04-08] [BD] — Document Workbench companion product built from zero to v0.6.3 in one day: PDF ingestion, LanceDB vector store, OpenAI providers, FastAPI routes, frontend UI matching AW design. Tested against Farragut NDA draft — Q&A with page citations working. Two new AW example cases generated and integrated: Tutorial #8 Cash Pay MedSpa (4,245 rows, PE diligence workflow) and Tutorial #9 Hospital Readmissions HRRP (975 rows, penalty exposure analysis). Both validated against Farragut use cases. Cloud/Local mode indicator added to AW header. DW repo fully set up with same continuity infrastructure as AW.
 [2026-04-07] [CODE] — v1.22.0. Tutorials #8 and #9 added: Cash Pay Entity Analysis (MedSpa,
   4,245 rows, 16 steps, bar+line charts, reference JOIN, query save, explain, export) and
   Hospital Readmissions Risk Analysis (HRRP, 975 rows, 15 steps, two-column reference JOIN
@@ -748,7 +751,7 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 - ~~Regenerate TX synthetic data~~ COMPLETE — Q8/Q9 now pass (70.3%, Harris 25.1%)
 - ~~Build Tutorial #4 example case~~ COMPLETE v1.14.0 — Farragut demo ready
 - Add medicaid_schema_map, mco_lookup, audit_risk_flags, service_category_map to Reference Table Library
-- Spec M5 Priority 2: Analysis Summary Artifact (configurable memo template)
+- ~~Spec M5 Priority 2: Analysis Summary Artifact~~ COMPLETE v1.23.0 — AI-powered session summary with 4-section memo (Findings/Methodology/Limitations/Open Items), privacy mode support, markdown export
 - Spec M5 Priority 3: AI Mode Switch (session-level Local/Cloud toggle)
 - Build additional Reference Table Library files: Medicaid schema map, MCO lookup
 - Spot-check usp_globe_categories, usp_guard_categories, orphan_drug_status CSVs

@@ -4330,6 +4330,49 @@ def api_session_summary():
     return session_summary()
 
 
+@app.post("/api/session/analysis_summary")
+def api_analysis_summary():
+    """Generate an AI-powered analysis summary from the current session log.
+
+    Reads session events, sends metadata to OpenAI, returns a structured
+    memo with Findings, Methodology, Limitations, and Open Items sections.
+    """
+    from app.ai.provider_openai import generate_analysis_summary
+    from dataclasses import asdict
+
+    # Require API key
+    if not _has_key():
+        raise HTTPException(status_code=402, detail="no_api_key")
+
+    session = get_current_session()
+    if session is None:
+        raise HTTPException(status_code=404, detail="No active session")
+
+    if not session.events:
+        raise HTTPException(status_code=400, detail="Session has no events to summarize")
+
+    # Build event list and metadata for the prompt
+    events = [asdict(ev) for ev in session.events]
+    meta = session_summary()
+    privacy_mode = _get_privacy_mode()
+
+    try:
+        result = generate_analysis_summary(
+            session_events=events,
+            session_meta=meta,
+            privacy_mode=privacy_mode,
+        )
+        log_event(SessionEventType.EXPORT, {
+            "action": "analysis_summary_generated",
+            "format": "analysis_summary",
+            "privacy_mode": privacy_mode,
+        })
+        return result
+    except Exception as e:
+        logger.exception("analysis_summary failed: %s", e)
+        raise HTTPException(status_code=500, detail=f"{type(e).__name__}: {e}")
+
+
 class SessionNameRequest(BaseModel):
     name: str = ""
     description: str = ""
