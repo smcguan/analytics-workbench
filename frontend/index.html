@@ -3178,6 +3178,12 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 <p><strong>When Privacy Mode is ON:</strong></p>
 <p>All of the above features are restricted to column names, data types, and aggregate statistics only. Sample rows, categorical values, and query result rows are withheld from every prompt before transmission. This restriction applies immediately — no restart required. The setting persists across sessions.</p>
 <p>For organizations with regulatory, privilege, or data handling requirements, enable Privacy Mode before beginning any session involving sensitive data.</p>
+<p><strong>AI Mode:</strong> A toggle in the Settings panel that switches between Cloud AI (OpenAI) and Local AI (Ollama). The current mode is always visible in the topbar pill.</p>
+<ul>
+<li><strong>Cloud (default)</strong> — AI features use OpenAI via your API key. Requires internet connection.</li>
+<li><strong>Local (Ollama)</strong> — AI features run entirely on this machine via Ollama at localhost:11434. No data leaves your device. Requires <a href="https://ollama.ai" target="_blank" rel="noopener">Ollama</a> installed and running with the llama3.2 model.</li>
+</ul>
+<p>When Local mode is selected, the Settings panel shows Ollama connection status: green when connected, amber with an install link when not running. Privacy Mode applies identically in both modes. Mode changes are logged in the Session Log for audit purposes.</p>
 
 <hr>
 <h3>Privacy</h3>

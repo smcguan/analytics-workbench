@@ -29,7 +29,15 @@
       "Bash(.venv/Scripts/python tests/run_all.py)",
       "Bash(PYTHONPATH=backend .venv/Scripts/python -m pytest tests/test_tutorial_queries.py -v)",
       "Bash(PYTHONPATH=backend .venv/Scripts/python -m pytest tests/test_analysis_summary.py -v)",
-      "Bash(PYTHONPATH=backend .venv/Scripts/python tests/test_accuracy.py --no-ai)"
+      "Bash(PYTHONPATH=backend .venv/Scripts/python tests/test_accuracy.py --no-ai)",
+      "Bash(PYTHONPATH=backend .venv/Scripts/python:*)",
+      "Bash(PYTHONPATH=backend python -c \"import app.ai.provider_ollama; print\\('import OK'\\)\")",
+      "Bash(PYTHONPATH=backend python -m pytest tests/test_ai_mode.py -v)",
+      "Bash(PYTHONPATH=backend python -m pytest tests/ -q)",
+      "Bash(PYTHONPATH=backend python -m pytest tests/test_ai_routes.py::test_generate_sql_nonexistent_dataset_returns_error -v)",
+      "Bash(PYTHONPATH=backend python -m pytest tests/test_ai_routes.py::test_generate_sql_nonexistent_dataset_returns_error tests/test_ai_mode.py::TestOllama503::test_503_on_generate_sql -v)",
+      "Bash(PYTHONPATH=backend python tests/run_all.py)",
+      "Bash(PYTHONPATH=backend python tests/test_accuracy.py --no-ai)"
     ]
   },
   "hooks": {
