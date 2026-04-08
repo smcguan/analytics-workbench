@@ -19,7 +19,7 @@
 - Reference Table Library v1 — COMPLETE (IRA drug list, 35 drugs Rounds 1-3)
 - Session Log — COMPLETE (v1.5.6)
 - Session File replay engine — COMPLETE automatic mode (v1.6.0)
-- Session Library / Example Cases — COMPLETE (v1.9.0/v1.14.0) — 8 cases, 5 domains
+- Session Library / Example Cases — COMPLETE (v1.9.0/v1.14.0/v1.22.0) — 12 cases, 8 domains
 - Workspace Snapshot — RETIRED (v1.11.0) — replaced by named sessions on Welcome card
 - Named Snapshots — RETIRED (v1.11.0) — replaced by named sessions on Welcome card
 - Reference Guide — COMPLETE as right-side slide-in drawer (v1.11.0) — sidebar stays accessible while reading
@@ -40,9 +40,9 @@
 - Customer API key management — COMPLETE (v1.20.0) — Fernet-encrypted key storage at %APPDATA%\JetWareAI\config.enc, first-launch setup overlay, Settings panel, 402 guard on all AI endpoints, developer key removed from codebase
 - Privacy Mode toggle — COMPLETE (v1.21.0) — Settings panel toggle restricts all AI transmissions to schema+stats only when enabled. Strips sample rows, categorical values, and query result rows from 5 affected endpoints. JSON config format in config.enc. Reference Guide rewritten with per-endpoint disclosure.
 
-**Current version:** v1.21.1 — Reference Guide accuracy pass, demo-ready for Farragut/McDermott meeting
+**Current version:** v1.22.0 — Tutorials #8/#9, demo-ready for Farragut/McDermott meeting
 
-**Test suite:** 1,098 automated tests across three suites, all passing.
+**Test suite:** 1,127 automated tests across three suites, all passing.
 - Unit tests (pytest tests/): 872 passed, 21 skipped
 - Feature + workflow suite (run_all.py): 185 passed, 1 skipped
 - Query accuracy suite (test_accuracy.py): 43 passed (23 deterministic + 20 AI)
@@ -377,6 +377,12 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-04-07] [CODE] — v1.22.0. Tutorials #8 and #9 added: Cash Pay Entity Analysis (MedSpa,
+  4,245 rows, 16 steps, bar+line charts, reference JOIN, query save, explain, export) and
+  Hospital Readmissions Risk Analysis (HRRP, 975 rows, 15 steps, two-column reference JOIN
+  on condition+year, penalty trend, system deterioration analysis). 10 example cases total,
+  7 domains. All baselines validated against actual CSVs. Auto-discovered by test suite —
+  5 new query_run tests. 908 pytest + 196 run_all + 23 accuracy = 1,127 tests.
 [2026-04-07] [BD+CODE] — Major documentation and privacy hardening session. Privacy Mode toggle
   complete (v1.21.0) and verified via prompt-level audit — debug_prompts.log confirmed sample
   rows and result rows correctly stripped in all five affected endpoints when Privacy Mode ON.

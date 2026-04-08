@@ -278,6 +278,8 @@ def test_all_cases_discovered():
         "usp_category_classification",
         "taxi_trip_analysis",
         "retail_order_analysis",
+        "cash_pay_medspa",
+        "idre_readmissions",
     }
     missing = expected_cases - case_ids
     assert not missing, f"Expected cases missing from test discovery: {missing}"

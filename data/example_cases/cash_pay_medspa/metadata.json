@@ -1,0 +1,27 @@
+{
+  "id": "cash_pay_medspa",
+  "name": "Cash Pay Entity Analysis",
+  "description": "PE diligence workflow for a 5-location cash pay MedSpa platform. Covers revenue by location, repeat patient retention rates, service line benchmark comparison, underperformer root cause analysis, and GLP-1 growth trend. Demonstrates AW on non-CMS cash pay data.",
+  "tagline": "Multi-Location MedSpa Platform",
+  "category": "Healthcare — Cash Pay",
+  "subcategory": "PE Diligence",
+  "difficulty": "Intermediate",
+  "estimated_minutes": 20,
+  "dataset_file": "cash_pay_medspa.csv",
+  "dataset_display_name": "MedSpa Visit Data (4,245 visits)",
+  "reference_tables": ["cash_pay_service_benchmarks"],
+  "features_exercised": [
+    "Schema Inspect",
+    "Insights",
+    "AI Natural Language Queries",
+    "Explain",
+    "Bar Chart",
+    "Line Chart",
+    "Query Save",
+    "Reference Table JOIN",
+    "Export Passport",
+    "Session Log"
+  ],
+  "has_session": true,
+  "version": "1.0"
+}

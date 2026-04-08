@@ -1,0 +1,27 @@
+{
+  "id": "idre_readmissions",
+  "name": "Hospital Readmissions Risk Analysis",
+  "description": "PE diligence workflow for a 65-hospital multi-state portfolio using CMS HRRP data. Identifies penalty-carrying hospitals, surfaces a deteriorating health system, benchmarks against CMS national averages via reference JOIN, and calculates penalty trend 2021 vs 2023. Demonstrates AW on structured CMS quality reporting data.",
+  "tagline": "HRRP Penalty Exposure — Multi-State Portfolio",
+  "category": "Healthcare — Inpatient Quality",
+  "subcategory": "PE Diligence",
+  "difficulty": "Intermediate",
+  "estimated_minutes": 20,
+  "dataset_file": "idre_readmissions.csv",
+  "dataset_display_name": "Hospital Readmissions Data (975 rows)",
+  "reference_tables": ["hrrp_national_benchmarks"],
+  "features_exercised": [
+    "Schema Inspect",
+    "Insights",
+    "AI Natural Language Queries",
+    "Bar Chart",
+    "Line Chart",
+    "Explain",
+    "Reference Table JOIN (two-column)",
+    "Query Save",
+    "Export Passport",
+    "Session Log"
+  ],
+  "has_session": true,
+  "version": "1.0"
+}

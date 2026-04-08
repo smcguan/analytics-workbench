@@ -1,0 +1,244 @@
+{
+  "session_id": "tutorial-08-cash-pay-medspa",
+  "started_at": "2026-04-07T10:00:00.000000+00:00",
+  "ended_at": "2026-04-07T10:25:00.000000+00:00",
+  "ai_mode": "cloud",
+  "app_version": "1.21.1",
+  "user": "tutorial",
+  "machine": "analytics-workbench",
+  "name": "Tutorial 8: Cash Pay Entity Analysis",
+  "description": "PE diligence workflow for a 5-location cash pay MedSpa platform. Covers revenue by location, repeat patient retention, service line benchmarking, underperformer root cause analysis, and GLP-1 growth trend. Demonstrates AW on non-CMS cash pay data with reference table JOINs, charts, explain, and export.",
+  "events": [
+    {
+      "event_type": "session_start",
+      "timestamp": "2026-04-07T10:00:00.000000+00:00",
+      "details": {},
+      "narration": {
+        "pre": "Starting a cash pay PE diligence session. We are analyzing a multi-location MedSpa platform for a private equity buyer.",
+        "post": "Session initialized. We will import visit data, inspect the schema, generate insights, load a benchmark reference table, and run a structured diligence query sequence."
+      }
+    },
+    {
+      "event_type": "dataset_import",
+      "timestamp": "2026-04-07T10:00:30.000000+00:00",
+      "details": {
+        "dataset": "cash_pay_medspa",
+        "row_count": 4245,
+        "column_count": 15,
+        "source_file": "cash_pay_medspa.csv"
+      },
+      "narration": {
+        "pre": "We're analyzing a multi-location MedSpa platform \u2014 5 locations across Arizona, Florida, Texas, Tennessee, and Colorado. 4,245 patient visits from January 2023 through June 2024. Each row is one visit: service line, location, provider type, new vs. returning patient, gross revenue, discount applied, and net revenue. This is what a cash pay PE diligence dataset looks like \u2014 POS exports, not insurance claims.",
+        "post": "Dataset loaded: 4,245 rows, 15 columns. Visit-level cash pay data across 5 MedSpa locations."
+      },
+      "baseline": {
+        "expected_row_count": 4245
+      },
+      "container": "data"
+    },
+    {
+      "event_type": "inspect_schema",
+      "timestamp": "2026-04-07T10:01:00.000000+00:00",
+      "details": {
+        "dataset": "cash_pay_medspa"
+      },
+      "narration": {
+        "pre": "Before querying, inspect the schema. Note the columns: visit_date, location, service_line, service_category, patient_type, units_of_service, gross_revenue, discount_applied, discount_pct, net_revenue. The patient_type column is categorical \u2014 New vs. Repeat. discount_applied is Y/N. This is clean visit-level data \u2014 no normalization needed before analysis.",
+        "post": "Schema confirmed. 15 columns \u2014 dates, locations, service lines, patient type flags, and revenue fields. Clean structure, ready for analysis."
+      },
+      "container": "view:query"
+    },
+    {
+      "event_type": "insights_generated",
+      "timestamp": "2026-04-07T10:01:30.000000+00:00",
+      "details": {
+        "dataset": "cash_pay_medspa",
+        "insight_count": 3
+      },
+      "narration": {
+        "pre": "Let AW surface the initial insight cards \u2014 distribution of service lines, location breakdown, revenue patterns. Use these as the starting hypothesis before drilling into queries.",
+        "post": "Insights generated from the MedSpa schema. The concentration and distribution cards provide the initial analytical direction \u2014 we will quantify these patterns in the query steps."
+      },
+      "container": "view:insights"
+    },
+    {
+      "event_type": "reference_load",
+      "timestamp": "2026-04-07T10:02:00.000000+00:00",
+      "details": {
+        "reference_name": "cash_pay_service_benchmarks",
+        "row_count": 6,
+        "columns": 5,
+        "source": "cash_pay_service_benchmarks.csv"
+      },
+      "narration": {
+        "pre": "Loading the service line benchmark reference table \u2014 industry average ticket prices, typical repeat patient rates, and expected annual revenue per location. We'll JOIN this against visit data to surface where the platform is above or below market.",
+        "post": "Benchmark reference loaded: 6 service lines with industry averages for ticket price, repeat rate, and annual revenue per location. Available for JOIN queries."
+      },
+      "container": "data"
+    },
+    {
+      "event_type": "ai_ask",
+      "timestamp": "2026-04-07T10:03:00.000000+00:00",
+      "details": {
+        "dataset": "cash_pay_medspa",
+        "question": "Show me total net revenue, visit count, and average revenue per visit by location, ranked highest to lowest"
+      },
+      "narration": {
+        "pre": "First analytical question: total net revenue, visit count, and average revenue per visit by location. This is the starting point for any multi-location diligence \u2014 where is the revenue, and where is the gap?",
+        "post": "Miami leads at $776K net revenue \u2014 2.6x Nashville's $296K. The question is whether Nashville is a structural problem or an early-stage location. Visit count alone doesn't answer that."
+      },
+      "baseline": {
+        "expected_row_count": 5
+      },
+      "container": "view:query"
+    },
+    {
+      "event_type": "chart_view",
+      "timestamp": "2026-04-07T10:03:30.000000+00:00",
+      "details": {
+        "chart_type": "bar"
+      },
+      "narration": {
+        "pre": "The bar chart makes the performance gap immediate. Click the Chart tab.",
+        "post": "Nashville is not close \u2014 it's less than half of the next-lowest location. The visual makes the gap obvious."
+      },
+      "container": "view:query"
+    },
+    {
+      "event_type": "ai_ask",
+      "timestamp": "2026-04-07T10:04:00.000000+00:00",
+      "details": {
+        "dataset": "cash_pay_medspa",
+        "question": "What percentage of visits at each location are from returning patients?"
+      },
+      "narration": {
+        "pre": "Next question: repeat patient rate by location. In cash pay healthcare, repeat patients ARE the business. A location that doesn't retain patients is spending acquisition cost on a one-time transaction.",
+        "post": "Nashville's repeat patient rate is 29.9% \u2014 roughly 15 percentage points below every other location. This is the first structural finding."
+      },
+      "baseline": {
+        "expected_row_count": 5
+      },
+      "container": "view:query"
+    },
+    {
+      "event_type": "explain",
+      "timestamp": "2026-04-07T10:04:30.000000+00:00",
+      "details": {
+        "explanation": "This query calculates the percentage of visits from returning patients at each of the five MedSpa locations. Nashville shows a significantly lower repeat rate compared to other locations, indicating a potential patient retention issue that warrants further investigation into local management practices, service quality, or competitive dynamics."
+      },
+      "narration": {
+        "pre": "Ask AW to explain what the repeat patient rate gap means operationally \u2014 translate the numbers into a diligence finding.",
+        "post": "Explain translates the numbers into plain English. For a PE sponsor who is not technical, this is how you show your work."
+      },
+      "container": "view:query"
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-04-07T10:05:00.000000+00:00",
+      "details": {
+        "dataset": "cash_pay_medspa",
+        "sql": "SELECT service_line,\n       ROUND(SUM(net_revenue),2) AS total_revenue,\n       COUNT(*) AS visits,\n       ROUND(100.0 * SUM(CASE WHEN discount_applied='Y' THEN 1 ELSE 0 END) / COUNT(*),1) AS discount_rate_pct,\n       ROUND(100.0 * SUM(CASE WHEN patient_type='Repeat' THEN 1 ELSE 0 END) / COUNT(*),1) AS repeat_rate_pct\nFROM dataset\nWHERE location = 'Nashville_TN'\nGROUP BY service_line\nORDER BY total_revenue DESC\nLIMIT 200",
+        "row_count": 6,
+        "elapsed_seconds": 0.02
+      },
+      "narration": {
+        "pre": "Drilling into Nashville specifically. This query breaks down Nashville by service line \u2014 showing revenue, visit count, discount rate, and repeat rate for each service line at the underperforming location.",
+        "post": "Nashville is discounting at 30-40% across every service line. The platform average is 10-14%. Nashville is running 3x the discount rate of its peers \u2014 and it's not buying retention. This is a management problem, not a market problem. The location is training patients to wait for a deal."
+      },
+      "baseline": {
+        "expected_row_count": 6
+      },
+      "container": "view:query"
+    },
+    {
+      "event_type": "query_save",
+      "timestamp": "2026-04-07T10:05:30.000000+00:00",
+      "details": {
+        "name": "Nashville Discount and Retention Audit"
+      },
+      "narration": {
+        "pre": "Save this query \u2014 it's a reusable diagnostic that can be parameterized against any location.",
+        "post": "Saved. It now lives in Saved Queries. Any session, any dataset \u2014 load it and run it."
+      },
+      "container": "view:query"
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-04-07T10:06:00.000000+00:00",
+      "details": {
+        "dataset": "cash_pay_medspa",
+        "reference": "cash_pay_service_benchmarks",
+        "sql": "SELECT d.service_line,\n       ROUND(SUM(d.net_revenue),2) AS total_revenue,\n       COUNT(*) AS visit_count,\n       ROUND(AVG(d.net_revenue / d.units_of_service),2) AS actual_avg_ticket,\n       r.industry_avg_ticket,\n       ROUND(AVG(d.net_revenue / d.units_of_service) - r.industry_avg_ticket, 2) AS ticket_vs_benchmark\nFROM dataset d\nLEFT JOIN reference r ON LOWER(d.service_line) = LOWER(r.service_line)\nGROUP BY d.service_line, r.industry_avg_ticket\nORDER BY total_revenue DESC\nLIMIT 200",
+        "row_count": 6,
+        "elapsed_seconds": 0.025
+      },
+      "narration": {
+        "pre": "Joining against the benchmark reference. This compares the platform's actual average ticket price per service line to industry benchmarks.",
+        "post": "Every service line is above industry average ticket \u2014 Weight Loss is running $502 vs the $305 benchmark, reflecting GLP-1 program pricing. Pricing is not Nashville's problem. The platform's pricing power is intact."
+      },
+      "baseline": {
+        "expected_row_count": 6
+      },
+      "container": "view:query"
+    },
+    {
+      "event_type": "ai_ask",
+      "timestamp": "2026-04-07T10:07:00.000000+00:00",
+      "details": {
+        "dataset": "cash_pay_medspa",
+        "question": "Show me Weight Loss revenue and visit count by quarter from 2023 Q1 through 2024 Q2"
+      },
+      "narration": {
+        "pre": "Zooming into the growth engine. Weight Loss (GLP-1 programs) is the highest-ticket service line. This query shows the quarterly revenue and visit trajectory.",
+        "post": "Weight Loss revenue grew 130% \u2014 from $61K in Q1 2023 to $141K in Q2 2024. Visit count grew modestly but revenue per visit expanded significantly. This is GLP-1 adoption driving higher average ticket. For a PE buyer this is the growth engine \u2014 and a concentration risk if semaglutide coverage policies change."
+      },
+      "baseline": {
+        "expected_row_count": 6
+      },
+      "container": "view:query"
+    },
+    {
+      "event_type": "chart_view",
+      "timestamp": "2026-04-07T10:07:30.000000+00:00",
+      "details": {
+        "chart_type": "line"
+      },
+      "narration": {
+        "pre": "The growth trajectory is clearest on a line chart. Click Chart.",
+        "post": "The growth trajectory is clear. Q2 2024 is a step-change \u2014 nearly double Q1 2024. Flag for diligence: what drove the acceleration? New locations opening GLP-1 programs, or existing locations scaling?"
+      },
+      "container": "view:query"
+    },
+    {
+      "event_type": "export",
+      "timestamp": "2026-04-07T10:08:00.000000+00:00",
+      "details": {
+        "format": "xlsx",
+        "dataset": "cash_pay_medspa",
+        "row_count": 6
+      },
+      "narration": {
+        "pre": "Exporting the benchmark comparison results. This table goes directly into the diligence memo \u2014 service line performance vs. industry benchmarks.",
+        "post": "Exporting the session passport. Three diligence findings documented: (1) Nashville is an operational turnaround candidate \u2014 discounting and retention practices, not market demand. (2) Weight Loss / GLP-1 is the platform growth engine \u2014 130% revenue increase in 18 months. (3) Injectables concentration is a platform-wide risk \u2014 34-42% of revenue at every location. All three map to specific valuation adjustments."
+      },
+      "container": "view:query"
+    },
+    {
+      "event_type": "session_end",
+      "timestamp": "2026-04-07T10:10:00.000000+00:00",
+      "details": {},
+      "narration": {
+        "pre": "Wrapping up the session log to complete the audit trail.",
+        "post": "Analysis complete. Cash pay diligence in AW follows the same workflow as CMS data \u2014 same natural language queries, same reference table JOINs, same reproducible session. The underlying data is different; the analytical capability is identical. Session summary: 1 dataset imported (4,245 visits), 1 reference table loaded (6 benchmarks), schema inspected, insights generated, 5 analytical queries run, 2 charts rendered, 1 query saved, 1 export. Three diligence findings: Nashville retention gap, GLP-1 growth engine, and pricing power confirmed above benchmarks."
+      }
+    }
+  ],
+  "resume_state": {
+    "dataset": "cash_pay_medspa",
+    "last_sql": "SELECT d.service_line,\n       ROUND(SUM(d.net_revenue),2) AS total_revenue,\n       COUNT(*) AS visit_count,\n       ROUND(AVG(d.net_revenue / d.units_of_service),2) AS actual_avg_ticket,\n       r.industry_avg_ticket,\n       ROUND(AVG(d.net_revenue / d.units_of_service) - r.industry_avg_ticket, 2) AS ticket_vs_benchmark\nFROM dataset d\nLEFT JOIN reference r ON LOWER(d.service_line) = LOWER(r.service_line)\nGROUP BY d.service_line, r.industry_avg_ticket\nORDER BY total_revenue DESC\nLIMIT 200",
+    "reference": {
+      "name": "cash_pay_service_benchmarks",
+      "library_source": "cash_pay_service_benchmarks.csv"
+    }
+  }
+}

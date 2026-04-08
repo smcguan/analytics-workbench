@@ -1,0 +1,16 @@
+condition,payment_year,national_avg_rate_pct,penalty_threshold_err,max_penalty_pct,cms_program
+AMI,2021,14.9,1.0,3.0,HRRP
+AMI,2022,14.7,1.0,3.0,HRRP
+AMI,2023,14.5,1.0,3.0,HRRP
+Heart Failure,2021,22.1,1.0,3.0,HRRP
+Heart Failure,2022,21.8,1.0,3.0,HRRP
+Heart Failure,2023,21.5,1.0,3.0,HRRP
+Pneumonia,2021,16.4,1.0,3.0,HRRP
+Pneumonia,2022,16.2,1.0,3.0,HRRP
+Pneumonia,2023,16.0,1.0,3.0,HRRP
+COPD,2021,20.0,1.0,3.0,HRRP
+COPD,2022,19.8,1.0,3.0,HRRP
+COPD,2023,19.5,1.0,3.0,HRRP
+Hip/Knee Replacement,2021,4.8,1.0,3.0,HRRP
+Hip/Knee Replacement,2022,4.6,1.0,3.0,HRRP
+Hip/Knee Replacement,2023,4.5,1.0,3.0,HRRP

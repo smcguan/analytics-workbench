@@ -1,0 +1,230 @@
+{
+  "session_id": "tutorial-09-idre-readmissions",
+  "started_at": "2026-04-07T11:00:00.000000+00:00",
+  "ended_at": "2026-04-07T11:25:00.000000+00:00",
+  "ai_mode": "cloud",
+  "app_version": "1.21.1",
+  "user": "tutorial",
+  "machine": "analytics-workbench",
+  "name": "Tutorial 9: Hospital Readmissions Risk Analysis",
+  "description": "PE diligence workflow for a 65-hospital multi-state portfolio using CMS HRRP data. Identifies penalty-carrying hospitals, surfaces a deteriorating health system, benchmarks against CMS national averages via two-column reference JOIN, and calculates penalty trend 2021 vs 2023.",
+  "events": [
+    {
+      "event_type": "session_start",
+      "timestamp": "2026-04-07T11:00:00.000000+00:00",
+      "details": {},
+      "narration": {
+        "pre": "Starting a hospital readmissions diligence session. A PE buyer is evaluating a multi-state hospital portfolio for HRRP penalty exposure.",
+        "post": "Session initialized. We will import facility-level readmissions data, load CMS national benchmarks, and run a structured penalty risk analysis."
+      }
+    },
+    {
+      "event_type": "dataset_import",
+      "timestamp": "2026-04-07T11:00:30.000000+00:00",
+      "details": {
+        "dataset": "idre_readmissions",
+        "row_count": 975,
+        "column_count": 14,
+        "source_file": "idre_readmissions.csv"
+      },
+      "narration": {
+        "pre": "Loading hospital readmissions data \u2014 975 rows covering 65 hospitals across 5 states: Texas, Florida, Ohio, Pennsylvania, and Georgia. Each row is one hospital-condition-year combination: the hospital's readmission rate for a specific CMS condition in a specific payment year, the national average rate, the Excess Readmission Ratio CMS uses to calculate penalties, and the estimated financial penalty. Three payment years: 2021, 2022, 2023. Five conditions: AMI, Heart Failure, Pneumonia, COPD, and Hip/Knee Replacement. This is facility-level quality reporting \u2014 the same data a PE buyer reviews when assessing readmission penalty exposure in a hospital acquisition.",
+        "post": "Dataset loaded: 975 rows, 14 columns. Facility-level CMS HRRP data across 65 hospitals, 5 states, 3 payment years, 5 conditions."
+      },
+      "baseline": {
+        "expected_row_count": 975
+      },
+      "container": "data"
+    },
+    {
+      "event_type": "reference_load",
+      "timestamp": "2026-04-07T11:01:00.000000+00:00",
+      "details": {
+        "reference_name": "hrrp_national_benchmarks",
+        "row_count": 15,
+        "columns": 6,
+        "source": "hrrp_national_benchmarks.csv"
+      },
+      "narration": {
+        "pre": "Loading the CMS HRRP national benchmark reference table \u2014 national average readmission rates by condition and payment year, the penalty threshold at an Excess Readmission Ratio of 1.0, and the 3% maximum penalty cap. We will JOIN this against the hospital data to identify which hospitals are above the national average and by how much.",
+        "post": "Benchmark reference loaded: 15 rows \u2014 5 conditions across 3 payment years with CMS national averages and penalty parameters."
+      },
+      "container": "data"
+    },
+    {
+      "event_type": "inspect_schema",
+      "timestamp": "2026-04-07T11:01:30.000000+00:00",
+      "details": {
+        "dataset": "idre_readmissions"
+      },
+      "narration": {
+        "pre": "Inspect the schema before querying. Key columns: hospital_id, hospital_name, state, health_system, ownership_type, beds, condition, payment_year, readmission_rate_pct, national_avg_rate_pct, excess_readmission_ratio, penalty_pct, estimated_penalty_dollars. The excess_readmission_ratio is the CMS-calculated metric \u2014 values above 1.0 trigger a penalty. estimated_penalty_dollars is a proxy calculation. payment_year and condition together identify each row uniquely per hospital.",
+        "post": "Schema confirmed. 14 columns \u2014 hospital identifiers, quality metrics, and penalty calculations. Ready for analysis."
+      },
+      "container": "view:query"
+    },
+    {
+      "event_type": "insights_generated",
+      "timestamp": "2026-04-07T11:02:00.000000+00:00",
+      "details": {
+        "dataset": "idre_readmissions",
+        "insight_count": 3
+      },
+      "narration": {
+        "pre": "Let AW surface the initial insight cards \u2014 distribution of hospitals by state, condition breakdown, penalty rate across the portfolio. Use these as the entry point before drilling into specific risk findings.",
+        "post": "Insights generated from the HRRP schema. The penalty distribution and concentration cards provide the initial analytical direction."
+      },
+      "container": "view:insights"
+    },
+    {
+      "event_type": "ai_ask",
+      "timestamp": "2026-04-07T11:03:00.000000+00:00",
+      "details": {
+        "dataset": "idre_readmissions",
+        "question": "Show me all hospitals with a penalty in 2023, ranked by total estimated penalty dollars"
+      },
+      "narration": {
+        "pre": "First analytical question: which hospitals are carrying the most penalty exposure in the most recent payment year? This is the starting point for any HRRP diligence.",
+        "post": "61 of 65 hospitals are carrying a penalty in 2023. Grady Memorial in Georgia leads by total penalty, followed by Riverside Medical Center Houston. Three of the top entries are all Riverside Health System \u2014 a portfolio-level concentration of risk worth isolating."
+      },
+      "baseline": {
+        "expected_row_count": 61
+      },
+      "container": "view:query"
+    },
+    {
+      "event_type": "chart_view",
+      "timestamp": "2026-04-07T11:03:30.000000+00:00",
+      "details": {
+        "chart_type": "bar"
+      },
+      "narration": {
+        "pre": "The bar chart makes the Riverside concentration visible immediately. Click Chart.",
+        "post": "Three hospitals, same system, all in the top tier of penalty exposure. When you see a health system show up repeatedly in a penalty ranking, the next question is whether it is a trend or a snapshot."
+      },
+      "container": "view:query"
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-04-07T11:04:00.000000+00:00",
+      "details": {
+        "dataset": "idre_readmissions",
+        "sql": "SELECT payment_year, condition,\n       ROUND(AVG(excess_readmission_ratio),4) AS avg_err,\n       SUM(estimated_penalty_dollars) AS estimated_penalty\nFROM dataset\nWHERE health_system = 'Riverside Health System'\nGROUP BY payment_year, condition\nORDER BY payment_year, condition\nLIMIT 200",
+        "row_count": 15,
+        "elapsed_seconds": 0.02
+      },
+      "narration": {
+        "pre": "Drilling into Riverside Health System specifically \u2014 breaking down their Excess Readmission Ratio and estimated penalty by payment year and condition to see the trajectory.",
+        "post": "Riverside's Excess Readmission Ratio is getting worse every year. In 2021 their average ERR was 1.065. By 2023 it is 1.178 \u2014 accelerating. Total estimated penalty went from $36K in 2021 to $125K in 2023. A 3.5x increase in two years. In a PE acquisition, this is a value creation liability, not a one-time event."
+      },
+      "baseline": {
+        "expected_row_count": 15
+      },
+      "container": "view:query"
+    },
+    {
+      "event_type": "chart_view",
+      "timestamp": "2026-04-07T11:04:30.000000+00:00",
+      "details": {
+        "chart_type": "line"
+      },
+      "narration": {
+        "pre": "The line chart shows the penalty trajectory. Click Chart.",
+        "post": "This is not noise \u2014 it is a directional trend. A buyer needs to model whether deterioration continues, stabilizes, or reverses, and build that assumption into the purchase price."
+      },
+      "container": "view:query"
+    },
+    {
+      "event_type": "explain",
+      "timestamp": "2026-04-07T11:05:00.000000+00:00",
+      "details": {
+        "explanation": "This query isolates Riverside Health System and breaks down their CMS Excess Readmission Ratio and estimated penalty by payment year and medical condition. The ERR measures how a hospital's readmission rate compares to the national expected rate \u2014 values above 1.0 mean the hospital readmits more patients than predicted. Riverside's ERR is increasing across most conditions each year, indicating a worsening quality trend that translates directly into growing financial penalties under the Hospital Readmissions Reduction Program."
+      },
+      "narration": {
+        "pre": "Ask AW to explain what an Excess Readmission Ratio above 1.0 means in plain English \u2014 what does a 1.178 ERR translate to operationally and financially for a hospital system.",
+        "post": "Explain translates the CMS metrics into language a PE sponsor can read. ERR above 1.0 means more readmissions than expected \u2014 and growing ERR means the problem is getting worse, not better."
+      },
+      "container": "view:query"
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-04-07T11:06:00.000000+00:00",
+      "details": {
+        "dataset": "idre_readmissions",
+        "reference": "hrrp_national_benchmarks",
+        "sql": "SELECT d.hospital_name, d.state, d.condition,\n       d.readmission_rate_pct,\n       r.national_avg_rate_pct,\n       ROUND(d.readmission_rate_pct - r.national_avg_rate_pct, 2) AS rate_vs_national,\n       d.excess_readmission_ratio,\n       d.penalty_pct\nFROM dataset d\nLEFT JOIN reference r\n  ON LOWER(d.condition) = LOWER(r.condition)\n  AND d.payment_year = r.payment_year\nWHERE d.payment_year = 2023\n  AND d.readmission_rate_pct > r.national_avg_rate_pct\nORDER BY rate_vs_national DESC\nLIMIT 200",
+        "row_count": 189,
+        "elapsed_seconds": 0.025
+      },
+      "narration": {
+        "pre": "Joining against the CMS benchmark reference. This uses a two-column JOIN \u2014 matching on both condition name and payment year \u2014 to compare each hospital's readmission rate to the correct national average for that condition and year.",
+        "post": "189 hospital-condition combinations are above the national average in 2023. The top of the list is dominated by Riverside and Georgia hospitals. Riverside Houston's Hip/Knee Replacement is 2.73 percentage points above national average \u2014 the maximum 3.0% CMS penalty triggered on their highest-volume elective line."
+      },
+      "baseline": {
+        "expected_row_count": 189
+      },
+      "container": "view:query"
+    },
+    {
+      "event_type": "query_run",
+      "timestamp": "2026-04-07T11:07:00.000000+00:00",
+      "details": {
+        "dataset": "idre_readmissions",
+        "sql": "SELECT health_system, state,\n       SUM(CASE WHEN payment_year=2021 THEN estimated_penalty_dollars ELSE 0 END) AS penalty_2021,\n       SUM(CASE WHEN payment_year=2023 THEN estimated_penalty_dollars ELSE 0 END) AS penalty_2023,\n       SUM(CASE WHEN payment_year=2023 THEN estimated_penalty_dollars ELSE 0 END) -\n       SUM(CASE WHEN payment_year=2021 THEN estimated_penalty_dollars ELSE 0 END) AS penalty_change\nFROM dataset\nGROUP BY health_system, state\nHAVING penalty_2023 > 0 OR penalty_2021 > 0\nORDER BY penalty_change DESC\nLIMIT 200",
+        "row_count": 55,
+        "elapsed_seconds": 0.02
+      },
+      "narration": {
+        "pre": "Comparing total penalty exposure by health system between 2021 and 2023. This surfaces which systems are getting worse and which are improving.",
+        "post": "Riverside's $89K penalty increase is the largest delta in the portfolio by a wide margin. Cleveland Clinic shows up with a $38K increase from zero \u2014 a system with no penalty in 2021 now carries one. That is the kind of deterioration a PE buyer needs to catch before close."
+      },
+      "baseline": {
+        "expected_row_count": 55
+      },
+      "container": "view:query"
+    },
+    {
+      "event_type": "query_save",
+      "timestamp": "2026-04-07T11:07:30.000000+00:00",
+      "details": {
+        "name": "System Penalty Exposure 2021 vs 2023"
+      },
+      "narration": {
+        "pre": "Saving this query as a reusable diligence template. Apply it to any hospital portfolio dataset and it surfaces the same deteriorating system risk pattern immediately.",
+        "post": "Saved. It now lives in Saved Queries \u2014 reusable across any hospital portfolio engagement."
+      },
+      "container": "view:query"
+    },
+    {
+      "event_type": "export",
+      "timestamp": "2026-04-07T11:08:00.000000+00:00",
+      "details": {
+        "format": "xlsx",
+        "dataset": "idre_readmissions",
+        "row_count": 55
+      },
+      "narration": {
+        "pre": "Exporting the penalty trend comparison. This table goes directly into the diligence memo.",
+        "post": "Exporting the session passport. Four diligence findings documented: (1) Riverside Health System is a deteriorating asset \u2014 ERR up, penalty 3.5x in two years, root cause in Hip/Knee Replacement at the Houston flagship. (2) Georgia is the highest-risk state in this portfolio at 1.056 average ERR. (3) 61 of 65 hospitals carry some penalty in 2023 \u2014 portfolio-wide exposure. (4) The benchmark JOIN identifies 189 specific hospital-condition combinations to prioritize in clinical operations due diligence."
+      },
+      "container": "view:query"
+    },
+    {
+      "event_type": "session_end",
+      "timestamp": "2026-04-07T11:10:00.000000+00:00",
+      "details": {},
+      "narration": {
+        "pre": "Wrapping up the session log to complete the audit trail.",
+        "post": "Analysis complete. HRRP readmissions diligence in AW follows the same pattern as Medicaid and Part D work \u2014 facility-level CMS data, national benchmark reference JOIN, natural language queries, reproducible session. Different dataset, identical methodology. Session summary: 1 dataset imported (975 rows), 1 reference table loaded (15 benchmarks), schema inspected, insights generated, 1 AI query, 3 manual SQL queries (including two-column reference JOIN), 2 charts, 1 explain, 1 query saved, 1 export."
+      }
+    }
+  ],
+  "resume_state": {
+    "dataset": "idre_readmissions",
+    "last_sql": "SELECT health_system, state,\n       SUM(CASE WHEN payment_year=2021 THEN estimated_penalty_dollars ELSE 0 END) AS penalty_2021,\n       SUM(CASE WHEN payment_year=2023 THEN estimated_penalty_dollars ELSE 0 END) AS penalty_2023,\n       SUM(CASE WHEN payment_year=2023 THEN estimated_penalty_dollars ELSE 0 END) -\n       SUM(CASE WHEN payment_year=2021 THEN estimated_penalty_dollars ELSE 0 END) AS penalty_change\nFROM dataset\nGROUP BY health_system, state\nHAVING penalty_2023 > 0 OR penalty_2021 > 0\nORDER BY penalty_change DESC\nLIMIT 200",
+    "reference": {
+      "name": "hrrp_national_benchmarks",
+      "library_source": "hrrp_national_benchmarks.csv"
+    }
+  }
+}

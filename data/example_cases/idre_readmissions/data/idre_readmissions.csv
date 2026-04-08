@@ -1,0 +1,976 @@
+hospital_id,hospital_name,city,state,health_system,ownership_type,beds,condition,payment_year,readmission_rate_pct,national_avg_rate_pct,excess_readmission_ratio,penalty_pct,estimated_penalty_dollars
+TX001,Riverside Medical Center - Houston,Houston,TX,Riverside Health System,For-Profit,450,AMI,2021,14.96,14.9,1.004,0.02,252
+TX001,Riverside Medical Center - Houston,Houston,TX,Riverside Health System,For-Profit,450,AMI,2022,16.1,14.7,1.0952,0.476,5998
+TX001,Riverside Medical Center - Houston,Houston,TX,Riverside Health System,For-Profit,450,AMI,2023,16.86,14.5,1.1628,0.814,10256
+TX001,Riverside Medical Center - Houston,Houston,TX,Riverside Health System,For-Profit,450,Heart Failure,2021,23.15,22.1,1.0475,0.238,2999
+TX001,Riverside Medical Center - Houston,Houston,TX,Riverside Health System,For-Profit,450,Heart Failure,2022,22.94,21.8,1.0523,0.262,3301
+TX001,Riverside Medical Center - Houston,Houston,TX,Riverside Health System,For-Profit,450,Heart Failure,2023,22.99,21.5,1.0693,0.346,4360
+TX001,Riverside Medical Center - Houston,Houston,TX,Riverside Health System,For-Profit,450,Pneumonia,2021,16.0,16.4,0.9756,0.0,0
+TX001,Riverside Medical Center - Houston,Houston,TX,Riverside Health System,For-Profit,450,Pneumonia,2022,18.11,16.2,1.1179,0.589,7421
+TX001,Riverside Medical Center - Houston,Houston,TX,Riverside Health System,For-Profit,450,Pneumonia,2023,16.27,16.0,1.0169,0.084,1058
+TX001,Riverside Medical Center - Houston,Houston,TX,Riverside Health System,For-Profit,450,COPD,2021,20.05,20.0,1.0025,0.012,151
+TX001,Riverside Medical Center - Houston,Houston,TX,Riverside Health System,For-Profit,450,COPD,2022,20.06,19.8,1.0131,0.065,819
+TX001,Riverside Medical Center - Houston,Houston,TX,Riverside Health System,For-Profit,450,COPD,2023,21.66,19.5,1.1108,0.554,6980
+TX001,Riverside Medical Center - Houston,Houston,TX,Riverside Health System,For-Profit,450,Hip/Knee Replacement,2021,4.88,4.8,1.0167,0.083,1046
+TX001,Riverside Medical Center - Houston,Houston,TX,Riverside Health System,For-Profit,450,Hip/Knee Replacement,2022,5.33,4.6,1.1587,0.794,10004
+TX001,Riverside Medical Center - Houston,Houston,TX,Riverside Health System,For-Profit,450,Hip/Knee Replacement,2023,7.23,4.5,1.6067,3.0,37800
+TX002,Riverside Regional - Dallas,Dallas,TX,Riverside Health System,For-Profit,320,AMI,2021,14.95,14.9,1.0034,0.017,152
+TX002,Riverside Regional - Dallas,Dallas,TX,Riverside Health System,For-Profit,320,AMI,2022,14.88,14.7,1.0122,0.061,547
+TX002,Riverside Regional - Dallas,Dallas,TX,Riverside Health System,For-Profit,320,AMI,2023,17.38,14.5,1.1986,0.993,8897
+TX002,Riverside Regional - Dallas,Dallas,TX,Riverside Health System,For-Profit,320,Heart Failure,2021,23.28,22.1,1.0534,0.267,2392
+TX002,Riverside Regional - Dallas,Dallas,TX,Riverside Health System,For-Profit,320,Heart Failure,2022,23.86,21.8,1.0945,0.473,4238
+TX002,Riverside Regional - Dallas,Dallas,TX,Riverside Health System,For-Profit,320,Heart Failure,2023,24.03,21.5,1.1177,0.588,5268
+TX002,Riverside Regional - Dallas,Dallas,TX,Riverside Health System,For-Profit,320,Pneumonia,2021,16.31,16.4,0.9945,0.0,0
+TX002,Riverside Regional - Dallas,Dallas,TX,Riverside Health System,For-Profit,320,Pneumonia,2022,18.23,16.2,1.1253,0.626,5609
+TX002,Riverside Regional - Dallas,Dallas,TX,Riverside Health System,For-Profit,320,Pneumonia,2023,17.78,16.0,1.1113,0.556,4982
+TX002,Riverside Regional - Dallas,Dallas,TX,Riverside Health System,For-Profit,320,COPD,2021,20.64,20.0,1.032,0.16,1434
+TX002,Riverside Regional - Dallas,Dallas,TX,Riverside Health System,For-Profit,320,COPD,2022,20.01,19.8,1.0106,0.053,475
+TX002,Riverside Regional - Dallas,Dallas,TX,Riverside Health System,For-Profit,320,COPD,2023,21.08,19.5,1.081,0.405,3629
+TX002,Riverside Regional - Dallas,Dallas,TX,Riverside Health System,For-Profit,320,Hip/Knee Replacement,2021,5.66,4.8,1.1792,0.896,8028
+TX002,Riverside Regional - Dallas,Dallas,TX,Riverside Health System,For-Profit,320,Hip/Knee Replacement,2022,6.24,4.6,1.3565,1.783,15976
+TX002,Riverside Regional - Dallas,Dallas,TX,Riverside Health System,For-Profit,320,Hip/Knee Replacement,2023,6.63,4.5,1.4733,2.367,21208
+TX003,Riverside Community - Austin,Austin,TX,Riverside Health System,For-Profit,210,AMI,2021,16.39,14.9,1.1,0.5,2940
+TX003,Riverside Community - Austin,Austin,TX,Riverside Health System,For-Profit,210,AMI,2022,15.74,14.7,1.0707,0.353,2076
+TX003,Riverside Community - Austin,Austin,TX,Riverside Health System,For-Profit,210,AMI,2023,14.93,14.5,1.0297,0.149,876
+TX003,Riverside Community - Austin,Austin,TX,Riverside Health System,For-Profit,210,Heart Failure,2021,23.01,22.1,1.0412,0.206,1211
+TX003,Riverside Community - Austin,Austin,TX,Riverside Health System,For-Profit,210,Heart Failure,2022,21.17,21.8,0.9711,0.0,0
+TX003,Riverside Community - Austin,Austin,TX,Riverside Health System,For-Profit,210,Heart Failure,2023,22.25,21.5,1.0349,0.174,1023
+TX003,Riverside Community - Austin,Austin,TX,Riverside Health System,For-Profit,210,Pneumonia,2021,16.55,16.4,1.0091,0.046,270
+TX003,Riverside Community - Austin,Austin,TX,Riverside Health System,For-Profit,210,Pneumonia,2022,17.74,16.2,1.0951,0.475,2793
+TX003,Riverside Community - Austin,Austin,TX,Riverside Health System,For-Profit,210,Pneumonia,2023,18.52,16.0,1.1575,0.787,4628
+TX003,Riverside Community - Austin,Austin,TX,Riverside Health System,For-Profit,210,COPD,2021,20.27,20.0,1.0135,0.068,400
+TX003,Riverside Community - Austin,Austin,TX,Riverside Health System,For-Profit,210,COPD,2022,21.18,19.8,1.0697,0.349,2052
+TX003,Riverside Community - Austin,Austin,TX,Riverside Health System,For-Profit,210,COPD,2023,20.56,19.5,1.0544,0.272,1599
+TX003,Riverside Community - Austin,Austin,TX,Riverside Health System,For-Profit,210,Hip/Knee Replacement,2021,7.21,4.8,1.5021,2.51,14759
+TX003,Riverside Community - Austin,Austin,TX,Riverside Health System,For-Profit,210,Hip/Knee Replacement,2022,5.49,4.6,1.1935,0.968,5692
+TX003,Riverside Community - Austin,Austin,TX,Riverside Health System,For-Profit,210,Hip/Knee Replacement,2023,6.48,4.5,1.44,2.2,12936
+TX004,Memorial Hermann Southeast,Houston,TX,Memorial Hermann,Non-Profit,380,AMI,2021,14.71,14.9,0.9872,0.0,0
+TX004,Memorial Hermann Southeast,Houston,TX,Memorial Hermann,Non-Profit,380,AMI,2022,15.6,14.7,1.0612,0.306,3256
+TX004,Memorial Hermann Southeast,Houston,TX,Memorial Hermann,Non-Profit,380,AMI,2023,14.63,14.5,1.009,0.045,479
+TX004,Memorial Hermann Southeast,Houston,TX,Memorial Hermann,Non-Profit,380,Heart Failure,2021,22.24,22.1,1.0063,0.031,330
+TX004,Memorial Hermann Southeast,Houston,TX,Memorial Hermann,Non-Profit,380,Heart Failure,2022,21.5,21.8,0.9862,0.0,0
+TX004,Memorial Hermann Southeast,Houston,TX,Memorial Hermann,Non-Profit,380,Heart Failure,2023,21.2,21.5,0.986,0.0,0
+TX004,Memorial Hermann Southeast,Houston,TX,Memorial Hermann,Non-Profit,380,Pneumonia,2021,16.55,16.4,1.0091,0.046,489
+TX004,Memorial Hermann Southeast,Houston,TX,Memorial Hermann,Non-Profit,380,Pneumonia,2022,16.17,16.2,0.9981,0.0,0
+TX004,Memorial Hermann Southeast,Houston,TX,Memorial Hermann,Non-Profit,380,Pneumonia,2023,16.08,16.0,1.005,0.025,266
+TX004,Memorial Hermann Southeast,Houston,TX,Memorial Hermann,Non-Profit,380,COPD,2021,19.53,20.0,0.9765,0.0,0
+TX004,Memorial Hermann Southeast,Houston,TX,Memorial Hermann,Non-Profit,380,COPD,2022,20.65,19.8,1.0429,0.214,2277
+TX004,Memorial Hermann Southeast,Houston,TX,Memorial Hermann,Non-Profit,380,COPD,2023,19.93,19.5,1.0221,0.111,1181
+TX004,Memorial Hermann Southeast,Houston,TX,Memorial Hermann,Non-Profit,380,Hip/Knee Replacement,2021,6.14,4.8,1.2792,1.396,14853
+TX004,Memorial Hermann Southeast,Houston,TX,Memorial Hermann,Non-Profit,380,Hip/Knee Replacement,2022,5.12,4.6,1.113,0.565,6012
+TX004,Memorial Hermann Southeast,Houston,TX,Memorial Hermann,Non-Profit,380,Hip/Knee Replacement,2023,4.69,4.5,1.0422,0.211,2245
+TX005,Baylor Scott & White Round Rock,Round Rock,TX,Baylor Scott & White,Non-Profit,290,AMI,2021,14.86,14.9,0.9973,0.0,0
+TX005,Baylor Scott & White Round Rock,Round Rock,TX,Baylor Scott & White,Non-Profit,290,AMI,2022,15.51,14.7,1.0551,0.275,2233
+TX005,Baylor Scott & White Round Rock,Round Rock,TX,Baylor Scott & White,Non-Profit,290,AMI,2023,14.56,14.5,1.0041,0.02,162
+TX005,Baylor Scott & White Round Rock,Round Rock,TX,Baylor Scott & White,Non-Profit,290,Heart Failure,2021,21.36,22.1,0.9665,0.0,0
+TX005,Baylor Scott & White Round Rock,Round Rock,TX,Baylor Scott & White,Non-Profit,290,Heart Failure,2022,21.19,21.8,0.972,0.0,0
+TX005,Baylor Scott & White Round Rock,Round Rock,TX,Baylor Scott & White,Non-Profit,290,Heart Failure,2023,19.8,21.5,0.9209,0.0,0
+TX005,Baylor Scott & White Round Rock,Round Rock,TX,Baylor Scott & White,Non-Profit,290,Pneumonia,2021,17.49,16.4,1.0665,0.333,2704
+TX005,Baylor Scott & White Round Rock,Round Rock,TX,Baylor Scott & White,Non-Profit,290,Pneumonia,2022,17.37,16.2,1.0722,0.361,2931
+TX005,Baylor Scott & White Round Rock,Round Rock,TX,Baylor Scott & White,Non-Profit,290,Pneumonia,2023,14.92,16.0,0.9325,0.0,0
+TX005,Baylor Scott & White Round Rock,Round Rock,TX,Baylor Scott & White,Non-Profit,290,COPD,2021,19.22,20.0,0.961,0.0,0
+TX005,Baylor Scott & White Round Rock,Round Rock,TX,Baylor Scott & White,Non-Profit,290,COPD,2022,19.16,19.8,0.9677,0.0,0
+TX005,Baylor Scott & White Round Rock,Round Rock,TX,Baylor Scott & White,Non-Profit,290,COPD,2023,18.99,19.5,0.9738,0.0,0
+TX005,Baylor Scott & White Round Rock,Round Rock,TX,Baylor Scott & White,Non-Profit,290,Hip/Knee Replacement,2021,5.17,4.8,1.0771,0.385,3126
+TX005,Baylor Scott & White Round Rock,Round Rock,TX,Baylor Scott & White,Non-Profit,290,Hip/Knee Replacement,2022,4.85,4.6,1.0543,0.272,2209
+TX005,Baylor Scott & White Round Rock,Round Rock,TX,Baylor Scott & White,Non-Profit,290,Hip/Knee Replacement,2023,4.73,4.5,1.0511,0.255,2071
+TX006,HCA Houston Healthcare West,Houston,TX,HCA Healthcare,For-Profit,340,AMI,2021,15.64,14.9,1.0497,0.249,2370
+TX006,HCA Houston Healthcare West,Houston,TX,HCA Healthcare,For-Profit,340,AMI,2022,15.33,14.7,1.0429,0.214,2037
+TX006,HCA Houston Healthcare West,Houston,TX,HCA Healthcare,For-Profit,340,AMI,2023,15.23,14.5,1.0503,0.252,2399
+TX006,HCA Houston Healthcare West,Houston,TX,HCA Healthcare,For-Profit,340,Heart Failure,2021,21.13,22.1,0.9561,0.0,0
+TX006,HCA Houston Healthcare West,Houston,TX,HCA Healthcare,For-Profit,340,Heart Failure,2022,21.59,21.8,0.9904,0.0,0
+TX006,HCA Houston Healthcare West,Houston,TX,HCA Healthcare,For-Profit,340,Heart Failure,2023,22.26,21.5,1.0353,0.177,1685
+TX006,HCA Houston Healthcare West,Houston,TX,HCA Healthcare,For-Profit,340,Pneumonia,2021,15.22,16.4,0.928,0.0,0
+TX006,HCA Houston Healthcare West,Houston,TX,HCA Healthcare,For-Profit,340,Pneumonia,2022,17.6,16.2,1.0864,0.432,4113
+TX006,HCA Houston Healthcare West,Houston,TX,HCA Healthcare,For-Profit,340,Pneumonia,2023,17.3,16.0,1.0813,0.406,3865
+TX006,HCA Houston Healthcare West,Houston,TX,HCA Healthcare,For-Profit,340,COPD,2021,20.42,20.0,1.021,0.105,1000
+TX006,HCA Houston Healthcare West,Houston,TX,HCA Healthcare,For-Profit,340,COPD,2022,20.39,19.8,1.0298,0.149,1418
+TX006,HCA Houston Healthcare West,Houston,TX,HCA Healthcare,For-Profit,340,COPD,2023,19.55,19.5,1.0026,0.013,124
+TX006,HCA Houston Healthcare West,Houston,TX,HCA Healthcare,For-Profit,340,Hip/Knee Replacement,2021,6.13,4.8,1.2771,1.385,13185
+TX006,HCA Houston Healthcare West,Houston,TX,HCA Healthcare,For-Profit,340,Hip/Knee Replacement,2022,5.43,4.6,1.1804,0.902,8587
+TX006,HCA Houston Healthcare West,Houston,TX,HCA Healthcare,For-Profit,340,Hip/Knee Replacement,2023,4.96,4.5,1.1022,0.511,4865
+TX007,Methodist Hospital San Antonio,San Antonio,TX,Methodist Health,Non-Profit,420,AMI,2021,13.7,14.9,0.9195,0.0,0
+TX007,Methodist Hospital San Antonio,San Antonio,TX,Methodist Health,Non-Profit,420,AMI,2022,15.58,14.7,1.0599,0.3,3528
+TX007,Methodist Hospital San Antonio,San Antonio,TX,Methodist Health,Non-Profit,420,AMI,2023,13.83,14.5,0.9538,0.0,0
+TX007,Methodist Hospital San Antonio,San Antonio,TX,Methodist Health,Non-Profit,420,Heart Failure,2021,22.59,22.1,1.0222,0.111,1305
+TX007,Methodist Hospital San Antonio,San Antonio,TX,Methodist Health,Non-Profit,420,Heart Failure,2022,21.56,21.8,0.989,0.0,0
+TX007,Methodist Hospital San Antonio,San Antonio,TX,Methodist Health,Non-Profit,420,Heart Failure,2023,21.76,21.5,1.0121,0.06,706
+TX007,Methodist Hospital San Antonio,San Antonio,TX,Methodist Health,Non-Profit,420,Pneumonia,2021,17.72,16.4,1.0805,0.403,4739
+TX007,Methodist Hospital San Antonio,San Antonio,TX,Methodist Health,Non-Profit,420,Pneumonia,2022,14.96,16.2,0.9235,0.0,0
+TX007,Methodist Hospital San Antonio,San Antonio,TX,Methodist Health,Non-Profit,420,Pneumonia,2023,15.86,16.0,0.9912,0.0,0
+TX007,Methodist Hospital San Antonio,San Antonio,TX,Methodist Health,Non-Profit,420,COPD,2021,19.21,20.0,0.9605,0.0,0
+TX007,Methodist Hospital San Antonio,San Antonio,TX,Methodist Health,Non-Profit,420,COPD,2022,19.15,19.8,0.9672,0.0,0
+TX007,Methodist Hospital San Antonio,San Antonio,TX,Methodist Health,Non-Profit,420,COPD,2023,19.74,19.5,1.0123,0.061,717
+TX007,Methodist Hospital San Antonio,San Antonio,TX,Methodist Health,Non-Profit,420,Hip/Knee Replacement,2021,4.14,4.8,0.8625,0.0,0
+TX007,Methodist Hospital San Antonio,San Antonio,TX,Methodist Health,Non-Profit,420,Hip/Knee Replacement,2022,3.64,4.6,0.7913,0.0,0
+TX007,Methodist Hospital San Antonio,San Antonio,TX,Methodist Health,Non-Profit,420,Hip/Knee Replacement,2023,3.89,4.5,0.8644,0.0,0
+TX008,Dell Seton Medical Center,Austin,TX,Ascension,Non-Profit,310,AMI,2021,16.41,14.9,1.1013,0.506,4392
+TX008,Dell Seton Medical Center,Austin,TX,Ascension,Non-Profit,310,AMI,2022,14.6,14.7,0.9932,0.0,0
+TX008,Dell Seton Medical Center,Austin,TX,Ascension,Non-Profit,310,AMI,2023,13.95,14.5,0.9621,0.0,0
+TX008,Dell Seton Medical Center,Austin,TX,Ascension,Non-Profit,310,Heart Failure,2021,22.54,22.1,1.0199,0.1,868
+TX008,Dell Seton Medical Center,Austin,TX,Ascension,Non-Profit,310,Heart Failure,2022,20.68,21.8,0.9486,0.0,0
+TX008,Dell Seton Medical Center,Austin,TX,Ascension,Non-Profit,310,Heart Failure,2023,21.5,21.5,1.0,0.0,0
+TX008,Dell Seton Medical Center,Austin,TX,Ascension,Non-Profit,310,Pneumonia,2021,17.07,16.4,1.0409,0.204,1771
+TX008,Dell Seton Medical Center,Austin,TX,Ascension,Non-Profit,310,Pneumonia,2022,16.2,16.2,1.0,0.0,0
+TX008,Dell Seton Medical Center,Austin,TX,Ascension,Non-Profit,310,Pneumonia,2023,15.67,16.0,0.9794,0.0,0
+TX008,Dell Seton Medical Center,Austin,TX,Ascension,Non-Profit,310,COPD,2021,18.09,20.0,0.9045,0.0,0
+TX008,Dell Seton Medical Center,Austin,TX,Ascension,Non-Profit,310,COPD,2022,20.58,19.8,1.0394,0.197,1710
+TX008,Dell Seton Medical Center,Austin,TX,Ascension,Non-Profit,310,COPD,2023,19.46,19.5,0.9979,0.0,0
+TX008,Dell Seton Medical Center,Austin,TX,Ascension,Non-Profit,310,Hip/Knee Replacement,2021,5.75,4.8,1.1979,0.989,8585
+TX008,Dell Seton Medical Center,Austin,TX,Ascension,Non-Profit,310,Hip/Knee Replacement,2022,5.96,4.6,1.2957,1.479,12838
+TX008,Dell Seton Medical Center,Austin,TX,Ascension,Non-Profit,310,Hip/Knee Replacement,2023,3.6,4.5,0.8,0.0,0
+TX009,Texas Health Harris Methodist,Fort Worth,TX,Texas Health,Non-Profit,360,AMI,2021,15.13,14.9,1.0154,0.077,776
+TX009,Texas Health Harris Methodist,Fort Worth,TX,Texas Health,Non-Profit,360,AMI,2022,13.74,14.7,0.9347,0.0,0
+TX009,Texas Health Harris Methodist,Fort Worth,TX,Texas Health,Non-Profit,360,AMI,2023,15.06,14.5,1.0386,0.193,1945
+TX009,Texas Health Harris Methodist,Fort Worth,TX,Texas Health,Non-Profit,360,Heart Failure,2021,21.84,22.1,0.9882,0.0,0
+TX009,Texas Health Harris Methodist,Fort Worth,TX,Texas Health,Non-Profit,360,Heart Failure,2022,22.4,21.8,1.0275,0.138,1391
+TX009,Texas Health Harris Methodist,Fort Worth,TX,Texas Health,Non-Profit,360,Heart Failure,2023,20.94,21.5,0.974,0.0,0
+TX009,Texas Health Harris Methodist,Fort Worth,TX,Texas Health,Non-Profit,360,Pneumonia,2021,15.8,16.4,0.9634,0.0,0
+TX009,Texas Health Harris Methodist,Fort Worth,TX,Texas Health,Non-Profit,360,Pneumonia,2022,15.28,16.2,0.9432,0.0,0
+TX009,Texas Health Harris Methodist,Fort Worth,TX,Texas Health,Non-Profit,360,Pneumonia,2023,15.76,16.0,0.985,0.0,0
+TX009,Texas Health Harris Methodist,Fort Worth,TX,Texas Health,Non-Profit,360,COPD,2021,21.18,20.0,1.059,0.295,2974
+TX009,Texas Health Harris Methodist,Fort Worth,TX,Texas Health,Non-Profit,360,COPD,2022,17.93,19.8,0.9056,0.0,0
+TX009,Texas Health Harris Methodist,Fort Worth,TX,Texas Health,Non-Profit,360,COPD,2023,18.06,19.5,0.9262,0.0,0
+TX009,Texas Health Harris Methodist,Fort Worth,TX,Texas Health,Non-Profit,360,Hip/Knee Replacement,2021,4.37,4.8,0.9104,0.0,0
+TX009,Texas Health Harris Methodist,Fort Worth,TX,Texas Health,Non-Profit,360,Hip/Knee Replacement,2022,3.85,4.6,0.837,0.0,0
+TX009,Texas Health Harris Methodist,Fort Worth,TX,Texas Health,Non-Profit,360,Hip/Knee Replacement,2023,3.28,4.5,0.7289,0.0,0
+TX010,Christus Mother Frances,Tyler,TX,Christus Health,Non-Profit,280,AMI,2021,16.05,14.9,1.0772,0.386,3026
+TX010,Christus Mother Frances,Tyler,TX,Christus Health,Non-Profit,280,AMI,2022,14.03,14.7,0.9544,0.0,0
+TX010,Christus Mother Frances,Tyler,TX,Christus Health,Non-Profit,280,AMI,2023,15.48,14.5,1.0676,0.338,2650
+TX010,Christus Mother Frances,Tyler,TX,Christus Health,Non-Profit,280,Heart Failure,2021,21.39,22.1,0.9679,0.0,0
+TX010,Christus Mother Frances,Tyler,TX,Christus Health,Non-Profit,280,Heart Failure,2022,19.86,21.8,0.911,0.0,0
+TX010,Christus Mother Frances,Tyler,TX,Christus Health,Non-Profit,280,Heart Failure,2023,21.91,21.5,1.0191,0.095,745
+TX010,Christus Mother Frances,Tyler,TX,Christus Health,Non-Profit,280,Pneumonia,2021,17.51,16.4,1.0677,0.339,2658
+TX010,Christus Mother Frances,Tyler,TX,Christus Health,Non-Profit,280,Pneumonia,2022,16.74,16.2,1.0333,0.167,1309
+TX010,Christus Mother Frances,Tyler,TX,Christus Health,Non-Profit,280,Pneumonia,2023,17.01,16.0,1.0631,0.315,2470
+TX010,Christus Mother Frances,Tyler,TX,Christus Health,Non-Profit,280,COPD,2021,19.27,20.0,0.9635,0.0,0
+TX010,Christus Mother Frances,Tyler,TX,Christus Health,Non-Profit,280,COPD,2022,18.7,19.8,0.9444,0.0,0
+TX010,Christus Mother Frances,Tyler,TX,Christus Health,Non-Profit,280,COPD,2023,19.89,19.5,1.02,0.1,784
+TX010,Christus Mother Frances,Tyler,TX,Christus Health,Non-Profit,280,Hip/Knee Replacement,2021,4.37,4.8,0.9104,0.0,0
+TX010,Christus Mother Frances,Tyler,TX,Christus Health,Non-Profit,280,Hip/Knee Replacement,2022,5.07,4.6,1.1022,0.511,4006
+TX010,Christus Mother Frances,Tyler,TX,Christus Health,Non-Profit,280,Hip/Knee Replacement,2023,3.93,4.5,0.8733,0.0,0
+TX011,United Regional Wichita Falls,Wichita Falls,TX,Independent,Non-Profit,200,AMI,2021,14.58,14.9,0.9785,0.0,0
+TX011,United Regional Wichita Falls,Wichita Falls,TX,Independent,Non-Profit,200,AMI,2022,14.93,14.7,1.0156,0.078,437
+TX011,United Regional Wichita Falls,Wichita Falls,TX,Independent,Non-Profit,200,AMI,2023,14.46,14.5,0.9972,0.0,0
+TX011,United Regional Wichita Falls,Wichita Falls,TX,Independent,Non-Profit,200,Heart Failure,2021,22.09,22.1,0.9995,0.0,0
+TX011,United Regional Wichita Falls,Wichita Falls,TX,Independent,Non-Profit,200,Heart Failure,2022,21.36,21.8,0.9798,0.0,0
+TX011,United Regional Wichita Falls,Wichita Falls,TX,Independent,Non-Profit,200,Heart Failure,2023,22.61,21.5,1.0516,0.258,1445
+TX011,United Regional Wichita Falls,Wichita Falls,TX,Independent,Non-Profit,200,Pneumonia,2021,16.39,16.4,0.9994,0.0,0
+TX011,United Regional Wichita Falls,Wichita Falls,TX,Independent,Non-Profit,200,Pneumonia,2022,15.72,16.2,0.9704,0.0,0
+TX011,United Regional Wichita Falls,Wichita Falls,TX,Independent,Non-Profit,200,Pneumonia,2023,16.19,16.0,1.0119,0.06,336
+TX011,United Regional Wichita Falls,Wichita Falls,TX,Independent,Non-Profit,200,COPD,2021,19.15,20.0,0.9575,0.0,0
+TX011,United Regional Wichita Falls,Wichita Falls,TX,Independent,Non-Profit,200,COPD,2022,20.17,19.8,1.0187,0.093,521
+TX011,United Regional Wichita Falls,Wichita Falls,TX,Independent,Non-Profit,200,COPD,2023,20.78,19.5,1.0656,0.328,1837
+TX011,United Regional Wichita Falls,Wichita Falls,TX,Independent,Non-Profit,200,Hip/Knee Replacement,2021,4.74,4.8,0.9875,0.0,0
+TX011,United Regional Wichita Falls,Wichita Falls,TX,Independent,Non-Profit,200,Hip/Knee Replacement,2022,3.7,4.6,0.8043,0.0,0
+TX011,United Regional Wichita Falls,Wichita Falls,TX,Independent,Non-Profit,200,Hip/Knee Replacement,2023,3.41,4.5,0.7578,0.0,0
+TX012,Covenant Medical Center,Lubbock,TX,Providence,Non-Profit,430,AMI,2021,14.68,14.9,0.9852,0.0,0
+TX012,Covenant Medical Center,Lubbock,TX,Providence,Non-Profit,430,AMI,2022,13.78,14.7,0.9374,0.0,0
+TX012,Covenant Medical Center,Lubbock,TX,Providence,Non-Profit,430,AMI,2023,13.5,14.5,0.931,0.0,0
+TX012,Covenant Medical Center,Lubbock,TX,Providence,Non-Profit,430,Heart Failure,2021,22.16,22.1,1.0027,0.013,157
+TX012,Covenant Medical Center,Lubbock,TX,Providence,Non-Profit,430,Heart Failure,2022,21.27,21.8,0.9757,0.0,0
+TX012,Covenant Medical Center,Lubbock,TX,Providence,Non-Profit,430,Heart Failure,2023,21.87,21.5,1.0172,0.086,1035
+TX012,Covenant Medical Center,Lubbock,TX,Providence,Non-Profit,430,Pneumonia,2021,16.45,16.4,1.003,0.015,181
+TX012,Covenant Medical Center,Lubbock,TX,Providence,Non-Profit,430,Pneumonia,2022,15.83,16.2,0.9772,0.0,0
+TX012,Covenant Medical Center,Lubbock,TX,Providence,Non-Profit,430,Pneumonia,2023,16.99,16.0,1.0619,0.31,3732
+TX012,Covenant Medical Center,Lubbock,TX,Providence,Non-Profit,430,COPD,2021,20.81,20.0,1.0405,0.202,2432
+TX012,Covenant Medical Center,Lubbock,TX,Providence,Non-Profit,430,COPD,2022,19.6,19.8,0.9899,0.0,0
+TX012,Covenant Medical Center,Lubbock,TX,Providence,Non-Profit,430,COPD,2023,18.8,19.5,0.9641,0.0,0
+TX012,Covenant Medical Center,Lubbock,TX,Providence,Non-Profit,430,Hip/Knee Replacement,2021,5.55,4.8,1.1562,0.781,9403
+TX012,Covenant Medical Center,Lubbock,TX,Providence,Non-Profit,430,Hip/Knee Replacement,2022,5.61,4.6,1.2196,1.098,13220
+TX012,Covenant Medical Center,Lubbock,TX,Providence,Non-Profit,430,Hip/Knee Replacement,2023,4.16,4.5,0.9244,0.0,0
+TX013,Odessa Regional Medical Center,Odessa,TX,Steward Health,For-Profit,175,AMI,2021,14.82,14.9,0.9946,0.0,0
+TX013,Odessa Regional Medical Center,Odessa,TX,Steward Health,For-Profit,175,AMI,2022,16.29,14.7,1.1082,0.541,2651
+TX013,Odessa Regional Medical Center,Odessa,TX,Steward Health,For-Profit,175,AMI,2023,16.22,14.5,1.1186,0.593,2906
+TX013,Odessa Regional Medical Center,Odessa,TX,Steward Health,For-Profit,175,Heart Failure,2021,22.33,22.1,1.0104,0.052,255
+TX013,Odessa Regional Medical Center,Odessa,TX,Steward Health,For-Profit,175,Heart Failure,2022,21.7,21.8,0.9954,0.0,0
+TX013,Odessa Regional Medical Center,Odessa,TX,Steward Health,For-Profit,175,Heart Failure,2023,22.09,21.5,1.0274,0.137,671
+TX013,Odessa Regional Medical Center,Odessa,TX,Steward Health,For-Profit,175,Pneumonia,2021,16.29,16.4,0.9933,0.0,0
+TX013,Odessa Regional Medical Center,Odessa,TX,Steward Health,For-Profit,175,Pneumonia,2022,16.6,16.2,1.0247,0.123,603
+TX013,Odessa Regional Medical Center,Odessa,TX,Steward Health,For-Profit,175,Pneumonia,2023,16.89,16.0,1.0556,0.278,1362
+TX013,Odessa Regional Medical Center,Odessa,TX,Steward Health,For-Profit,175,COPD,2021,20.94,20.0,1.047,0.235,1152
+TX013,Odessa Regional Medical Center,Odessa,TX,Steward Health,For-Profit,175,COPD,2022,20.83,19.8,1.052,0.26,1274
+TX013,Odessa Regional Medical Center,Odessa,TX,Steward Health,For-Profit,175,COPD,2023,18.79,19.5,0.9636,0.0,0
+TX013,Odessa Regional Medical Center,Odessa,TX,Steward Health,For-Profit,175,Hip/Knee Replacement,2021,3.37,4.8,0.7021,0.0,0
+TX013,Odessa Regional Medical Center,Odessa,TX,Steward Health,For-Profit,175,Hip/Knee Replacement,2022,5.88,4.6,1.2783,1.391,6816
+TX013,Odessa Regional Medical Center,Odessa,TX,Steward Health,For-Profit,175,Hip/Knee Replacement,2023,5.06,4.5,1.1244,0.622,3048
+TX014,Valley Baptist Medical Center,Harlingen,TX,HCA Healthcare,For-Profit,270,AMI,2021,15.75,14.9,1.057,0.285,2155
+TX014,Valley Baptist Medical Center,Harlingen,TX,HCA Healthcare,For-Profit,270,AMI,2022,14.85,14.7,1.0102,0.051,386
+TX014,Valley Baptist Medical Center,Harlingen,TX,HCA Healthcare,For-Profit,270,AMI,2023,15.83,14.5,1.0917,0.458,3462
+TX014,Valley Baptist Medical Center,Harlingen,TX,HCA Healthcare,For-Profit,270,Heart Failure,2021,23.0,22.1,1.0407,0.203,1535
+TX014,Valley Baptist Medical Center,Harlingen,TX,HCA Healthcare,For-Profit,270,Heart Failure,2022,21.6,21.8,0.9908,0.0,0
+TX014,Valley Baptist Medical Center,Harlingen,TX,HCA Healthcare,For-Profit,270,Heart Failure,2023,22.67,21.5,1.0544,0.272,2056
+TX014,Valley Baptist Medical Center,Harlingen,TX,HCA Healthcare,For-Profit,270,Pneumonia,2021,15.03,16.4,0.9165,0.0,0
+TX014,Valley Baptist Medical Center,Harlingen,TX,HCA Healthcare,For-Profit,270,Pneumonia,2022,14.82,16.2,0.9148,0.0,0
+TX014,Valley Baptist Medical Center,Harlingen,TX,HCA Healthcare,For-Profit,270,Pneumonia,2023,16.52,16.0,1.0325,0.162,1225
+TX014,Valley Baptist Medical Center,Harlingen,TX,HCA Healthcare,For-Profit,270,COPD,2021,21.0,20.0,1.05,0.25,1890
+TX014,Valley Baptist Medical Center,Harlingen,TX,HCA Healthcare,For-Profit,270,COPD,2022,19.52,19.8,0.9859,0.0,0
+TX014,Valley Baptist Medical Center,Harlingen,TX,HCA Healthcare,For-Profit,270,COPD,2023,19.95,19.5,1.0231,0.115,869
+TX014,Valley Baptist Medical Center,Harlingen,TX,HCA Healthcare,For-Profit,270,Hip/Knee Replacement,2021,5.38,4.8,1.1208,0.604,4566
+TX014,Valley Baptist Medical Center,Harlingen,TX,HCA Healthcare,For-Profit,270,Hip/Knee Replacement,2022,4.96,4.6,1.0783,0.392,2964
+TX014,Valley Baptist Medical Center,Harlingen,TX,HCA Healthcare,For-Profit,270,Hip/Knee Replacement,2023,5.69,4.5,1.2644,1.322,9994
+TX015,East Texas Medical Center,Tyler,TX,UT Health,Non-Profit,320,AMI,2021,15.61,14.9,1.0477,0.239,2141
+TX015,East Texas Medical Center,Tyler,TX,UT Health,Non-Profit,320,AMI,2022,14.77,14.7,1.0048,0.024,215
+TX015,East Texas Medical Center,Tyler,TX,UT Health,Non-Profit,320,AMI,2023,13.78,14.5,0.9503,0.0,0
+TX015,East Texas Medical Center,Tyler,TX,UT Health,Non-Profit,320,Heart Failure,2021,22.13,22.1,1.0014,0.007,63
+TX015,East Texas Medical Center,Tyler,TX,UT Health,Non-Profit,320,Heart Failure,2022,21.69,21.8,0.995,0.0,0
+TX015,East Texas Medical Center,Tyler,TX,UT Health,Non-Profit,320,Heart Failure,2023,20.47,21.5,0.9521,0.0,0
+TX015,East Texas Medical Center,Tyler,TX,UT Health,Non-Profit,320,Pneumonia,2021,15.29,16.4,0.9323,0.0,0
+TX015,East Texas Medical Center,Tyler,TX,UT Health,Non-Profit,320,Pneumonia,2022,15.97,16.2,0.9858,0.0,0
+TX015,East Texas Medical Center,Tyler,TX,UT Health,Non-Profit,320,Pneumonia,2023,15.28,16.0,0.955,0.0,0
+TX015,East Texas Medical Center,Tyler,TX,UT Health,Non-Profit,320,COPD,2021,19.59,20.0,0.9795,0.0,0
+TX015,East Texas Medical Center,Tyler,TX,UT Health,Non-Profit,320,COPD,2022,20.34,19.8,1.0273,0.137,1228
+TX015,East Texas Medical Center,Tyler,TX,UT Health,Non-Profit,320,COPD,2023,20.42,19.5,1.0472,0.236,2115
+TX015,East Texas Medical Center,Tyler,TX,UT Health,Non-Profit,320,Hip/Knee Replacement,2021,5.01,4.8,1.0437,0.219,1962
+TX015,East Texas Medical Center,Tyler,TX,UT Health,Non-Profit,320,Hip/Knee Replacement,2022,4.66,4.6,1.013,0.065,582
+TX015,East Texas Medical Center,Tyler,TX,UT Health,Non-Profit,320,Hip/Knee Replacement,2023,4.18,4.5,0.9289,0.0,0
+FL001,AdventHealth Orlando,Orlando,FL,AdventHealth,Non-Profit,900,AMI,2021,14.98,14.9,1.0054,0.027,680
+FL001,AdventHealth Orlando,Orlando,FL,AdventHealth,Non-Profit,900,AMI,2022,14.32,14.7,0.9741,0.0,0
+FL001,AdventHealth Orlando,Orlando,FL,AdventHealth,Non-Profit,900,AMI,2023,13.63,14.5,0.94,0.0,0
+FL001,AdventHealth Orlando,Orlando,FL,AdventHealth,Non-Profit,900,Heart Failure,2021,20.56,22.1,0.9303,0.0,0
+FL001,AdventHealth Orlando,Orlando,FL,AdventHealth,Non-Profit,900,Heart Failure,2022,21.86,21.8,1.0028,0.014,353
+FL001,AdventHealth Orlando,Orlando,FL,AdventHealth,Non-Profit,900,Heart Failure,2023,19.84,21.5,0.9228,0.0,0
+FL001,AdventHealth Orlando,Orlando,FL,AdventHealth,Non-Profit,900,Pneumonia,2021,16.72,16.4,1.0195,0.098,2470
+FL001,AdventHealth Orlando,Orlando,FL,AdventHealth,Non-Profit,900,Pneumonia,2022,16.16,16.2,0.9975,0.0,0
+FL001,AdventHealth Orlando,Orlando,FL,AdventHealth,Non-Profit,900,Pneumonia,2023,15.93,16.0,0.9956,0.0,0
+FL001,AdventHealth Orlando,Orlando,FL,AdventHealth,Non-Profit,900,COPD,2021,19.48,20.0,0.974,0.0,0
+FL001,AdventHealth Orlando,Orlando,FL,AdventHealth,Non-Profit,900,COPD,2022,20.15,19.8,1.0177,0.089,2243
+FL001,AdventHealth Orlando,Orlando,FL,AdventHealth,Non-Profit,900,COPD,2023,18.61,19.5,0.9544,0.0,0
+FL001,AdventHealth Orlando,Orlando,FL,AdventHealth,Non-Profit,900,Hip/Knee Replacement,2021,4.21,4.8,0.8771,0.0,0
+FL001,AdventHealth Orlando,Orlando,FL,AdventHealth,Non-Profit,900,Hip/Knee Replacement,2022,3.04,4.6,0.6609,0.0,0
+FL001,AdventHealth Orlando,Orlando,FL,AdventHealth,Non-Profit,900,Hip/Knee Replacement,2023,3.65,4.5,0.8111,0.0,0
+FL002,Jackson Memorial Hospital,Miami,FL,Jackson Health,Government,1500,AMI,2021,13.66,14.9,0.9168,0.0,0
+FL002,Jackson Memorial Hospital,Miami,FL,Jackson Health,Government,1500,AMI,2022,13.1,14.7,0.8912,0.0,0
+FL002,Jackson Memorial Hospital,Miami,FL,Jackson Health,Government,1500,AMI,2023,15.15,14.5,1.0448,0.224,9408
+FL002,Jackson Memorial Hospital,Miami,FL,Jackson Health,Government,1500,Heart Failure,2021,22.29,22.1,1.0086,0.043,1806
+FL002,Jackson Memorial Hospital,Miami,FL,Jackson Health,Government,1500,Heart Failure,2022,21.16,21.8,0.9706,0.0,0
+FL002,Jackson Memorial Hospital,Miami,FL,Jackson Health,Government,1500,Heart Failure,2023,19.62,21.5,0.9126,0.0,0
+FL002,Jackson Memorial Hospital,Miami,FL,Jackson Health,Government,1500,Pneumonia,2021,16.2,16.4,0.9878,0.0,0
+FL002,Jackson Memorial Hospital,Miami,FL,Jackson Health,Government,1500,Pneumonia,2022,16.08,16.2,0.9926,0.0,0
+FL002,Jackson Memorial Hospital,Miami,FL,Jackson Health,Government,1500,Pneumonia,2023,15.67,16.0,0.9794,0.0,0
+FL002,Jackson Memorial Hospital,Miami,FL,Jackson Health,Government,1500,COPD,2021,18.45,20.0,0.9225,0.0,0
+FL002,Jackson Memorial Hospital,Miami,FL,Jackson Health,Government,1500,COPD,2022,20.21,19.8,1.0207,0.103,4326
+FL002,Jackson Memorial Hospital,Miami,FL,Jackson Health,Government,1500,COPD,2023,20.5,19.5,1.0513,0.256,10752
+FL002,Jackson Memorial Hospital,Miami,FL,Jackson Health,Government,1500,Hip/Knee Replacement,2021,4.17,4.8,0.8688,0.0,0
+FL002,Jackson Memorial Hospital,Miami,FL,Jackson Health,Government,1500,Hip/Knee Replacement,2022,3.12,4.6,0.6783,0.0,0
+FL002,Jackson Memorial Hospital,Miami,FL,Jackson Health,Government,1500,Hip/Knee Replacement,2023,4.17,4.5,0.9267,0.0,0
+FL003,Tampa General Hospital,Tampa,FL,TGH,Non-Profit,1010,AMI,2021,13.4,14.9,0.8993,0.0,0
+FL003,Tampa General Hospital,Tampa,FL,TGH,Non-Profit,1010,AMI,2022,14.16,14.7,0.9633,0.0,0
+FL003,Tampa General Hospital,Tampa,FL,TGH,Non-Profit,1010,AMI,2023,14.32,14.5,0.9876,0.0,0
+FL003,Tampa General Hospital,Tampa,FL,TGH,Non-Profit,1010,Heart Failure,2021,21.09,22.1,0.9543,0.0,0
+FL003,Tampa General Hospital,Tampa,FL,TGH,Non-Profit,1010,Heart Failure,2022,22.34,21.8,1.0248,0.124,3507
+FL003,Tampa General Hospital,Tampa,FL,TGH,Non-Profit,1010,Heart Failure,2023,21.29,21.5,0.9902,0.0,0
+FL003,Tampa General Hospital,Tampa,FL,TGH,Non-Profit,1010,Pneumonia,2021,16.47,16.4,1.0043,0.021,594
+FL003,Tampa General Hospital,Tampa,FL,TGH,Non-Profit,1010,Pneumonia,2022,16.52,16.2,1.0198,0.099,2800
+FL003,Tampa General Hospital,Tampa,FL,TGH,Non-Profit,1010,Pneumonia,2023,16.2,16.0,1.0125,0.062,1753
+FL003,Tampa General Hospital,Tampa,FL,TGH,Non-Profit,1010,COPD,2021,20.87,20.0,1.0435,0.218,6165
+FL003,Tampa General Hospital,Tampa,FL,TGH,Non-Profit,1010,COPD,2022,19.13,19.8,0.9662,0.0,0
+FL003,Tampa General Hospital,Tampa,FL,TGH,Non-Profit,1010,COPD,2023,19.88,19.5,1.0195,0.098,2771
+FL003,Tampa General Hospital,Tampa,FL,TGH,Non-Profit,1010,Hip/Knee Replacement,2021,4.46,4.8,0.9292,0.0,0
+FL003,Tampa General Hospital,Tampa,FL,TGH,Non-Profit,1010,Hip/Knee Replacement,2022,4.05,4.6,0.8804,0.0,0
+FL003,Tampa General Hospital,Tampa,FL,TGH,Non-Profit,1010,Hip/Knee Replacement,2023,3.77,4.5,0.8378,0.0,0
+FL004,HCA Florida Blake Hospital,Bradenton,FL,HCA Healthcare,For-Profit,290,AMI,2021,15.36,14.9,1.0309,0.154,1250
+FL004,HCA Florida Blake Hospital,Bradenton,FL,HCA Healthcare,For-Profit,290,AMI,2022,14.44,14.7,0.9823,0.0,0
+FL004,HCA Florida Blake Hospital,Bradenton,FL,HCA Healthcare,For-Profit,290,AMI,2023,13.47,14.5,0.929,0.0,0
+FL004,HCA Florida Blake Hospital,Bradenton,FL,HCA Healthcare,For-Profit,290,Heart Failure,2021,22.89,22.1,1.0357,0.179,1453
+FL004,HCA Florida Blake Hospital,Bradenton,FL,HCA Healthcare,For-Profit,290,Heart Failure,2022,22.33,21.8,1.0243,0.121,983
+FL004,HCA Florida Blake Hospital,Bradenton,FL,HCA Healthcare,For-Profit,290,Heart Failure,2023,21.57,21.5,1.0033,0.017,138
+FL004,HCA Florida Blake Hospital,Bradenton,FL,HCA Healthcare,For-Profit,290,Pneumonia,2021,17.37,16.4,1.0591,0.295,2395
+FL004,HCA Florida Blake Hospital,Bradenton,FL,HCA Healthcare,For-Profit,290,Pneumonia,2022,15.01,16.2,0.9265,0.0,0
+FL004,HCA Florida Blake Hospital,Bradenton,FL,HCA Healthcare,For-Profit,290,Pneumonia,2023,17.03,16.0,1.0644,0.322,2615
+FL004,HCA Florida Blake Hospital,Bradenton,FL,HCA Healthcare,For-Profit,290,COPD,2021,19.13,20.0,0.9565,0.0,0
+FL004,HCA Florida Blake Hospital,Bradenton,FL,HCA Healthcare,For-Profit,290,COPD,2022,19.62,19.8,0.9909,0.0,0
+FL004,HCA Florida Blake Hospital,Bradenton,FL,HCA Healthcare,For-Profit,290,COPD,2023,20.3,19.5,1.041,0.205,1665
+FL004,HCA Florida Blake Hospital,Bradenton,FL,HCA Healthcare,For-Profit,290,Hip/Knee Replacement,2021,5.87,4.8,1.2229,1.115,9054
+FL004,HCA Florida Blake Hospital,Bradenton,FL,HCA Healthcare,For-Profit,290,Hip/Knee Replacement,2022,5.13,4.6,1.1152,0.576,4677
+FL004,HCA Florida Blake Hospital,Bradenton,FL,HCA Healthcare,For-Profit,290,Hip/Knee Replacement,2023,4.65,4.5,1.0333,0.167,1356
+FL005,Sarasota Memorial Hospital,Sarasota,FL,Sarasota Memorial,Government,820,AMI,2021,14.95,14.9,1.0034,0.017,390
+FL005,Sarasota Memorial Hospital,Sarasota,FL,Sarasota Memorial,Government,820,AMI,2022,15.85,14.7,1.0782,0.391,8977
+FL005,Sarasota Memorial Hospital,Sarasota,FL,Sarasota Memorial,Government,820,AMI,2023,13.53,14.5,0.9331,0.0,0
+FL005,Sarasota Memorial Hospital,Sarasota,FL,Sarasota Memorial,Government,820,Heart Failure,2021,21.95,22.1,0.9932,0.0,0
+FL005,Sarasota Memorial Hospital,Sarasota,FL,Sarasota Memorial,Government,820,Heart Failure,2022,20.78,21.8,0.9532,0.0,0
+FL005,Sarasota Memorial Hospital,Sarasota,FL,Sarasota Memorial,Government,820,Heart Failure,2023,21.7,21.5,1.0093,0.047,1079
+FL005,Sarasota Memorial Hospital,Sarasota,FL,Sarasota Memorial,Government,820,Pneumonia,2021,16.59,16.4,1.0116,0.058,1332
+FL005,Sarasota Memorial Hospital,Sarasota,FL,Sarasota Memorial,Government,820,Pneumonia,2022,16.47,16.2,1.0167,0.083,1906
+FL005,Sarasota Memorial Hospital,Sarasota,FL,Sarasota Memorial,Government,820,Pneumonia,2023,15.93,16.0,0.9956,0.0,0
+FL005,Sarasota Memorial Hospital,Sarasota,FL,Sarasota Memorial,Government,820,COPD,2021,19.05,20.0,0.9525,0.0,0
+FL005,Sarasota Memorial Hospital,Sarasota,FL,Sarasota Memorial,Government,820,COPD,2022,18.97,19.8,0.9581,0.0,0
+FL005,Sarasota Memorial Hospital,Sarasota,FL,Sarasota Memorial,Government,820,COPD,2023,18.74,19.5,0.961,0.0,0
+FL005,Sarasota Memorial Hospital,Sarasota,FL,Sarasota Memorial,Government,820,Hip/Knee Replacement,2021,5.01,4.8,1.0437,0.219,5028
+FL005,Sarasota Memorial Hospital,Sarasota,FL,Sarasota Memorial,Government,820,Hip/Knee Replacement,2022,4.3,4.6,0.9348,0.0,0
+FL005,Sarasota Memorial Hospital,Sarasota,FL,Sarasota Memorial,Government,820,Hip/Knee Replacement,2023,3.91,4.5,0.8689,0.0,0
+FL006,Lee Health Cape Coral,Cape Coral,FL,Lee Health,Government,290,AMI,2021,15.33,14.9,1.0289,0.144,1169
+FL006,Lee Health Cape Coral,Cape Coral,FL,Lee Health,Government,290,AMI,2022,13.69,14.7,0.9313,0.0,0
+FL006,Lee Health Cape Coral,Cape Coral,FL,Lee Health,Government,290,AMI,2023,13.32,14.5,0.9186,0.0,0
+FL006,Lee Health Cape Coral,Cape Coral,FL,Lee Health,Government,290,Heart Failure,2021,21.73,22.1,0.9833,0.0,0
+FL006,Lee Health Cape Coral,Cape Coral,FL,Lee Health,Government,290,Heart Failure,2022,23.38,21.8,1.0725,0.363,2948
+FL006,Lee Health Cape Coral,Cape Coral,FL,Lee Health,Government,290,Heart Failure,2023,21.69,21.5,1.0088,0.044,357
+FL006,Lee Health Cape Coral,Cape Coral,FL,Lee Health,Government,290,Pneumonia,2021,16.21,16.4,0.9884,0.0,0
+FL006,Lee Health Cape Coral,Cape Coral,FL,Lee Health,Government,290,Pneumonia,2022,16.98,16.2,1.0481,0.241,1957
+FL006,Lee Health Cape Coral,Cape Coral,FL,Lee Health,Government,290,Pneumonia,2023,14.28,16.0,0.8925,0.0,0
+FL006,Lee Health Cape Coral,Cape Coral,FL,Lee Health,Government,290,COPD,2021,19.87,20.0,0.9935,0.0,0
+FL006,Lee Health Cape Coral,Cape Coral,FL,Lee Health,Government,290,COPD,2022,19.94,19.8,1.0071,0.036,292
+FL006,Lee Health Cape Coral,Cape Coral,FL,Lee Health,Government,290,COPD,2023,20.47,19.5,1.0497,0.249,2022
+FL006,Lee Health Cape Coral,Cape Coral,FL,Lee Health,Government,290,Hip/Knee Replacement,2021,5.35,4.8,1.1146,0.573,4653
+FL006,Lee Health Cape Coral,Cape Coral,FL,Lee Health,Government,290,Hip/Knee Replacement,2022,4.57,4.6,0.9935,0.0,0
+FL006,Lee Health Cape Coral,Cape Coral,FL,Lee Health,Government,290,Hip/Knee Replacement,2023,4.21,4.5,0.9356,0.0,0
+FL007,Baptist Hospital Pensacola,Pensacola,FL,Baptist Health,Non-Profit,340,AMI,2021,14.52,14.9,0.9745,0.0,0
+FL007,Baptist Hospital Pensacola,Pensacola,FL,Baptist Health,Non-Profit,340,AMI,2022,13.92,14.7,0.9469,0.0,0
+FL007,Baptist Hospital Pensacola,Pensacola,FL,Baptist Health,Non-Profit,340,AMI,2023,14.15,14.5,0.9759,0.0,0
+FL007,Baptist Hospital Pensacola,Pensacola,FL,Baptist Health,Non-Profit,340,Heart Failure,2021,21.92,22.1,0.9919,0.0,0
+FL007,Baptist Hospital Pensacola,Pensacola,FL,Baptist Health,Non-Profit,340,Heart Failure,2022,21.72,21.8,0.9963,0.0,0
+FL007,Baptist Hospital Pensacola,Pensacola,FL,Baptist Health,Non-Profit,340,Heart Failure,2023,22.01,21.5,1.0237,0.119,1133
+FL007,Baptist Hospital Pensacola,Pensacola,FL,Baptist Health,Non-Profit,340,Pneumonia,2021,18.04,16.4,1.1,0.5,4760
+FL007,Baptist Hospital Pensacola,Pensacola,FL,Baptist Health,Non-Profit,340,Pneumonia,2022,16.49,16.2,1.0179,0.09,857
+FL007,Baptist Hospital Pensacola,Pensacola,FL,Baptist Health,Non-Profit,340,Pneumonia,2023,16.61,16.0,1.0381,0.191,1818
+FL007,Baptist Hospital Pensacola,Pensacola,FL,Baptist Health,Non-Profit,340,COPD,2021,20.61,20.0,1.0305,0.152,1447
+FL007,Baptist Hospital Pensacola,Pensacola,FL,Baptist Health,Non-Profit,340,COPD,2022,19.76,19.8,0.998,0.0,0
+FL007,Baptist Hospital Pensacola,Pensacola,FL,Baptist Health,Non-Profit,340,COPD,2023,18.76,19.5,0.9621,0.0,0
+FL007,Baptist Hospital Pensacola,Pensacola,FL,Baptist Health,Non-Profit,340,Hip/Knee Replacement,2021,4.39,4.8,0.9146,0.0,0
+FL007,Baptist Hospital Pensacola,Pensacola,FL,Baptist Health,Non-Profit,340,Hip/Knee Replacement,2022,5.75,4.6,1.25,1.25,11900
+FL007,Baptist Hospital Pensacola,Pensacola,FL,Baptist Health,Non-Profit,340,Hip/Knee Replacement,2023,4.52,4.5,1.0044,0.022,209
+FL008,Tallahassee Memorial,Tallahassee,FL,TMH,Non-Profit,770,AMI,2021,13.02,14.9,0.8738,0.0,0
+FL008,Tallahassee Memorial,Tallahassee,FL,TMH,Non-Profit,770,AMI,2022,14.66,14.7,0.9973,0.0,0
+FL008,Tallahassee Memorial,Tallahassee,FL,TMH,Non-Profit,770,AMI,2023,14.81,14.5,1.0214,0.107,2307
+FL008,Tallahassee Memorial,Tallahassee,FL,TMH,Non-Profit,770,Heart Failure,2021,22.05,22.1,0.9977,0.0,0
+FL008,Tallahassee Memorial,Tallahassee,FL,TMH,Non-Profit,770,Heart Failure,2022,21.18,21.8,0.9716,0.0,0
+FL008,Tallahassee Memorial,Tallahassee,FL,TMH,Non-Profit,770,Heart Failure,2023,21.12,21.5,0.9823,0.0,0
+FL008,Tallahassee Memorial,Tallahassee,FL,TMH,Non-Profit,770,Pneumonia,2021,17.6,16.4,1.0732,0.366,7891
+FL008,Tallahassee Memorial,Tallahassee,FL,TMH,Non-Profit,770,Pneumonia,2022,17.52,16.2,1.0815,0.407,8775
+FL008,Tallahassee Memorial,Tallahassee,FL,TMH,Non-Profit,770,Pneumonia,2023,16.79,16.0,1.0494,0.247,5325
+FL008,Tallahassee Memorial,Tallahassee,FL,TMH,Non-Profit,770,COPD,2021,20.51,20.0,1.0255,0.128,2760
+FL008,Tallahassee Memorial,Tallahassee,FL,TMH,Non-Profit,770,COPD,2022,19.91,19.8,1.0056,0.028,604
+FL008,Tallahassee Memorial,Tallahassee,FL,TMH,Non-Profit,770,COPD,2023,20.54,19.5,1.0533,0.266,5735
+FL008,Tallahassee Memorial,Tallahassee,FL,TMH,Non-Profit,770,Hip/Knee Replacement,2021,5.21,4.8,1.0854,0.427,9206
+FL008,Tallahassee Memorial,Tallahassee,FL,TMH,Non-Profit,770,Hip/Knee Replacement,2022,6.12,4.6,1.3304,1.652,35617
+FL008,Tallahassee Memorial,Tallahassee,FL,TMH,Non-Profit,770,Hip/Knee Replacement,2023,4.01,4.5,0.8911,0.0,0
+FL009,UF Health Gainesville,Gainesville,FL,UF Health,Government,980,AMI,2021,14.71,14.9,0.9872,0.0,0
+FL009,UF Health Gainesville,Gainesville,FL,UF Health,Government,980,AMI,2022,14.43,14.7,0.9816,0.0,0
+FL009,UF Health Gainesville,Gainesville,FL,UF Health,Government,980,AMI,2023,13.69,14.5,0.9441,0.0,0
+FL009,UF Health Gainesville,Gainesville,FL,UF Health,Government,980,Heart Failure,2021,21.66,22.1,0.9801,0.0,0
+FL009,UF Health Gainesville,Gainesville,FL,UF Health,Government,980,Heart Failure,2022,20.8,21.8,0.9541,0.0,0
+FL009,UF Health Gainesville,Gainesville,FL,UF Health,Government,980,Heart Failure,2023,21.43,21.5,0.9967,0.0,0
+FL009,UF Health Gainesville,Gainesville,FL,UF Health,Government,980,Pneumonia,2021,15.48,16.4,0.9439,0.0,0
+FL009,UF Health Gainesville,Gainesville,FL,UF Health,Government,980,Pneumonia,2022,15.11,16.2,0.9327,0.0,0
+FL009,UF Health Gainesville,Gainesville,FL,UF Health,Government,980,Pneumonia,2023,14.63,16.0,0.9144,0.0,0
+FL009,UF Health Gainesville,Gainesville,FL,UF Health,Government,980,COPD,2021,17.98,20.0,0.899,0.0,0
+FL009,UF Health Gainesville,Gainesville,FL,UF Health,Government,980,COPD,2022,19.35,19.8,0.9773,0.0,0
+FL009,UF Health Gainesville,Gainesville,FL,UF Health,Government,980,COPD,2023,18.54,19.5,0.9508,0.0,0
+FL009,UF Health Gainesville,Gainesville,FL,UF Health,Government,980,Hip/Knee Replacement,2021,4.24,4.8,0.8833,0.0,0
+FL009,UF Health Gainesville,Gainesville,FL,UF Health,Government,980,Hip/Knee Replacement,2022,2.99,4.6,0.65,0.0,0
+FL009,UF Health Gainesville,Gainesville,FL,UF Health,Government,980,Hip/Knee Replacement,2023,3.91,4.5,0.8689,0.0,0
+FL010,Halifax Health,Daytona Beach,FL,Halifax,Government,640,AMI,2021,14.04,14.9,0.9423,0.0,0
+FL010,Halifax Health,Daytona Beach,FL,Halifax,Government,640,AMI,2022,15.16,14.7,1.0313,0.157,2813
+FL010,Halifax Health,Daytona Beach,FL,Halifax,Government,640,AMI,2023,15.05,14.5,1.0379,0.19,3405
+FL010,Halifax Health,Daytona Beach,FL,Halifax,Government,640,Heart Failure,2021,22.37,22.1,1.0122,0.061,1093
+FL010,Halifax Health,Daytona Beach,FL,Halifax,Government,640,Heart Failure,2022,21.88,21.8,1.0037,0.019,340
+FL010,Halifax Health,Daytona Beach,FL,Halifax,Government,640,Heart Failure,2023,20.78,21.5,0.9665,0.0,0
+FL010,Halifax Health,Daytona Beach,FL,Halifax,Government,640,Pneumonia,2021,16.93,16.4,1.0323,0.161,2885
+FL010,Halifax Health,Daytona Beach,FL,Halifax,Government,640,Pneumonia,2022,17.52,16.2,1.0815,0.407,7293
+FL010,Halifax Health,Daytona Beach,FL,Halifax,Government,640,Pneumonia,2023,16.22,16.0,1.0137,0.069,1236
+FL010,Halifax Health,Daytona Beach,FL,Halifax,Government,640,COPD,2021,20.04,20.0,1.002,0.01,179
+FL010,Halifax Health,Daytona Beach,FL,Halifax,Government,640,COPD,2022,20.28,19.8,1.0242,0.121,2168
+FL010,Halifax Health,Daytona Beach,FL,Halifax,Government,640,COPD,2023,19.7,19.5,1.0103,0.051,914
+FL010,Halifax Health,Daytona Beach,FL,Halifax,Government,640,Hip/Knee Replacement,2021,5.43,4.8,1.1313,0.656,11756
+FL010,Halifax Health,Daytona Beach,FL,Halifax,Government,640,Hip/Knee Replacement,2022,4.81,4.6,1.0457,0.229,4104
+FL010,Halifax Health,Daytona Beach,FL,Halifax,Government,640,Hip/Knee Replacement,2023,4.29,4.5,0.9533,0.0,0
+FL011,Broward Health Medical Center,Fort Lauderdale,FL,Broward Health,Government,720,AMI,2021,16.7,14.9,1.1208,0.604,12177
+FL011,Broward Health Medical Center,Fort Lauderdale,FL,Broward Health,Government,720,AMI,2022,14.67,14.7,0.998,0.0,0
+FL011,Broward Health Medical Center,Fort Lauderdale,FL,Broward Health,Government,720,AMI,2023,15.55,14.5,1.0724,0.362,7298
+FL011,Broward Health Medical Center,Fort Lauderdale,FL,Broward Health,Government,720,Heart Failure,2021,21.74,22.1,0.9837,0.0,0
+FL011,Broward Health Medical Center,Fort Lauderdale,FL,Broward Health,Government,720,Heart Failure,2022,23.03,21.8,1.0564,0.282,5685
+FL011,Broward Health Medical Center,Fort Lauderdale,FL,Broward Health,Government,720,Heart Failure,2023,22.05,21.5,1.0256,0.128,2580
+FL011,Broward Health Medical Center,Fort Lauderdale,FL,Broward Health,Government,720,Pneumonia,2021,16.88,16.4,1.0293,0.147,2964
+FL011,Broward Health Medical Center,Fort Lauderdale,FL,Broward Health,Government,720,Pneumonia,2022,16.63,16.2,1.0265,0.132,2661
+FL011,Broward Health Medical Center,Fort Lauderdale,FL,Broward Health,Government,720,Pneumonia,2023,16.53,16.0,1.0331,0.165,3326
+FL011,Broward Health Medical Center,Fort Lauderdale,FL,Broward Health,Government,720,COPD,2021,19.94,20.0,0.997,0.0,0
+FL011,Broward Health Medical Center,Fort Lauderdale,FL,Broward Health,Government,720,COPD,2022,20.68,19.8,1.0444,0.222,4476
+FL011,Broward Health Medical Center,Fort Lauderdale,FL,Broward Health,Government,720,COPD,2023,19.68,19.5,1.0092,0.046,927
+FL011,Broward Health Medical Center,Fort Lauderdale,FL,Broward Health,Government,720,Hip/Knee Replacement,2021,4.73,4.8,0.9854,0.0,0
+FL011,Broward Health Medical Center,Fort Lauderdale,FL,Broward Health,Government,720,Hip/Knee Replacement,2022,4.73,4.6,1.0283,0.141,2843
+FL011,Broward Health Medical Center,Fort Lauderdale,FL,Broward Health,Government,720,Hip/Knee Replacement,2023,5.59,4.5,1.2422,1.211,24414
+FL012,Palm Beach Gardens Medical,Palm Beach Gardens,FL,HCA Healthcare,For-Profit,210,AMI,2021,15.6,14.9,1.047,0.235,1382
+FL012,Palm Beach Gardens Medical,Palm Beach Gardens,FL,HCA Healthcare,For-Profit,210,AMI,2022,14.33,14.7,0.9748,0.0,0
+FL012,Palm Beach Gardens Medical,Palm Beach Gardens,FL,HCA Healthcare,For-Profit,210,AMI,2023,14.36,14.5,0.9903,0.0,0
+FL012,Palm Beach Gardens Medical,Palm Beach Gardens,FL,HCA Healthcare,For-Profit,210,Heart Failure,2021,22.94,22.1,1.038,0.19,1117
+FL012,Palm Beach Gardens Medical,Palm Beach Gardens,FL,HCA Healthcare,For-Profit,210,Heart Failure,2022,21.4,21.8,0.9817,0.0,0
+FL012,Palm Beach Gardens Medical,Palm Beach Gardens,FL,HCA Healthcare,For-Profit,210,Heart Failure,2023,22.5,21.5,1.0465,0.232,1364
+FL012,Palm Beach Gardens Medical,Palm Beach Gardens,FL,HCA Healthcare,For-Profit,210,Pneumonia,2021,16.73,16.4,1.0201,0.101,594
+FL012,Palm Beach Gardens Medical,Palm Beach Gardens,FL,HCA Healthcare,For-Profit,210,Pneumonia,2022,16.34,16.2,1.0086,0.043,253
+FL012,Palm Beach Gardens Medical,Palm Beach Gardens,FL,HCA Healthcare,For-Profit,210,Pneumonia,2023,16.55,16.0,1.0344,0.172,1011
+FL012,Palm Beach Gardens Medical,Palm Beach Gardens,FL,HCA Healthcare,For-Profit,210,COPD,2021,20.81,20.0,1.0405,0.202,1188
+FL012,Palm Beach Gardens Medical,Palm Beach Gardens,FL,HCA Healthcare,For-Profit,210,COPD,2022,19.12,19.8,0.9657,0.0,0
+FL012,Palm Beach Gardens Medical,Palm Beach Gardens,FL,HCA Healthcare,For-Profit,210,COPD,2023,18.87,19.5,0.9677,0.0,0
+FL012,Palm Beach Gardens Medical,Palm Beach Gardens,FL,HCA Healthcare,For-Profit,210,Hip/Knee Replacement,2021,5.13,4.8,1.0688,0.344,2023
+FL012,Palm Beach Gardens Medical,Palm Beach Gardens,FL,HCA Healthcare,For-Profit,210,Hip/Knee Replacement,2022,4.91,4.6,1.0674,0.337,1982
+FL012,Palm Beach Gardens Medical,Palm Beach Gardens,FL,HCA Healthcare,For-Profit,210,Hip/Knee Replacement,2023,5.45,4.5,1.2111,1.056,6209
+FL013,Lakeland Regional Health,Lakeland,FL,Lakeland Regional,Non-Profit,870,AMI,2021,15.06,14.9,1.0107,0.053,1291
+FL013,Lakeland Regional Health,Lakeland,FL,Lakeland Regional,Non-Profit,870,AMI,2022,13.53,14.7,0.9204,0.0,0
+FL013,Lakeland Regional Health,Lakeland,FL,Lakeland Regional,Non-Profit,870,AMI,2023,12.1,14.5,0.8345,0.0,0
+FL013,Lakeland Regional Health,Lakeland,FL,Lakeland Regional,Non-Profit,870,Heart Failure,2021,21.13,22.1,0.9561,0.0,0
+FL013,Lakeland Regional Health,Lakeland,FL,Lakeland Regional,Non-Profit,870,Heart Failure,2022,22.01,21.8,1.0096,0.048,1169
+FL013,Lakeland Regional Health,Lakeland,FL,Lakeland Regional,Non-Profit,870,Heart Failure,2023,22.07,21.5,1.0265,0.132,3216
+FL013,Lakeland Regional Health,Lakeland,FL,Lakeland Regional,Non-Profit,870,Pneumonia,2021,15.04,16.4,0.9171,0.0,0
+FL013,Lakeland Regional Health,Lakeland,FL,Lakeland Regional,Non-Profit,870,Pneumonia,2022,16.32,16.2,1.0074,0.037,901
+FL013,Lakeland Regional Health,Lakeland,FL,Lakeland Regional,Non-Profit,870,Pneumonia,2023,15.25,16.0,0.9531,0.0,0
+FL013,Lakeland Regional Health,Lakeland,FL,Lakeland Regional,Non-Profit,870,COPD,2021,19.26,20.0,0.963,0.0,0
+FL013,Lakeland Regional Health,Lakeland,FL,Lakeland Regional,Non-Profit,870,COPD,2022,17.99,19.8,0.9086,0.0,0
+FL013,Lakeland Regional Health,Lakeland,FL,Lakeland Regional,Non-Profit,870,COPD,2023,19.01,19.5,0.9749,0.0,0
+FL013,Lakeland Regional Health,Lakeland,FL,Lakeland Regional,Non-Profit,870,Hip/Knee Replacement,2021,4.99,4.8,1.0396,0.198,4823
+FL013,Lakeland Regional Health,Lakeland,FL,Lakeland Regional,Non-Profit,870,Hip/Knee Replacement,2022,4.71,4.6,1.0239,0.12,2923
+FL013,Lakeland Regional Health,Lakeland,FL,Lakeland Regional,Non-Profit,870,Hip/Knee Replacement,2023,3.86,4.5,0.8578,0.0,0
+OH001,Cleveland Clinic Main Campus,Cleveland,OH,Cleveland Clinic,Non-Profit,1290,AMI,2021,14.33,14.9,0.9617,0.0,0
+OH001,Cleveland Clinic Main Campus,Cleveland,OH,Cleveland Clinic,Non-Profit,1290,AMI,2022,14.63,14.7,0.9952,0.0,0
+OH001,Cleveland Clinic Main Campus,Cleveland,OH,Cleveland Clinic,Non-Profit,1290,AMI,2023,14.89,14.5,1.0269,0.134,4840
+OH001,Cleveland Clinic Main Campus,Cleveland,OH,Cleveland Clinic,Non-Profit,1290,Heart Failure,2021,20.92,22.1,0.9466,0.0,0
+OH001,Cleveland Clinic Main Campus,Cleveland,OH,Cleveland Clinic,Non-Profit,1290,Heart Failure,2022,21.44,21.8,0.9835,0.0,0
+OH001,Cleveland Clinic Main Campus,Cleveland,OH,Cleveland Clinic,Non-Profit,1290,Heart Failure,2023,21.96,21.5,1.0214,0.107,3865
+OH001,Cleveland Clinic Main Campus,Cleveland,OH,Cleveland Clinic,Non-Profit,1290,Pneumonia,2021,15.86,16.4,0.9671,0.0,0
+OH001,Cleveland Clinic Main Campus,Cleveland,OH,Cleveland Clinic,Non-Profit,1290,Pneumonia,2022,15.85,16.2,0.9784,0.0,0
+OH001,Cleveland Clinic Main Campus,Cleveland,OH,Cleveland Clinic,Non-Profit,1290,Pneumonia,2023,15.59,16.0,0.9744,0.0,0
+OH001,Cleveland Clinic Main Campus,Cleveland,OH,Cleveland Clinic,Non-Profit,1290,COPD,2021,19.28,20.0,0.964,0.0,0
+OH001,Cleveland Clinic Main Campus,Cleveland,OH,Cleveland Clinic,Non-Profit,1290,COPD,2022,18.43,19.8,0.9308,0.0,0
+OH001,Cleveland Clinic Main Campus,Cleveland,OH,Cleveland Clinic,Non-Profit,1290,COPD,2023,19.98,19.5,1.0246,0.123,4443
+OH001,Cleveland Clinic Main Campus,Cleveland,OH,Cleveland Clinic,Non-Profit,1290,Hip/Knee Replacement,2021,4.13,4.8,0.8604,0.0,0
+OH001,Cleveland Clinic Main Campus,Cleveland,OH,Cleveland Clinic,Non-Profit,1290,Hip/Knee Replacement,2022,5.53,4.6,1.2022,1.011,36517
+OH001,Cleveland Clinic Main Campus,Cleveland,OH,Cleveland Clinic,Non-Profit,1290,Hip/Knee Replacement,2023,5.12,4.5,1.1378,0.689,24887
+OH002,Ohio State Wexner Medical,Columbus,OH,Ohio State,Government,1086,AMI,2021,13.78,14.9,0.9248,0.0,0
+OH002,Ohio State Wexner Medical,Columbus,OH,Ohio State,Government,1086,AMI,2022,12.65,14.7,0.8605,0.0,0
+OH002,Ohio State Wexner Medical,Columbus,OH,Ohio State,Government,1086,AMI,2023,14.93,14.5,1.0297,0.149,4531
+OH002,Ohio State Wexner Medical,Columbus,OH,Ohio State,Government,1086,Heart Failure,2021,20.54,22.1,0.9294,0.0,0
+OH002,Ohio State Wexner Medical,Columbus,OH,Ohio State,Government,1086,Heart Failure,2022,23.82,21.8,1.0927,0.464,14109
+OH002,Ohio State Wexner Medical,Columbus,OH,Ohio State,Government,1086,Heart Failure,2023,20.32,21.5,0.9451,0.0,0
+OH002,Ohio State Wexner Medical,Columbus,OH,Ohio State,Government,1086,Pneumonia,2021,15.39,16.4,0.9384,0.0,0
+OH002,Ohio State Wexner Medical,Columbus,OH,Ohio State,Government,1086,Pneumonia,2022,16.06,16.2,0.9914,0.0,0
+OH002,Ohio State Wexner Medical,Columbus,OH,Ohio State,Government,1086,Pneumonia,2023,15.33,16.0,0.9581,0.0,0
+OH002,Ohio State Wexner Medical,Columbus,OH,Ohio State,Government,1086,COPD,2021,19.29,20.0,0.9645,0.0,0
+OH002,Ohio State Wexner Medical,Columbus,OH,Ohio State,Government,1086,COPD,2022,20.75,19.8,1.048,0.24,7298
+OH002,Ohio State Wexner Medical,Columbus,OH,Ohio State,Government,1086,COPD,2023,20.76,19.5,1.0646,0.323,9822
+OH002,Ohio State Wexner Medical,Columbus,OH,Ohio State,Government,1086,Hip/Knee Replacement,2021,5.16,4.8,1.075,0.375,11403
+OH002,Ohio State Wexner Medical,Columbus,OH,Ohio State,Government,1086,Hip/Knee Replacement,2022,3.31,4.6,0.7196,0.0,0
+OH002,Ohio State Wexner Medical,Columbus,OH,Ohio State,Government,1086,Hip/Knee Replacement,2023,4.37,4.5,0.9711,0.0,0
+OH003,Cincinnati Children's,Cincinnati,OH,Cincinnati Children's,Non-Profit,640,AMI,2021,15.24,14.9,1.0228,0.114,2043
+OH003,Cincinnati Children's,Cincinnati,OH,Cincinnati Children's,Non-Profit,640,AMI,2022,14.69,14.7,0.9993,0.0,0
+OH003,Cincinnati Children's,Cincinnati,OH,Cincinnati Children's,Non-Profit,640,AMI,2023,15.52,14.5,1.0703,0.352,6308
+OH003,Cincinnati Children's,Cincinnati,OH,Cincinnati Children's,Non-Profit,640,Heart Failure,2021,22.23,22.1,1.0059,0.03,538
+OH003,Cincinnati Children's,Cincinnati,OH,Cincinnati Children's,Non-Profit,640,Heart Failure,2022,20.74,21.8,0.9514,0.0,0
+OH003,Cincinnati Children's,Cincinnati,OH,Cincinnati Children's,Non-Profit,640,Heart Failure,2023,20.31,21.5,0.9447,0.0,0
+OH003,Cincinnati Children's,Cincinnati,OH,Cincinnati Children's,Non-Profit,640,Pneumonia,2021,16.99,16.4,1.036,0.18,3226
+OH003,Cincinnati Children's,Cincinnati,OH,Cincinnati Children's,Non-Profit,640,Pneumonia,2022,17.75,16.2,1.0957,0.478,8566
+OH003,Cincinnati Children's,Cincinnati,OH,Cincinnati Children's,Non-Profit,640,Pneumonia,2023,15.42,16.0,0.9637,0.0,0
+OH003,Cincinnati Children's,Cincinnati,OH,Cincinnati Children's,Non-Profit,640,COPD,2021,19.12,20.0,0.956,0.0,0
+OH003,Cincinnati Children's,Cincinnati,OH,Cincinnati Children's,Non-Profit,640,COPD,2022,21.22,19.8,1.0717,0.359,6433
+OH003,Cincinnati Children's,Cincinnati,OH,Cincinnati Children's,Non-Profit,640,COPD,2023,19.68,19.5,1.0092,0.046,824
+OH003,Cincinnati Children's,Cincinnati,OH,Cincinnati Children's,Non-Profit,640,Hip/Knee Replacement,2021,5.04,4.8,1.05,0.25,4480
+OH003,Cincinnati Children's,Cincinnati,OH,Cincinnati Children's,Non-Profit,640,Hip/Knee Replacement,2022,5.76,4.6,1.2522,1.261,22597
+OH003,Cincinnati Children's,Cincinnati,OH,Cincinnati Children's,Non-Profit,640,Hip/Knee Replacement,2023,4.63,4.5,1.0289,0.144,2580
+OH004,University Hospitals Cleveland,Cleveland,OH,UH,Non-Profit,1032,AMI,2021,14.49,14.9,0.9725,0.0,0
+OH004,University Hospitals Cleveland,Cleveland,OH,UH,Non-Profit,1032,AMI,2022,12.59,14.7,0.8565,0.0,0
+OH004,University Hospitals Cleveland,Cleveland,OH,UH,Non-Profit,1032,AMI,2023,14.91,14.5,1.0283,0.141,4074
+OH004,University Hospitals Cleveland,Cleveland,OH,UH,Non-Profit,1032,Heart Failure,2021,21.35,22.1,0.9661,0.0,0
+OH004,University Hospitals Cleveland,Cleveland,OH,UH,Non-Profit,1032,Heart Failure,2022,22.89,21.8,1.05,0.25,7224
+OH004,University Hospitals Cleveland,Cleveland,OH,UH,Non-Profit,1032,Heart Failure,2023,21.61,21.5,1.0051,0.026,751
+OH004,University Hospitals Cleveland,Cleveland,OH,UH,Non-Profit,1032,Pneumonia,2021,14.89,16.4,0.9079,0.0,0
+OH004,University Hospitals Cleveland,Cleveland,OH,UH,Non-Profit,1032,Pneumonia,2022,17.05,16.2,1.0525,0.262,7571
+OH004,University Hospitals Cleveland,Cleveland,OH,UH,Non-Profit,1032,Pneumonia,2023,15.59,16.0,0.9744,0.0,0
+OH004,University Hospitals Cleveland,Cleveland,OH,UH,Non-Profit,1032,COPD,2021,20.82,20.0,1.041,0.205,5924
+OH004,University Hospitals Cleveland,Cleveland,OH,UH,Non-Profit,1032,COPD,2022,20.34,19.8,1.0273,0.137,3959
+OH004,University Hospitals Cleveland,Cleveland,OH,UH,Non-Profit,1032,COPD,2023,19.11,19.5,0.98,0.0,0
+OH004,University Hospitals Cleveland,Cleveland,OH,UH,Non-Profit,1032,Hip/Knee Replacement,2021,3.61,4.8,0.7521,0.0,0
+OH004,University Hospitals Cleveland,Cleveland,OH,UH,Non-Profit,1032,Hip/Knee Replacement,2022,4.72,4.6,1.0261,0.131,3785
+OH004,University Hospitals Cleveland,Cleveland,OH,UH,Non-Profit,1032,Hip/Knee Replacement,2023,4.46,4.5,0.9911,0.0,0
+OH005,OhioHealth Riverside,Columbus,OH,OhioHealth,Non-Profit,800,AMI,2021,14.3,14.9,0.9597,0.0,0
+OH005,OhioHealth Riverside,Columbus,OH,OhioHealth,Non-Profit,800,AMI,2022,14.6,14.7,0.9932,0.0,0
+OH005,OhioHealth Riverside,Columbus,OH,OhioHealth,Non-Profit,800,AMI,2023,14.97,14.5,1.0324,0.162,3629
+OH005,OhioHealth Riverside,Columbus,OH,OhioHealth,Non-Profit,800,Heart Failure,2021,22.06,22.1,0.9982,0.0,0
+OH005,OhioHealth Riverside,Columbus,OH,OhioHealth,Non-Profit,800,Heart Failure,2022,21.74,21.8,0.9972,0.0,0
+OH005,OhioHealth Riverside,Columbus,OH,OhioHealth,Non-Profit,800,Heart Failure,2023,21.91,21.5,1.0191,0.095,2128
+OH005,OhioHealth Riverside,Columbus,OH,OhioHealth,Non-Profit,800,Pneumonia,2021,16.39,16.4,0.9994,0.0,0
+OH005,OhioHealth Riverside,Columbus,OH,OhioHealth,Non-Profit,800,Pneumonia,2022,14.7,16.2,0.9074,0.0,0
+OH005,OhioHealth Riverside,Columbus,OH,OhioHealth,Non-Profit,800,Pneumonia,2023,16.0,16.0,1.0,0.0,0
+OH005,OhioHealth Riverside,Columbus,OH,OhioHealth,Non-Profit,800,COPD,2021,20.8,20.0,1.04,0.2,4480
+OH005,OhioHealth Riverside,Columbus,OH,OhioHealth,Non-Profit,800,COPD,2022,20.63,19.8,1.0419,0.21,4704
+OH005,OhioHealth Riverside,Columbus,OH,OhioHealth,Non-Profit,800,COPD,2023,18.8,19.5,0.9641,0.0,0
+OH005,OhioHealth Riverside,Columbus,OH,OhioHealth,Non-Profit,800,Hip/Knee Replacement,2021,5.35,4.8,1.1146,0.573,12835
+OH005,OhioHealth Riverside,Columbus,OH,OhioHealth,Non-Profit,800,Hip/Knee Replacement,2022,7.26,4.6,1.5783,2.892,64781
+OH005,OhioHealth Riverside,Columbus,OH,OhioHealth,Non-Profit,800,Hip/Knee Replacement,2023,4.58,4.5,1.0178,0.089,1994
+OH006,Mercy Health St. Vincent,Toledo,OH,Mercy Health,Non-Profit,480,AMI,2021,14.22,14.9,0.9544,0.0,0
+OH006,Mercy Health St. Vincent,Toledo,OH,Mercy Health,Non-Profit,480,AMI,2022,13.81,14.7,0.9395,0.0,0
+OH006,Mercy Health St. Vincent,Toledo,OH,Mercy Health,Non-Profit,480,AMI,2023,14.8,14.5,1.0207,0.103,1384
+OH006,Mercy Health St. Vincent,Toledo,OH,Mercy Health,Non-Profit,480,Heart Failure,2021,21.51,22.1,0.9733,0.0,0
+OH006,Mercy Health St. Vincent,Toledo,OH,Mercy Health,Non-Profit,480,Heart Failure,2022,21.14,21.8,0.9697,0.0,0
+OH006,Mercy Health St. Vincent,Toledo,OH,Mercy Health,Non-Profit,480,Heart Failure,2023,21.92,21.5,1.0195,0.098,1317
+OH006,Mercy Health St. Vincent,Toledo,OH,Mercy Health,Non-Profit,480,Pneumonia,2021,16.98,16.4,1.0354,0.177,2379
+OH006,Mercy Health St. Vincent,Toledo,OH,Mercy Health,Non-Profit,480,Pneumonia,2022,16.85,16.2,1.0401,0.201,2701
+OH006,Mercy Health St. Vincent,Toledo,OH,Mercy Health,Non-Profit,480,Pneumonia,2023,16.68,16.0,1.0425,0.212,2849
+OH006,Mercy Health St. Vincent,Toledo,OH,Mercy Health,Non-Profit,480,COPD,2021,19.18,20.0,0.959,0.0,0
+OH006,Mercy Health St. Vincent,Toledo,OH,Mercy Health,Non-Profit,480,COPD,2022,19.09,19.8,0.9641,0.0,0
+OH006,Mercy Health St. Vincent,Toledo,OH,Mercy Health,Non-Profit,480,COPD,2023,20.42,19.5,1.0472,0.236,3172
+OH006,Mercy Health St. Vincent,Toledo,OH,Mercy Health,Non-Profit,480,Hip/Knee Replacement,2021,5.24,4.8,1.0917,0.458,6156
+OH006,Mercy Health St. Vincent,Toledo,OH,Mercy Health,Non-Profit,480,Hip/Knee Replacement,2022,4.8,4.6,1.0435,0.218,2930
+OH006,Mercy Health St. Vincent,Toledo,OH,Mercy Health,Non-Profit,480,Hip/Knee Replacement,2023,3.48,4.5,0.7733,0.0,0
+OH007,Aultman Hospital,Canton,OH,Aultman,Non-Profit,520,AMI,2021,14.16,14.9,0.9503,0.0,0
+OH007,Aultman Hospital,Canton,OH,Aultman,Non-Profit,520,AMI,2022,15.9,14.7,1.0816,0.408,5940
+OH007,Aultman Hospital,Canton,OH,Aultman,Non-Profit,520,AMI,2023,13.35,14.5,0.9207,0.0,0
+OH007,Aultman Hospital,Canton,OH,Aultman,Non-Profit,520,Heart Failure,2021,22.94,22.1,1.038,0.19,2766
+OH007,Aultman Hospital,Canton,OH,Aultman,Non-Profit,520,Heart Failure,2022,22.14,21.8,1.0156,0.078,1136
+OH007,Aultman Hospital,Canton,OH,Aultman,Non-Profit,520,Heart Failure,2023,21.52,21.5,1.0009,0.004,58
+OH007,Aultman Hospital,Canton,OH,Aultman,Non-Profit,520,Pneumonia,2021,16.08,16.4,0.9805,0.0,0
+OH007,Aultman Hospital,Canton,OH,Aultman,Non-Profit,520,Pneumonia,2022,16.29,16.2,1.0056,0.028,408
+OH007,Aultman Hospital,Canton,OH,Aultman,Non-Profit,520,Pneumonia,2023,16.63,16.0,1.0394,0.197,2868
+OH007,Aultman Hospital,Canton,OH,Aultman,Non-Profit,520,COPD,2021,21.75,20.0,1.0875,0.437,6363
+OH007,Aultman Hospital,Canton,OH,Aultman,Non-Profit,520,COPD,2022,19.91,19.8,1.0056,0.028,408
+OH007,Aultman Hospital,Canton,OH,Aultman,Non-Profit,520,COPD,2023,18.84,19.5,0.9662,0.0,0
+OH007,Aultman Hospital,Canton,OH,Aultman,Non-Profit,520,Hip/Knee Replacement,2021,5.78,4.8,1.2042,1.021,14866
+OH007,Aultman Hospital,Canton,OH,Aultman,Non-Profit,520,Hip/Knee Replacement,2022,5.45,4.6,1.1848,0.924,13453
+OH007,Aultman Hospital,Canton,OH,Aultman,Non-Profit,520,Hip/Knee Replacement,2023,4.37,4.5,0.9711,0.0,0
+OH008,Summa Health Akron City,Akron,OH,Summa Health,Non-Profit,430,AMI,2021,14.42,14.9,0.9678,0.0,0
+OH008,Summa Health Akron City,Akron,OH,Summa Health,Non-Profit,430,AMI,2022,13.62,14.7,0.9265,0.0,0
+OH008,Summa Health Akron City,Akron,OH,Summa Health,Non-Profit,430,AMI,2023,14.11,14.5,0.9731,0.0,0
+OH008,Summa Health Akron City,Akron,OH,Summa Health,Non-Profit,430,Heart Failure,2021,22.43,22.1,1.0149,0.074,891
+OH008,Summa Health Akron City,Akron,OH,Summa Health,Non-Profit,430,Heart Failure,2022,22.01,21.8,1.0096,0.048,578
+OH008,Summa Health Akron City,Akron,OH,Summa Health,Non-Profit,430,Heart Failure,2023,23.01,21.5,1.0702,0.351,4226
+OH008,Summa Health Akron City,Akron,OH,Summa Health,Non-Profit,430,Pneumonia,2021,16.64,16.4,1.0146,0.073,879
+OH008,Summa Health Akron City,Akron,OH,Summa Health,Non-Profit,430,Pneumonia,2022,15.99,16.2,0.987,0.0,0
+OH008,Summa Health Akron City,Akron,OH,Summa Health,Non-Profit,430,Pneumonia,2023,16.69,16.0,1.0431,0.215,2589
+OH008,Summa Health Akron City,Akron,OH,Summa Health,Non-Profit,430,COPD,2021,21.12,20.0,1.056,0.28,3371
+OH008,Summa Health Akron City,Akron,OH,Summa Health,Non-Profit,430,COPD,2022,20.11,19.8,1.0157,0.079,951
+OH008,Summa Health Akron City,Akron,OH,Summa Health,Non-Profit,430,COPD,2023,19.5,19.5,1.0,0.0,0
+OH008,Summa Health Akron City,Akron,OH,Summa Health,Non-Profit,430,Hip/Knee Replacement,2021,5.8,4.8,1.2083,1.041,12534
+OH008,Summa Health Akron City,Akron,OH,Summa Health,Non-Profit,430,Hip/Knee Replacement,2022,4.17,4.6,0.9065,0.0,0
+OH008,Summa Health Akron City,Akron,OH,Summa Health,Non-Profit,430,Hip/Knee Replacement,2023,5.1,4.5,1.1333,0.666,8019
+OH009,Kettering Health Main,Dayton,OH,Kettering,Non-Profit,390,AMI,2021,15.58,14.9,1.0456,0.228,2490
+OH009,Kettering Health Main,Dayton,OH,Kettering,Non-Profit,390,AMI,2022,14.89,14.7,1.0129,0.064,699
+OH009,Kettering Health Main,Dayton,OH,Kettering,Non-Profit,390,AMI,2023,16.13,14.5,1.1124,0.562,6137
+OH009,Kettering Health Main,Dayton,OH,Kettering,Non-Profit,390,Heart Failure,2021,21.1,22.1,0.9548,0.0,0
+OH009,Kettering Health Main,Dayton,OH,Kettering,Non-Profit,390,Heart Failure,2022,23.14,21.8,1.0615,0.308,3363
+OH009,Kettering Health Main,Dayton,OH,Kettering,Non-Profit,390,Heart Failure,2023,20.7,21.5,0.9628,0.0,0
+OH009,Kettering Health Main,Dayton,OH,Kettering,Non-Profit,390,Pneumonia,2021,16.82,16.4,1.0256,0.128,1398
+OH009,Kettering Health Main,Dayton,OH,Kettering,Non-Profit,390,Pneumonia,2022,15.16,16.2,0.9358,0.0,0
+OH009,Kettering Health Main,Dayton,OH,Kettering,Non-Profit,390,Pneumonia,2023,14.99,16.0,0.9369,0.0,0
+OH009,Kettering Health Main,Dayton,OH,Kettering,Non-Profit,390,COPD,2021,19.22,20.0,0.961,0.0,0
+OH009,Kettering Health Main,Dayton,OH,Kettering,Non-Profit,390,COPD,2022,20.86,19.8,1.0535,0.268,2927
+OH009,Kettering Health Main,Dayton,OH,Kettering,Non-Profit,390,COPD,2023,19.23,19.5,0.9862,0.0,0
+OH009,Kettering Health Main,Dayton,OH,Kettering,Non-Profit,390,Hip/Knee Replacement,2021,3.59,4.8,0.7479,0.0,0
+OH009,Kettering Health Main,Dayton,OH,Kettering,Non-Profit,390,Hip/Knee Replacement,2022,4.14,4.6,0.9,0.0,0
+OH009,Kettering Health Main,Dayton,OH,Kettering,Non-Profit,390,Hip/Knee Replacement,2023,5.06,4.5,1.1244,0.622,6792
+OH010,Genesis Healthcare,Zanesville,OH,Genesis,Non-Profit,280,AMI,2021,14.08,14.9,0.945,0.0,0
+OH010,Genesis Healthcare,Zanesville,OH,Genesis,Non-Profit,280,AMI,2022,15.78,14.7,1.0735,0.367,2877
+OH010,Genesis Healthcare,Zanesville,OH,Genesis,Non-Profit,280,AMI,2023,14.64,14.5,1.0097,0.049,384
+OH010,Genesis Healthcare,Zanesville,OH,Genesis,Non-Profit,280,Heart Failure,2021,21.87,22.1,0.9896,0.0,0
+OH010,Genesis Healthcare,Zanesville,OH,Genesis,Non-Profit,280,Heart Failure,2022,22.15,21.8,1.0161,0.081,635
+OH010,Genesis Healthcare,Zanesville,OH,Genesis,Non-Profit,280,Heart Failure,2023,22.45,21.5,1.0442,0.221,1733
+OH010,Genesis Healthcare,Zanesville,OH,Genesis,Non-Profit,280,Pneumonia,2021,16.68,16.4,1.0171,0.085,666
+OH010,Genesis Healthcare,Zanesville,OH,Genesis,Non-Profit,280,Pneumonia,2022,17.18,16.2,1.0605,0.302,2368
+OH010,Genesis Healthcare,Zanesville,OH,Genesis,Non-Profit,280,Pneumonia,2023,15.71,16.0,0.9819,0.0,0
+OH010,Genesis Healthcare,Zanesville,OH,Genesis,Non-Profit,280,COPD,2021,20.25,20.0,1.0125,0.062,486
+OH010,Genesis Healthcare,Zanesville,OH,Genesis,Non-Profit,280,COPD,2022,19.37,19.8,0.9783,0.0,0
+OH010,Genesis Healthcare,Zanesville,OH,Genesis,Non-Profit,280,COPD,2023,18.55,19.5,0.9513,0.0,0
+OH010,Genesis Healthcare,Zanesville,OH,Genesis,Non-Profit,280,Hip/Knee Replacement,2021,6.55,4.8,1.3646,1.823,14292
+OH010,Genesis Healthcare,Zanesville,OH,Genesis,Non-Profit,280,Hip/Knee Replacement,2022,4.12,4.6,0.8957,0.0,0
+OH010,Genesis Healthcare,Zanesville,OH,Genesis,Non-Profit,280,Hip/Knee Replacement,2023,3.31,4.5,0.7356,0.0,0
+OH011,Adena Regional Medical,Chillicothe,OH,Adena,Non-Profit,175,AMI,2021,14.56,14.9,0.9772,0.0,0
+OH011,Adena Regional Medical,Chillicothe,OH,Adena,Non-Profit,175,AMI,2022,15.84,14.7,1.0776,0.388,1901
+OH011,Adena Regional Medical,Chillicothe,OH,Adena,Non-Profit,175,AMI,2023,14.21,14.5,0.98,0.0,0
+OH011,Adena Regional Medical,Chillicothe,OH,Adena,Non-Profit,175,Heart Failure,2021,22.54,22.1,1.0199,0.1,490
+OH011,Adena Regional Medical,Chillicothe,OH,Adena,Non-Profit,175,Heart Failure,2022,22.07,21.8,1.0124,0.062,304
+OH011,Adena Regional Medical,Chillicothe,OH,Adena,Non-Profit,175,Heart Failure,2023,21.92,21.5,1.0195,0.098,480
+OH011,Adena Regional Medical,Chillicothe,OH,Adena,Non-Profit,175,Pneumonia,2021,17.07,16.4,1.0409,0.204,1000
+OH011,Adena Regional Medical,Chillicothe,OH,Adena,Non-Profit,175,Pneumonia,2022,16.64,16.2,1.0272,0.136,666
+OH011,Adena Regional Medical,Chillicothe,OH,Adena,Non-Profit,175,Pneumonia,2023,16.68,16.0,1.0425,0.212,1039
+OH011,Adena Regional Medical,Chillicothe,OH,Adena,Non-Profit,175,COPD,2021,19.26,20.0,0.963,0.0,0
+OH011,Adena Regional Medical,Chillicothe,OH,Adena,Non-Profit,175,COPD,2022,19.0,19.8,0.9596,0.0,0
+OH011,Adena Regional Medical,Chillicothe,OH,Adena,Non-Profit,175,COPD,2023,20.32,19.5,1.0421,0.211,1034
+OH011,Adena Regional Medical,Chillicothe,OH,Adena,Non-Profit,175,Hip/Knee Replacement,2021,5.35,4.8,1.1146,0.573,2808
+OH011,Adena Regional Medical,Chillicothe,OH,Adena,Non-Profit,175,Hip/Knee Replacement,2022,4.31,4.6,0.937,0.0,0
+OH011,Adena Regional Medical,Chillicothe,OH,Adena,Non-Profit,175,Hip/Knee Replacement,2023,6.47,4.5,1.4378,2.189,10726
+OH012,Southern Ohio Medical Center,Portsmouth,OH,SOMC,Non-Profit,260,AMI,2021,13.79,14.9,0.9255,0.0,0
+OH012,Southern Ohio Medical Center,Portsmouth,OH,SOMC,Non-Profit,260,AMI,2022,14.53,14.7,0.9884,0.0,0
+OH012,Southern Ohio Medical Center,Portsmouth,OH,SOMC,Non-Profit,260,AMI,2023,14.73,14.5,1.0159,0.08,582
+OH012,Southern Ohio Medical Center,Portsmouth,OH,SOMC,Non-Profit,260,Heart Failure,2021,21.35,22.1,0.9661,0.0,0
+OH012,Southern Ohio Medical Center,Portsmouth,OH,SOMC,Non-Profit,260,Heart Failure,2022,20.17,21.8,0.9252,0.0,0
+OH012,Southern Ohio Medical Center,Portsmouth,OH,SOMC,Non-Profit,260,Heart Failure,2023,21.03,21.5,0.9781,0.0,0
+OH012,Southern Ohio Medical Center,Portsmouth,OH,SOMC,Non-Profit,260,Pneumonia,2021,16.91,16.4,1.0311,0.155,1128
+OH012,Southern Ohio Medical Center,Portsmouth,OH,SOMC,Non-Profit,260,Pneumonia,2022,16.23,16.2,1.0019,0.01,73
+OH012,Southern Ohio Medical Center,Portsmouth,OH,SOMC,Non-Profit,260,Pneumonia,2023,16.41,16.0,1.0256,0.128,932
+OH012,Southern Ohio Medical Center,Portsmouth,OH,SOMC,Non-Profit,260,COPD,2021,19.66,20.0,0.983,0.0,0
+OH012,Southern Ohio Medical Center,Portsmouth,OH,SOMC,Non-Profit,260,COPD,2022,19.23,19.8,0.9712,0.0,0
+OH012,Southern Ohio Medical Center,Portsmouth,OH,SOMC,Non-Profit,260,COPD,2023,20.25,19.5,1.0385,0.192,1398
+OH012,Southern Ohio Medical Center,Portsmouth,OH,SOMC,Non-Profit,260,Hip/Knee Replacement,2021,4.47,4.8,0.9313,0.0,0
+OH012,Southern Ohio Medical Center,Portsmouth,OH,SOMC,Non-Profit,260,Hip/Knee Replacement,2022,5.42,4.6,1.1783,0.891,6486
+OH012,Southern Ohio Medical Center,Portsmouth,OH,SOMC,Non-Profit,260,Hip/Knee Replacement,2023,5.36,4.5,1.1911,0.956,6960
+PA001,Hospital of the University of PA,Philadelphia,PA,Penn Medicine,Non-Profit,820,AMI,2021,14.92,14.9,1.0013,0.007,161
+PA001,Hospital of the University of PA,Philadelphia,PA,Penn Medicine,Non-Profit,820,AMI,2022,14.25,14.7,0.9694,0.0,0
+PA001,Hospital of the University of PA,Philadelphia,PA,Penn Medicine,Non-Profit,820,AMI,2023,15.26,14.5,1.0524,0.262,6016
+PA001,Hospital of the University of PA,Philadelphia,PA,Penn Medicine,Non-Profit,820,Heart Failure,2021,21.48,22.1,0.9719,0.0,0
+PA001,Hospital of the University of PA,Philadelphia,PA,Penn Medicine,Non-Profit,820,Heart Failure,2022,21.61,21.8,0.9913,0.0,0
+PA001,Hospital of the University of PA,Philadelphia,PA,Penn Medicine,Non-Profit,820,Heart Failure,2023,19.18,21.5,0.8921,0.0,0
+PA001,Hospital of the University of PA,Philadelphia,PA,Penn Medicine,Non-Profit,820,Pneumonia,2021,15.05,16.4,0.9177,0.0,0
+PA001,Hospital of the University of PA,Philadelphia,PA,Penn Medicine,Non-Profit,820,Pneumonia,2022,15.51,16.2,0.9574,0.0,0
+PA001,Hospital of the University of PA,Philadelphia,PA,Penn Medicine,Non-Profit,820,Pneumonia,2023,16.12,16.0,1.0075,0.038,872
+PA001,Hospital of the University of PA,Philadelphia,PA,Penn Medicine,Non-Profit,820,COPD,2021,20.24,20.0,1.012,0.06,1378
+PA001,Hospital of the University of PA,Philadelphia,PA,Penn Medicine,Non-Profit,820,COPD,2022,18.81,19.8,0.95,0.0,0
+PA001,Hospital of the University of PA,Philadelphia,PA,Penn Medicine,Non-Profit,820,COPD,2023,18.9,19.5,0.9692,0.0,0
+PA001,Hospital of the University of PA,Philadelphia,PA,Penn Medicine,Non-Profit,820,Hip/Knee Replacement,2021,3.68,4.8,0.7667,0.0,0
+PA001,Hospital of the University of PA,Philadelphia,PA,Penn Medicine,Non-Profit,820,Hip/Knee Replacement,2022,4.52,4.6,0.9826,0.0,0
+PA001,Hospital of the University of PA,Philadelphia,PA,Penn Medicine,Non-Profit,820,Hip/Knee Replacement,2023,4.49,4.5,0.9978,0.0,0
+PA002,Jefferson Health - TJU,Philadelphia,PA,Jefferson,Non-Profit,900,AMI,2021,13.87,14.9,0.9309,0.0,0
+PA002,Jefferson Health - TJU,Philadelphia,PA,Jefferson,Non-Profit,900,AMI,2022,14.76,14.7,1.0041,0.02,504
+PA002,Jefferson Health - TJU,Philadelphia,PA,Jefferson,Non-Profit,900,AMI,2023,13.75,14.5,0.9483,0.0,0
+PA002,Jefferson Health - TJU,Philadelphia,PA,Jefferson,Non-Profit,900,Heart Failure,2021,21.15,22.1,0.957,0.0,0
+PA002,Jefferson Health - TJU,Philadelphia,PA,Jefferson,Non-Profit,900,Heart Failure,2022,20.63,21.8,0.9463,0.0,0
+PA002,Jefferson Health - TJU,Philadelphia,PA,Jefferson,Non-Profit,900,Heart Failure,2023,20.66,21.5,0.9609,0.0,0
+PA002,Jefferson Health - TJU,Philadelphia,PA,Jefferson,Non-Profit,900,Pneumonia,2021,17.32,16.4,1.0561,0.281,7081
+PA002,Jefferson Health - TJU,Philadelphia,PA,Jefferson,Non-Profit,900,Pneumonia,2022,16.22,16.2,1.0012,0.006,151
+PA002,Jefferson Health - TJU,Philadelphia,PA,Jefferson,Non-Profit,900,Pneumonia,2023,15.57,16.0,0.9731,0.0,0
+PA002,Jefferson Health - TJU,Philadelphia,PA,Jefferson,Non-Profit,900,COPD,2021,19.71,20.0,0.9855,0.0,0
+PA002,Jefferson Health - TJU,Philadelphia,PA,Jefferson,Non-Profit,900,COPD,2022,19.12,19.8,0.9657,0.0,0
+PA002,Jefferson Health - TJU,Philadelphia,PA,Jefferson,Non-Profit,900,COPD,2023,17.87,19.5,0.9164,0.0,0
+PA002,Jefferson Health - TJU,Philadelphia,PA,Jefferson,Non-Profit,900,Hip/Knee Replacement,2021,5.99,4.8,1.2479,1.24,31248
+PA002,Jefferson Health - TJU,Philadelphia,PA,Jefferson,Non-Profit,900,Hip/Knee Replacement,2022,5.99,4.6,1.3022,1.511,38077
+PA002,Jefferson Health - TJU,Philadelphia,PA,Jefferson,Non-Profit,900,Hip/Knee Replacement,2023,3.7,4.5,0.8222,0.0,0
+PA003,UPMC Presbyterian,Pittsburgh,PA,UPMC,Non-Profit,1500,AMI,2021,13.69,14.9,0.9188,0.0,0
+PA003,UPMC Presbyterian,Pittsburgh,PA,UPMC,Non-Profit,1500,AMI,2022,15.34,14.7,1.0435,0.218,9156
+PA003,UPMC Presbyterian,Pittsburgh,PA,UPMC,Non-Profit,1500,AMI,2023,14.39,14.5,0.9924,0.0,0
+PA003,UPMC Presbyterian,Pittsburgh,PA,UPMC,Non-Profit,1500,Heart Failure,2021,21.66,22.1,0.9801,0.0,0
+PA003,UPMC Presbyterian,Pittsburgh,PA,UPMC,Non-Profit,1500,Heart Failure,2022,22.01,21.8,1.0096,0.048,2016
+PA003,UPMC Presbyterian,Pittsburgh,PA,UPMC,Non-Profit,1500,Heart Failure,2023,19.97,21.5,0.9288,0.0,0
+PA003,UPMC Presbyterian,Pittsburgh,PA,UPMC,Non-Profit,1500,Pneumonia,2021,16.8,16.4,1.0244,0.122,5124
+PA003,UPMC Presbyterian,Pittsburgh,PA,UPMC,Non-Profit,1500,Pneumonia,2022,15.44,16.2,0.9531,0.0,0
+PA003,UPMC Presbyterian,Pittsburgh,PA,UPMC,Non-Profit,1500,Pneumonia,2023,14.76,16.0,0.9225,0.0,0
+PA003,UPMC Presbyterian,Pittsburgh,PA,UPMC,Non-Profit,1500,COPD,2021,18.54,20.0,0.927,0.0,0
+PA003,UPMC Presbyterian,Pittsburgh,PA,UPMC,Non-Profit,1500,COPD,2022,18.13,19.8,0.9157,0.0,0
+PA003,UPMC Presbyterian,Pittsburgh,PA,UPMC,Non-Profit,1500,COPD,2023,19.13,19.5,0.981,0.0,0
+PA003,UPMC Presbyterian,Pittsburgh,PA,UPMC,Non-Profit,1500,Hip/Knee Replacement,2021,4.45,4.8,0.9271,0.0,0
+PA003,UPMC Presbyterian,Pittsburgh,PA,UPMC,Non-Profit,1500,Hip/Knee Replacement,2022,4.44,4.6,0.9652,0.0,0
+PA003,UPMC Presbyterian,Pittsburgh,PA,UPMC,Non-Profit,1500,Hip/Knee Replacement,2023,4.53,4.5,1.0067,0.033,1386
+PA004,Penn State Hershey Medical,Hershey,PA,Penn State,Government,550,AMI,2021,17.18,14.9,1.153,0.765,11781
+PA004,Penn State Hershey Medical,Hershey,PA,Penn State,Government,550,AMI,2022,13.18,14.7,0.8966,0.0,0
+PA004,Penn State Hershey Medical,Hershey,PA,Penn State,Government,550,AMI,2023,15.2,14.5,1.0483,0.242,3727
+PA004,Penn State Hershey Medical,Hershey,PA,Penn State,Government,550,Heart Failure,2021,23.85,22.1,1.0792,0.396,6098
+PA004,Penn State Hershey Medical,Hershey,PA,Penn State,Government,550,Heart Failure,2022,21.47,21.8,0.9849,0.0,0
+PA004,Penn State Hershey Medical,Hershey,PA,Penn State,Government,550,Heart Failure,2023,20.87,21.5,0.9707,0.0,0
+PA004,Penn State Hershey Medical,Hershey,PA,Penn State,Government,550,Pneumonia,2021,16.2,16.4,0.9878,0.0,0
+PA004,Penn State Hershey Medical,Hershey,PA,Penn State,Government,550,Pneumonia,2022,15.14,16.2,0.9346,0.0,0
+PA004,Penn State Hershey Medical,Hershey,PA,Penn State,Government,550,Pneumonia,2023,15.13,16.0,0.9456,0.0,0
+PA004,Penn State Hershey Medical,Hershey,PA,Penn State,Government,550,COPD,2021,19.96,20.0,0.998,0.0,0
+PA004,Penn State Hershey Medical,Hershey,PA,Penn State,Government,550,COPD,2022,19.6,19.8,0.9899,0.0,0
+PA004,Penn State Hershey Medical,Hershey,PA,Penn State,Government,550,COPD,2023,19.69,19.5,1.0097,0.049,755
+PA004,Penn State Hershey Medical,Hershey,PA,Penn State,Government,550,Hip/Knee Replacement,2021,4.87,4.8,1.0146,0.073,1124
+PA004,Penn State Hershey Medical,Hershey,PA,Penn State,Government,550,Hip/Knee Replacement,2022,4.6,4.6,1.0,0.0,0
+PA004,Penn State Hershey Medical,Hershey,PA,Penn State,Government,550,Hip/Knee Replacement,2023,5.3,4.5,1.1778,0.889,13691
+PA005,Geisinger Medical Center,Danville,PA,Geisinger,Non-Profit,574,AMI,2021,13.97,14.9,0.9376,0.0,0
+PA005,Geisinger Medical Center,Danville,PA,Geisinger,Non-Profit,574,AMI,2022,15.68,14.7,1.0667,0.333,5352
+PA005,Geisinger Medical Center,Danville,PA,Geisinger,Non-Profit,574,AMI,2023,14.56,14.5,1.0041,0.02,321
+PA005,Geisinger Medical Center,Danville,PA,Geisinger,Non-Profit,574,Heart Failure,2021,21.45,22.1,0.9706,0.0,0
+PA005,Geisinger Medical Center,Danville,PA,Geisinger,Non-Profit,574,Heart Failure,2022,20.82,21.8,0.955,0.0,0
+PA005,Geisinger Medical Center,Danville,PA,Geisinger,Non-Profit,574,Heart Failure,2023,22.87,21.5,1.0637,0.319,5127
+PA005,Geisinger Medical Center,Danville,PA,Geisinger,Non-Profit,574,Pneumonia,2021,16.33,16.4,0.9957,0.0,0
+PA005,Geisinger Medical Center,Danville,PA,Geisinger,Non-Profit,574,Pneumonia,2022,16.01,16.2,0.9883,0.0,0
+PA005,Geisinger Medical Center,Danville,PA,Geisinger,Non-Profit,574,Pneumonia,2023,15.28,16.0,0.955,0.0,0
+PA005,Geisinger Medical Center,Danville,PA,Geisinger,Non-Profit,574,COPD,2021,21.31,20.0,1.0655,0.327,5256
+PA005,Geisinger Medical Center,Danville,PA,Geisinger,Non-Profit,574,COPD,2022,19.28,19.8,0.9737,0.0,0
+PA005,Geisinger Medical Center,Danville,PA,Geisinger,Non-Profit,574,COPD,2023,19.38,19.5,0.9938,0.0,0
+PA005,Geisinger Medical Center,Danville,PA,Geisinger,Non-Profit,574,Hip/Knee Replacement,2021,3.77,4.8,0.7854,0.0,0
+PA005,Geisinger Medical Center,Danville,PA,Geisinger,Non-Profit,574,Hip/Knee Replacement,2022,5.21,4.6,1.1326,0.663,10656
+PA005,Geisinger Medical Center,Danville,PA,Geisinger,Non-Profit,574,Hip/Knee Replacement,2023,4.77,4.5,1.06,0.3,4822
+PA006,Lehigh Valley Hospital,Allentown,PA,LVHN,Non-Profit,830,AMI,2021,15.05,14.9,1.0101,0.05,1162
+PA006,Lehigh Valley Hospital,Allentown,PA,LVHN,Non-Profit,830,AMI,2022,14.73,14.7,1.002,0.01,232
+PA006,Lehigh Valley Hospital,Allentown,PA,LVHN,Non-Profit,830,AMI,2023,13.43,14.5,0.9262,0.0,0
+PA006,Lehigh Valley Hospital,Allentown,PA,LVHN,Non-Profit,830,Heart Failure,2021,19.64,22.1,0.8887,0.0,0
+PA006,Lehigh Valley Hospital,Allentown,PA,LVHN,Non-Profit,830,Heart Failure,2022,22.66,21.8,1.0394,0.197,4578
+PA006,Lehigh Valley Hospital,Allentown,PA,LVHN,Non-Profit,830,Heart Failure,2023,21.76,21.5,1.0121,0.06,1394
+PA006,Lehigh Valley Hospital,Allentown,PA,LVHN,Non-Profit,830,Pneumonia,2021,15.82,16.4,0.9646,0.0,0
+PA006,Lehigh Valley Hospital,Allentown,PA,LVHN,Non-Profit,830,Pneumonia,2022,16.29,16.2,1.0056,0.028,651
+PA006,Lehigh Valley Hospital,Allentown,PA,LVHN,Non-Profit,830,Pneumonia,2023,15.6,16.0,0.975,0.0,0
+PA006,Lehigh Valley Hospital,Allentown,PA,LVHN,Non-Profit,830,COPD,2021,20.83,20.0,1.0415,0.208,4834
+PA006,Lehigh Valley Hospital,Allentown,PA,LVHN,Non-Profit,830,COPD,2022,19.21,19.8,0.9702,0.0,0
+PA006,Lehigh Valley Hospital,Allentown,PA,LVHN,Non-Profit,830,COPD,2023,19.3,19.5,0.9897,0.0,0
+PA006,Lehigh Valley Hospital,Allentown,PA,LVHN,Non-Profit,830,Hip/Knee Replacement,2021,6.12,4.8,1.275,1.375,31955
+PA006,Lehigh Valley Hospital,Allentown,PA,LVHN,Non-Profit,830,Hip/Knee Replacement,2022,5.1,4.6,1.1087,0.544,12643
+PA006,Lehigh Valley Hospital,Allentown,PA,LVHN,Non-Profit,830,Hip/Knee Replacement,2023,3.22,4.5,0.7156,0.0,0
+PA007,Reading Hospital,West Reading,PA,Tower Health,Non-Profit,697,AMI,2021,15.87,14.9,1.0651,0.325,6343
+PA007,Reading Hospital,West Reading,PA,Tower Health,Non-Profit,697,AMI,2022,14.81,14.7,1.0075,0.038,742
+PA007,Reading Hospital,West Reading,PA,Tower Health,Non-Profit,697,AMI,2023,14.61,14.5,1.0076,0.038,742
+PA007,Reading Hospital,West Reading,PA,Tower Health,Non-Profit,697,Heart Failure,2021,22.71,22.1,1.0276,0.138,2693
+PA007,Reading Hospital,West Reading,PA,Tower Health,Non-Profit,697,Heart Failure,2022,21.16,21.8,0.9706,0.0,0
+PA007,Reading Hospital,West Reading,PA,Tower Health,Non-Profit,697,Heart Failure,2023,22.0,21.5,1.0233,0.117,2283
+PA007,Reading Hospital,West Reading,PA,Tower Health,Non-Profit,697,Pneumonia,2021,16.98,16.4,1.0354,0.177,3454
+PA007,Reading Hospital,West Reading,PA,Tower Health,Non-Profit,697,Pneumonia,2022,15.68,16.2,0.9679,0.0,0
+PA007,Reading Hospital,West Reading,PA,Tower Health,Non-Profit,697,Pneumonia,2023,16.23,16.0,1.0144,0.072,1405
+PA007,Reading Hospital,West Reading,PA,Tower Health,Non-Profit,697,COPD,2021,20.4,20.0,1.02,0.1,1952
+PA007,Reading Hospital,West Reading,PA,Tower Health,Non-Profit,697,COPD,2022,19.17,19.8,0.9682,0.0,0
+PA007,Reading Hospital,West Reading,PA,Tower Health,Non-Profit,697,COPD,2023,19.65,19.5,1.0077,0.039,761
+PA007,Reading Hospital,West Reading,PA,Tower Health,Non-Profit,697,Hip/Knee Replacement,2021,5.4,4.8,1.125,0.625,12198
+PA007,Reading Hospital,West Reading,PA,Tower Health,Non-Profit,697,Hip/Knee Replacement,2022,3.65,4.6,0.7935,0.0,0
+PA007,Reading Hospital,West Reading,PA,Tower Health,Non-Profit,697,Hip/Knee Replacement,2023,4.44,4.5,0.9867,0.0,0
+PA008,Abington Memorial Hospital,Abington,PA,Jefferson,Non-Profit,665,AMI,2021,14.4,14.9,0.9664,0.0,0
+PA008,Abington Memorial Hospital,Abington,PA,Jefferson,Non-Profit,665,AMI,2022,13.58,14.7,0.9238,0.0,0
+PA008,Abington Memorial Hospital,Abington,PA,Jefferson,Non-Profit,665,AMI,2023,14.0,14.5,0.9655,0.0,0
+PA008,Abington Memorial Hospital,Abington,PA,Jefferson,Non-Profit,665,Heart Failure,2021,22.87,22.1,1.0348,0.174,3240
+PA008,Abington Memorial Hospital,Abington,PA,Jefferson,Non-Profit,665,Heart Failure,2022,22.04,21.8,1.011,0.055,1024
+PA008,Abington Memorial Hospital,Abington,PA,Jefferson,Non-Profit,665,Heart Failure,2023,21.27,21.5,0.9893,0.0,0
+PA008,Abington Memorial Hospital,Abington,PA,Jefferson,Non-Profit,665,Pneumonia,2021,16.0,16.4,0.9756,0.0,0
+PA008,Abington Memorial Hospital,Abington,PA,Jefferson,Non-Profit,665,Pneumonia,2022,16.73,16.2,1.0327,0.163,3035
+PA008,Abington Memorial Hospital,Abington,PA,Jefferson,Non-Profit,665,Pneumonia,2023,15.85,16.0,0.9906,0.0,0
+PA008,Abington Memorial Hospital,Abington,PA,Jefferson,Non-Profit,665,COPD,2021,20.9,20.0,1.045,0.225,4190
+PA008,Abington Memorial Hospital,Abington,PA,Jefferson,Non-Profit,665,COPD,2022,20.62,19.8,1.0414,0.207,3854
+PA008,Abington Memorial Hospital,Abington,PA,Jefferson,Non-Profit,665,COPD,2023,20.87,19.5,1.0703,0.352,6554
+PA008,Abington Memorial Hospital,Abington,PA,Jefferson,Non-Profit,665,Hip/Knee Replacement,2021,4.67,4.8,0.9729,0.0,0
+PA008,Abington Memorial Hospital,Abington,PA,Jefferson,Non-Profit,665,Hip/Knee Replacement,2022,3.9,4.6,0.8478,0.0,0
+PA008,Abington Memorial Hospital,Abington,PA,Jefferson,Non-Profit,665,Hip/Knee Replacement,2023,4.36,4.5,0.9689,0.0,0
+PA009,Mercy Philadelphia Hospital,Philadelphia,PA,Trinity,Non-Profit,150,AMI,2021,14.96,14.9,1.004,0.02,84
+PA009,Mercy Philadelphia Hospital,Philadelphia,PA,Trinity,Non-Profit,150,AMI,2022,14.99,14.7,1.0197,0.099,416
+PA009,Mercy Philadelphia Hospital,Philadelphia,PA,Trinity,Non-Profit,150,AMI,2023,14.68,14.5,1.0124,0.062,260
+PA009,Mercy Philadelphia Hospital,Philadelphia,PA,Trinity,Non-Profit,150,Heart Failure,2021,23.21,22.1,1.0502,0.251,1054
+PA009,Mercy Philadelphia Hospital,Philadelphia,PA,Trinity,Non-Profit,150,Heart Failure,2022,21.84,21.8,1.0018,0.009,38
+PA009,Mercy Philadelphia Hospital,Philadelphia,PA,Trinity,Non-Profit,150,Heart Failure,2023,23.89,21.5,1.1112,0.556,2335
+PA009,Mercy Philadelphia Hospital,Philadelphia,PA,Trinity,Non-Profit,150,Pneumonia,2021,16.73,16.4,1.0201,0.101,424
+PA009,Mercy Philadelphia Hospital,Philadelphia,PA,Trinity,Non-Profit,150,Pneumonia,2022,16.7,16.2,1.0309,0.154,647
+PA009,Mercy Philadelphia Hospital,Philadelphia,PA,Trinity,Non-Profit,150,Pneumonia,2023,14.34,16.0,0.8962,0.0,0
+PA009,Mercy Philadelphia Hospital,Philadelphia,PA,Trinity,Non-Profit,150,COPD,2021,21.09,20.0,1.0545,0.272,1142
+PA009,Mercy Philadelphia Hospital,Philadelphia,PA,Trinity,Non-Profit,150,COPD,2022,19.52,19.8,0.9859,0.0,0
+PA009,Mercy Philadelphia Hospital,Philadelphia,PA,Trinity,Non-Profit,150,COPD,2023,19.93,19.5,1.0221,0.111,466
+PA009,Mercy Philadelphia Hospital,Philadelphia,PA,Trinity,Non-Profit,150,Hip/Knee Replacement,2021,4.75,4.8,0.9896,0.0,0
+PA009,Mercy Philadelphia Hospital,Philadelphia,PA,Trinity,Non-Profit,150,Hip/Knee Replacement,2022,4.26,4.6,0.9261,0.0,0
+PA009,Mercy Philadelphia Hospital,Philadelphia,PA,Trinity,Non-Profit,150,Hip/Knee Replacement,2023,3.95,4.5,0.8778,0.0,0
+PA010,Sharon Regional Medical,Sharon,PA,Sharon Regional,For-Profit,177,AMI,2021,15.3,14.9,1.0268,0.134,664
+PA010,Sharon Regional Medical,Sharon,PA,Sharon Regional,For-Profit,177,AMI,2022,15.85,14.7,1.0782,0.391,1938
+PA010,Sharon Regional Medical,Sharon,PA,Sharon Regional,For-Profit,177,AMI,2023,14.67,14.5,1.0117,0.059,292
+PA010,Sharon Regional Medical,Sharon,PA,Sharon Regional,For-Profit,177,Heart Failure,2021,20.4,22.1,0.9231,0.0,0
+PA010,Sharon Regional Medical,Sharon,PA,Sharon Regional,For-Profit,177,Heart Failure,2022,22.03,21.8,1.0106,0.053,263
+PA010,Sharon Regional Medical,Sharon,PA,Sharon Regional,For-Profit,177,Heart Failure,2023,20.36,21.5,0.947,0.0,0
+PA010,Sharon Regional Medical,Sharon,PA,Sharon Regional,For-Profit,177,Pneumonia,2021,14.65,16.4,0.8933,0.0,0
+PA010,Sharon Regional Medical,Sharon,PA,Sharon Regional,For-Profit,177,Pneumonia,2022,15.04,16.2,0.9284,0.0,0
+PA010,Sharon Regional Medical,Sharon,PA,Sharon Regional,For-Profit,177,Pneumonia,2023,17.0,16.0,1.0625,0.312,1546
+PA010,Sharon Regional Medical,Sharon,PA,Sharon Regional,For-Profit,177,COPD,2021,19.71,20.0,0.9855,0.0,0
+PA010,Sharon Regional Medical,Sharon,PA,Sharon Regional,For-Profit,177,COPD,2022,20.36,19.8,1.0283,0.141,699
+PA010,Sharon Regional Medical,Sharon,PA,Sharon Regional,For-Profit,177,COPD,2023,20.88,19.5,1.0708,0.354,1754
+PA010,Sharon Regional Medical,Sharon,PA,Sharon Regional,For-Profit,177,Hip/Knee Replacement,2021,4.83,4.8,1.0063,0.031,154
+PA010,Sharon Regional Medical,Sharon,PA,Sharon Regional,For-Profit,177,Hip/Knee Replacement,2022,5.54,4.6,1.2043,1.021,5060
+PA010,Sharon Regional Medical,Sharon,PA,Sharon Regional,For-Profit,177,Hip/Knee Replacement,2023,5.61,4.5,1.2467,1.233,6111
+GA001,Emory University Hospital,Atlanta,GA,Emory,Non-Profit,579,AMI,2021,15.34,14.9,1.0295,0.148,2399
+GA001,Emory University Hospital,Atlanta,GA,Emory,Non-Profit,579,AMI,2022,14.9,14.7,1.0136,0.068,1102
+GA001,Emory University Hospital,Atlanta,GA,Emory,Non-Profit,579,AMI,2023,14.24,14.5,0.9821,0.0,0
+GA001,Emory University Hospital,Atlanta,GA,Emory,Non-Profit,579,Heart Failure,2021,22.79,22.1,1.0312,0.156,2529
+GA001,Emory University Hospital,Atlanta,GA,Emory,Non-Profit,579,Heart Failure,2022,22.9,21.8,1.0505,0.252,4085
+GA001,Emory University Hospital,Atlanta,GA,Emory,Non-Profit,579,Heart Failure,2023,23.21,21.5,1.0795,0.397,6436
+GA001,Emory University Hospital,Atlanta,GA,Emory,Non-Profit,579,Pneumonia,2021,15.93,16.4,0.9713,0.0,0
+GA001,Emory University Hospital,Atlanta,GA,Emory,Non-Profit,579,Pneumonia,2022,16.89,16.2,1.0426,0.213,3453
+GA001,Emory University Hospital,Atlanta,GA,Emory,Non-Profit,579,Pneumonia,2023,15.52,16.0,0.97,0.0,0
+GA001,Emory University Hospital,Atlanta,GA,Emory,Non-Profit,579,COPD,2021,20.35,20.0,1.0175,0.088,1427
+GA001,Emory University Hospital,Atlanta,GA,Emory,Non-Profit,579,COPD,2022,20.57,19.8,1.0389,0.194,3145
+GA001,Emory University Hospital,Atlanta,GA,Emory,Non-Profit,579,COPD,2023,19.2,19.5,0.9846,0.0,0
+GA001,Emory University Hospital,Atlanta,GA,Emory,Non-Profit,579,Hip/Knee Replacement,2021,7.08,4.8,1.475,2.375,38504
+GA001,Emory University Hospital,Atlanta,GA,Emory,Non-Profit,579,Hip/Knee Replacement,2022,4.82,4.6,1.0478,0.239,3875
+GA001,Emory University Hospital,Atlanta,GA,Emory,Non-Profit,579,Hip/Knee Replacement,2023,4.71,4.5,1.0467,0.233,3777
+GA002,Wellstar Atlanta Medical,Atlanta,GA,Wellstar,Non-Profit,460,AMI,2021,15.61,14.9,1.0477,0.239,3078
+GA002,Wellstar Atlanta Medical,Atlanta,GA,Wellstar,Non-Profit,460,AMI,2022,14.52,14.7,0.9878,0.0,0
+GA002,Wellstar Atlanta Medical,Atlanta,GA,Wellstar,Non-Profit,460,AMI,2023,15.15,14.5,1.0448,0.224,2885
+GA002,Wellstar Atlanta Medical,Atlanta,GA,Wellstar,Non-Profit,460,Heart Failure,2021,23.23,22.1,1.0511,0.255,3284
+GA002,Wellstar Atlanta Medical,Atlanta,GA,Wellstar,Non-Profit,460,Heart Failure,2022,21.95,21.8,1.0069,0.034,438
+GA002,Wellstar Atlanta Medical,Atlanta,GA,Wellstar,Non-Profit,460,Heart Failure,2023,22.59,21.5,1.0507,0.253,3259
+GA002,Wellstar Atlanta Medical,Atlanta,GA,Wellstar,Non-Profit,460,Pneumonia,2021,17.19,16.4,1.0482,0.241,3104
+GA002,Wellstar Atlanta Medical,Atlanta,GA,Wellstar,Non-Profit,460,Pneumonia,2022,17.09,16.2,1.0549,0.274,3529
+GA002,Wellstar Atlanta Medical,Atlanta,GA,Wellstar,Non-Profit,460,Pneumonia,2023,16.32,16.0,1.02,0.1,1288
+GA002,Wellstar Atlanta Medical,Atlanta,GA,Wellstar,Non-Profit,460,COPD,2021,21.31,20.0,1.0655,0.327,4212
+GA002,Wellstar Atlanta Medical,Atlanta,GA,Wellstar,Non-Profit,460,COPD,2022,19.94,19.8,1.0071,0.036,464
+GA002,Wellstar Atlanta Medical,Atlanta,GA,Wellstar,Non-Profit,460,COPD,2023,18.8,19.5,0.9641,0.0,0
+GA002,Wellstar Atlanta Medical,Atlanta,GA,Wellstar,Non-Profit,460,Hip/Knee Replacement,2021,5.06,4.8,1.0542,0.271,3490
+GA002,Wellstar Atlanta Medical,Atlanta,GA,Wellstar,Non-Profit,460,Hip/Knee Replacement,2022,5.46,4.6,1.187,0.935,12043
+GA002,Wellstar Atlanta Medical,Atlanta,GA,Wellstar,Non-Profit,460,Hip/Knee Replacement,2023,4.81,4.5,1.0689,0.344,4431
+GA003,Grady Memorial Hospital,Atlanta,GA,Grady,Government,953,AMI,2021,14.66,14.9,0.9839,0.0,0
+GA003,Grady Memorial Hospital,Atlanta,GA,Grady,Government,953,AMI,2022,14.63,14.7,0.9952,0.0,0
+GA003,Grady Memorial Hospital,Atlanta,GA,Grady,Government,953,AMI,2023,16.02,14.5,1.1048,0.524,13982
+GA003,Grady Memorial Hospital,Atlanta,GA,Grady,Government,953,Heart Failure,2021,21.91,22.1,0.9914,0.0,0
+GA003,Grady Memorial Hospital,Atlanta,GA,Grady,Government,953,Heart Failure,2022,21.98,21.8,1.0083,0.041,1094
+GA003,Grady Memorial Hospital,Atlanta,GA,Grady,Government,953,Heart Failure,2023,22.44,21.5,1.0437,0.219,5844
+GA003,Grady Memorial Hospital,Atlanta,GA,Grady,Government,953,Pneumonia,2021,18.59,16.4,1.1335,0.667,17798
+GA003,Grady Memorial Hospital,Atlanta,GA,Grady,Government,953,Pneumonia,2022,16.1,16.2,0.9938,0.0,0
+GA003,Grady Memorial Hospital,Atlanta,GA,Grady,Government,953,Pneumonia,2023,16.22,16.0,1.0137,0.069,1841
+GA003,Grady Memorial Hospital,Atlanta,GA,Grady,Government,953,COPD,2021,19.98,20.0,0.999,0.0,0
+GA003,Grady Memorial Hospital,Atlanta,GA,Grady,Government,953,COPD,2022,20.21,19.8,1.0207,0.103,2748
+GA003,Grady Memorial Hospital,Atlanta,GA,Grady,Government,953,COPD,2023,20.77,19.5,1.0651,0.325,8672
+GA003,Grady Memorial Hospital,Atlanta,GA,Grady,Government,953,Hip/Knee Replacement,2021,5.26,4.8,1.0958,0.479,12782
+GA003,Grady Memorial Hospital,Atlanta,GA,Grady,Government,953,Hip/Knee Replacement,2022,5.73,4.6,1.2457,1.229,32795
+GA003,Grady Memorial Hospital,Atlanta,GA,Grady,Government,953,Hip/Knee Replacement,2023,5.59,4.5,1.2422,1.211,32314
+GA004,Augusta University Medical,Augusta,GA,AU Health,Government,478,AMI,2021,15.54,14.9,1.043,0.215,2878
+GA004,Augusta University Medical,Augusta,GA,AU Health,Government,478,AMI,2022,13.81,14.7,0.9395,0.0,0
+GA004,Augusta University Medical,Augusta,GA,AU Health,Government,478,AMI,2023,15.32,14.5,1.0566,0.283,3788
+GA004,Augusta University Medical,Augusta,GA,AU Health,Government,478,Heart Failure,2021,21.72,22.1,0.9828,0.0,0
+GA004,Augusta University Medical,Augusta,GA,AU Health,Government,478,Heart Failure,2022,23.81,21.8,1.0922,0.461,6170
+GA004,Augusta University Medical,Augusta,GA,AU Health,Government,478,Heart Failure,2023,22.11,21.5,1.0284,0.142,1901
+GA004,Augusta University Medical,Augusta,GA,AU Health,Government,478,Pneumonia,2021,17.15,16.4,1.0457,0.229,3065
+GA004,Augusta University Medical,Augusta,GA,AU Health,Government,478,Pneumonia,2022,16.34,16.2,1.0086,0.043,576
+GA004,Augusta University Medical,Augusta,GA,AU Health,Government,478,Pneumonia,2023,16.74,16.0,1.0462,0.231,3092
+GA004,Augusta University Medical,Augusta,GA,AU Health,Government,478,COPD,2021,22.03,20.0,1.1015,0.507,6786
+GA004,Augusta University Medical,Augusta,GA,AU Health,Government,478,COPD,2022,19.99,19.8,1.0096,0.048,642
+GA004,Augusta University Medical,Augusta,GA,AU Health,Government,478,COPD,2023,20.61,19.5,1.0569,0.284,3801
+GA004,Augusta University Medical,Augusta,GA,AU Health,Government,478,Hip/Knee Replacement,2021,5.18,4.8,1.0792,0.396,5300
+GA004,Augusta University Medical,Augusta,GA,AU Health,Government,478,Hip/Knee Replacement,2022,6.45,4.6,1.4022,2.011,26915
+GA004,Augusta University Medical,Augusta,GA,AU Health,Government,478,Hip/Knee Replacement,2023,3.85,4.5,0.8556,0.0,0
+GA005,Piedmont Athens Regional,Athens,GA,Piedmont,Non-Profit,359,AMI,2021,15.2,14.9,1.0201,0.101,1015
+GA005,Piedmont Athens Regional,Athens,GA,Piedmont,Non-Profit,359,AMI,2022,16.74,14.7,1.1388,0.694,6976
+GA005,Piedmont Athens Regional,Athens,GA,Piedmont,Non-Profit,359,AMI,2023,14.75,14.5,1.0172,0.086,864
+GA005,Piedmont Athens Regional,Athens,GA,Piedmont,Non-Profit,359,Heart Failure,2021,23.08,22.1,1.0443,0.222,2232
+GA005,Piedmont Athens Regional,Athens,GA,Piedmont,Non-Profit,359,Heart Failure,2022,22.08,21.8,1.0128,0.064,643
+GA005,Piedmont Athens Regional,Athens,GA,Piedmont,Non-Profit,359,Heart Failure,2023,21.45,21.5,0.9977,0.0,0
+GA005,Piedmont Athens Regional,Athens,GA,Piedmont,Non-Profit,359,Pneumonia,2021,16.63,16.4,1.014,0.07,704
+GA005,Piedmont Athens Regional,Athens,GA,Piedmont,Non-Profit,359,Pneumonia,2022,17.89,16.2,1.1043,0.522,5247
+GA005,Piedmont Athens Regional,Athens,GA,Piedmont,Non-Profit,359,Pneumonia,2023,16.52,16.0,1.0325,0.162,1628
+GA005,Piedmont Athens Regional,Athens,GA,Piedmont,Non-Profit,359,COPD,2021,20.49,20.0,1.0245,0.122,1226
+GA005,Piedmont Athens Regional,Athens,GA,Piedmont,Non-Profit,359,COPD,2022,21.38,19.8,1.0798,0.399,4011
+GA005,Piedmont Athens Regional,Athens,GA,Piedmont,Non-Profit,359,COPD,2023,20.28,19.5,1.04,0.2,2010
+GA005,Piedmont Athens Regional,Athens,GA,Piedmont,Non-Profit,359,Hip/Knee Replacement,2021,5.72,4.8,1.1917,0.958,9630
+GA005,Piedmont Athens Regional,Athens,GA,Piedmont,Non-Profit,359,Hip/Knee Replacement,2022,5.41,4.6,1.1761,0.88,8846
+GA005,Piedmont Athens Regional,Athens,GA,Piedmont,Non-Profit,359,Hip/Knee Replacement,2023,6.91,4.5,1.5356,2.678,26919
+GA006,Navicent Health Baldwin,Macon,GA,Atrium,Non-Profit,637,AMI,2021,14.71,14.9,0.9872,0.0,0
+GA006,Navicent Health Baldwin,Macon,GA,Atrium,Non-Profit,637,AMI,2022,14.87,14.7,1.0116,0.058,1034
+GA006,Navicent Health Baldwin,Macon,GA,Atrium,Non-Profit,637,AMI,2023,13.34,14.5,0.92,0.0,0
+GA006,Navicent Health Baldwin,Macon,GA,Atrium,Non-Profit,637,Heart Failure,2021,22.03,22.1,0.9968,0.0,0
+GA006,Navicent Health Baldwin,Macon,GA,Atrium,Non-Profit,637,Heart Failure,2022,20.7,21.8,0.9495,0.0,0
+GA006,Navicent Health Baldwin,Macon,GA,Atrium,Non-Profit,637,Heart Failure,2023,22.87,21.5,1.0637,0.319,5690
+GA006,Navicent Health Baldwin,Macon,GA,Atrium,Non-Profit,637,Pneumonia,2021,17.02,16.4,1.0378,0.189,3371
+GA006,Navicent Health Baldwin,Macon,GA,Atrium,Non-Profit,637,Pneumonia,2022,16.32,16.2,1.0074,0.037,660
+GA006,Navicent Health Baldwin,Macon,GA,Atrium,Non-Profit,637,Pneumonia,2023,17.14,16.0,1.0713,0.356,6350
+GA006,Navicent Health Baldwin,Macon,GA,Atrium,Non-Profit,637,COPD,2021,20.51,20.0,1.0255,0.128,2283
+GA006,Navicent Health Baldwin,Macon,GA,Atrium,Non-Profit,637,COPD,2022,21.1,19.8,1.0657,0.329,5868
+GA006,Navicent Health Baldwin,Macon,GA,Atrium,Non-Profit,637,COPD,2023,20.02,19.5,1.0267,0.133,2372
+GA006,Navicent Health Baldwin,Macon,GA,Atrium,Non-Profit,637,Hip/Knee Replacement,2021,3.45,4.8,0.7188,0.0,0
+GA006,Navicent Health Baldwin,Macon,GA,Atrium,Non-Profit,637,Hip/Knee Replacement,2022,5.9,4.6,1.2826,1.413,25202
+GA006,Navicent Health Baldwin,Macon,GA,Atrium,Non-Profit,637,Hip/Knee Replacement,2023,4.73,4.5,1.0511,0.255,4548
+GA007,Northside Hospital Atlanta,Atlanta,GA,Northside,Non-Profit,637,AMI,2021,15.04,14.9,1.0094,0.047,838
+GA007,Northside Hospital Atlanta,Atlanta,GA,Northside,Non-Profit,637,AMI,2022,14.95,14.7,1.017,0.085,1516
+GA007,Northside Hospital Atlanta,Atlanta,GA,Northside,Non-Profit,637,AMI,2023,14.46,14.5,0.9972,0.0,0
+GA007,Northside Hospital Atlanta,Atlanta,GA,Northside,Non-Profit,637,Heart Failure,2021,24.34,22.1,1.1014,0.507,9043
+GA007,Northside Hospital Atlanta,Atlanta,GA,Northside,Non-Profit,637,Heart Failure,2022,22.07,21.8,1.0124,0.062,1106
+GA007,Northside Hospital Atlanta,Atlanta,GA,Northside,Non-Profit,637,Heart Failure,2023,22.02,21.5,1.0242,0.121,2158
+GA007,Northside Hospital Atlanta,Atlanta,GA,Northside,Non-Profit,637,Pneumonia,2021,15.6,16.4,0.9512,0.0,0
+GA007,Northside Hospital Atlanta,Atlanta,GA,Northside,Non-Profit,637,Pneumonia,2022,16.96,16.2,1.0469,0.234,4174
+GA007,Northside Hospital Atlanta,Atlanta,GA,Northside,Non-Profit,637,Pneumonia,2023,16.44,16.0,1.0275,0.138,2461
+GA007,Northside Hospital Atlanta,Atlanta,GA,Northside,Non-Profit,637,COPD,2021,20.25,20.0,1.0125,0.062,1106
+GA007,Northside Hospital Atlanta,Atlanta,GA,Northside,Non-Profit,637,COPD,2022,19.86,19.8,1.003,0.015,268
+GA007,Northside Hospital Atlanta,Atlanta,GA,Northside,Non-Profit,637,COPD,2023,20.55,19.5,1.0538,0.269,4798
+GA007,Northside Hospital Atlanta,Atlanta,GA,Northside,Non-Profit,637,Hip/Knee Replacement,2021,5.51,4.8,1.1479,0.739,13181
+GA007,Northside Hospital Atlanta,Atlanta,GA,Northside,Non-Profit,637,Hip/Knee Replacement,2022,5.79,4.6,1.2587,1.293,23062
+GA007,Northside Hospital Atlanta,Atlanta,GA,Northside,Non-Profit,637,Hip/Knee Replacement,2023,5.63,4.5,1.2511,1.256,22402
+GA008,WellStar Kennestone,Marietta,GA,Wellstar,Non-Profit,633,AMI,2021,14.63,14.9,0.9819,0.0,0
+GA008,WellStar Kennestone,Marietta,GA,Wellstar,Non-Profit,633,AMI,2022,15.56,14.7,1.0585,0.292,5175
+GA008,WellStar Kennestone,Marietta,GA,Wellstar,Non-Profit,633,AMI,2023,14.34,14.5,0.989,0.0,0
+GA008,WellStar Kennestone,Marietta,GA,Wellstar,Non-Profit,633,Heart Failure,2021,22.75,22.1,1.0294,0.147,2605
+GA008,WellStar Kennestone,Marietta,GA,Wellstar,Non-Profit,633,Heart Failure,2022,22.32,21.8,1.0239,0.12,2127
+GA008,WellStar Kennestone,Marietta,GA,Wellstar,Non-Profit,633,Heart Failure,2023,21.82,21.5,1.0149,0.074,1312
+GA008,WellStar Kennestone,Marietta,GA,Wellstar,Non-Profit,633,Pneumonia,2021,17.44,16.4,1.0634,0.317,5619
+GA008,WellStar Kennestone,Marietta,GA,Wellstar,Non-Profit,633,Pneumonia,2022,16.65,16.2,1.0278,0.139,2464
+GA008,WellStar Kennestone,Marietta,GA,Wellstar,Non-Profit,633,Pneumonia,2023,17.9,16.0,1.1187,0.594,10528
+GA008,WellStar Kennestone,Marietta,GA,Wellstar,Non-Profit,633,COPD,2021,21.31,20.0,1.0655,0.327,5796
+GA008,WellStar Kennestone,Marietta,GA,Wellstar,Non-Profit,633,COPD,2022,21.88,19.8,1.1051,0.525,9305
+GA008,WellStar Kennestone,Marietta,GA,Wellstar,Non-Profit,633,COPD,2023,18.66,19.5,0.9569,0.0,0
+GA008,WellStar Kennestone,Marietta,GA,Wellstar,Non-Profit,633,Hip/Knee Replacement,2021,4.62,4.8,0.9625,0.0,0
+GA008,WellStar Kennestone,Marietta,GA,Wellstar,Non-Profit,633,Hip/Knee Replacement,2022,5.48,4.6,1.1913,0.957,16962
+GA008,WellStar Kennestone,Marietta,GA,Wellstar,Non-Profit,633,Hip/Knee Replacement,2023,5.14,4.5,1.1422,0.711,12602
+GA009,Northeast Georgia Medical,Gainesville,GA,NGMC,Non-Profit,557,AMI,2021,17.81,14.9,1.1953,0.977,15237
+GA009,Northeast Georgia Medical,Gainesville,GA,NGMC,Non-Profit,557,AMI,2022,15.78,14.7,1.0735,0.367,5724
+GA009,Northeast Georgia Medical,Gainesville,GA,NGMC,Non-Profit,557,AMI,2023,14.82,14.5,1.0221,0.111,1731
+GA009,Northeast Georgia Medical,Gainesville,GA,NGMC,Non-Profit,557,Heart Failure,2021,22.75,22.1,1.0294,0.147,2293
+GA009,Northeast Georgia Medical,Gainesville,GA,NGMC,Non-Profit,557,Heart Failure,2022,22.22,21.8,1.0193,0.097,1513
+GA009,Northeast Georgia Medical,Gainesville,GA,NGMC,Non-Profit,557,Heart Failure,2023,22.83,21.5,1.0619,0.31,4835
+GA009,Northeast Georgia Medical,Gainesville,GA,NGMC,Non-Profit,557,Pneumonia,2021,16.96,16.4,1.0341,0.171,2667
+GA009,Northeast Georgia Medical,Gainesville,GA,NGMC,Non-Profit,557,Pneumonia,2022,17.49,16.2,1.0796,0.398,6207
+GA009,Northeast Georgia Medical,Gainesville,GA,NGMC,Non-Profit,557,Pneumonia,2023,16.64,16.0,1.04,0.2,3119
+GA009,Northeast Georgia Medical,Gainesville,GA,NGMC,Non-Profit,557,COPD,2021,21.2,20.0,1.06,0.3,4679
+GA009,Northeast Georgia Medical,Gainesville,GA,NGMC,Non-Profit,557,COPD,2022,20.04,19.8,1.0121,0.06,936
+GA009,Northeast Georgia Medical,Gainesville,GA,NGMC,Non-Profit,557,COPD,2023,20.26,19.5,1.039,0.195,3041
+GA009,Northeast Georgia Medical,Gainesville,GA,NGMC,Non-Profit,557,Hip/Knee Replacement,2021,4.22,4.8,0.8792,0.0,0
+GA009,Northeast Georgia Medical,Gainesville,GA,NGMC,Non-Profit,557,Hip/Knee Replacement,2022,4.36,4.6,0.9478,0.0,0
+GA009,Northeast Georgia Medical,Gainesville,GA,NGMC,Non-Profit,557,Hip/Knee Replacement,2023,5.61,4.5,1.2467,1.233,19230
+GA010,Phoebe Putney Memorial,Albany,GA,Phoebe,Non-Profit,443,AMI,2021,16.52,14.9,1.1087,0.544,6748
+GA010,Phoebe Putney Memorial,Albany,GA,Phoebe,Non-Profit,443,AMI,2022,15.03,14.7,1.0224,0.112,1389
+GA010,Phoebe Putney Memorial,Albany,GA,Phoebe,Non-Profit,443,AMI,2023,14.46,14.5,0.9972,0.0,0
+GA010,Phoebe Putney Memorial,Albany,GA,Phoebe,Non-Profit,443,Heart Failure,2021,22.37,22.1,1.0122,0.061,757
+GA010,Phoebe Putney Memorial,Albany,GA,Phoebe,Non-Profit,443,Heart Failure,2022,22.69,21.8,1.0408,0.204,2530
+GA010,Phoebe Putney Memorial,Albany,GA,Phoebe,Non-Profit,443,Heart Failure,2023,20.45,21.5,0.9512,0.0,0
+GA010,Phoebe Putney Memorial,Albany,GA,Phoebe,Non-Profit,443,Pneumonia,2021,15.53,16.4,0.947,0.0,0
+GA010,Phoebe Putney Memorial,Albany,GA,Phoebe,Non-Profit,443,Pneumonia,2022,16.89,16.2,1.0426,0.213,2642
+GA010,Phoebe Putney Memorial,Albany,GA,Phoebe,Non-Profit,443,Pneumonia,2023,16.05,16.0,1.0031,0.016,198
+GA010,Phoebe Putney Memorial,Albany,GA,Phoebe,Non-Profit,443,COPD,2021,19.74,20.0,0.987,0.0,0
+GA010,Phoebe Putney Memorial,Albany,GA,Phoebe,Non-Profit,443,COPD,2022,20.82,19.8,1.0515,0.258,3200
+GA010,Phoebe Putney Memorial,Albany,GA,Phoebe,Non-Profit,443,COPD,2023,19.7,19.5,1.0103,0.051,633
+GA010,Phoebe Putney Memorial,Albany,GA,Phoebe,Non-Profit,443,Hip/Knee Replacement,2021,7.42,4.8,1.5458,2.729,33851
+GA010,Phoebe Putney Memorial,Albany,GA,Phoebe,Non-Profit,443,Hip/Knee Replacement,2022,5.83,4.6,1.2674,1.337,16584
+GA010,Phoebe Putney Memorial,Albany,GA,Phoebe,Non-Profit,443,Hip/Knee Replacement,2023,4.5,4.5,1.0,0.0,0
+GA011,Memorial Health Savannah,Savannah,GA,HCA Healthcare,For-Profit,610,AMI,2021,15.99,14.9,1.0732,0.366,6251
+GA011,Memorial Health Savannah,Savannah,GA,HCA Healthcare,For-Profit,610,AMI,2022,16.92,14.7,1.151,0.755,12895
+GA011,Memorial Health Savannah,Savannah,GA,HCA Healthcare,For-Profit,610,AMI,2023,14.14,14.5,0.9752,0.0,0
+GA011,Memorial Health Savannah,Savannah,GA,HCA Healthcare,For-Profit,610,Heart Failure,2021,22.85,22.1,1.0339,0.17,2904
+GA011,Memorial Health Savannah,Savannah,GA,HCA Healthcare,For-Profit,610,Heart Failure,2022,24.21,21.8,1.1106,0.553,9445
+GA011,Memorial Health Savannah,Savannah,GA,HCA Healthcare,For-Profit,610,Heart Failure,2023,20.89,21.5,0.9716,0.0,0
+GA011,Memorial Health Savannah,Savannah,GA,HCA Healthcare,For-Profit,610,Pneumonia,2021,17.42,16.4,1.0622,0.311,5312
+GA011,Memorial Health Savannah,Savannah,GA,HCA Healthcare,For-Profit,610,Pneumonia,2022,16.57,16.2,1.0228,0.114,1947
+GA011,Memorial Health Savannah,Savannah,GA,HCA Healthcare,For-Profit,610,Pneumonia,2023,15.7,16.0,0.9812,0.0,0
+GA011,Memorial Health Savannah,Savannah,GA,HCA Healthcare,For-Profit,610,COPD,2021,20.48,20.0,1.024,0.12,2050
+GA011,Memorial Health Savannah,Savannah,GA,HCA Healthcare,For-Profit,610,COPD,2022,21.8,19.8,1.101,0.505,8625
+GA011,Memorial Health Savannah,Savannah,GA,HCA Healthcare,For-Profit,610,COPD,2023,22.54,19.5,1.1559,0.779,13305
+GA011,Memorial Health Savannah,Savannah,GA,HCA Healthcare,For-Profit,610,Hip/Knee Replacement,2021,5.49,4.8,1.1438,0.719,12281
+GA011,Memorial Health Savannah,Savannah,GA,HCA Healthcare,For-Profit,610,Hip/Knee Replacement,2022,7.04,4.6,1.5304,2.652,45296
+GA011,Memorial Health Savannah,Savannah,GA,HCA Healthcare,For-Profit,610,Hip/Knee Replacement,2023,5.74,4.5,1.2756,1.378,23536
+GA012,Colquitt Regional Medical,Moultrie,GA,Independent,Non-Profit,99,AMI,2021,15.53,14.9,1.0423,0.212,588
+GA012,Colquitt Regional Medical,Moultrie,GA,Independent,Non-Profit,99,AMI,2022,15.64,14.7,1.0639,0.32,887
+GA012,Colquitt Regional Medical,Moultrie,GA,Independent,Non-Profit,99,AMI,2023,15.13,14.5,1.0434,0.217,602
+GA012,Colquitt Regional Medical,Moultrie,GA,Independent,Non-Profit,99,Heart Failure,2021,22.99,22.1,1.0403,0.202,560
+GA012,Colquitt Regional Medical,Moultrie,GA,Independent,Non-Profit,99,Heart Failure,2022,22.55,21.8,1.0344,0.172,477
+GA012,Colquitt Regional Medical,Moultrie,GA,Independent,Non-Profit,99,Heart Failure,2023,21.8,21.5,1.014,0.07,194
+GA012,Colquitt Regional Medical,Moultrie,GA,Independent,Non-Profit,99,Pneumonia,2021,15.22,16.4,0.928,0.0,0
+GA012,Colquitt Regional Medical,Moultrie,GA,Independent,Non-Profit,99,Pneumonia,2022,17.23,16.2,1.0636,0.318,881
+GA012,Colquitt Regional Medical,Moultrie,GA,Independent,Non-Profit,99,Pneumonia,2023,15.19,16.0,0.9494,0.0,0
+GA012,Colquitt Regional Medical,Moultrie,GA,Independent,Non-Profit,99,COPD,2021,20.69,20.0,1.0345,0.172,477
+GA012,Colquitt Regional Medical,Moultrie,GA,Independent,Non-Profit,99,COPD,2022,19.91,19.8,1.0056,0.028,78
+GA012,Colquitt Regional Medical,Moultrie,GA,Independent,Non-Profit,99,COPD,2023,19.91,19.5,1.021,0.105,291
+GA012,Colquitt Regional Medical,Moultrie,GA,Independent,Non-Profit,99,Hip/Knee Replacement,2021,5.56,4.8,1.1583,0.792,2195
+GA012,Colquitt Regional Medical,Moultrie,GA,Independent,Non-Profit,99,Hip/Knee Replacement,2022,5.43,4.6,1.1804,0.902,2500
+GA012,Colquitt Regional Medical,Moultrie,GA,Independent,Non-Profit,99,Hip/Knee Replacement,2023,5.58,4.5,1.24,1.2,3326
+GA013,Appling Healthcare,Baxley,GA,Independent,Non-Profit,25,AMI,2021,13.74,14.9,0.9221,0.0,0
+GA013,Appling Healthcare,Baxley,GA,Independent,Non-Profit,25,AMI,2022,15.72,14.7,1.0694,0.347,243
+GA013,Appling Healthcare,Baxley,GA,Independent,Non-Profit,25,AMI,2023,14.35,14.5,0.9897,0.0,0
+GA013,Appling Healthcare,Baxley,GA,Independent,Non-Profit,25,Heart Failure,2021,23.67,22.1,1.071,0.355,248
+GA013,Appling Healthcare,Baxley,GA,Independent,Non-Profit,25,Heart Failure,2022,22.03,21.8,1.0106,0.053,37
+GA013,Appling Healthcare,Baxley,GA,Independent,Non-Profit,25,Heart Failure,2023,21.52,21.5,1.0009,0.004,3
+GA013,Appling Healthcare,Baxley,GA,Independent,Non-Profit,25,Pneumonia,2021,17.54,16.4,1.0695,0.347,243
+GA013,Appling Healthcare,Baxley,GA,Independent,Non-Profit,25,Pneumonia,2022,16.95,16.2,1.0463,0.232,162
+GA013,Appling Healthcare,Baxley,GA,Independent,Non-Profit,25,Pneumonia,2023,16.89,16.0,1.0556,0.278,195
+GA013,Appling Healthcare,Baxley,GA,Independent,Non-Profit,25,COPD,2021,21.52,20.0,1.076,0.38,266
+GA013,Appling Healthcare,Baxley,GA,Independent,Non-Profit,25,COPD,2022,19.93,19.8,1.0066,0.033,23
+GA013,Appling Healthcare,Baxley,GA,Independent,Non-Profit,25,COPD,2023,21.16,19.5,1.0851,0.425,298
+GA013,Appling Healthcare,Baxley,GA,Independent,Non-Profit,25,Hip/Knee Replacement,2021,5.1,4.8,1.0625,0.312,218
+GA013,Appling Healthcare,Baxley,GA,Independent,Non-Profit,25,Hip/Knee Replacement,2022,4.95,4.6,1.0761,0.381,267
+GA013,Appling Healthcare,Baxley,GA,Independent,Non-Profit,25,Hip/Knee Replacement,2023,5.63,4.5,1.2511,1.256,879
+GA014,St. Francis Hospital Columbus,Columbus,GA,Piedmont,Non-Profit,338,AMI,2021,14.86,14.9,0.9973,0.0,0
+GA014,St. Francis Hospital Columbus,Columbus,GA,Piedmont,Non-Profit,338,AMI,2022,15.35,14.7,1.0442,0.221,2092
+GA014,St. Francis Hospital Columbus,Columbus,GA,Piedmont,Non-Profit,338,AMI,2023,15.3,14.5,1.0552,0.276,2612
+GA014,St. Francis Hospital Columbus,Columbus,GA,Piedmont,Non-Profit,338,Heart Failure,2021,22.3,22.1,1.009,0.045,426
+GA014,St. Francis Hospital Columbus,Columbus,GA,Piedmont,Non-Profit,338,Heart Failure,2022,22.45,21.8,1.0298,0.149,1410
+GA014,St. Francis Hospital Columbus,Columbus,GA,Piedmont,Non-Profit,338,Heart Failure,2023,22.11,21.5,1.0284,0.142,1344
+GA014,St. Francis Hospital Columbus,Columbus,GA,Piedmont,Non-Profit,338,Pneumonia,2021,16.46,16.4,1.0037,0.019,180
+GA014,St. Francis Hospital Columbus,Columbus,GA,Piedmont,Non-Profit,338,Pneumonia,2022,17.2,16.2,1.0617,0.309,2924
+GA014,St. Francis Hospital Columbus,Columbus,GA,Piedmont,Non-Profit,338,Pneumonia,2023,17.34,16.0,1.0837,0.419,3965
+GA014,St. Francis Hospital Columbus,Columbus,GA,Piedmont,Non-Profit,338,COPD,2021,22.15,20.0,1.1075,0.537,5082
+GA014,St. Francis Hospital Columbus,Columbus,GA,Piedmont,Non-Profit,338,COPD,2022,21.22,19.8,1.0717,0.359,3398
+GA014,St. Francis Hospital Columbus,Columbus,GA,Piedmont,Non-Profit,338,COPD,2023,20.3,19.5,1.041,0.205,1940
+GA014,St. Francis Hospital Columbus,Columbus,GA,Piedmont,Non-Profit,338,Hip/Knee Replacement,2021,5.14,4.8,1.0708,0.354,3350
+GA014,St. Francis Hospital Columbus,Columbus,GA,Piedmont,Non-Profit,338,Hip/Knee Replacement,2022,5.27,4.6,1.1457,0.728,6890
+GA014,St. Francis Hospital Columbus,Columbus,GA,Piedmont,Non-Profit,338,Hip/Knee Replacement,2023,6.61,4.5,1.4689,2.345,22193
+GA015,Phoebe Sumter Medical,Americus,GA,Phoebe,Non-Profit,45,AMI,2021,15.61,14.9,1.0477,0.239,301
+GA015,Phoebe Sumter Medical,Americus,GA,Phoebe,Non-Profit,45,AMI,2022,14.32,14.7,0.9741,0.0,0
+GA015,Phoebe Sumter Medical,Americus,GA,Phoebe,Non-Profit,45,AMI,2023,14.72,14.5,1.0152,0.076,96
+GA015,Phoebe Sumter Medical,Americus,GA,Phoebe,Non-Profit,45,Heart Failure,2021,21.93,22.1,0.9923,0.0,0
+GA015,Phoebe Sumter Medical,Americus,GA,Phoebe,Non-Profit,45,Heart Failure,2022,21.54,21.8,0.9881,0.0,0
+GA015,Phoebe Sumter Medical,Americus,GA,Phoebe,Non-Profit,45,Heart Failure,2023,21.4,21.5,0.9953,0.0,0
+GA015,Phoebe Sumter Medical,Americus,GA,Phoebe,Non-Profit,45,Pneumonia,2021,16.92,16.4,1.0317,0.159,200
+GA015,Phoebe Sumter Medical,Americus,GA,Phoebe,Non-Profit,45,Pneumonia,2022,14.66,16.2,0.9049,0.0,0
+GA015,Phoebe Sumter Medical,Americus,GA,Phoebe,Non-Profit,45,Pneumonia,2023,16.18,16.0,1.0112,0.056,71
+GA015,Phoebe Sumter Medical,Americus,GA,Phoebe,Non-Profit,45,COPD,2021,20.55,20.0,1.0275,0.138,174
+GA015,Phoebe Sumter Medical,Americus,GA,Phoebe,Non-Profit,45,COPD,2022,20.68,19.8,1.0444,0.222,280
+GA015,Phoebe Sumter Medical,Americus,GA,Phoebe,Non-Profit,45,COPD,2023,17.96,19.5,0.921,0.0,0
+GA015,Phoebe Sumter Medical,Americus,GA,Phoebe,Non-Profit,45,Hip/Knee Replacement,2021,3.59,4.8,0.7479,0.0,0
+GA015,Phoebe Sumter Medical,Americus,GA,Phoebe,Non-Profit,45,Hip/Knee Replacement,2022,4.77,4.6,1.037,0.185,233
+GA015,Phoebe Sumter Medical,Americus,GA,Phoebe,Non-Profit,45,Hip/Knee Replacement,2023,5.12,4.5,1.1378,0.689,868
