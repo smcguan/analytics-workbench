@@ -1,7 +1,7 @@
 # Analytics Workbench — History
 
 Archived milestone detail, resolved bugs, and completed backlog items.
-Active state lives in CONTEXT.md. Coding guidance lives in CLAUDE.md.
+Active state lives in CONTEXT_AW.md. Coding guidance lives in CLAUDE.md.
 
 ---
 

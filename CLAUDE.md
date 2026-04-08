@@ -1,13 +1,13 @@
 # Analytics Workbench — Claude Code Context
 
-> **IMPORTANT: Read CONTEXT.md before starting any session.**
-> CONTEXT.md is the single source of truth for milestone status, open decisions,
-> session log, and next actions. Always read CONTEXT.md alongside this file.
+> **IMPORTANT: Read CONTEXT_AW.md before starting any session.**
+> CONTEXT_AW.md is the single source of truth for milestone status, open decisions,
+> session log, and next actions. Always read CONTEXT_AW.md alongside this file.
 > Historical milestone detail and resolved bugs are in HISTORY.md.
 >
-> **Also read BUGS.md at session start.**
-> BUGS.md is the structured bug log. When you fix a bug this session, update its
-> record in BUGS.md immediately — set Status to FIXED, add the version and commit
+> **Also read BUGS_AW.md at session start.**
+> BUGS_AW.md is the structured bug log. When you fix a bug this session, update its
+> record in BUGS_AW.md immediately — set Status to FIXED, add the version and commit
 > reference, and mark whether a test was added. Do not wait until session end.
 
 ---
@@ -25,7 +25,7 @@ Open file → dataset loads → insights appear automatically → inspect datase
 generate SQL → review/edit SQL → run SQL → table + chart appear → export results
 
 ## CURRENT DEVELOPMENT STAGE
-Milestones 1–4 complete. Milestone 5 in active planning. See CONTEXT.md.
+Milestones 1–4 complete. Milestone 5 in active planning. See CONTEXT_AW.md.
 
 ---
 
@@ -374,8 +374,8 @@ AW_MAX_EXPORT_ROWS=200000
 ---
 
 ## WHEN CONTRIBUTING
-1. Always read CONTEXT.md at session start — current status, backlog, next actions
-2. Always read BUGS.md at session start — active bugs, root causes, hardening priorities
+1. Always read CONTEXT_AW.md at session start — current status, backlog, next actions
+2. Always read BUGS_AW.md at session start — active bugs, root causes, hardening priorities
 3. Always read the actual file before editing — never assume current state
 4. Preserve frozen UI decisions unless explicitly told to change them
 5. Distinguish frontend vs backend problems clearly
@@ -390,14 +390,14 @@ AW_MAX_EXPORT_ROWS=200000
 ## Session Discipline
 
 At the end of every session the wrap script must:
-1. Update CONTEXT.md with session summary — one to three lines, most recent at top
+1. Update CONTEXT_AW.md with session summary — one to three lines, most recent at top
 2. Emit a BD flag if any change affects commercial positioning or customer-facing
    behavior. Format: "BD FLAG: [what changed] — [commercial implication]"
 3. Verify the implemented feature satisfies the commercial intent statement
    from the requirements prompt before closing the session
 
 ## Business Context
-See CONTEXT.md for current product and business state.
+See CONTEXT_AW.md for current product and business state.
 
 ## Farragut Engagement — Key Commercial Constraints
 

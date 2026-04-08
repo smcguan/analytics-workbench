@@ -186,6 +186,15 @@
       "container": "view:query"
     },
     {
+      "event_type": "generate_summary",
+      "timestamp": "2026-03-20T17:30:00.000000+00:00",
+      "details": {},
+      "narration": {
+        "pre": "The analysis is complete. Generate Summary produces a structured memo of the IRA exclusion methodology — which datasets were used, which filters were applied, and what the candidate list represents. This is the audit trail for the analytical work.",
+        "post": "The Analysis Summary captures the full workflow: Part D spending data imported, IRA reference table joined, exclusion filter applied, candidate list exported. The four-section memo (Findings, Methodology, Limitations, Open Items) is ready for review or export as Markdown."
+      }
+    },
+    {
       "event_type": "session_end",
       "timestamp": "2026-03-20T17:35:00.000000+00:00",
       "details": {},

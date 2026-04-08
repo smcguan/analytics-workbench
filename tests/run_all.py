@@ -250,9 +250,9 @@ def _print_summary(results: list[dict], total_time: float) -> None:
 # ============================================================
 
 def _get_version() -> str:
-    """Read version from CONTEXT.md (Current version: vX.Y.Z line)."""
+    """Read version from CONTEXT_AW.md (Current version: vX.Y.Z line)."""
     try:
-        ctx = Path(__file__).parent.parent / "CONTEXT.md"
+        ctx = Path(__file__).parent.parent / "CONTEXT_AW.md"
         for line in ctx.read_text(encoding="utf-8").splitlines():
             if "**Current version:**" in line:
                 parts = line.split("**Current version:**")

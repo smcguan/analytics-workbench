@@ -41,10 +41,10 @@
 - Privacy Mode toggle — COMPLETE (v1.21.0) — Settings panel toggle restricts all AI transmissions to schema+stats only when enabled. Strips sample rows, categorical values, and query result rows from 5 affected endpoints. JSON config format in config.enc. Reference Guide rewritten with per-endpoint disclosure.
 - Analysis Summary Artifact — COMPLETE (v1.23.0) — AI-powered session summary generates structured memo (Findings/Methodology/Limitations/Open Items) from session log. Privacy mode strips SQL and data values. Slide-in drawer with markdown export. Configurable template for per-customer formats.
 
-**Current version:** v1.23.0 — Analysis Summary Artifact (M5 Priority 2)
+**Current version:** v1.23.1 — Analysis Summary polish: Reference Guide, tutorials, tests, export UX
 
-**Test suite:** 1,146 automated tests across three suites, all passing.
-- Unit tests (pytest tests/): 927 passed, 21 skipped
+**Test suite:** 1,152 automated tests across three suites, all passing.
+- Unit tests (pytest tests/): 933 passed, 21 skipped
 - Feature + workflow suite (run_all.py): 196 passed, 1 skipped
 - Query accuracy suite (test_accuracy.py): 43 passed (23 deterministic + 20 AI)
 - AI accuracy when enabled: 100% (20/20) — threshold is 85%
@@ -378,6 +378,13 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-04-08] [CODE] — v1.23.1. Analysis Summary polish: Reference Guide section rewritten with full
+  documentation (export options, privacy behavior, four-section structure). generate_summary tutorial
+  step added to Tutorials #1, #3, #4 with playback engine handler. Copy to Clipboard button added
+  to drawer toolbar (sticky top, responsive stacking). 6 new endpoint tests (four-section headings,
+  privacy prompt inspection both modes, empty session graceful handling, no cross-session caching,
+  markdown export validation). generate_summary added to replayable step types and session log badge/label.
+  933 pytest + 196 run_all + 23 accuracy = 1,152 tests.
 [2026-04-08] [CODE] — v1.23.0. Analysis Summary Artifact (M5 Priority 2). New POST /api/session/analysis_summary endpoint reads session log events, sends metadata to OpenAI, returns structured 4-section memo (Findings, Methodology, Limitations, Open Items). Privacy mode supported — strips SQL and data values from prompt when enabled. Frontend: Generate Summary button in WORKFLOWS sidebar, slide-in drawer with rendered sections, Export Markdown button, Regenerate button. Configurable template variable for future per-customer customization. 19 new tests (prompt builder, parser, endpoint, privacy). 1,146 tests passing.
 [2026-04-08] [BD] — Document Workbench companion product built from zero to v0.6.3 in one day: PDF ingestion, LanceDB vector store, OpenAI providers, FastAPI routes, frontend UI matching AW design. Tested against Farragut NDA draft — Q&A with page citations working. Two new AW example cases generated and integrated: Tutorial #8 Cash Pay MedSpa (4,245 rows, PE diligence workflow) and Tutorial #9 Hospital Readmissions HRRP (975 rows, penalty exposure analysis). Both validated against Farragut use cases. Cloud/Local mode indicator added to AW header. DW repo fully set up with same continuity infrastructure as AW.
 [2026-04-07] [CODE] — v1.22.0. Tutorials #8 and #9 added: Cash Pay Entity Analysis (MedSpa,
@@ -435,11 +442,11 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
   runner. _fetchResultNarrative() was fire-and-forget in query_run and ai_ask handlers;
   next step's 800ms pause was shorter than OpenAI's 2-4s response time, so narrative
   got cleared before rendering. Fix: await the call in both demo runner paths. Root cause
-  corrected from DIVERGENT_PATH to CONCURRENCY in BUGS.md. 1,079 tests passing.
+  corrected from DIVERGENT_PATH to CONCURRENCY in BUGS_AW.md. 1,079 tests passing.
 [2026-03-29] [BD] — Wrap workflow established. SKILL.md updated to run all three test
-  suites (pytest + run_all.py + test_accuracy.py) and update both CONTEXT.md and
+  suites (pytest + run_all.py + test_accuracy.py) and update both CONTEXT_AW.md and
   CONTEXT_BUSINESS.md on every wrap. Testing procedure Word doc produced for enterprise
-  QA conversations. Wrap → upload → BD update → final CONTEXT.md loop confirmed working.
+  QA conversations. Wrap → upload → BD update → final CONTEXT_AW.md loop confirmed working.
   Next session priorities: SOW stress test, Features 6-7, Casey follow-up, Wyoming LLC.
 [2026-03-29] [CODE] — v1.19.0. Three-suite test infrastructure complete + Bugs #9/#10/#11
   permanently fixed. Bug #9: Insights prompt column-name agnostic — passes aliases and uses
@@ -661,12 +668,12 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
   Exit no longer creates session files, Save & Exit no longer creates duplicates. v1.10.1.
 [2026-03-20] [BD] — Farragut/McDermott research complete. Identified as McDermott+Consulting
   (law firm analytics arm). Multi-state Medicaid normalization identified as next use case.
-  Casey prep doc built with Stan Q&A guide. CONTEXT.md updated with Farragut profile,
+  Casey prep doc built with Stan Q&A guide. CONTEXT_AW.md updated with Farragut profile,
   M5 priorities reordered, Medicaid reference tables added to library roadmap.
 [2026-03-20] [BD] — Market intelligence research complete. Competitor moves mapped.
   Tier 1 consultant one-pager built. Positioning copy updated post-M4.
-[2026-03-20] [BD] — UI redesign batch validated in CONTEXT.md: Reference Guide built,
-  SESSIONS restructured, Exit button, collapsible sidebar. CLAUDE.md + CONTEXT.md
+[2026-03-20] [BD] — UI redesign batch validated in CONTEXT_AW.md: Reference Guide built,
+  SESSIONS restructured, Exit button, collapsible sidebar. CLAUDE.md + CONTEXT_AW.md
   updated with Parameterized Sessions spec and M5 feature documentation.
 [2026-03-20] [CODE] — UI redesign batch: Reference Guide, SESSIONS 4 buttons, Exit button,
   collapsible sidebar, /wrap updated, /sync skill added. 607 tests. v1.10.0.
@@ -772,7 +779,7 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 [DATE] [BD] — decision made, document produced, or strategy updated
 
 **At the start of any session**, read this file first.
-For Claude Code: add to CLAUDE.md → See CONTEXT.md for current product and business state.
+For Claude Code: add to CLAUDE.md → See CONTEXT_AW.md for current product and business state.
 For Claude.ai: paste the full file or the relevant sections.
 
 **To trigger a context update:** say "update the context file" at end of session.

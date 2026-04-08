@@ -179,12 +179,12 @@ multiply at 200+ customers.
 - "Log this bug: [description]" — I'll add a formatted entry and generate a Claude Code handoff prompt
 - "Mark BUG-XXX fixed in vX.X.X" — I'll update the status
 - "Synthesize bugs" — I'll analyze patterns and surface architectural risks
-- "Update BUGS.md" — I'll produce a fresh version of this file to re-upload
+- "Update BUGS_AW.md" — I'll produce a fresh version of this file to re-upload
 
 **After a Claude Code session:**
 - Note which bugs were fixed and what version
 - Come back to any project chat, say "mark BUG-XXX fixed in vX.X.X"
-- Re-download and re-upload the updated BUGS.md to the project
+- Re-download and re-upload the updated BUGS_AW.md to the project
 
 **Template for new bugs:**
 ### BUG-XXX

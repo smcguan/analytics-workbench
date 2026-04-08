@@ -27,7 +27,7 @@ Read `backend/app/version.py` and report the current version.
 Run `git status -s` and `git log --oneline -5` to show any local changes
 and the most recent commits.
 
-**6. Read CONTEXT.md**
+**6. Read CONTEXT_AW.md**
 Read the full file. Focus on:
 - Last Session Log (most recent 3 entries) — what was just done
 - Next Actions — what needs to happen next
@@ -49,6 +49,6 @@ Output a brief orientation summary:
 - Current version
 - Test suite status (count + pass/fail)
 - Last session: what was built (from session log)
-- Top 3 next actions (from CONTEXT.md)
+- Top 3 next actions (from CONTEXT_AW.md)
 - Any active bugs
 - Any uncommitted local changes

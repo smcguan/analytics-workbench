@@ -2101,13 +2101,23 @@
         .summary-drawer-body li{ margin-bottom:4px; }
         .summary-drawer-body p{ margin:6px 0 10px; }
         .summary-drawer-body strong{ color:var(--text); }
-        .summary-drawer-footer{
+        .summary-drawer-toolbar{
             display:flex;
             gap:8px;
-            padding:12px 20px;
-            border-top:1px solid var(--stroke);
+            padding:10px 20px;
+            border-bottom:1px solid var(--stroke);
             flex-shrink:0;
+            flex-wrap:wrap;
         }
+        .summary-drawer-toolbar .btn{ flex:1; min-width:120px; }
+        .summary-copied-msg{
+            font-size:11px;
+            color:var(--success);
+            align-self:center;
+            opacity:0;
+            transition:opacity .2s;
+        }
+        .summary-copied-msg.show{ opacity:1; }
         .summary-loading{
             display:flex;
             align-items:center;
@@ -3106,16 +3116,19 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 <li>Regression testing — Run All validates that updated data still produces expected results</li>
 </ul>
 
-<h4>Analysis Summary</h4>
-<p>Click <strong>Generate Summary</strong> in the Workflows sidebar section to create an AI-powered memo of your session. The summary reads your Session Log and produces a structured document with four sections:</p>
+<h3>Analysis Summary Artifact</h3>
+<p>After running an analytical session, AW can automatically generate a structured summary memo from your Session Log. The memo is designed to bridge the gap between raw analysis and a client-ready deliverable.</p>
+<p>To generate a summary: click <strong>Generate Summary</strong> in the WORKFLOWS sidebar section. The summary opens in a slide-in drawer.</p>
+<p>The memo has four sections:</p>
 <ul>
-<li><strong>Findings</strong> — key analytical results with specific numbers and entity names</li>
-<li><strong>Methodology</strong> — datasets loaded, reference tables joined, analytical approach taken</li>
-<li><strong>Limitations</strong> — data quality caveats, proxy measures, filter assumptions</li>
-<li><strong>Open Items</strong> — unanswered questions and follow-up analyses needed</li>
+<li><strong>Findings</strong> — key results and patterns identified during the session</li>
+<li><strong>Methodology</strong> — datasets loaded, reference tables used, queries run, and filters applied</li>
+<li><strong>Limitations</strong> — data quality issues, caveats, and scope boundaries</li>
+<li><strong>Open Items</strong> — questions flagged for follow-up or further investigation</li>
 </ul>
-<p><strong>Privacy Mode:</strong> When Privacy Mode is enabled, the summary prompt receives query descriptions and row counts but no SQL or data values. Findings describe analytical patterns rather than citing specific numbers.</p>
-<p><strong>Export:</strong> Click <strong>Export Markdown</strong> in the drawer footer to download the summary as a <code>.md</code> file. Click <strong>Regenerate</strong> to produce a fresh summary from the current session state.</p>
+<p><strong>Privacy Mode behavior:</strong> when Privacy Mode is ON, the summary prompt strips SQL queries and data values — the memo describes the analytical approach without referencing specific numbers or query syntax.</p>
+<p><strong>Export options:</strong> use <strong>Export Markdown</strong> to download the memo as a <code>.md</code> file, or <strong>Copy to Clipboard</strong> to paste directly into a Word document, email, or reporting tool.</p>
+<p>The summary reflects the full session from first import to last query. Run all your queries before generating — the summary improves with more session activity.</p>
 
 <hr>
 <h3>Sessions</h3>
@@ -3198,12 +3211,14 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             <h2>Analysis Summary</h2>
             <button id="summaryCloseBtn" class="ec-close" title="Close">&times;</button>
         </div>
+        <div class="summary-drawer-toolbar">
+            <button class="btn small" id="summaryExportBtn" title="Export summary as Markdown" disabled>Export Markdown</button>
+            <button class="btn small" id="summaryCopyBtn" title="Copy summary to clipboard" disabled>Copy to Clipboard</button>
+            <button class="btn small" id="summaryRegenerateBtn" title="Regenerate summary from current session">Regenerate</button>
+            <span class="summary-copied-msg" id="summaryCopiedMsg">Copied</span>
+        </div>
         <div class="summary-drawer-body" id="summaryBody">
             <div class="help-text">Click "Generate Summary" to create an AI-powered analysis memo from your session.</div>
-        </div>
-        <div class="summary-drawer-footer">
-            <button class="btn small" id="summaryExportBtn" title="Export summary as Markdown" disabled>Export Markdown</button>
-            <button class="btn small" id="summaryRegenerateBtn" title="Regenerate summary from current session">Regenerate</button>
         </div>
     </div>
 
@@ -4652,7 +4667,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             if (eventType === "dataset_import" || eventType === "dataset_delete" || eventType === "dataset_derived") return "sld-badge-import";
             if (eventType === "query_run" || eventType === "ai_sql_generated") return "sld-badge-query";
             if (eventType === "reference_load" || eventType === "reference_delete") return "sld-badge-ref";
-            if (eventType === "export") return "sld-badge-export";
+            if (eventType === "export" || eventType === "generate_summary") return "sld-badge-export";
             if (eventType === "result_passport" || eventType === "passport_export") return "sld-badge-passport";
             return "sld-badge-system";
         }
@@ -4673,6 +4688,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 session_start: "SESSION START",
                 session_end: "SESSION END",
                 query_save: "QUERY SAVED",
+                generate_summary: "SUMMARY GENERATED",
             };
             return labels[eventType] || eventType.replace(/_/g, " ").toUpperCase();
         }
@@ -4795,6 +4811,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             const body = $("summaryBody");
             body.innerHTML = '<div class="summary-loading"><div class="spinner"></div>Generating analysis summary...</div>';
             $("summaryExportBtn").disabled = true;
+            $("summaryCopyBtn").disabled = true;
             _summaryRawMarkdown = "";
 
             try {
@@ -4820,6 +4837,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 _summaryRawMarkdown = data.raw_text || "";
                 _renderSummary(data);
                 $("summaryExportBtn").disabled = false;
+                $("summaryCopyBtn").disabled = false;
             } catch (e) {
                 body.innerHTML = '<div class="help-text">Failed to generate summary: ' + e.message + '</div>';
             }
@@ -4885,6 +4903,15 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
             showToast("Summary exported as Markdown");
+        }
+
+        function _copySummaryToClipboard() {
+            if (!_summaryRawMarkdown) return;
+            navigator.clipboard.writeText("# Analysis Summary\n\n" + _summaryRawMarkdown).then(() => {
+                const msg = $("summaryCopiedMsg");
+                msg.classList.add("show");
+                setTimeout(() => msg.classList.remove("show"), 2000);
+            });
         }
 
         // ---------------------------------------------------------------
@@ -5634,7 +5661,8 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             return ["dataset_import", "query_run", "reference_load", "reference_delete", "export", "session_end",
                     "edit_panel_open", "edit_panel_choose", "edit_panel_check", "edit_panel_run",
                     "inspect_schema", "inspect_preview", "ai_ask", "insights_generated",
-                    "explain", "chart_view", "query_save", "query_load", "dataset_derived"].includes(eventType);
+                    "explain", "chart_view", "query_save", "query_load", "dataset_derived",
+                    "generate_summary"].includes(eventType);
         }
 
         async function openTutorial(filename) {
@@ -6655,6 +6683,25 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                     await _tutorialPause(1200);
                 } catch (e) {
                     toast(`Save as Dataset failed during replay: ${e.message || ""}`, 6000);
+                }
+                return;
+            }
+
+            // ── generate_summary ────────────────────────────────────────────────────
+            // Triggers the Analysis Summary drawer — calls the AI endpoint and opens
+            // the slide-in drawer showing the four-section memo.
+            if (step.event_type === "generate_summary") {
+                await generateAnalysisSummary();
+                // Wait for drawer to be visible and content to load
+                await _tutorialPause(2000);
+                // Verify all four section headings are present
+                const body = $("summaryBody");
+                const headings = body.querySelectorAll("h2");
+                const headingTexts = [...headings].map(h => h.textContent.toLowerCase());
+                const hasFour = ["findings", "methodology", "limitations", "open items"]
+                    .every(s => headingTexts.some(h => h.includes(s)));
+                if (!hasFour) {
+                    console.warn("[STEP] generate_summary: not all four section headings found:", headingTexts);
                 }
                 return;
             }
@@ -8495,6 +8542,7 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         $("generateSummaryBtn").addEventListener("click", generateAnalysisSummary);
         $("summaryCloseBtn").addEventListener("click", closeSummaryDrawer);
         $("summaryExportBtn").addEventListener("click", _exportSummaryMarkdown);
+        $("summaryCopyBtn").addEventListener("click", _copySummaryToClipboard);
         $("summaryRegenerateBtn").addEventListener("click", generateAnalysisSummary);
 
         // SQL expand/collapse in session log drawer

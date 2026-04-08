@@ -313,3 +313,136 @@ class TestEndpoint:
         with patch("app.main._has_key", return_value=False):
             resp = client.post("/api/session/analysis_summary")
             assert resp.status_code == 402
+
+    def test_response_has_all_four_section_headings(self, client):
+        """Verify the response contains all four required section keys with content."""
+        start_session()
+        log_event(SessionEventType.DATASET_IMPORT, {
+            "dataset": "test_ds", "row_count": 500, "column_count": 10
+        })
+        log_event(SessionEventType.QUERY_RUN, {
+            "dataset": "test_ds", "sql": "SELECT region, SUM(revenue) FROM dataset GROUP BY region",
+            "rowcount": 5, "elapsed_seconds": 0.02,
+        })
+        with patch(
+            "app.ai.provider_openai.generate_sql_response",
+            return_value=MOCK_AI_RESPONSE,
+        ):
+            resp = client.post("/api/session/analysis_summary")
+            data = resp.json()
+            # All four sections present and non-empty
+            assert data["findings"] != ""
+            assert data["methodology"] != ""
+            assert data["limitations"] != ""
+            assert data["open_items"] != ""
+            # raw_text contains all four section headers
+            assert "## Findings" in data["raw_text"]
+            assert "## Methodology" in data["raw_text"]
+            assert "## Limitations" in data["raw_text"]
+            assert "## Open Items" in data["raw_text"]
+
+    def test_privacy_mode_on_strips_sql_from_prompt(self, client):
+        """When Privacy Mode ON, the prompt must NOT contain raw SQL queries."""
+        start_session()
+        test_sql = "SELECT secret_col, SUM(amount) FROM dataset GROUP BY secret_col"
+        log_event(SessionEventType.DATASET_IMPORT, {"dataset": "ds"})
+        log_event(SessionEventType.QUERY_RUN, {
+            "dataset": "ds", "sql": test_sql,
+            "rowcount": 3, "elapsed_seconds": 0.01,
+        })
+        with patch("app.main._get_privacy_mode", return_value=True), \
+             patch(
+                 "app.ai.provider_openai.generate_sql_response",
+                 return_value=MOCK_AI_RESPONSE,
+             ) as mock_call:
+            client.post("/api/session/analysis_summary")
+            prompt = mock_call.call_args[0][0]
+            assert test_sql not in prompt
+            assert "PRIVACY RESTRICTION" in prompt
+
+    def test_privacy_mode_off_includes_sql_in_prompt(self, client):
+        """When Privacy Mode OFF, the prompt should contain SQL from session events."""
+        start_session()
+        test_sql = "SELECT region, COUNT(*) FROM dataset GROUP BY region"
+        log_event(SessionEventType.DATASET_IMPORT, {"dataset": "ds"})
+        log_event(SessionEventType.QUERY_RUN, {
+            "dataset": "ds", "sql": test_sql,
+            "rowcount": 5, "elapsed_seconds": 0.01,
+        })
+        with patch("app.main._get_privacy_mode", return_value=False), \
+             patch(
+                 "app.ai.provider_openai.generate_sql_response",
+                 return_value=MOCK_AI_RESPONSE,
+             ) as mock_call:
+            client.post("/api/session/analysis_summary")
+            prompt = mock_call.call_args[0][0]
+            assert test_sql in prompt
+            assert "PRIVACY RESTRICTION" not in prompt
+
+    def test_empty_session_no_500(self, client):
+        """Session with only session_start event (no queries) should return 400, not 500."""
+        start_session()
+        # session has a session_start event — clear it for truly empty
+        session = get_current_session()
+        session.events.clear()
+        resp = client.post("/api/session/analysis_summary")
+        assert resp.status_code == 400
+        assert "no events" in resp.json().get("detail", "").lower()
+
+    def test_summary_not_cached_between_sessions(self, client):
+        """Two different sessions should produce different prompts (no cross-session caching)."""
+        # Session 1
+        start_session()
+        log_event(SessionEventType.DATASET_IMPORT, {"dataset": "alpha_ds"})
+        log_event(SessionEventType.QUERY_RUN, {
+            "dataset": "alpha_ds", "sql": "SELECT * FROM dataset",
+            "rowcount": 10, "elapsed_seconds": 0.01,
+        })
+        prompts = []
+        with patch(
+            "app.ai.provider_openai.generate_sql_response",
+            return_value=MOCK_AI_RESPONSE,
+        ) as mock_call:
+            client.post("/api/session/analysis_summary")
+            prompts.append(mock_call.call_args[0][0])
+
+        # Session 2 — different dataset
+        _reset_session()
+        start_session()
+        log_event(SessionEventType.DATASET_IMPORT, {"dataset": "beta_ds"})
+        log_event(SessionEventType.QUERY_RUN, {
+            "dataset": "beta_ds", "sql": "SELECT col_z FROM dataset",
+            "rowcount": 20, "elapsed_seconds": 0.02,
+        })
+        with patch(
+            "app.ai.provider_openai.generate_sql_response",
+            return_value=MOCK_AI_RESPONSE,
+        ) as mock_call:
+            client.post("/api/session/analysis_summary")
+            prompts.append(mock_call.call_args[0][0])
+
+        # Prompts should differ — session 1 mentions alpha_ds, session 2 mentions beta_ds
+        assert "alpha_ds" in prompts[0]
+        assert "beta_ds" in prompts[1]
+        assert "alpha_ds" not in prompts[1]
+        assert "beta_ds" not in prompts[0]
+
+    def test_raw_text_is_valid_markdown(self, client):
+        """raw_text should be valid markdown with section headers suitable for export."""
+        start_session()
+        log_event(SessionEventType.DATASET_IMPORT, {"dataset": "ds"})
+        log_event(SessionEventType.QUERY_RUN, {
+            "dataset": "ds", "sql": "SELECT 1",
+            "rowcount": 1, "elapsed_seconds": 0.01,
+        })
+        with patch(
+            "app.ai.provider_openai.generate_sql_response",
+            return_value=MOCK_AI_RESPONSE,
+        ):
+            resp = client.post("/api/session/analysis_summary")
+            data = resp.json()
+            raw = data["raw_text"]
+            # Should start with a section header
+            assert raw.startswith("## ")
+            # Should contain markdown bullet points
+            assert "- " in raw

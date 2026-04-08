@@ -343,6 +343,15 @@
       "container": "view:saved"
     },
     {
+      "event_type": "generate_summary",
+      "timestamp": "2026-03-23T10:23:00.000000+00:00",
+      "details": {},
+      "narration": {
+        "pre": "With ten queries complete across three states, we now generate the Analysis Summary — a structured memo capturing the key findings, methodology, and open items from this diligence session. In a real engagement this becomes the starting point for the client deliverable.",
+        "post": "The Analysis Summary drawer shows four sections: Findings (key risk indicators across all three states), Methodology (datasets loaded, reference tables joined, queries run), Limitations (data caveats and proxy measures), and Open Items (follow-up analyses needed). This is the bridge from raw analysis to a client-ready memo."
+      }
+    },
+    {
       "event_type": "session_end",
       "timestamp": "2026-03-23T10:25:00.000000+00:00",
       "details": {},

@@ -506,7 +506,7 @@ CYAN   = lambda t: _ansi("36", t)
 
 def _get_version() -> str:
     try:
-        ctx = ROOT / "CONTEXT.md"
+        ctx = ROOT / "CONTEXT_AW.md"
         for line in ctx.read_text(encoding="utf-8").splitlines():
             if "**Current version:**" in line:
                 parts = line.split("**Current version:**")

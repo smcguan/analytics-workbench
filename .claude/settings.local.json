@@ -20,7 +20,16 @@
       "Bash(PYTHONPATH=backend .venv/Scripts/python tests/test_accuracy.py)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(.venv/Scripts/pip install:*)",
+      "Bash(.venv/Scripts/pip show:*)",
+      "Bash(.venv/Scripts/python -m pip install cryptography)",
+      "Bash(.venv/Scripts/python tests/test_accuracy.py --no-ai)",
+      "Bash(python:*)",
+      "Bash(.venv/Scripts/python tests/run_all.py)",
+      "Bash(PYTHONPATH=backend .venv/Scripts/python -m pytest tests/test_tutorial_queries.py -v)",
+      "Bash(PYTHONPATH=backend .venv/Scripts/python -m pytest tests/test_analysis_summary.py -v)",
+      "Bash(PYTHONPATH=backend .venv/Scripts/python tests/test_accuracy.py --no-ai)"
     ]
   },
   "hooks": {
@@ -29,7 +38,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python -c \"import json, sys; c=open('C:/dev/analytics-workbench/CONTEXT.md').read(); print(json.dumps({'hookSpecificOutput': {'hookEventName': 'SessionStart', 'additionalContext': 'SESSION JUST STARTED. As your very first action this session, respond immediately with a brief status greeting covering: (1) current version from CONTEXT.md, (2) the top 3 items from NEXT ACTIONS > Product / code section, (3) any ACTIVE BUGS. Keep it under 15 lines total.\\n\\nFull CONTEXT.md contents:\\n' + c}})); sys.exit(2)\"",
+            "command": "python -c \"import json, sys; c=open('C:/dev/analytics-workbench/CONTEXT_AW.md').read(); print(json.dumps({'hookSpecificOutput': {'hookEventName': 'SessionStart', 'additionalContext': 'SESSION JUST STARTED. As your very first action this session, respond immediately with a brief status greeting covering: (1) current version from CONTEXT_AW.md, (2) the top 3 items from NEXT ACTIONS > Product / code section, (3) any ACTIVE BUGS. Keep it under 15 lines total.\\n\\nFull CONTEXT_AW.md contents:\\n' + c}})); sys.exit(2)\"",
             "statusMessage": "Loading project context...",
             "asyncRewake": true
           }
