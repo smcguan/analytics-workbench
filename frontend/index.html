@@ -2280,6 +2280,10 @@
             </div>
 
             <div class="top-actions">
+                <div class="meta-pill" id="modePill">
+                    <span class="status-dot ok" id="modeDot"></span>
+                    <span id="modeText">Cloud Mode</span>
+                </div>
                 <div class="meta-pill" id="versionPill">
                     <span class="status-dot" id="versionDot"></span>
                     <span id="versionText">Loading version…</span>
@@ -8776,6 +8780,9 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             $("privacyModeDesc").textContent = enabled
                 ? "AI features send column names and statistics only. No sample rows, categorical values, or query result rows are transmitted."
                 : "AI features currently send: column names, statistics, up to 5 sample rows, up to 10 categorical values per column, and up to 10 query result rows (for Result Narrative and Explain).";
+            // Update topbar mode indicator
+            $("modeText").textContent = enabled ? "Privacy Mode" : "Cloud Mode";
+            $("modeDot").className = "status-dot ok";
         }
 
         $("privacyModeToggle").addEventListener("change", async (e) => {
@@ -8897,6 +8904,12 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             if (!keyConfigured) {
                 showKeySetupOverlay();
             }
+
+            // Initialize topbar mode indicator
+            try {
+                const pm = await apiJson("/api/settings/privacy_mode");
+                _updatePrivacyModeUI(pm.privacy_mode);
+            } catch (_) {}
         })();
     </script>
 </body>
