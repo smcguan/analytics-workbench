@@ -385,3 +385,37 @@ AW_MAX_EXPORT_ROWS=200000
 10. Never leave bare except: pass blocks — always log the error
 11. For any new AI endpoint, follow the suggest_questions caching pattern exactly
 12. When in doubt about DuckDB syntax, test with EXPLAIN before executing
+
+## Session Discipline
+
+At the end of every session the wrap script must:
+1. Update CONTEXT.md with session summary — one to three lines, most recent at top
+2. Emit a BD flag if any change affects commercial positioning or customer-facing
+   behavior. Format: "BD FLAG: [what changed] — [commercial implication]"
+3. Verify the implemented feature satisfies the commercial intent statement
+   from the requirements prompt before closing the session
+
+## Business Context
+See CONTEXT.md for current product and business state.
+
+## Farragut Engagement — Key Commercial Constraints
+
+1. Farragut (McDermott+Consulting) = primary prospect, healthcare PE diligence,
+   law firm environment, attorney-client privilege applies to all client data.
+2. Casey McGuan = Farragut subcontractor transitioning to full-time employee May 2026.
+   Casey = internal resource. JetWare = external vendor. Roles must stay clean.
+3. NDA is the only commercial unlock. Nothing ships to Farragut until NDA signed.
+4. Five use cases: CIM extraction + CMS repository = Document Workbench (not built).
+   Cash pay + IDRE = AW today. PE ownership database = AW partial.
+5. IP boundary: JetWare owns software and platform improvements. Farragut owns
+   workflows, data, and internal methodology. Platform evolves broadly.
+   Workflows stay customer-specific.
+6. Never imply co-development with Casey. Never frame JetWare as consultant.
+   Primary = software license. Secondary = onboarding. Avoid SOW-based ownership risk.
+7. Moat is workflow + execution + customer proximity — not technology.
+8. Speed framing: "shorten the loop between analysis and implementation" /
+   "velocity with control" — NOT "we move fast."
+9. Pedigree: 40 years regulated software, LifeMOD exit to Smith & Nephew 2012,
+   1,079 automated tests. JetWare timing is deliberate playbook, not fly-by-night.
+10. End state: Farragut = anchor customer. Casey = embedded signal loop.
+    JetWare = scalable platform vendor.
