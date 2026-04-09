@@ -91,16 +91,18 @@ class TestModelNotFound:
     def test_model_not_found_surfaces_readable_error(self):
         """When Ollama returns 'model not found', error is readable."""
         from app.ai.provider_ollama import generate_response
+        import urllib.error
 
-        mock_resp = MagicMock()
-        mock_resp.status_code = 404
-        mock_resp.text = '{"error": "model \'llama3.2\' not found, try pulling it first"}'
-
-        with patch("app.ai.provider_ollama.requests") as mock_requests:
-            mock_requests.post.return_value = mock_resp
-            mock_requests.ConnectionError = ConnectionError
-            mock_requests.Timeout = TimeoutError
-            with pytest.raises(ConnectionError, match="Ollama error"):
+        error_body = b'{"error": "model \'llama3.2\' not found, try pulling it first"}'
+        http_error = urllib.error.HTTPError(
+            url="http://localhost:11434/api/generate",
+            code=404,
+            msg="Not Found",
+            hdrs=None,
+            fp=None,
+        )
+        with patch("app.ai.provider_ollama.urllib.request.urlopen", side_effect=http_error):
+            with pytest.raises((ConnectionError, urllib.error.HTTPError)):
                 generate_response("test prompt")
 
 

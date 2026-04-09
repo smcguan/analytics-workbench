@@ -13,6 +13,10 @@ Uses the Ollama HTTP API at localhost:11434. The model name is
 read from config at request time via key_manager.get_ollama_model()
 so changes in Settings take effect immediately without restart.
 
+Uses only Python standard library (urllib) — no third-party packages
+required. This ensures it works in both dev mode and the packaged
+PyInstaller .exe where requests may not be bundled.
+
 ============================================================
 """
 
@@ -21,11 +25,8 @@ from __future__ import annotations
 import json
 import logging
 import os
-
-try:
-    import requests
-except ImportError:
-    requests = None  # type: ignore[assignment]
+import urllib.request
+import urllib.error
 
 logger = logging.getLogger("app")
 
@@ -40,14 +41,11 @@ def _get_model() -> str:
 
 def check_ollama_available() -> bool:
     """Return True if Ollama is running and responding at the configured URL."""
-    if requests is None:
-        logger.warning("check_ollama_available: requests module not installed")
-        return False
     url = f"{OLLAMA_BASE_URL}/api/tags"
     try:
-        resp = requests.get(url, timeout=2)
-        logger.info("check_ollama_available: GET %s → %s", url, resp.status_code)
-        return resp.status_code == 200
+        with urllib.request.urlopen(url, timeout=2) as resp:
+            logger.info("check_ollama_available: GET %s → %s", url, resp.status)
+            return resp.status == 200
     except Exception as exc:
         logger.warning("check_ollama_available: GET %s → %s: %s", url, type(exc).__name__, exc)
         return False
@@ -64,33 +62,32 @@ def generate_response(prompt: str) -> str:
     Raises ConnectionError if Ollama is not reachable, which routes.py
     translates to HTTP 503.
     """
-    if requests is None:
-        raise ConnectionError(
-            "Ollama support requires the 'requests' package. Install with: pip install requests"
-        )
     model = _get_model()
+    payload = json.dumps({
+        "model": model,
+        "prompt": prompt,
+        "stream": False,
+    }).encode("utf-8")
+
+    req = urllib.request.Request(
+        f"{OLLAMA_BASE_URL}/api/generate",
+        data=payload,
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+
     try:
-        resp = requests.post(
-            f"{OLLAMA_BASE_URL}/api/generate",
-            json={
-                "model": model,
-                "prompt": prompt,
-                "stream": False,
-            },
-            timeout=120,
-        )
-    except requests.ConnectionError:
+        with urllib.request.urlopen(req, timeout=120) as resp:
+            body = resp.read().decode("utf-8")
+            if resp.status != 200:
+                raise ConnectionError(f"Ollama error: HTTP {resp.status} — {body[:200]}")
+            data = json.loads(body)
+            return data.get("response", "").strip()
+    except urllib.error.URLError as exc:
         raise ConnectionError(
             "Ollama is not running. Start Ollama and try again."
-        )
-    except requests.Timeout:
+        ) from exc
+    except TimeoutError:
         raise ConnectionError(
             "Ollama request timed out. Check that the model is loaded."
         )
-
-    if resp.status_code != 200:
-        error_detail = resp.text[:200] if resp.text else f"HTTP {resp.status_code}"
-        raise ConnectionError(f"Ollama error: {error_detail}")
-
-    data = resp.json()
-    return data.get("response", "").strip()
