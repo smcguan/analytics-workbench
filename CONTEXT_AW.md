@@ -386,13 +386,19 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
   privacy prompt inspection both modes, empty session graceful handling, no cross-session caching,
   markdown export validation). generate_summary added to replayable step types and session log badge/label.
   933 pytest + 196 run_all + 23 accuracy = 1,152 tests.
-[2026-04-08] [CODE] — v1.24.1. Configurable Ollama model. Default upgraded from llama3.2 (3B) to
-  llama3.1:8b. key_manager.py: get_ollama_model()/set_ollama_model(). 2 new API endpoints:
-  GET/POST /api/settings/ollama_model. provider_ollama.py: zero hardcoded model names, reads from
-  config at request time. Settings panel: Ollama model text field + Save button (visible only in
-  Local mode). Reference Guide: updated AI Mode docs with configurable model, troubleshooting rows.
-  test_ollama_accuracy.py: now checks any available model, not llama3.2 specifically. 8 new tests
-  (key_manager model ops + endpoint CRUD). 970 pytest + 196 run_all + 23 accuracy = 1,189 tests.
+[2026-04-08] [CODE] — v1.24.1. Configurable Ollama model + Ollama test suites + diagnostic logging.
+  Default model upgraded from llama3.2 (3B) to llama3.1:8b. key_manager.py: get_ollama_model()/
+  set_ollama_model(). 2 new API endpoints: GET/POST /api/settings/ollama_model. provider_ollama.py:
+  zero hardcoded model names, reads from config at request time. Settings panel: Ollama model text
+  field + Save button (visible only in Local mode). Reference Guide: updated AI Mode docs with
+  configurable model, troubleshooting rows updated. test_ollama_accuracy.py: 10-query benchmark
+  suite (skips when Ollama unavailable, checks any available model). test_ollama_robustness.py:
+  11 tests — 503 handling, model not found, malformed JSON, code fence cleaning, mid-session
+  switch, BUG-012 regression, all-endpoint routing verification (no Ollama required).
+  check_ollama_available() diagnostic logging added (INFO/WARNING with URL and status).
+  AI Mode toggle error handler made resilient — fetches real Ollama status on failure instead of
+  passing false. conftest.py: patches _get_ai_mode to cloud for test isolation across modules.
+  970 pytest + 196 run_all + 23 accuracy = 1,189 tests.
 [2026-04-08] [CODE] — v1.24.0. AI Mode Switch (M5 Priority 3). New provider_ollama.py connects to
   Ollama at localhost:11434. generate_sql_response() dispatches to OpenAI or Ollama
   based on ai_mode in config.enc. key_manager.py: get_ai_mode()/set_ai_mode() with validation.
