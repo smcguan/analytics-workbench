@@ -44,8 +44,8 @@
 
 **Current version:** v1.24.0 — AI Mode Switch: session-level Cloud/Local toggle via Ollama (M5 Priority 3)
 
-**Test suite:** 1,168 automated tests across three suites, all passing.
-- Unit tests (pytest tests/): 949 passed, 21 skipped
+**Test suite:** 1,170 automated tests across three suites, all passing.
+- Unit tests (pytest tests/): 951 passed, 21 skipped
 - Feature + workflow suite (run_all.py): 196 passed, 1 skipped
 - Query accuracy suite (test_accuracy.py): 43 passed (23 deterministic + 20 AI)
 - AI accuracy when enabled: 100% (20/20) — threshold is 85%
@@ -396,6 +396,11 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
   type in SessionEventType enum with Session Log badge. 503 handler in apiJson(). 16 new tests
   (key_manager, endpoints, provider routing, 503 handling, session log, privacy parity).
   949 pytest + 196 run_all + 23 accuracy = 1,168 tests.
+[2026-04-08] [CODE] — BUG-013/014 fixed. Settings panel toggles (AI Mode + Privacy Mode) were
+  broken — DOM .checked state caused re-entrant feedback loops. Fix: confirmed JS state variables
+  (_currentAiMode, _currentPrivacyMode) with _settingsToggling guard. Privacy Mode now hidden when
+  AI Mode is Local (nothing leaves machine). Backend _get_privacy_mode() returns False in local mode.
+  2 new toggle alternation tests. 951 pytest + 196 run_all + 23 accuracy = 1,170 tests.
 [2026-04-08] [CODE] — v1.23.0. Analysis Summary Artifact (M5 Priority 2). New POST /api/session/analysis_summary endpoint reads session log events, sends metadata to OpenAI, returns structured 4-section memo (Findings, Methodology, Limitations, Open Items). Privacy mode supported — strips SQL and data values from prompt when enabled. Frontend: Generate Summary button in WORKFLOWS sidebar, slide-in drawer with rendered sections, Export Markdown button, Regenerate button. Configurable template variable for future per-customer customization. 19 new tests (prompt builder, parser, endpoint, privacy). 1,146 tests passing.
 [2026-04-08] [BD] — Document Workbench companion product built from zero to v0.6.3 in one day: PDF ingestion, LanceDB vector store, OpenAI providers, FastAPI routes, frontend UI matching AW design. Tested against Farragut NDA draft — Q&A with page citations working. Two new AW example cases generated and integrated: Tutorial #8 Cash Pay MedSpa (4,245 rows, PE diligence workflow) and Tutorial #9 Hospital Readmissions HRRP (975 rows, penalty exposure analysis). Both validated against Farragut use cases. Cloud/Local mode indicator added to AW header. DW repo fully set up with same continuity infrastructure as AW.
 [2026-04-07] [CODE] — v1.22.0. Tutorials #8 and #9 added: Cash Pay Entity Analysis (MedSpa,

@@ -130,6 +130,54 @@ class TestAiModeEndpoints:
             data = resp.json()
             assert data["ollama_available"] is False
 
+    def test_ai_mode_toggles_correctly_across_multiple_clicks(self, client):
+        """Simulate multiple toggle clicks: cloud → local → cloud → local.
+        Each POST should alternate correctly — no snap-back to one value."""
+        # Start at cloud (default)
+        assert client.get("/api/settings/ai_mode").json()["mode"] == "cloud"
+
+        # Click 1: cloud → local
+        client.post("/api/settings/ai_mode", json={"mode": "local"})
+        assert client.get("/api/settings/ai_mode").json()["mode"] == "local"
+
+        # Click 2: local → cloud
+        client.post("/api/settings/ai_mode", json={"mode": "cloud"})
+        assert client.get("/api/settings/ai_mode").json()["mode"] == "cloud"
+
+        # Click 3: cloud → local
+        client.post("/api/settings/ai_mode", json={"mode": "local"})
+        assert client.get("/api/settings/ai_mode").json()["mode"] == "local"
+
+        # Click 4: local → cloud
+        client.post("/api/settings/ai_mode", json={"mode": "cloud"})
+        assert client.get("/api/settings/ai_mode").json()["mode"] == "cloud"
+
+    def test_privacy_mode_toggles_correctly_across_multiple_clicks(self, client):
+        """Simulate multiple toggle clicks: off → on → off → on.
+        Each POST should alternate correctly — never stuck on one value."""
+        # Start at off (default)
+        assert client.get("/api/settings/privacy_mode").json()["privacy_mode"] is False
+
+        # Click 1: off → on
+        client.post("/api/settings/privacy_mode", json={"enabled": True},
+                     headers={"Content-Type": "application/json"})
+        assert client.get("/api/settings/privacy_mode").json()["privacy_mode"] is True
+
+        # Click 2: on → off
+        client.post("/api/settings/privacy_mode", json={"enabled": False},
+                     headers={"Content-Type": "application/json"})
+        assert client.get("/api/settings/privacy_mode").json()["privacy_mode"] is False
+
+        # Click 3: off → on
+        client.post("/api/settings/privacy_mode", json={"enabled": True},
+                     headers={"Content-Type": "application/json"})
+        assert client.get("/api/settings/privacy_mode").json()["privacy_mode"] is True
+
+        # Click 4: on → off
+        client.post("/api/settings/privacy_mode", json={"enabled": False},
+                     headers={"Content-Type": "application/json"})
+        assert client.get("/api/settings/privacy_mode").json()["privacy_mode"] is False
+
 
 # ---------------------------------------------------------------------------
 # PROVIDER ROUTING TESTS

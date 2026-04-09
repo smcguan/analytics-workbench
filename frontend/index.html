@@ -9083,9 +9083,19 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             } catch (_) {}
         }
 
+        // ── Confirmed state variables ─────────────────────────────────
+        // These track the last confirmed backend state. Toggle handlers
+        // invert THESE — not the DOM checkbox — to determine the next value.
+        // This prevents re-entrant change events from sending stale values.
         let _currentAiMode = "cloud";
+        let _currentPrivacyMode = false;
+        let _settingsToggling = false;  // guard against re-entrant change events
 
         function _updatePrivacyModeUI(enabled) {
+            _currentPrivacyMode = enabled;
+            _settingsToggling = true;
+            $("privacyModeToggle").checked = enabled;
+            _settingsToggling = false;
             $("privacyModeHeading").textContent = enabled ? "Privacy Mode \u2014 On" : "Privacy Mode \u2014 Off";
             $("privacyModeLabel").textContent = enabled ? "On" : "Off";
             $("privacyModeDesc").textContent = enabled
@@ -9097,7 +9107,9 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
         function _updateAiModeUI(mode, ollamaAvailable) {
             _currentAiMode = mode;
             const isLocal = mode === "local";
+            _settingsToggling = true;
             $("aiModeToggle").checked = isLocal;
+            _settingsToggling = false;
             $("aiModeHeading").textContent = isLocal ? "AI Mode \u2014 Local (Ollama)" : "AI Mode \u2014 Cloud";
             $("aiModeLabel").textContent = isLocal ? "Local" : "Cloud";
             $("aiModeDesc").textContent = isLocal
@@ -9125,44 +9137,45 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 $("modeDot").className = "status-dot ok";
                 $("modePill").style.background = "rgba(79,140,255,.15)";
             } else {
-                $("modeText").textContent = privacyOn ? "Privacy Mode" : "Cloud AI";
+                $("modeText").textContent = _currentPrivacyMode ? "Privacy Mode" : "Cloud AI";
                 $("modeDot").className = "status-dot ok";
                 $("modePill").style.background = "";
             }
         }
 
-        $("privacyModeToggle").addEventListener("change", async (e) => {
-            const enabled = e.target.checked;
+        $("privacyModeToggle").addEventListener("change", async () => {
+            if (_settingsToggling) return;  // ignore programmatic .checked changes
+            const newVal = !_currentPrivacyMode;  // invert confirmed state, not DOM
             try {
                 await apiJson("/api/settings/privacy_mode", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ enabled }),
+                    body: JSON.stringify({ enabled: newVal }),
                 });
-                _updatePrivacyModeUI(enabled);
-                $("privacyModeConfirm").textContent = enabled ? "Privacy Mode enabled" : "Privacy Mode disabled";
+                _updatePrivacyModeUI(newVal);
+                $("privacyModeConfirm").textContent = newVal ? "Privacy Mode enabled" : "Privacy Mode disabled";
                 setTimeout(() => { $("privacyModeConfirm").textContent = ""; }, 3000);
             } catch (err) {
-                e.target.checked = !enabled;
+                _updatePrivacyModeUI(_currentPrivacyMode);  // revert to confirmed state
                 toast("Failed to update Privacy Mode: " + err.message);
             }
         });
 
-        $("aiModeToggle").addEventListener("change", async (e) => {
-            const isLocal = e.target.checked;
-            const mode = isLocal ? "local" : "cloud";
+        $("aiModeToggle").addEventListener("change", async () => {
+            if (_settingsToggling) return;  // ignore programmatic .checked changes
+            const newMode = _currentAiMode === "cloud" ? "local" : "cloud";  // invert confirmed state
             try {
                 await apiJson("/api/settings/ai_mode", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ mode }),
+                    body: JSON.stringify({ mode: newMode }),
                 });
                 const status = await apiJson("/api/settings/ai_mode");
                 _updateAiModeUI(status.mode, status.ollama_available);
-                $("aiModeConfirm").textContent = isLocal ? "Switched to Local AI (Ollama)" : "Switched to Cloud AI (OpenAI)";
+                $("aiModeConfirm").textContent = newMode === "local" ? "Switched to Local AI (Ollama)" : "Switched to Cloud AI (OpenAI)";
                 setTimeout(() => { $("aiModeConfirm").textContent = ""; }, 3000);
             } catch (err) {
-                e.target.checked = !isLocal;
+                _updateAiModeUI(_currentAiMode, false);  // revert to confirmed state
                 toast("Failed to update AI Mode: " + err.message);
             }
         });

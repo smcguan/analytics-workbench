@@ -186,6 +186,32 @@ multiply at 200+ customers.
 
 ---
 
+### BUG-013
+**Status:** FIXED — v1.24.0
+**Found:** 2026-04-08 — Self-test (Settings panel testing)
+**Component:** UI_GENERAL
+**Root Cause:** STATE_MANAGEMENT
+**Summary:** AI Mode toggle snaps back to Cloud — subsequent clicks always send "cloud" after first successful toggle to local.
+**Detail:** _updateAiModeUI() sets $("aiModeToggle").checked programmatically, which fires another "change" event. The re-entrant handler reads the just-set DOM state and sends the same mode again, creating a feedback loop that resets to the default.
+**Fix:** Toggle handlers now invert a confirmed JS state variable (_currentAiMode) instead of reading DOM .checked. A _settingsToggling guard prevents re-entrant change events when _updateAiModeUI() sets .checked programmatically.
+**Fix Commit:** v1.24.0
+**Test Added:** Yes — test_ai_mode.py::TestAiModeEndpoints::test_ai_mode_toggles_correctly_across_multiple_clicks
+
+---
+
+### BUG-014
+**Status:** FIXED — v1.24.0
+**Found:** 2026-04-08 — Self-test (Settings panel testing)
+**Component:** UI_GENERAL
+**Root Cause:** STATE_MANAGEMENT
+**Summary:** Privacy Mode toggle can only turn ON — every click sends enabled:true regardless of current state.
+**Detail:** Toggle handler read e.target.checked (DOM state) which could be stale or re-triggered by UI updates. Same root cause pattern as BUG-013 — DOM-derived state instead of confirmed backend state.
+**Fix:** Toggle handler now inverts _currentPrivacyMode (confirmed JS variable) instead of reading DOM. _updatePrivacyModeUI() explicitly sets the checkbox and updates the confirmed variable. Re-entrant guard prevents feedback loops.
+**Fix Commit:** v1.24.0
+**Test Added:** Yes — test_ai_mode.py::TestAiModeEndpoints::test_privacy_mode_toggles_correctly_across_multiple_clicks
+
+---
+
 ## HOW TO USE THIS FILE
 
 **In any JetWare AI Development project chat:**
@@ -214,6 +240,7 @@ multiply at 200+ customers.
 ---
 
 ## CHANGELOG
+- 2026-04-08 — BUG-013 and BUG-014 fixed v1.24.0. Settings toggles now use confirmed JS state variables instead of DOM .checked, with re-entrant guard. 2 new toggle alternation tests.
 - 2026-04-08 — BUG-012 fixed v1.24.0. generate_sql_response() refactored as single dispatch chokepoint — all endpoints route correctly in both modes.
 - 2026-04-08 — BUG-012 logged. suggest_questions bypasses ai_mode check, calls OpenAI in local mode.
 - 2026-04-06 — BUG-010 and BUG-011 fixed v1.20.1. config.enc added to .gitignore; corrupted/wrong-machine key auto-deleted with 11 tests.
