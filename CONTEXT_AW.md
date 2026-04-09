@@ -42,10 +42,10 @@
 - Analysis Summary Artifact — COMPLETE (v1.23.0) — AI-powered session summary generates structured memo (Findings/Methodology/Limitations/Open Items) from session log. Privacy mode strips SQL and data values. Slide-in drawer with markdown export. Configurable template for per-customer formats.
 - AI Mode Switch — COMPLETE (v1.24.0) — Session-level Cloud/Local toggle. OllamaProvider at localhost:11434 with llama3.2. Settings panel toggle with dynamic Ollama status. Topbar pill shows current mode. ai_mode_change event in Session Log. 503 on Ollama unavailable. Privacy Mode applies identically to both providers.
 
-**Current version:** v1.24.0 — AI Mode Switch: session-level Cloud/Local toggle via Ollama (M5 Priority 3)
+**Current version:** v1.24.1 — Configurable Ollama model (default llama3.1:8b)
 
-**Test suite:** 1,170 automated tests across three suites, all passing.
-- Unit tests (pytest tests/): 951 passed, 21 skipped
+**Test suite:** 1,189 automated tests across three suites, all passing.
+- Unit tests (pytest tests/): 970 passed, 21 skipped
 - Feature + workflow suite (run_all.py): 196 passed, 1 skipped
 - Query accuracy suite (test_accuracy.py): 43 passed (23 deterministic + 20 AI)
 - AI accuracy when enabled: 100% (20/20) — threshold is 85%
@@ -386,8 +386,15 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
   privacy prompt inspection both modes, empty session graceful handling, no cross-session caching,
   markdown export validation). generate_summary added to replayable step types and session log badge/label.
   933 pytest + 196 run_all + 23 accuracy = 1,152 tests.
+[2026-04-08] [CODE] — v1.24.1. Configurable Ollama model. Default upgraded from llama3.2 (3B) to
+  llama3.1:8b. key_manager.py: get_ollama_model()/set_ollama_model(). 2 new API endpoints:
+  GET/POST /api/settings/ollama_model. provider_ollama.py: zero hardcoded model names, reads from
+  config at request time. Settings panel: Ollama model text field + Save button (visible only in
+  Local mode). Reference Guide: updated AI Mode docs with configurable model, troubleshooting rows.
+  test_ollama_accuracy.py: now checks any available model, not llama3.2 specifically. 8 new tests
+  (key_manager model ops + endpoint CRUD). 970 pytest + 196 run_all + 23 accuracy = 1,189 tests.
 [2026-04-08] [CODE] — v1.24.0. AI Mode Switch (M5 Priority 3). New provider_ollama.py connects to
-  Ollama at localhost:11434 with llama3.2. generate_sql_response() dispatches to OpenAI or Ollama
+  Ollama at localhost:11434. generate_sql_response() dispatches to OpenAI or Ollama
   based on ai_mode in config.enc. key_manager.py: get_ai_mode()/set_ai_mode() with validation.
   2 new API endpoints: GET/POST /api/settings/ai_mode (includes ollama_available check).
   _require_api_key() now handles both modes: 402 for missing API key (cloud), 503 for Ollama down

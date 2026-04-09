@@ -2813,6 +2813,15 @@ LIMIT 100</textarea>
                             </div>
                             <p id="aiModeDesc" style="color:var(--fg1); font-size:.85rem; margin:0 0 8px; line-height:1.5;">AI features use OpenAI via your API key. Requires internet connection.</p>
                             <div id="ollamaStatus" style="font-size:.85rem; min-height:1.2em; display:none;"></div>
+                            <div id="ollamaModelSection" style="display:none; margin-top:10px;">
+                                <label style="font-size:.85rem; color:var(--fg1); display:block; margin-bottom:4px;">Ollama model</label>
+                                <div style="display:flex; gap:6px; align-items:center;">
+                                    <input type="text" id="ollamaModelInput" style="flex:1; padding:5px 8px; font-size:.85rem; background:var(--bg1); border:1px solid var(--stroke); border-radius:6px; color:var(--text); font-family:var(--mono);" placeholder="llama3.1:8b">
+                                    <button class="btn small" id="ollamaModelSaveBtn" style="flex-shrink:0;">Save</button>
+                                    <span id="ollamaModelConfirm" style="font-size:.8rem; color:var(--success); opacity:0; transition:opacity .2s;">Saved</span>
+                                </div>
+                                <p style="color:var(--muted); font-size:.78rem; margin:4px 0 0;">Run <code>ollama pull [model-name]</code> to download a model before using it.</p>
+                            </div>
                             <div id="aiModeConfirm" style="color:var(--accent); font-size:.85rem; min-height:1.2em;"></div>
                         </div>
                     </div>
@@ -3182,7 +3191,8 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 <p>Privacy Mode is automatically hidden when AI Mode is set to Local — in local mode, no data leaves the machine regardless of prompt content.</p>
 <p><strong>AI Mode:</strong> A session-level toggle that controls whether AI features use OpenAI (cloud) or a local model via Ollama (local). The current mode is shown as a pill in the topbar at all times.</p>
 <p><strong>Cloud mode (default):</strong> AI features use OpenAI via your API key. Requires an internet connection. Provides the highest accuracy for SQL generation, insights, and analytical summaries.</p>
-<p><strong>Local mode (Ollama):</strong> AI features run entirely on your machine using the Ollama runtime and the llama3.2 model. No data leaves your machine in any form. No API key or internet connection required. Quality is lower than cloud mode — recommended for compliance demonstration or air-gapped environments, not as the default analytical workflow.</p>
+<p><strong>Local mode (Ollama):</strong> AI features run entirely on your machine using the Ollama runtime. The default model is llama3.1:8b. You can change the model in Settings — any model available in your local Ollama installation can be used. Run <code>ollama pull [model-name]</code> to download a model before selecting it. No data leaves your machine in any form. No API key or internet connection required.</p>
+<p>Note: Local mode SQL generation quality depends on the model selected. Larger models (8B+ parameters) produce significantly better results than smaller models (3B). For full analytical capability, cloud mode is recommended.</p>
 <p>To use local mode: install Ollama from <a href="https://ollama.ai" target="_blank" rel="noopener">ollama.ai</a>, then run <code>ollama pull llama3.2</code> to download the model. The Settings panel shows Ollama connection status. If Ollama is not running, the status indicator shows "Ollama not running" with an install link.</p>
 <p><strong>Privacy Mode is not shown when Local mode is active</strong> — in local mode, no data leaves your machine regardless of what is sent to the local model, making Privacy Mode redundant.</p>
 
@@ -3204,8 +3214,8 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
 <tr style="border-bottom:1px solid var(--bg2);"><td style="padding:6px; font-weight:600; white-space:nowrap;">Insights not generating</td><td style="padding:6px;">Check that your API key is configured in Settings.</td></tr>
 <tr style="border-bottom:1px solid var(--bg2);"><td style="padding:6px; font-weight:600; white-space:nowrap;">Wrong dataset after restore</td><td style="padding:6px;">The saved dataset may have been deleted. Re-import it and try again.</td></tr>
 <tr style="border-bottom:1px solid var(--bg2);"><td style="padding:6px; font-weight:600; white-space:nowrap;">AI narratives or explanations are vague or generic</td><td style="padding:6px;">Privacy Mode may be enabled. When on, result rows are withheld from AI prompts — narratives summarize based on column context only. Check Settings to review the current Privacy Mode state.</td></tr>
-<tr style="border-bottom:1px solid var(--bg2);"><td style="padding:6px; font-weight:600; white-space:nowrap;">AI features not working in Local mode</td><td style="padding:6px;">Check that Ollama is running (<code>ollama serve</code>) and the model is downloaded (<code>ollama pull llama3.2</code>). Settings panel shows connection status.</td></tr>
-<tr><td style="padding:6px; font-weight:600; white-space:nowrap;">Local mode SQL generation returns errors or empty results</td><td style="padding:6px;">llama3.2 has lower accuracy than OpenAI for complex SQL. Try simpler queries or switch to Cloud mode for complex multi-table analysis.</td></tr>
+<tr style="border-bottom:1px solid var(--bg2);"><td style="padding:6px; font-weight:600; white-space:nowrap;">AI features not working in Local mode</td><td style="padding:6px;">Check that Ollama is running (<code>ollama serve</code>) and the model is downloaded (<code>ollama pull llama3.1:8b</code>). Settings panel shows connection status.</td></tr>
+<tr><td style="padding:6px; font-weight:600; white-space:nowrap;">Local mode SQL generation returns errors or empty results</td><td style="padding:6px;">The selected model may be too small for complex SQL. Try a larger model — run <code>ollama pull llama3.1:8b</code> and update the model name in Settings. For complex multi-table analysis, cloud mode is recommended.</td></tr>
 </table>
 
         </div>
@@ -9083,6 +9093,11 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 _updateAiModeUI(am.mode, am.ollama_available);
                 $("aiModeConfirm").textContent = "";
             } catch (_) {}
+            // Load Ollama model name
+            try {
+                const om = await apiJson("/api/settings/ollama_model");
+                $("ollamaModelInput").value = om.model || "";
+            } catch (_) {}
         }
 
         // ── Confirmed state variables ─────────────────────────────────
@@ -9121,7 +9136,8 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             if (isLocal) {
                 status.style.display = "";
                 if (ollamaAvailable) {
-                    status.innerHTML = '<span style="color:var(--success);">\u25cf Ollama connected \u2014 llama3.2</span>';
+                    const modelName = $("ollamaModelInput").value || "llama3.1:8b";
+                    status.innerHTML = '<span style="color:var(--success);">\u25cf Ollama connected \u2014 ' + modelName + '</span>';
                 } else {
                     status.innerHTML = '<span style="color:var(--warning);">\u25cf Ollama not running \u2014 <a href="https://ollama.ai" target="_blank" rel="noopener" style="color:var(--accent);">Install Ollama \u2197</a></span>';
                 }
@@ -9130,6 +9146,8 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             }
             // Hide Privacy Mode when local — nothing leaves the machine
             $("privacyModeSection").style.display = isLocal ? "none" : "";
+            // Show Ollama model field only in local mode
+            $("ollamaModelSection").style.display = isLocal ? "" : "none";
             _updateTopbarModePill();
         }
 
@@ -9179,6 +9197,23 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             } catch (err) {
                 _updateAiModeUI(_currentAiMode, false);  // revert to confirmed state
                 toast("Failed to update AI Mode: " + err.message);
+            }
+        });
+
+        $("ollamaModelSaveBtn").addEventListener("click", async () => {
+            const model = $("ollamaModelInput").value.trim();
+            if (!model) { toast("Model name cannot be empty."); return; }
+            try {
+                await apiJson("/api/settings/ollama_model", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ model }),
+                });
+                const msg = $("ollamaModelConfirm");
+                msg.style.opacity = "1";
+                setTimeout(() => { msg.style.opacity = "0"; }, 2000);
+            } catch (err) {
+                toast("Failed to save model: " + err.message);
             }
         });
 

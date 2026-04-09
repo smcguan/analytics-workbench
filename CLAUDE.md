@@ -250,6 +250,8 @@ GET  /api/settings/privacy_mode
 POST /api/settings/privacy_mode
 GET  /api/settings/ai_mode
 POST /api/settings/ai_mode
+GET  /api/settings/ollama_model
+POST /api/settings/ollama_model
 POST /api/shutdown
 ```
 

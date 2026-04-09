@@ -26,18 +26,19 @@ import pytest
 # ---------------------------------------------------------------------------
 
 def _ollama_available():
+    """Check if Ollama is running and has any model available."""
     try:
         import requests
         r = requests.get("http://localhost:11434/api/tags", timeout=2)
         tags = r.json().get("models", [])
-        return any("llama3.2" in m.get("name", "") for m in tags)
+        return len(tags) > 0  # Any model available — tests use configured model
     except Exception:
         return False
 
 
 pytestmark = pytest.mark.skipif(
     not _ollama_available(),
-    reason="Ollama not running or llama3.2 not available",
+    reason="Ollama not running or no models available",
 )
 
 

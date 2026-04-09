@@ -209,3 +209,27 @@ def set_ai_mode(mode: str) -> None:
     cfg["ai_mode"] = mode
     _write_config(cfg)
     logger.info("AI mode set to %s", mode)
+
+
+# ============================================================
+# PUBLIC API — OLLAMA MODEL
+# ============================================================
+
+_DEFAULT_OLLAMA_MODEL = "llama3.1:8b"
+
+
+def get_ollama_model() -> str:
+    """Return the configured Ollama model name. Defaults to 'llama3.1:8b'."""
+    cfg = _read_config()
+    model = cfg.get("ollama_model", "")
+    return model if model else _DEFAULT_OLLAMA_MODEL
+
+
+def set_ollama_model(model: str) -> None:
+    """Save the Ollama model name. Validates it's a non-empty string."""
+    if not model or not isinstance(model, str) or not model.strip():
+        raise ValueError("Ollama model name must be a non-empty string.")
+    cfg = _read_config()
+    cfg["ollama_model"] = model.strip()
+    _write_config(cfg)
+    logger.info("Ollama model set to %s", model.strip())

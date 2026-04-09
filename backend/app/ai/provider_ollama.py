@@ -9,14 +9,9 @@ PURPOSE
 Ollama provider for local AI execution. Drop-in replacement for
 generate_sql_response() from provider_openai.py.
 
-Uses the Ollama HTTP API at localhost:11434 with the llama3.2 model.
-All prompts are identical to the OpenAI provider — only the
-transport and model name differ.
-
-This provider exists for compliance demonstration: Farragut's
-legal team needs a verified air-gap option. Quality is lower
-than GPT-4o-mini for complex SQL but sufficient for the
-procurement unlock.
+Uses the Ollama HTTP API at localhost:11434. The model name is
+read from config at request time via key_manager.get_ollama_model()
+so changes in Settings take effect immediately without restart.
 
 ============================================================
 """
@@ -35,7 +30,12 @@ except ImportError:
 logger = logging.getLogger("app")
 
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.2")
+
+
+def _get_model() -> str:
+    """Read the configured model name from config at request time."""
+    from app.key_manager import get_ollama_model
+    return get_ollama_model()
 
 
 def check_ollama_available() -> bool:
@@ -50,8 +50,8 @@ def check_ollama_available() -> bool:
 
 
 def get_ollama_model() -> str:
-    """Return the configured Ollama model name."""
-    return OLLAMA_MODEL
+    """Return the configured Ollama model name (delegates to key_manager)."""
+    return _get_model()
 
 
 def generate_response(prompt: str) -> str:
@@ -64,11 +64,12 @@ def generate_response(prompt: str) -> str:
         raise ConnectionError(
             "Ollama support requires the 'requests' package. Install with: pip install requests"
         )
+    model = _get_model()
     try:
         resp = requests.post(
             f"{OLLAMA_BASE_URL}/api/generate",
             json={
-                "model": OLLAMA_MODEL,
+                "model": model,
                 "prompt": prompt,
                 "stream": False,
             },

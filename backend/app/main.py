@@ -2182,7 +2182,7 @@ def api_health():
 # API KEY MANAGEMENT
 # ============================================================
 
-from app.key_manager import has_key as _has_key, get_key as _get_key, save_key as _save_key, clear_key as _clear_key, mask_key as _mask_key, get_privacy_mode as _raw_privacy_mode, set_privacy_mode as _set_privacy_mode, get_ai_mode as _get_ai_mode, set_ai_mode as _set_ai_mode
+from app.key_manager import has_key as _has_key, get_key as _get_key, save_key as _save_key, clear_key as _clear_key, mask_key as _mask_key, get_privacy_mode as _raw_privacy_mode, set_privacy_mode as _set_privacy_mode, get_ai_mode as _get_ai_mode, set_ai_mode as _set_ai_mode, get_ollama_model as _get_ollama_model, set_ollama_model as _set_ollama_model
 
 
 def _get_privacy_mode() -> bool:
@@ -2266,6 +2266,23 @@ def api_settings_ai_mode_save(payload: dict):
             "old_mode": old_mode,
             "new_mode": mode,
         })
+    return {"success": True}
+
+
+@app.get("/api/settings/ollama_model")
+def api_settings_ollama_model():
+    """Return the configured Ollama model name."""
+    return {"model": _get_ollama_model()}
+
+
+@app.post("/api/settings/ollama_model")
+def api_settings_ollama_model_save(payload: dict):
+    """Save the Ollama model name."""
+    model = payload.get("model", "")
+    try:
+        _set_ollama_model(model)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     return {"success": True}
 
 

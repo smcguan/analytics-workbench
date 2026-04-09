@@ -23,7 +23,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 import app.main as main_module
-from app.key_manager import get_ai_mode, set_ai_mode
+from app.key_manager import get_ai_mode, set_ai_mode, get_ollama_model, set_ollama_model
 from app.services.session_log import (
     _reset_session,
     start_session,
@@ -89,6 +89,30 @@ class TestAiModeKeyManager:
         with pytest.raises(ValueError):
             set_ai_mode("banana")
         assert get_ai_mode() == "local"
+
+
+class TestOllamaModelKeyManager:
+    """Tests for get_ollama_model/set_ollama_model in key_manager.py."""
+
+    def test_defaults_to_llama31_8b(self):
+        assert get_ollama_model() == "llama3.1:8b"
+
+    def test_set_and_get_model(self):
+        set_ollama_model("mistral:7b")
+        assert get_ollama_model() == "mistral:7b"
+
+    def test_empty_model_raises_valueerror(self):
+        with pytest.raises(ValueError, match="non-empty"):
+            set_ollama_model("")
+
+    def test_whitespace_only_raises_valueerror(self):
+        with pytest.raises(ValueError, match="non-empty"):
+            set_ollama_model("   ")
+
+    def test_model_persists_across_reads(self):
+        set_ollama_model("codellama:13b")
+        assert get_ollama_model() == "codellama:13b"
+        assert get_ollama_model() == "codellama:13b"  # second read
 
 
 # ---------------------------------------------------------------------------
@@ -183,6 +207,21 @@ class TestAiModeEndpoints:
         client.post("/api/settings/privacy_mode", json={"enabled": False},
                      headers={"Content-Type": "application/json"})
         assert client.get("/api/settings/privacy_mode").json()["privacy_mode"] is False
+
+    def test_get_ollama_model_returns_default(self, client):
+        resp = client.get("/api/settings/ollama_model")
+        assert resp.status_code == 200
+        assert resp.json()["model"] == "llama3.1:8b"
+
+    def test_set_ollama_model(self, client):
+        resp = client.post("/api/settings/ollama_model", json={"model": "mistral:7b"})
+        assert resp.status_code == 200
+        assert resp.json()["success"] is True
+        assert client.get("/api/settings/ollama_model").json()["model"] == "mistral:7b"
+
+    def test_set_ollama_model_empty_returns_400(self, client):
+        resp = client.post("/api/settings/ollama_model", json={"model": ""})
+        assert resp.status_code == 400
 
 
 # ---------------------------------------------------------------------------
