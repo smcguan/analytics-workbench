@@ -9195,7 +9195,13 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
                 $("aiModeConfirm").textContent = newMode === "local" ? "Switched to Local AI (Ollama)" : "Switched to Cloud AI (OpenAI)";
                 setTimeout(() => { $("aiModeConfirm").textContent = ""; }, 3000);
             } catch (err) {
-                _updateAiModeUI(_currentAiMode, false);  // revert to confirmed state
+                // Revert to confirmed state but try to get real Ollama status
+                try {
+                    const fallback = await apiJson("/api/settings/ai_mode");
+                    _updateAiModeUI(fallback.mode, fallback.ollama_available);
+                } catch (_) {
+                    _updateAiModeUI(_currentAiMode, false);
+                }
                 toast("Failed to update AI Mode: " + err.message);
             }
         });

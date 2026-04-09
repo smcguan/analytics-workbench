@@ -41,11 +41,15 @@ def _get_model() -> str:
 def check_ollama_available() -> bool:
     """Return True if Ollama is running and responding at the configured URL."""
     if requests is None:
+        logger.warning("check_ollama_available: requests module not installed")
         return False
+    url = f"{OLLAMA_BASE_URL}/api/tags"
     try:
-        resp = requests.get(f"{OLLAMA_BASE_URL}/api/tags", timeout=2)
+        resp = requests.get(url, timeout=2)
+        logger.info("check_ollama_available: GET %s → %s", url, resp.status_code)
         return resp.status_code == 200
-    except Exception:
+    except Exception as exc:
+        logger.warning("check_ollama_available: GET %s → %s: %s", url, type(exc).__name__, exc)
         return False
 
 
