@@ -2788,6 +2788,7 @@ LIMIT 100</textarea>
                             </div>
                         </div>
                         <div class="settings-section">
+                            <div id="privacyModeSection">
                             <h3 id="privacyModeHeading">Privacy Mode — Off</h3>
                             <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
                                 <label style="position:relative; display:inline-block; width:44px; height:24px; cursor:pointer;">
@@ -2799,8 +2800,8 @@ LIMIT 100</textarea>
                             </div>
                             <p id="privacyModeDesc" style="color:var(--fg1); font-size:.85rem; margin:0 0 8px; line-height:1.5;">AI features currently send: column names, statistics, up to 5 sample rows, up to 10 categorical values per column, and up to 10 query result rows (for Result Narrative and Explain).</p>
                             <div id="privacyModeConfirm" style="color:var(--accent); font-size:.85rem; min-height:1.2em;"></div>
-
                             <hr style="border:none; border-top:1px solid var(--stroke); margin:16px 0;">
+                            </div>
                             <h3 id="aiModeHeading">AI Mode — Cloud</h3>
                             <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px;">
                                 <label style="position:relative; display:inline-block; width:44px; height:24px; cursor:pointer;">
@@ -9113,13 +9114,14 @@ ORDER BY d.Tot_Spndng_2023 DESC</pre>
             } else {
                 status.style.display = "none";
             }
+            // Hide Privacy Mode when local — nothing leaves the machine
+            $("privacyModeSection").style.display = isLocal ? "none" : "";
             _updateTopbarModePill();
         }
 
         function _updateTopbarModePill() {
-            const privacyOn = $("privacyModeToggle").checked;
             if (_currentAiMode === "local") {
-                $("modeText").textContent = privacyOn ? "Local AI + Privacy" : "Local AI";
+                $("modeText").textContent = "Local AI";
                 $("modeDot").className = "status-dot ok";
                 $("modePill").style.background = "rgba(79,140,255,.15)";
             } else {

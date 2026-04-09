@@ -112,7 +112,14 @@ from .sql_validator import (
 )
 
 from app.services.session_log import log_event, SessionEventType
-from app.key_manager import has_key as _has_api_key, get_privacy_mode as _get_privacy_mode, get_ai_mode as _get_ai_mode
+from app.key_manager import has_key as _has_api_key, get_privacy_mode as _raw_privacy_mode, get_ai_mode as _get_ai_mode
+
+
+def _get_privacy_mode() -> bool:
+    """Return effective privacy mode. Always False in local mode — nothing leaves the machine."""
+    if _get_ai_mode() == "local":
+        return False
+    return _raw_privacy_mode()
 
 # ============================================================
 # ROUTER INITIALIZATION

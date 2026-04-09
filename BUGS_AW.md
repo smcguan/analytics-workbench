@@ -173,6 +173,19 @@ multiply at 200+ customers.
 
 ---
 
+### BUG-012
+**Status:** FIXED — v1.24.0
+**Found:** 2026-04-08 — Self-test (local mode testing)
+**Component:** AI_FEATURES
+**Root Cause:** DIVERGENT_PATH
+**Summary:** suggest_questions endpoint ignores AI mode setting and calls OpenAI directly when local mode is active.
+**Detail:** app.log shows `suggest_questions calling OpenAI` while AI mode was set to local. generate_sql correctly routes to Ollama and returns "model not found" errors — confirming local mode is active and working for that endpoint. suggest_questions has a separate code path that bypasses the get_ai_mode() check and calls OpenAI directly regardless of mode. This is a privacy and compliance issue — the feature silently breaks the air-gap guarantee when local mode is selected.
+**Fix:** Refactored generate_sql_response() as the single dispatch chokepoint — all 8 AI functions call it, and it checks get_ai_mode() to route to _call_openai() or provider_ollama.generate_response(). No endpoint-level routing needed since every function ultimately calls generate_sql_response(). All endpoints now correctly route through the active provider.
+**Fix Commit:** ad42592 — v1.24.0
+**Test Added:** Yes — test_ai_mode.py::TestProviderRouting (cloud_calls_openai, local_calls_ollama)
+
+---
+
 ## HOW TO USE THIS FILE
 
 **In any JetWare AI Development project chat:**
@@ -201,6 +214,8 @@ multiply at 200+ customers.
 ---
 
 ## CHANGELOG
+- 2026-04-08 — BUG-012 fixed v1.24.0. generate_sql_response() refactored as single dispatch chokepoint — all endpoints route correctly in both modes.
+- 2026-04-08 — BUG-012 logged. suggest_questions bypasses ai_mode check, calls OpenAI in local mode.
 - 2026-04-06 — BUG-010 and BUG-011 fixed v1.20.1. config.enc added to .gitignore; corrupted/wrong-machine key auto-deleted with 11 tests.
 - 2026-04-06 — BUG-010 and BUG-011 logged. API key management multi-machine bugs found in self-test.
 - 2026-03-31 — BUG-001 fixed v1.19.1. Root cause corrected to CONCURRENCY. 1,079 tests passing.
