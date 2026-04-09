@@ -85,6 +85,19 @@ Wrap summary table:
 | Commit | [hash] |
 | Push | Done |
 
+**14. Remind user to upload context files to Claude.ai project**
+Output this exact block after the session handoff block:
+
+─────────────────────────────────────────────
+MANUAL STEP REQUIRED — Claude Code cannot do this automatically.
+
+Upload these two files to the JetWare AI Development project:
+  • CONTEXT_AW.md
+  • BUGS_AW.md
+
+Without this step, the next Claude.ai session will have stale context.
+─────────────────────────────────────────────
+
 Then output the session handoff block — copy this exact format:
 
 === SESSION HANDOFF — AW vX.X.X — [DATE] ===
@@ -104,6 +117,8 @@ ACTIVE BUGS:
 NEXT SESSION:
 [1-3 lines — exactly what to build next and why]
 =================================================
+
+
 
 The handoff block is for pasting directly into Claude.ai to orient the planning
 assistant without uploading any files. Write it to be self-contained and precise —

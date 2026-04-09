@@ -18,13 +18,19 @@
 
 ## PRODUCT SUMMARY
 
+**PRODUCT FAMILY NAME: JetWare Workbench**
+The unified product name going forward. Analytics Workbench and Document Workbench
+are legacy names for the pre-integration products. Externally: "JetWare Workbench —
+Data and Documents in a single environment." Internally: Data tab + Documents tab.
+Do NOT rename codebase or installers until integration is complete.
+
 Analytics Workbench is a Windows desktop application for analysts who work with
 sensitive data. It imports CSV, Excel, TSV, and Parquet files locally, surfaces
 insights automatically, and answers natural language questions via AI-generated
 SQL — without sending data to any cloud server.
 
-**Current version:** v1.20.0
-**Test suite:** 1,079 automated tests, all passing. AI SQL accuracy: 100% (20/20).
+**Current version:** v1.24.2
+**Test suite:** 1,189 automated tests, all passing. AI SQL accuracy: 100% (20/20).
 
 **Core capabilities (all shipped):**
 - Import up to 220M rows — loads in seconds
@@ -39,7 +45,12 @@ SQL — without sending data to any cloud server.
 - Result Narrative — two-sentence plain English summary after every query
 - Sanity Check — automatic warnings on suspicious results
 - Smarter Suggestions — three-step analytical sequence on any dataset
-- Example Workflows — 8 built-in tutorials across 5 domains
+- Example Workflows — 12 built-in tutorials across 8 domains
+- Analysis Summary Artifact — AI-powered session memo (Findings/Methodology/
+  Limitations/Open Items), privacy mode support, markdown export
+- AI Mode Switch — Cloud/Local toggle, Ollama provider, Settings UI, topbar pill
+- Customer API Key Management — Fernet-encrypted, first-launch setup, Settings panel
+- Privacy Mode — schema+stats only mode, strips sample rows and result rows
 - JetWare AI logo — branding in header and Welcome card
 
 **Key selling points by audience:**
@@ -127,11 +138,19 @@ Customer supplies their own OpenAI API key — no data intermediary.
 ## GO-TO-MARKET POSITION
 
 **Primary positioning:**
-"Analytics Workbench is the only AI analytics tool that imports your files, surfaces
-insights automatically, lets you enrich your data without exporting it — and never
-sends a single row to the cloud."
+"JetWare Workbench is the only AI analytics environment that lets analysts query
+structured data and unstructured documents in the same session — without their
+data ever leaving the machine."
 
 **Tagline:** "AI analytics for data that stays put."
+
+**Unified product pitch:**
+"Data tab and Documents tab in a single environment. Ask a question of a document,
+get a cited answer, flip to the Data tab and validate that number against the actual
+financial data, flip back and ask a follow-up. The unified Analysis Summary at the
+end captures everything — document claims and data evidence in one structured memo.
+Discrepancies between what the document says and what the data shows are flagged
+automatically. No other tool does this locally."
 
 **Core differentiator:** Privacy architecture — three tiers, each honest and verifiable.
 **Quality differentiator:** 1,079 automated tests including AI SQL accuracy verification.
@@ -159,25 +178,41 @@ sends a single row to the cloud."
 - Casey's role: Subcontractor delivering SOW work. Full-time hire budgeted for May 2026.
   Jackie has discussed AI department career trajectory for Casey at McDermott.
 
-**Current Farragut status (as of 2026-04-07):**
-- Casey had lunch with Shawn. Full-time hire at Farragut confirmed for May onboarding.
-- Wednesday call = Casey only, five use cases discussion. Shawn not invited.
-- Casey does NOT want to mention JetWare or flag Shawn's follow-up on the call.
-  His read of the room takes priority — respect it completely.
-- Shawn will debrief with Casey after Wednesday call before deciding Thursday approach.
-- Thursday outreach to Jackie will be calibrated based on Wednesday debrief signal:
-  which use cases had most urgency, how Casey's standing looks, how fast Farragut
-  is moving. Email draft ready but framing may adjust based on debrief.
+**Current Farragut status (as of 2026-04-09):**
+- Wednesday meeting summary received from Casey. All five use cases discussed.
+- Tone: collaborative and engaged from both Jackie and Stan.
+- Stan raised security review UNPROMPTED — this is internal advocacy, not gatekeeping.
+- Jackie and Stan discussed having Casey demo AW to broader team and letting them tinker.
+- NDA and security review timeline: approximately one month.
+- AW positioned as Phase 2 end goal — automating manual workflows at scale.
+- Do NOT send email to Jackie or Stan until Stan gets back to Casey.
+  Casey's direction — respect it completely.
 - Jackie has accepted Shawn's LinkedIn connection request.
-- Do NOT reference Wednesday's call in Thursday email if Casey gave no heads-up.
-  Email must stand alone as founder reaching out to establish formal relationship.
 
-**Five Farragut use cases identified (from Stan email):**
-- CIM extraction — Document Workbench territory
-- CMS rule/note repository + searchable query — Document Workbench territory
-- Searchable PE ownership database with org chart output — AW + new output capability
-- Cash pay entities analysis (MedSpas etc.) — AW today
-- IDRE data analysis (CMS inpatient dataset) — AW today
+**Five Farragut use cases — confirmed active (from April 9 meeting):**
+
+1. CIM extraction — Document Workbench. Drop in PDF, ask questions, get cited answers.
+   DW handles this today.
+
+2. CMS Rule Repository — Document Workbench. Current process is manual and frustrating.
+   Team wants RAG system on CMS regulatory documents for fast, searchable policy queries.
+   Clear pain point, obvious ROI. DW handles this today. CMS library subscription is
+   the recurring revenue product that keeps this current.
+
+3. PE Ownership Database / Tombstone Infographic — AW + new capability.
+   Jackie wants to identify PE firms and portfolio companies by healthcare sector.
+   Novel requirement: decode blurred tombstone-style infographics using AI.
+   Casey framed honestly — possible but unproven. Needs feasibility spike before
+   any commitment. Computer vision + entity recognition — different from AW/DW core.
+
+4. Cash Pay Entities / MedSpa Analysis — AW today. PE investment area.
+   Details light — more coming as Casey surfaces specifics.
+
+5. IDRE Trending Analysis — AW. NEW REQUIREMENT from Jackie.
+   Monitor CMS dispute volume trends by specialty and payer as early PE investment signal.
+   "Significant money in these spaces — is it trending up or down?"
+   Specific analytical workflow needing requirements spec from Casey before building.
+   Type 1 platform feature — every PE firm in healthcare needs this.
 
 **Farragut commercial separation (CRITICAL):**
 Casey's consulting/employment track and the AW software license track are two
@@ -263,7 +298,7 @@ if the repo became public. The text below is clean for that purpose.
 
 ```
 ## Business Context
-See CONTEXT_AW.md for current product and business state.
+See CONTEXT.md for current product and business state.
 
 ## Farragut Engagement — Key Commercial Constraints
 
@@ -447,46 +482,263 @@ Supporting proof points if pressed:
 - Privacy architecture document prepared for McDermott general counsel review
 - Local-first architecture is a deliberate design choice, not a limitation
 
-**Status:** v0.10.2 — essentially demo-ready. Full stack operational.
-**Tests:** 180 passing.
+**Status:** v0.11.0 — demo-ready. Full stack operational. Real Federal Register PDFs.
+**Tests:** 185 passing.
 **One-pager:** Complete (produced 2026-04-07). Navy/amber design, four sections.
 
 **What is built and verified:**
 - Full PDF ingestion pipeline — PyMuPDF, paragraph-aware chunking, LanceDB vector store
 - Cloud mode (OpenAI gpt-4o-mini + text-embedding-3-small) — tested with real PDFs
-- Local mode (Ollama phi-3-mini + nomic-embed-text) — tested end-to-end
+- Local mode (Ollama phi-3-mini + nomic-embed-text) — validated against Farragut NDA draft
 - PyInstaller .exe packaging — verified, 404MB, runs standalone
-- CMS regulatory library v1 — 5 document categories indexed (synthetic docs currently)
+- CMS regulatory library v2 — real Federal Register PDFs (HH PPS, SNF PPS, HRRP)
 - Frontend UI — matches AW sidebar structure exactly, dark theme, shared branding
 - Shared config.enc with AW — same API key, same settings, same APPDATA path
 - All 9 FastAPI endpoints wired and responding
 
-**Decisions confirmed:**
-- Vector store: LanceDB
-- Local model: phi-3-mini (answers), nomic-embed-text (embeddings)
-- App: Option A — separate .exe (DocumentWorkbench.exe)
-- Shared config.enc with AW at APPDATA\JetWareAI\
+**Integration plan — CONFIRMED:**
+DW merges into AW as a Documents tab after Farragut validates DW against a real
+CIM PDF. Trigger: successful demo against real Farragut CIM PDF.
+Result: one install, one product (JetWare Workbench), unified session log.
 
-**Two remaining actions before demo-ready:**
-1. Replace synthetic CMS library docs with real CMS PDFs — content work, not build work
-2. Rebuild .exe with v0.10.2 code — last build was v0.8.0
+**Four DW features to build before integration:**
+1. Citation Passport — export full Q&A session with citations
+2. CIM Memo Export — auto-generated structured memo from document session
+3. Workflow Save and Replay with document swap
+4. Example Workflows — waiting for Casey's debrief to define
 
 **What this means for Farragut:**
-Four of five use cases now demonstrable:
+Four of five use cases demonstrable now:
 - CIM extraction — drop in PDF, ask questions, get cited answers. Working now.
-- CMS regulatory repository — library built, indexed, queryable. Swap real docs and ready.
+- CMS regulatory repository — real Federal Register PDFs indexed and queryable.
 - Cash pay entities analysis — AW today.
 - IDRE data analysis — AW today.
 - PE ownership database — AW partial, new output capability needed.
 
 **Suite framing:**
-- Analytics Workbench — structured data, available now
-- Document Workbench — unstructured documents, available now (pending real CMS PDFs)
+- Analytics Workbench (Data tab) — structured data, available now
+- Document Workbench (Documents tab) — unstructured documents, available now
+- JetWare Workbench — unified product, post-integration (trigger: Farragut CIM demo)
 - Research Workbench — external sourcing, roadmap
 
 ---
 
-## COMPASS/FARRAGUT DELIVERABLE STATUS
+## PRODUCT STRATEGY FRAMEWORK — PLATFORM VS CUSTOMER-SPECIFIC
+
+**Context:** Farragut is the anchor customer shaping the roadmap. Every requirement
+Casey surfaces must be evaluated before building to ensure the product stays
+clean for the general market while fully serving Farragut.
+
+**The governing question for every Farragut requirement:**
+"Would a Marwood analyst need this, or only a Farragut analyst?"
+
+---
+
+**Type 1 — Platform Features (build broadly)**
+
+Capabilities that every firm in the healthcare PE diligence space needs.
+These go into the core product, are documented, and ship in the next version.
+
+Examples:
+- Multi-dataset JOIN and schema normalization
+- CIM extraction and document Q&A
+- CMS regulatory library querying
+- Workflow replay and parameterized sessions
+- Reference table library (IRA drugs, state Medicaid schema maps, MCO lookup)
+- Analysis Summary Artifact
+- Privacy Mode toggle
+
+Test: Would a Marwood, BRG, or Avalere analyst need this capability?
+If yes — build it as a platform feature.
+
+---
+
+**Type 2 — Customer-Specific Configuration (stays in Farragut's instance)**
+
+Farragut's specific workflow methodology, reference table formats, memo
+templates, internal naming conventions, and analytical sequences. These are
+consulting deliverables — not core product features.
+
+Examples:
+- Farragut's specific CIM memo template structure
+- Their internal drug classification methodology
+- Their PE diligence workflow naming conventions
+- Reference tables built to their specific data formats
+
+Test: Would only a Farragut analyst need this, not analysts at other firms?
+If yes — build it as a template, reference table, or configuration that lives
+in Farragut's instance. Does not go into core codebase.
+
+---
+
+**Why this matters:**
+
+The product stays clean and accessible for general market customers.
+Farragut gets everything they need without polluting the core product.
+The IP boundary stays clean — JetWare owns platform improvements,
+Farragut owns their workflows and configurations.
+Scaling to a second customer doesn't require stripping out Farragut-specific
+complexity first.
+
+---
+
+**Scaling discipline for the next 60-90 days:**
+
+Focus exclusively on Farragut. One anchor customer done properly is worth
+ten half-baked relationships. Do not pursue other customers until:
+- Farragut evaluation install is complete
+- Casey is running workflows successfully
+- First reference story is documentable
+
+After that, approach the competitor list one firm at a time with a validated
+product and a reference customer. The general market product will be better
+because of what was learned at Farragut — not in spite of it.
+
+---
+
+## PRICING FRAMEWORK — FARRAGUT / McDERMOTT WILL & EMERY
+
+**Mental model: price time savings, not software.**
+
+A McDermott analyst doing PE diligence manually bills $150-400/hr depending
+on seniority. AW compresses a 20-hour analysis to 2-3 hours. That's 17-18
+hours of recovered analyst time per engagement. At $200/hr average that's
+$3,400-3,600 of value per engagement. Farragut runs dozens of engagements
+per year. Price a fraction of that value — not what software "normally costs."
+
+**ROI statement for the proposal:**
+"AW compresses a typical diligence workflow from 15-20 hours to 2-3 hours.
+At your billing rates, that's $2,500-3,500 of recovered analyst time per
+engagement. At 40 engagements per year, that's $100,000-140,000 in recovered
+capacity annually — before counting quality improvement and audit trail value.
+This is not a software cost. It is an investment with a measurable return."
+
+**Budget reality (confirmed 2026-04-08):**
+Jackie budgeted for Casey's position, not for software. There is no pre-allocated
+software budget for AW. The software cost must either be found in existing
+discretionary budget or go through a formal procurement process. This means:
+- Lead with the pilot number, not the enterprise number
+- Frame the software cost inside the Casey investment: "You're spending $150k
+  on Casey. AW makes that investment worth 5-10x more in output."
+- Year 1 target: low enough to find without a major procurement battle
+- Year 2 expansion: happens after ROI is documented and budget cycle resets
+
+**Key budget question for Casey:**
+"Does Jackie have discretionary budget for tools and software separate from
+headcount, or does this need to go through formal IT procurement?"
+This determines timeline — discretionary budget closes fast, IT procurement
+takes 3-6 months.
+
+---
+
+**Three pricing models:**
+
+**Model 1 — Per seat, enterprise license (recommended starting point)**
+- Standard, simple to administer, scales with headcount
+- Farragut only: 10-15 seats at $4,000-6,000/seat/year = $40,000-90,000/yr
+- McDermott enterprise-wide: 50-100 seats = $200,000-600,000/yr
+- Includes maintenance and reference library updates
+
+**Model 2 — Enterprise flat fee**
+- One annual license, unlimited seats within defined organization
+- Farragut only: $80,000-120,000/yr
+- McDermott enterprise-wide: $200,000-400,000/yr
+- Requires precise definition of "the organization"
+
+**Model 3 — Phased entry with expansion (recommended structure)**
+- Year 1 pilot: Farragut only, 5-10 seats, full onboarding
+  Price: $40,000-60,000 all-in — low enough to find in existing budget
+- Year 2 expansion: pre-negotiated rate for broader McDermott deployment
+  Price: $3,500-5,000/seat or flat enterprise fee
+- Lower entry price, larger total contract if pilot succeeds
+- Protects both parties — they prove value before committing enterprise-wide
+- Budget cycle resets at Year 2 — enterprise conversation happens then
+
+---
+
+**Exclusivity pricing:**
+
+Offering 12-month exclusivity means no sales to Marwood, BRG, Avalere, or
+any direct competitor. This is a significant concession — price accordingly.
+
+Exclusivity premium: 3-5x standard license cost
+- Standard Farragut pilot: $40,000-60,000
+- With exclusivity: $150,000-250,000/yr
+
+Rules for offering exclusivity:
+- Define scope narrowly: "healthcare PE diligence consulting" not "all analytics"
+- 12 months maximum — no multi-year exclusivity
+- Exclusivity applies to direct competitors only — not all industries
+- Must be formalized in the contract — not a verbal commitment
+- Price must reflect the opportunity cost of not selling to the competitor list
+
+---
+
+**Onboarding and consulting fees (separate from license):**
+
+- Initial onboarding engagement: $10,000-20,000 fixed fee
+  Covers: installation, workflow configuration, analyst training, first
+  two workflow templates built to Farragut methodology
+- Ongoing workflow development: $200-300/hr or fixed project fee
+- Reference library maintenance: $5,000-10,000/yr
+  Covers: annual updates to CMS rules, IRA drug lists, MCO lookups,
+  Medicaid schema maps
+
+---
+
+**Recommended proposal structure for Farragut:**
+
+**Option A — Pilot (recommended opening position)**
+- Scope: Farragut Square Group only
+- Seats: 5-10 seats
+- Term: 12 months
+- Includes: AW + Document Workbench licenses, onboarding engagement,
+  reference library v1, 12 months maintenance and support
+- Price: $40,000-60,000 all-in — sized to fit discretionary budget
+- Expansion: pre-negotiated rate of $4,000/seat for additional users
+  or enterprise flat fee for McDermott-wide deployment at renewal
+
+**Option B — Enterprise (if they want to go big immediately)**
+- Scope: McDermott Will & Emery enterprise
+- Seats: unlimited within the firm
+- Term: 12 months with annual renewal
+- Includes: AW + Document Workbench, onboarding, reference library,
+  maintenance and support
+- Price: $250,000-350,000/yr depending on headcount confirmation
+- Requires headcount estimate from Casey and formal procurement process
+
+**Option C — Exclusive Pilot**
+- Same as Option A plus 12-month exclusivity on healthcare PE diligence
+- Price: $150,000-250,000
+- Scope of exclusivity: direct named competitors only
+  (Marwood, BRG, Avalere, HMA, Chartis)
+
+---
+
+**Before the proposal is built — questions for Casey:**
+
+1. Does Jackie have discretionary budget for tools/software separate from
+   headcount, or does this need formal IT procurement? (determines timeline)
+2. How many analysts at Farragut Square Group specifically would use this?
+3. How many people at McDermott Will & Emery broadly could use this?
+4. What is their typical contract term — annual, multi-year?
+5. Is there a budget owner — Farragut's budget or McDermott central IT/ops?
+
+These answers determine whether you're building a $50,000 proposal or a
+$300,000 proposal, and whether it closes in weeks or months.
+Don't guess — ask Casey before drafting anything.
+
+---
+
+**Proposal build trigger:**
+
+Do NOT build the proposal until:
+- NDA is signed
+- Casey has answered the five questions above
+- Stan's committee has approved moving forward
+- Shawn has had at least one direct conversation with Jackie post-NDA
+
+The proposal is the closing document, not the opening move.
 
 **Delivered:**
 - Part B / GLOBE memo — 57 confirmed candidates, 14 sole orphan drugs. March 18, 2026.
@@ -661,6 +913,29 @@ Example combinations by post type:
 
 ## LAST SESSION LOG (BD-RELEVANT)
 
+[2026-04-09] [BD] — Casey meeting summary received. Wednesday call with Jackie and Stan.
+  All five use cases confirmed active. Tone collaborative and engaged. Stan raised
+  security review unprompted — internal advocacy confirmed. Jackie and Stan discussed
+  Casey demoing to broader team. NDA + security review ~1 month. AW positioned as
+  Phase 2 end goal. New requirement surfaced: IDRE trending analysis as PE investment
+  signal (dispute volume by specialty and payer). Tombstone infographic decoding
+  identified as novel capability — needs feasibility spike before commitment.
+  CMS library subscription confirmed as real recurring revenue product.
+  Three new product implications documented. Email from lifemodeler.org flagged —
+  must use jetwareai.com for all Farragut communications.
+  JetWare Workbench confirmed as product name. Proposal and context updated.
+
+[2026-04-08] [BD] — Product handoff received from dev project. AW now v1.23.0 (1,146 tests),
+  DW now v0.11.0 (185 tests, real Federal Register PDFs, local mode validated against
+  Farragut NDA draft). Integration plan confirmed: DW merges into AW as Documents tab
+  after Farragut CIM demo. JetWare Workbench confirmed as unified product name.
+  Unified product vision documented: Data + Documents in same session, unified Analysis
+  Summary, discrepancy flagging. Four pre-integration DW features identified.
+  Farragut proposal updated to reflect unified product. DW pricing added:
+  $1,500-3,000/seat + CMS library subscription $200-400/seat/year.
+  Blackstone MD (retired friend) identified as warm contact — catch-up email drafted.
+  CONTEXT_BUSINESS.md updated.
+
 [2026-04-08] [BD] — Farragut breakthrough. Wednesday call outcome: AW fully on
   the table. Jackie and Stan excited. Stan taking to committee to determine how
   to bring in. Casey to focus work on AW internally. Sandbox evaluation and
@@ -745,9 +1020,9 @@ Example combinations by post type:
 - [ ] Privacy Mode toggle — IN DEVELOPMENT (Claude Code prompt drafted)
   Gate: must be built and prompt-level verified before evaluation package ships
 - [ ] IT intake document — finalize once Privacy Mode toggle is verified
-- [x] Document Workbench foundation — COMPLETE v0.10.2, 180 tests, demo-ready
-- [ ] Document Workbench — replace synthetic CMS docs with real PDFs
-- [ ] Document Workbench — rebuild .exe with v0.10.2 code
+- [x] Document Workbench — COMPLETE v0.11.0, 185 tests, real CMS PDFs, demo-ready
+- [ ] Document Workbench — four pre-integration features (Citation Passport, CIM Memo Export, Workflow Replay, Example Workflows)
+- [ ] JetWare Workbench integration — trigger: Farragut CIM PDF demo success
 - [ ] Logo swap — resolve third build source overwriting asset
 - [ ] Demo dataset — clean representative healthcare PE dataset for Farragut demo
 
@@ -789,9 +1064,9 @@ Example combinations by post type:
 - Hold if debrief signals timing is wrong
 
 **Dark period build priorities:**
-1. Privacy Mode toggle (gating item for AW evaluation package)
-2. Document Workbench — replace synthetic CMS docs with real PDFs
-3. Document Workbench — rebuild .exe with v0.10.2 code
+1. Privacy Mode toggle (gating item for AW evaluation package — may already be complete in v1.21.0, verify)
+2. Document Workbench — four pre-integration features (Casey debrief drives Example Workflows)
+3. JetWare Workbench integration — after Farragut CIM demo validates DW
 4. Admin: QuickBooks, bank account, credit card
 
 **Weekly:**
@@ -805,4 +1080,4 @@ Example combinations by post type:
 Start BD session: paste this file, say "JetWare AI BD context loaded."
 Start LinkedIn/content session: paste this file, say "JetWare AI content session loaded."
 End BD session: note key decisions. Claude Code wrap script updates automatically.
-Full technical detail: see CONTEXT_AW.md.
+Full technical detail: see CONTEXT.md.

@@ -160,6 +160,11 @@ Building toward reproducible, auditable, shareable analytical sessions:
 ## Wrap Records
 <!-- Each /wrap appends a 3-line summary below. Most recent at top. -->
 
+**v1.24.2** | 2026-04-09 (wrap 2)
+Carry-forward commit. BUILD_RELEASE.bat hardened: /T on taskkill, 4s timeout, tasklist
+check with hard stop, post-rmdir verification. CONTEXT_BUSINESS.md updated to v1.24.2
++ JetWare Workbench name. wrap/SKILL.md step 14 added. 1,189 tests.
+
 **v1.24.2** | 2026-04-09
 EOD skill added (.claude/skills/eod/SKILL.md). Automates end-of-day procedure: runs
 /wrap, then emits structured EOD block covering Accomplished, Product State, Farragut

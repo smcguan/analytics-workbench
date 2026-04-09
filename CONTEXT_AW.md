@@ -379,6 +379,12 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
 
+[2026-04-09] [CODE] — v1.24.2. Tooling and carry-forward commit. BUILD_RELEASE.bat hardened:
+  /T flag on both taskkill commands, timeout 2→4s, tasklist check with hard stop if exe still running,
+  post-rmdir verification for dist\ and build\. CONTEXT_BUSINESS.md updated to v1.24.2 + JetWare Workbench
+  product family name + AI Mode Switch + Analysis Summary features. wrap/SKILL.md step 14 added (upload
+  reminder). No product code changes. 970 pytest + 196 run_all + 23 accuracy = 1,189 tests.
+
 [2026-04-09] [CODE] — v1.24.2. EOD skill added (.claude/skills/eod/SKILL.md) — automates end-of-day
   reporting: runs wrap, then emits structured EOD block (Accomplished/Product State/Farragut Readiness/
   Tomorrow priorities/Open Items). No product code changes. 970 pytest + 196 run_all + 23 accuracy = 1,189 tests.
