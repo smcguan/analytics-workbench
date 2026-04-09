@@ -42,7 +42,7 @@
 - Analysis Summary Artifact — COMPLETE (v1.23.0) — AI-powered session summary generates structured memo (Findings/Methodology/Limitations/Open Items) from session log. Privacy mode strips SQL and data values. Slide-in drawer with markdown export. Configurable template for per-customer formats.
 - AI Mode Switch — COMPLETE (v1.24.0) — Session-level Cloud/Local toggle. OllamaProvider at localhost:11434 with llama3.2. Settings panel toggle with dynamic Ollama status. Topbar pill shows current mode. ai_mode_change event in Session Log. 503 on Ollama unavailable. Privacy Mode applies identically to both providers.
 
-**Current version:** v1.24.1 — Configurable Ollama model (default llama3.1:8b)
+**Current version:** v1.24.2 — EOD skill added; tooling only
 
 **Test suite:** 1,189 automated tests across three suites, all passing.
 - Unit tests (pytest tests/): 970 passed, 21 skipped
@@ -378,6 +378,10 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
 
 ## LAST SESSION LOG
 # Append one line per session. Most recent at top. Format: [DATE] [ENV] — summary.
+
+[2026-04-09] [CODE] — v1.24.2. EOD skill added (.claude/skills/eod/SKILL.md) — automates end-of-day
+  reporting: runs wrap, then emits structured EOD block (Accomplished/Product State/Farragut Readiness/
+  Tomorrow priorities/Open Items). No product code changes. 970 pytest + 196 run_all + 23 accuracy = 1,189 tests.
 
 [2026-04-08] [CODE] — v1.23.1. Analysis Summary polish: Reference Guide section rewritten with full
   documentation (export options, privacy behavior, four-section structure). generate_summary tutorial

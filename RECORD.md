@@ -10,7 +10,7 @@ stays on the analyst's machine — AI generates analysis instructions, not data 
 **Tech stack:** FastAPI backend, DuckDB query engine, OpenAI GPT-4.1-mini for AI,
 vanilla HTML/JS/CSS frontend, PyInstaller packaging for Windows desktop.
 
-**Current version:** v1.24.1 | **Total commits:** 130+ | **Test suite:** 1,189 tests (three suites, AI accuracy 100%)
+**Current version:** v1.24.2 | **Total commits:** 130+ | **Test suite:** 1,189 tests (three suites, AI accuracy 100%)
 
 ---
 
@@ -132,6 +132,7 @@ Building toward reproducible, auditable, shareable analytical sessions:
 | v1.10.2 | 2026-03-21 | Bug #18: Refresh was deleting disk files (root cause of restore loop); Clear SQL button; Sessions Save exits; SQL auto-clears on restore |
 | v1.10.3 | 2026-03-21 | Chart tab disabled until query returns chartable result; Sessions Save no longer exits; restore filters dataset list to session dataset only |
 | v1.11.0 | 2026-03-21 | SESSIONS sidebar removed; snapshots retired; Welcome card is session hub (Resume + Save); Reference Guide as slide-in drawer; 603 tests |
+| v1.24.2 | 2026-04-09 | EOD skill added (.claude/skills/eod/SKILL.md); tooling only, no product changes; 1,189 tests |
 | v1.24.1 | 2026-04-08 | Configurable Ollama model: default llama3.1:8b, Settings field, zero hardcoded names, Reference Guide updated; 8 new tests; 1,189 tests |
 | v1.24.0 | 2026-04-08 | AI Mode Switch (M5 P3): Cloud/Local toggle via Ollama, Settings panel, topbar pill, 503 handling, 16 new tests; 1,168 tests |
 | v1.23.1 | 2026-04-08 | Analysis Summary polish: Reference Guide docs, tutorials #1/#3/#4 generate_summary step, Copy to Clipboard, 6 new tests; 1,152 tests |
@@ -158,6 +159,11 @@ Building toward reproducible, auditable, shareable analytical sessions:
 
 ## Wrap Records
 <!-- Each /wrap appends a 3-line summary below. Most recent at top. -->
+
+**v1.24.2** | 2026-04-09
+EOD skill added (.claude/skills/eod/SKILL.md). Automates end-of-day procedure: runs
+/wrap, then emits structured EOD block covering Accomplished, Product State, Farragut
+Readiness, Tomorrow priorities, and Open Items. No product code changes. 1,189 tests.
 
 **v1.24.0** | 2026-04-08
 AI Mode Switch (M5 Priority 3). provider_ollama.py with llama3.2 at localhost:11434.
