@@ -167,7 +167,8 @@ toggle with Ollama status indicator. Topbar pill shows current mode. 16 new test
 **v1.24.1** | 2026-04-08
 Configurable Ollama model. Default upgraded from llama3.2 (3B) to llama3.1:8b.
 key_manager get_ollama_model/set_ollama_model. Settings panel model field (Local only).
-provider_ollama zero hardcoded names. Reference Guide updated. 8 new tests.
+provider_ollama zero hardcoded names, migrated from requests to urllib (stdlib).
+Reference Guide updated. Ollama accuracy + robustness test suites. 8 new tests.
 
 **v1.23.1** | 2026-04-08
 Analysis Summary polish pass. Reference Guide section rewritten with full documentation.

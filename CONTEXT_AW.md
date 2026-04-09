@@ -398,7 +398,8 @@ arm of a major law firm. This is the reference customer that unlocks the Tier 3 
   check_ollama_available() diagnostic logging added (INFO/WARNING with URL and status).
   AI Mode toggle error handler made resilient — fetches real Ollama status on failure instead of
   passing false. conftest.py: patches _get_ai_mode to cloud for test isolation across modules.
-  970 pytest + 196 run_all + 23 accuracy = 1,189 tests.
+  provider_ollama.py migrated from requests to urllib (Python stdlib) — works in both dev and
+  PyInstaller .exe without pip install. 970 pytest + 196 run_all + 23 accuracy = 1,189 tests.
 [2026-04-08] [CODE] — v1.24.0. AI Mode Switch (M5 Priority 3). New provider_ollama.py connects to
   Ollama at localhost:11434. generate_sql_response() dispatches to OpenAI or Ollama
   based on ai_mode in config.enc. key_manager.py: get_ai_mode()/set_ai_mode() with validation.
