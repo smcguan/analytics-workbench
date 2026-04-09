@@ -310,7 +310,8 @@ class TestEndpoint:
     def test_402_when_no_api_key(self, client):
         start_session()
         log_event(SessionEventType.DATASET_IMPORT, {"dataset": "x"})
-        with patch("app.main._has_key", return_value=False):
+        with patch("app.main._has_key", return_value=False), \
+             patch("app.main._get_ai_mode", return_value="cloud"):
             resp = client.post("/api/session/analysis_summary")
             assert resp.status_code == 402
 

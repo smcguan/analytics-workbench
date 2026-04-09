@@ -14,5 +14,7 @@ def _bypass_api_key_check():
     tests with a 402 before the mock even runs, so we disable it here.
     """
     with patch("app.ai.routes._has_api_key", return_value=True), \
-         patch("app.main._has_key", return_value=True):
+         patch("app.main._has_key", return_value=True), \
+         patch("app.ai.routes._get_ai_mode", return_value="cloud"), \
+         patch("app.main._get_ai_mode", return_value="cloud"):
         yield

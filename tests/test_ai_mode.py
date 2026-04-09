@@ -106,16 +106,19 @@ class TestAiModeEndpoints:
         assert "ollama_available" in data
 
     def test_set_ai_mode_local(self, client):
-        resp = client.post(
-            "/api/settings/ai_mode",
-            json={"mode": "local"},
-        )
-        assert resp.status_code == 200
-        assert resp.json()["success"] is True
+        from app.key_manager import get_ai_mode as _real_get_ai_mode
+        with patch("app.ai.routes._get_ai_mode", side_effect=_real_get_ai_mode), \
+             patch("app.main._get_ai_mode", side_effect=_real_get_ai_mode):
+            resp = client.post(
+                "/api/settings/ai_mode",
+                json={"mode": "local"},
+            )
+            assert resp.status_code == 200
+            assert resp.json()["success"] is True
 
-        # Verify it persisted
-        resp2 = client.get("/api/settings/ai_mode")
-        assert resp2.json()["mode"] == "local"
+            # Verify it persisted
+            resp2 = client.get("/api/settings/ai_mode")
+            assert resp2.json()["mode"] == "local"
 
     def test_set_ai_mode_invalid_returns_400(self, client):
         resp = client.post(
@@ -133,24 +136,27 @@ class TestAiModeEndpoints:
     def test_ai_mode_toggles_correctly_across_multiple_clicks(self, client):
         """Simulate multiple toggle clicks: cloud → local → cloud → local.
         Each POST should alternate correctly — no snap-back to one value."""
-        # Start at cloud (default)
-        assert client.get("/api/settings/ai_mode").json()["mode"] == "cloud"
+        from app.key_manager import get_ai_mode as _real_get_ai_mode
+        with patch("app.ai.routes._get_ai_mode", side_effect=_real_get_ai_mode), \
+             patch("app.main._get_ai_mode", side_effect=_real_get_ai_mode):
+            # Start at cloud (default)
+            assert client.get("/api/settings/ai_mode").json()["mode"] == "cloud"
 
-        # Click 1: cloud → local
-        client.post("/api/settings/ai_mode", json={"mode": "local"})
-        assert client.get("/api/settings/ai_mode").json()["mode"] == "local"
+            # Click 1: cloud → local
+            client.post("/api/settings/ai_mode", json={"mode": "local"})
+            assert client.get("/api/settings/ai_mode").json()["mode"] == "local"
 
-        # Click 2: local → cloud
-        client.post("/api/settings/ai_mode", json={"mode": "cloud"})
-        assert client.get("/api/settings/ai_mode").json()["mode"] == "cloud"
+            # Click 2: local → cloud
+            client.post("/api/settings/ai_mode", json={"mode": "cloud"})
+            assert client.get("/api/settings/ai_mode").json()["mode"] == "cloud"
 
-        # Click 3: cloud → local
-        client.post("/api/settings/ai_mode", json={"mode": "local"})
-        assert client.get("/api/settings/ai_mode").json()["mode"] == "local"
+            # Click 3: cloud → local
+            client.post("/api/settings/ai_mode", json={"mode": "local"})
+            assert client.get("/api/settings/ai_mode").json()["mode"] == "local"
 
-        # Click 4: local → cloud
-        client.post("/api/settings/ai_mode", json={"mode": "cloud"})
-        assert client.get("/api/settings/ai_mode").json()["mode"] == "cloud"
+            # Click 4: local → cloud
+            client.post("/api/settings/ai_mode", json={"mode": "cloud"})
+            assert client.get("/api/settings/ai_mode").json()["mode"] == "cloud"
 
     def test_privacy_mode_toggles_correctly_across_multiple_clicks(self, client):
         """Simulate multiple toggle clicks: off → on → off → on.
@@ -219,7 +225,8 @@ class TestOllama503:
     def test_503_on_generate_sql(self, client):
         set_ai_mode("local")
         start_session()
-        with patch("app.ai.provider_ollama.check_ollama_available", return_value=False):
+        with patch("app.ai.routes._get_ai_mode", return_value="local"), \
+             patch("app.ai.provider_ollama.check_ollama_available", return_value=False):
             resp = client.post("/api/ai/generate_sql", json={
                 "dataset": "test", "question": "test"
             })
@@ -229,7 +236,8 @@ class TestOllama503:
     def test_503_on_suggest_questions(self, client):
         set_ai_mode("local")
         start_session()
-        with patch("app.ai.provider_ollama.check_ollama_available", return_value=False):
+        with patch("app.ai.routes._get_ai_mode", return_value="local"), \
+             patch("app.ai.provider_ollama.check_ollama_available", return_value=False):
             resp = client.get("/api/ai/suggest_questions?dataset=test")
             # suggest_questions catches exceptions internally and returns error in JSON
             data = resp.json()
